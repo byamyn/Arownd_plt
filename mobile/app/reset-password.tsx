@@ -31,6 +31,7 @@ export default function ResetPasswordScreen() {
   const {
     control,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting }
   } = useForm<ResetPasswordInput>({
     resolver: zodResolver(resetPasswordSchema),
@@ -126,11 +127,7 @@ export default function ResetPasswordScreen() {
               />
             )}
           />
-          <Controller
-            control={control}
-            name="password"
-            render={({ field: { value } }) => <PasswordStrengthMeter password={value} />}
-          />
+          <PasswordStrengthMeter password={watch("password")} />
 
           <Controller
             control={control}
