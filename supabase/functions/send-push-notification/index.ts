@@ -138,8 +138,17 @@ Deno.serve(async (req: Request) => {
 
     const accessToken = await getGoogleAccessToken(serviceAccount);
     const data = toFcmData(record);
-    const results = await Promise.all(
-      devices.map(async ({ token }) => {
+    const results: boolean[] = new Array(devices.length).fill(false);
+    let nextDeviceIndex = 0;
+    const workerCount = Math.min(5, devices.length);
+
+    const sendWorker = async (): Promise<void> => {
+      while (true) {
+        const deviceIndex = nextDeviceIndex;
+        nextDeviceIndex += 1;
+        if (deviceIndex >= devices.length) return;
+
+        const { token } = devices[deviceIndex];
         const response = await fetch(
           `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`,
           {
@@ -161,6 +170,7 @@ Deno.serve(async (req: Request) => {
             }),
           },
         );
+
         if (!response.ok) {
           const failure = await response.text();
           if (failure.includes("UNREGISTERED") || failure.includes("registration-token-not-registered")) {
@@ -169,11 +179,14 @@ Deno.serve(async (req: Request) => {
               { method: "DELETE", headers: restHeaders },
             );
           }
-          return false;
+          results[deviceIndex] = false;
+          continue;
         }
-        return true;
-      }),
-    );
+        results[deviceIndex] = true;
+      }
+    };
+
+    await Promise.all(Array.from({ length: workerCount }, () => sendWorker()));
 
     return new Response(JSON.stringify({ sent: results.filter(Boolean).length, total: devices.length }), {
       headers: { "Content-Type": "application/json" },
