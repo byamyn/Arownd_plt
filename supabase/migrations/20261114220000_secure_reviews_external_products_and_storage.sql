@@ -155,6 +155,10 @@ declare
 begin
   if _user_id is null then return false; end if;
 
+  delete from public.external_products_rate_limits
+  where user_id = _user_id
+    and hour_bucket < current_bucket - interval '2 hours';
+
   insert into public.external_products_rate_limits (user_id, hour_bucket, request_count)
   values (_user_id, current_bucket, 1)
   on conflict (user_id, hour_bucket)

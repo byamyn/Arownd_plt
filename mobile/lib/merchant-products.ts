@@ -230,7 +230,7 @@ export async function addMerchantProductImage(
 
   const rows = z.array(MerchantProductImageSchema).parse(data as unknown);
   if (rows.length !== 1) throw new Error("merchant_product_image_not_created");
-  return rows[0];
+  return rows[0]!;
 }
 
 export async function removeMerchantProductImage(
