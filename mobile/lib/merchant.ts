@@ -417,7 +417,7 @@ export async function rejectMerchantOrder(
   if (normalizedReason && normalizedReason.length > 500) {
     throw new Error("merchant_rejection_reason_too_long");
   }
-  if (normalizedReason && /(https?:\\/\\/|www\\.)/i.test(normalizedReason)) {
+  if (normalizedReason && /(https?:\/\/|www\.)/i.test(normalizedReason)) {
     throw new Error("merchant_rejection_reason_links_not_allowed");
   }
 
