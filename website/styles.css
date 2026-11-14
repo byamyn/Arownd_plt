@@ -997,3 +997,6 @@ html { scroll-padding-top: 110px; }
     margin-left: auto;
   }
 }
+
+/* Prominent app-download action in the homepage hero */
+.hero-actions .hero-download-button { margin-top: 0; }
