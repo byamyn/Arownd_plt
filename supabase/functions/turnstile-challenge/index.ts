@@ -3,21 +3,21 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 const RETURN_URL = "com.arownd.app://captcha";
 
 function htmlResponse(status: number, title: string, message: string): Response {
-  const html = \`<!doctype html>
+  const html = `<!doctype html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
-  <title>\${title}</title>
+  <title>${title}</title>
   <style>
     body{margin:0;min-height:100vh;display:grid;place-items:center;background:#f7f7f5;color:#171717;font-family:Arial,sans-serif;padding:24px;box-sizing:border-box}
     main{width:min(100%,420px);padding:28px;border:1px solid #e5e5e5;border-radius:18px;background:#fff;text-align:center;box-sizing:border-box}
     h1{font-size:20px;margin:0 0 12px}p{font-size:15px;line-height:1.7;color:#555;margin:0}
   </style>
 </head>
-<body><main><h1>\${title}</h1><p>\${message}</p></main></body>
-</html>\`;
+<body><main><h1>${title}</h1><p>${message}</p></main></body>
+</html>`;
   return new Response(html, {
     status,
     headers: {
@@ -49,7 +49,7 @@ Deno.serve((request: Request) => {
     return htmlResponse(503, "التحقق غير مهيأ", "لم يكتمل إعداد التحقق الآمن لهذا التطبيق بعد.");
   }
 
-  const page = \`<!doctype html>
+  const page = `<!doctype html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8">
@@ -70,9 +70,9 @@ Deno.serve((request: Request) => {
         return;
       }
       window.turnstile.render("#turnstile-widget", {
-        sitekey: "\${siteKey}",
+        sitekey: "${siteKey}",
         callback: function(token) {
-          window.location.replace("\${RETURN_URL}?token=" + encodeURIComponent(token));
+          window.location.replace("${RETURN_URL}?token=" + encodeURIComponent(token));
         },
         "expired-callback": function() {
           document.getElementById("status").textContent = "انتهت صلاحية التحقق. أعد المحاولة.";
@@ -94,7 +94,7 @@ Deno.serve((request: Request) => {
     <div id="status" role="status" aria-live="polite"></div>
   </main>
 </body>
-</html>\`;
+</html>`;
   return new Response(page, {
     status: 200,
     headers: {
