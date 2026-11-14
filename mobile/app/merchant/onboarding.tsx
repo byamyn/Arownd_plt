@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Redirect, router } from "expo-router";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { z } from "zod";
 import { Controller, useForm } from "react-hook-form";
 import {
@@ -19,7 +19,8 @@ import { fetchCheckoutRegions } from "@/lib/checkout";
 import {
   createMerchantStore,
   fetchMerchantAccess,
-  fetchMerchantCategories
+  fetchMerchantCategories,
+  fetchMerchantSignupBusinessName
 } from "@/lib/merchant";
 import {
   merchantStoreErrorKey,
@@ -52,6 +53,13 @@ export default function MerchantOnboardingScreen() {
     access.data?.status === "personal" ||
     access.data?.status === "merchant_setup_required";
 
+  const suggestedStoreName = useQuery({
+    queryKey: ["merchant-signup-business-name"],
+    queryFn: fetchMerchantSignupBusinessName,
+    enabled: canStartOnboarding,
+    staleTime: Infinity
+  });
+
   const regionOptions = useQuery({ queryKey: ["merchant-regions"], queryFn: () => fetchCheckoutRegions(), enabled: canStartOnboarding, staleTime: Infinity });
   const categories = useQuery({
     queryKey: ["merchant-categories"],
@@ -63,6 +71,7 @@ export default function MerchantOnboardingScreen() {
   const {
     control,
     handleSubmit,
+    getValues,
     setValue,
     watch,
     formState: { errors, isSubmitting }
@@ -82,6 +91,13 @@ export default function MerchantOnboardingScreen() {
       subcategories: []
     }
   });
+
+  useEffect(() => {
+    const suggestedName = suggestedStoreName.data;
+    if (suggestedName && !getValues("storeName").trim()) {
+      setValue("storeName", suggestedName, { shouldDirty: false });
+    }
+  }, [suggestedStoreName.data, getValues, setValue]);
 
   const regionId = watch("regionId");
   const secondaryOptions = useQuery({ queryKey: ["merchant-regions", regionId], queryFn: () => fetchCheckoutRegions(regionId), enabled: canStartOnboarding && regionId !== null, staleTime: Infinity });
