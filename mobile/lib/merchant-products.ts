@@ -249,7 +249,7 @@ export async function removeMerchantProductImage(
   if (error) throw error;
   const rows = z.array(MerchantProductImageSchema).parse(data as unknown);
   if (rows.length !== 1) throw new Error("merchant_product_image_not_removed");
-  const removed = rows[0];
+  const removed = rows[0]!;
 
   const { data: remainingReferences, error: referencesError } = await client
     .from("product_images")
