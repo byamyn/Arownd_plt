@@ -67,8 +67,8 @@ begin
       and p.prosecdef
       and exists (
         select 1
-        from pg_catalog.unnest(p.proconfig) setting
-        where setting like 'search_path=public%'
+        from pg_catalog.unnest(p.proconfig) as cfg(setting)
+        where cfg.setting like 'search_path=public%'
       )
   loop
     execute pg_catalog.format(
