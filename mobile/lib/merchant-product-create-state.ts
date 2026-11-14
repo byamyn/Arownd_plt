@@ -40,7 +40,7 @@ export function validateMerchantProductInput(input: {
     !input.price.trim() ||
     !Number.isSafeInteger(price) ||
     price <= 0 ||
-    price > 2_147_483_647 ||
+    price > 50_000_000 ||
     !input.stock.trim() ||
     !Number.isInteger(stock) ||
     stock < 0 ||
