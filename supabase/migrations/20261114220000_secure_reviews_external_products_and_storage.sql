@@ -209,6 +209,13 @@ begin
     raise exception 'merchant_offer_not_found';
   end if;
 
+  if not exists (
+    select 1 from storage.objects so
+    where so.bucket_id = 'product-media' and so.name = _image_path
+  ) then
+    raise exception 'product_image_storage_object_not_found';
+  end if;
+
   perform pg_advisory_xact_lock(hashtextextended(_offer_id::text, 0));
   if (select count(*) from public.product_images pi where pi.offer_id = _offer_id) >= 5 then
     raise exception 'product_image_limit_reached';
