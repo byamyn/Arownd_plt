@@ -12,11 +12,60 @@ import type {
   RecoveryInput
 } from "@/lib/auth-validation";
 
+const AUTH_CAPTCHA_ENABLED = process.env.EXPO_PUBLIC_AUTH_CAPTCHA_ENABLED === "true";
+const TURNSTILE_CHALLENGE_URL = "https://nagzoafkitfsqlcwsdau.supabase.co/functions/v1/turnstile-challenge";
+const CAPTCHA_RETURN_URL = "com.arownd.app://captcha";
+
+async function getAuthCaptchaToken(): Promise<string | undefined> {
+  if (!AUTH_CAPTCHA_ENABLED) return undefined;
+
+  return new Promise((resolve, reject) => {
+    let settled = false;
+    const finish = (error?: Error, token?: string) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      subscription.remove();
+      if (error) reject(error);
+      else resolve(token);
+    };
+
+    const subscription = Linking.addEventListener("url", ({ url }) => {
+      let callbackUrl: URL;
+      try {
+        callbackUrl = new URL(url);
+      } catch {
+        return;
+      }
+
+      if (callbackUrl.protocol !== "com.arownd.app:" || callbackUrl.hostname !== "captcha") return;
+      const token = callbackUrl.searchParams.get("token");
+      if (!token) {
+        finish(new Error("AUTH_CAPTCHA_TOKEN_MISSING"));
+        return;
+      }
+      finish(undefined, token);
+    });
+
+    const timeout = setTimeout(() => {
+      finish(new Error("AUTH_CAPTCHA_TIMEOUT"));
+    }, 180_000);
+
+    void Linking.openURL(
+      TURNSTILE_CHALLENGE_URL + "?return_url=" + encodeURIComponent(CAPTCHA_RETURN_URL)
+    ).catch((error: unknown) => {
+      finish(error instanceof Error ? error : new Error("AUTH_CAPTCHA_OPEN_FAILED"));
+    });
+  });
+}
+
 export async function signIn(input: LoginInput): Promise<void> {
   assertActionRateLimit("auth:sign-in", 1_500);
+  const captchaToken = await getAuthCaptchaToken();
   const { data, error } = await getSupabaseClient().auth.signInWithPassword({
     email: input.email,
-    password: input.password
+    password: input.password,
+    ...(captchaToken ? { options: { captchaToken } } : {})
   });
 
   if (error) throw error;
@@ -31,6 +80,7 @@ export async function signUpPersonal(input: PersonalSignupInput): Promise<boolea
   if (!countryCode) throw new Error("COUNTRY_NOT_SELECTED");
 
   const inviteCode = await getPendingInviteCode();
+  const captchaToken = await getAuthCaptchaToken();
   const redirectTo = Linking.createURL("auth/callback", {
     scheme: "com.arownd.app"
   });
@@ -40,6 +90,7 @@ export async function signUpPersonal(input: PersonalSignupInput): Promise<boolea
     password: input.password,
     options: {
       emailRedirectTo: redirectTo,
+      ...(captchaToken ? { captchaToken } : {}),
       data: {
         full_name: input.fullName.trim(),
         account_type: "personal",
@@ -60,6 +111,7 @@ export async function signUpBusiness(input: BusinessSignupInput): Promise<boolea
   if (!countryCode) throw new Error("COUNTRY_NOT_SELECTED");
 
   const inviteCode = await getPendingInviteCode();
+  const captchaToken = await getAuthCaptchaToken();
   const redirectTo = Linking.createURL("auth/callback", {
     scheme: "com.arownd.app"
   });
@@ -69,6 +121,7 @@ export async function signUpBusiness(input: BusinessSignupInput): Promise<boolea
     password: input.password,
     options: {
       emailRedirectTo: redirectTo,
+      ...(captchaToken ? { captchaToken } : {}),
       data: {
         full_name: input.fullName.trim(),
         account_type: "merchant",
@@ -86,12 +139,14 @@ export async function signUpBusiness(input: BusinessSignupInput): Promise<boolea
 
 export async function requestPasswordRecovery(input: RecoveryInput): Promise<void> {
   assertActionRateLimit("auth:password-recovery", 60_000);
+  const captchaToken = await getAuthCaptchaToken();
   const redirectTo = Linking.createURL("reset-password", {
     scheme: "com.arownd.app"
   });
 
   const { error } = await getSupabaseClient().auth.resetPasswordForEmail(input.email, {
-    redirectTo
+    redirectTo,
+    ...(captchaToken ? { captchaToken } : {})
   });
 
   if (error) throw error;
