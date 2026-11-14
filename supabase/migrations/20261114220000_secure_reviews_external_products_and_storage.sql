@@ -198,12 +198,19 @@ begin
     select 1 from public.store_offers so
     join public.stores st on st.id = so.store_id
     where so.id = _offer_id and st.owner_id = actor_id
+      and exists (
+        select 1 from public.profiles p
+        join public.user_roles ur on ur.user_id = p.user_id
+        where p.user_id = actor_id
+          and p.account_type::text = 'merchant'
+          and ur.role::text = 'merchant'
+      )
   ) then
     raise exception 'merchant_offer_not_found';
   end if;
 
   perform pg_advisory_xact_lock(hashtextextended(_offer_id::text, 0));
-  if (select count(*) from public.product_images pi where pi.offer_id = _offer_id) >= 8 then
+  if (select count(*) from public.product_images pi where pi.offer_id = _offer_id) >= 5 then
     raise exception 'product_image_limit_reached';
   end if;
 
@@ -240,6 +247,13 @@ begin
     select 1 from public.store_offers so
     join public.stores st on st.id = so.store_id
     where so.id = _offer_id and st.owner_id = actor_id
+      and exists (
+        select 1 from public.profiles p
+        join public.user_roles ur on ur.user_id = p.user_id
+        where p.user_id = actor_id
+          and p.account_type::text = 'merchant'
+          and ur.role::text = 'merchant'
+      )
   ) then
     raise exception 'merchant_offer_not_found';
   end if;
