@@ -1,9 +1,19 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-push-webhook-secret",
-};
+async function hasValidWebhookSecret(provided: string | null, expected: string): Promise<boolean> {
+  const encoder = new TextEncoder();
+  const [providedDigest, expectedDigest] = await Promise.all([
+    crypto.subtle.digest("SHA-256", encoder.encode(provided ?? "")),
+    crypto.subtle.digest("SHA-256", encoder.encode(expected)),
+  ]);
+  const providedBytes = new Uint8Array(providedDigest);
+  const expectedBytes = new Uint8Array(expectedDigest);
+  let difference = 0;
+  for (let index = 0; index < expectedBytes.length; index += 1) {
+    difference |= providedBytes[index] ^ expectedBytes[index];
+  }
+  return difference === 0;
+}
 
 function base64Url(input: Uint8Array): string {
   let binary = "";
@@ -80,15 +90,12 @@ function toFcmData(record: Record<string, unknown>): Record<string, string> {
 }
 
 Deno.serve(async (req: Request) => {
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
-  }
   if (req.method !== "POST") {
     return new Response("Method not allowed", { status: 405 });
   }
 
   const webhookSecret = Deno.env.get("PUSH_WEBHOOK_SECRET");
-  if (!webhookSecret || req.headers.get("x-push-webhook-secret") !== webhookSecret) {
+  if (!webhookSecret || !(await hasValidWebhookSecret(req.headers.get("x-push-webhook-secret"), webhookSecret))) {
     return new Response("Unauthorized", { status: 401 });
   }
 
@@ -98,7 +105,7 @@ Deno.serve(async (req: Request) => {
     const userId = typeof record?.user_id === "string" ? record.user_id : null;
     if (!record || !userId) {
       return new Response(JSON.stringify({ skipped: true }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
       });
     }
 
@@ -125,7 +132,7 @@ Deno.serve(async (req: Request) => {
     const devices = (await devicesResponse.json()) as Array<{ token: string }>;
     if (!devices.length) {
       return new Response(JSON.stringify({ sent: 0 }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
       });
     }
 
@@ -169,13 +176,13 @@ Deno.serve(async (req: Request) => {
     );
 
     return new Response(JSON.stringify({ sent: results.filter(Boolean).length, total: devices.length }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
     console.error("[send-push-notification]", error);
     return new Response(JSON.stringify({ error: "Push delivery failed" }), {
       status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json" },
     });
   }
 });
