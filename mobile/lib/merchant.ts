@@ -27,6 +27,16 @@ export type MerchantAccess = {
   store: { id: string; name: string; slug: string } | null;
 };
 
+export async function fetchMerchantSignupBusinessName(): Promise<string | null> {
+  const { data, error } = await getSupabaseClient().auth.getUser();
+  if (error) throw error;
+  const metadata = data.user?.user_metadata as Record<string, unknown> | undefined;
+  const businessName = metadata?.business_name;
+  if (typeof businessName !== "string") return null;
+  const normalized = businessName.trim();
+  return normalized.length > 0 ? normalized.slice(0, 100) : null;
+}
+
 export async function fetchMerchantAccess(): Promise<MerchantAccess | null> {
   const client = getSupabaseClient();
   const { data: authData, error: authError } = await client.auth.getUser();
