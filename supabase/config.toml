@@ -2,3 +2,7 @@ project_id = "nagzoafkitfsqlcwsdau"
 
 [functions.send-push-notification]
 verify_jwt = false
+
+[functions.turnstile-challenge]
+verify_jwt = false
+
