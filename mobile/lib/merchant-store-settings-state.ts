@@ -1,9 +1,38 @@
 import { z } from "zod";
 
+function isStoreMediaUrl(value: string): boolean {
+  if (!value) return true;
+  try {
+    const url = new URL(value);
+    if (
+      url.protocol !== "https:" ||
+      url.hostname !== "nagzoafkitfsqlcwsdau.supabase.co" ||
+      url.username !== "" ||
+      url.password !== "" ||
+      url.hash !== ""
+    ) return false;
+
+    if (url.pathname.startsWith("/storage/v1/object/public/store-media/")) {
+      return url.search === "";
+    }
+
+    if (url.pathname.startsWith("/storage/v1/object/sign/store-media/")) {
+      return url.searchParams.has("token") &&
+        url.searchParams.get("token")!.length > 0 &&
+        [...url.searchParams.keys()].length === 1;
+    }
+
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 function isHttpsUrl(value: string): boolean {
   if (!value) return true;
   try {
-    return new URL(value).protocol === "https:";
+    const url = new URL(value);
+    return url.protocol === "https:" && url.hostname.length > 0;
   } catch {
     return false;
   }
@@ -13,8 +42,8 @@ export const MerchantStoreSettingsSchema = z.object({
   name: z.string().trim().min(2).max(100),
   region_id: z.number().int().positive(),
   secondary_region_id: z.number().int().positive().nullable(),
-  logo_url: z.string().trim().max(1000),
-  cover_url: z.string().trim().max(1000),
+  logo_url: z.string().trim().max(1000).refine(isStoreMediaUrl),
+  cover_url: z.string().trim().max(1000).refine(isStoreMediaUrl),
   description: z.string().trim().max(2000),
   phone: z.string().trim().regex(/^[+0-9()\s-]{7,20}$/),
   whatsapp: z.string().trim().max(20).refine((value) => value.length === 0 || /^[+0-9()\s-]{7,20}$/.test(value)),
