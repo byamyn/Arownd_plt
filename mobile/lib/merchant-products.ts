@@ -155,7 +155,7 @@ export async function updateMerchantProductOffer(
   values: MerchantOfferValues
 ): Promise<void> {
   const parsed = z.object({
-    price: z.number().int().positive().max(2_147_483_647),
+    price: z.number().int().positive().max(50_000_000),
     stock_quantity: z.number().int().min(0).max(9999),
     options: z.object({
       sizes: z.array(z.string().trim().min(1).max(40)).max(20),
