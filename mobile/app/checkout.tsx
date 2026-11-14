@@ -143,7 +143,16 @@ export default function CheckoutScreen() {
       void queryClient.invalidateQueries({ queryKey: ["customer-cart-offers"] });
       void queryClient.invalidateQueries({ queryKey: ["customer-orders"] });
     },
-    onError: () => setFormError(translate("checkoutSubmitError"))
+    onError: (error) => {
+      const message = error instanceof Error ? error.message : "";
+      if (message.includes("pending_order_limit_reached")) {
+        setFormError(translate("checkoutPendingLimit"));
+      } else if (message.includes("cannot_purchase_own_store")) {
+        setFormError(translate("checkoutOwnStore"));
+      } else {
+        setFormError(translate("checkoutSubmitError"));
+      }
+    }
   });
 
   if (createdOrderId) {
