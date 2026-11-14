@@ -37,10 +37,10 @@ begin
     join pg_catalog.pg_namespace n on n.oid = p.pronamespace
     where n.nspname in ('public', 'private')
       and (
-        pg_catalog.strpos('public.is_store_owner(' in p.prosrc) > 0
-        or pg_catalog.strpos('public.is_order_owner(' in p.prosrc) > 0
-        or pg_catalog.strpos('public.is_offer_owner(' in p.prosrc) > 0
-        or pg_catalog.strpos('public.is_order_merchant(' in p.prosrc) > 0
+        pg_catalog.strpos(p.prosrc, 'public.is_store_owner(') > 0
+        or pg_catalog.strpos(p.prosrc, 'public.is_order_owner(') > 0
+        or pg_catalog.strpos(p.prosrc, 'public.is_offer_owner(') > 0
+        or pg_catalog.strpos(p.prosrc, 'public.is_order_merchant(') > 0
       )
   loop
     definition := pg_catalog.pg_get_functiondef(fn.oid);
