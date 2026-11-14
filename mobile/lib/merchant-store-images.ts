@@ -30,7 +30,8 @@ export function getStoreImageStoragePath(imageUrl: string, userId: string): stri
   if (!userId.trim()) return null;
   try {
     const url = new URL(imageUrl);
-    if (url.protocol !== "https:") return null;
+    if (url.protocol !== "https:" || url.hostname !== "nagzoafkitfsqlcwsdau.supabase.co" ||
+      url.username !== "" || url.password !== "" || url.hash !== "") return null;
     const markers = [
       "/storage/v1/object/public/store-media/",
       "/storage/v1/object/sign/store-media/"
