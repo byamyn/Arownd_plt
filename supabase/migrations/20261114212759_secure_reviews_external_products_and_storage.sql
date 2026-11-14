@@ -1,5 +1,4 @@
--- Secure verified reviews, external product provider usage, direct table writes and merchant media storage.
--- This migration is staged in GitHub only. It is not applied to the production database.
+-- Arownd security hardening: verified reviews, external product provider usage, table privileges and merchant media storage.
 
 create or replace function public.submit_review(
   _target_type review_target_type,
