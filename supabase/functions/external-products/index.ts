@@ -24,7 +24,9 @@ const PROVIDER_MARKETS: Record<string, "ae" | "eg" | "ma"> = {
   MA: "ma",
 };
 
-async function resolveAuthenticatedBrowsingCountry(req: Request): Promise<string | null> {
+type AuthenticatedMarket = { userId: string; countryCode: string };
+
+async function resolveAuthenticatedBrowsingCountry(req: Request): Promise<AuthenticatedMarket | null> {
   const authorization = req.headers.get("Authorization");
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
@@ -62,7 +64,77 @@ async function resolveAuthenticatedBrowsingCountry(req: Request): Promise<string
   if (!countryResponse.ok) return null;
 
   const enabledCountries: unknown = await countryResponse.json().catch(() => null);
-  return Array.isArray(enabledCountries) && enabledCountries.length === 1 ? countryCode : null;
+  return Array.isArray(enabledCountries) && enabledCountries.length === 1
+    ? { userId, countryCode }
+    : null;
+}
+
+function serviceHeaders(serviceKey: string) {
+  return {
+    apikey: serviceKey,
+    Authorization: `Bearer ${serviceKey}`,
+    "content-type": "application/json",
+  };
+}
+
+async function readCachedProducts(
+  supabaseUrl: string,
+  serviceKey: string,
+  market: string,
+  language: string,
+): Promise<unknown[] | null> {
+  const url = new URL("/rest/v1/external_products_cache", supabaseUrl);
+  url.searchParams.set("market", `eq.${market}`);
+  url.searchParams.set("language", `eq.${language}`);
+  url.searchParams.set("expires_at", `gt.${new Date().toISOString()}`);
+  url.searchParams.set("select", "products");
+  url.searchParams.set("limit", "1");
+
+  const response = await fetch(url, { headers: serviceHeaders(serviceKey) });
+  if (!response.ok) throw new Error("external_products_cache_read_failed");
+  const rows: unknown = await response.json().catch(() => null);
+  if (!Array.isArray(rows) || rows.length !== 1) return null;
+  const row: unknown = rows[0];
+  if (typeof row !== "object" || row === null || !Array.isArray((row as { products?: unknown }).products)) return null;
+  return (row as { products: unknown[] }).products;
+}
+
+async function consumeProviderQuota(
+  supabaseUrl: string,
+  serviceKey: string,
+  userId: string,
+): Promise<boolean> {
+  const response = await fetch(`${supabaseUrl}/rest/v1/rpc/consume_external_products_quota`, {
+    method: "POST",
+    headers: serviceHeaders(serviceKey),
+    body: JSON.stringify({ _user_id: userId }),
+  });
+  if (!response.ok) throw new Error("external_products_quota_check_failed");
+  return await response.json().catch(() => false) === true;
+}
+
+async function writeCachedProducts(
+  supabaseUrl: string,
+  serviceKey: string,
+  market: string,
+  language: string,
+  products: unknown[],
+): Promise<void> {
+  const response = await fetch(`${supabaseUrl}/rest/v1/external_products_cache?on_conflict=market,language`, {
+    method: "POST",
+    headers: {
+      ...serviceHeaders(serviceKey),
+      Prefer: "resolution=merge-duplicates,return=minimal",
+    },
+    body: JSON.stringify({
+      market,
+      language,
+      products,
+      expires_at: new Date(Date.now() + 6 * 60 * 60 * 1000).toISOString(),
+      updated_at: new Date().toISOString(),
+    }),
+  });
+  if (!response.ok) throw new Error("external_products_cache_write_failed");
 }
 
 function isHttpsUrl(value: unknown, allowedHosts: string[]): value is string {
@@ -86,9 +158,7 @@ function normalizeNoonProduct(item: NoonProduct, country: "ae" | "eg") {
     typeof item.price !== "number" ||
     !Number.isFinite(item.price) ||
     typeof item.currency !== "string"
-  ) {
-    return null;
-  }
+  ) return null;
 
   const imageUrl = isHttpsUrl(item.image, ["nooncdn.com"]) ? item.image : null;
   const marketName = country === "ae" ? "Noon الإمارات" : "Noon مصر";
@@ -122,9 +192,7 @@ function normalizeJumiaProduct(item: JumiaProduct) {
     typeof item.price !== "number" ||
     !Number.isFinite(item.price) ||
     item.currency !== "MAD"
-  ) {
-    return null;
-  }
+  ) return null;
 
   const imageUrl = isHttpsUrl(item.image, ["jumia.is", "jumia.ma"]) ? item.image : null;
   const priceLabel = new Intl.NumberFormat("ar-MA", {
@@ -146,9 +214,7 @@ function normalizeJumiaProduct(item: JumiaProduct) {
 }
 
 Deno.serve(async (req: Request) => {
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
-  }
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") {
     return Response.json({ error: "Method not allowed" }, { status: 405, headers: corsHeaders });
   }
@@ -158,23 +224,46 @@ Deno.serve(async (req: Request) => {
     if (typeof payload !== "object" || payload === null) {
       return Response.json({ error: "Invalid request" }, { status: 400, headers: corsHeaders });
     }
-
     const language = (payload as { language?: unknown }).language;
     if (language !== "ar" && language !== "en") {
       return Response.json({ error: "Unsupported language" }, { status: 400, headers: corsHeaders });
     }
-
     if (!req.headers.get("Authorization")?.startsWith("Bearer ")) {
       return Response.json({ error: "Unauthorized" }, { status: 401, headers: corsHeaders });
     }
 
-    const browsingCountryCode = await resolveAuthenticatedBrowsingCountry(req);
-    if (!browsingCountryCode) {
+    const authenticatedMarket = await resolveAuthenticatedBrowsingCountry(req);
+    if (!authenticatedMarket) {
       return Response.json({ error: "Browsing market is unavailable" }, { status: 403, headers: corsHeaders });
     }
-    const country = PROVIDER_MARKETS[browsingCountryCode];
-    if (!country) {
-      return Response.json({ products: [] }, { headers: corsHeaders });
+    const country = PROVIDER_MARKETS[authenticatedMarket.countryCode];
+    if (!country) return Response.json({ products: [] }, { headers: corsHeaders });
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!supabaseUrl || !serviceKey) {
+      console.error("[external-products] Server-side cache/rate-limit credentials are missing");
+      return Response.json({ error: "Product source is not configured" }, { status: 503, headers: corsHeaders });
+    }
+
+    let cachedProducts: unknown[] | null;
+    try {
+      cachedProducts = await readCachedProducts(supabaseUrl, serviceKey, country, language);
+    } catch {
+      console.error("[external-products] Cache lookup failed");
+      return Response.json({ error: "Product source temporarily unavailable" }, { status: 503, headers: corsHeaders });
+    }
+    if (cachedProducts) return Response.json({ products: cachedProducts }, { headers: corsHeaders });
+
+    let quotaAllowed = false;
+    try {
+      quotaAllowed = await consumeProviderQuota(supabaseUrl, serviceKey, authenticatedMarket.userId);
+    } catch {
+      console.error("[external-products] Quota check failed");
+      return Response.json({ error: "Product source temporarily unavailable" }, { status: 503, headers: corsHeaders });
+    }
+    if (!quotaAllowed) {
+      return Response.json({ error: "External product request limit reached" }, { status: 429, headers: corsHeaders });
     }
 
     const apiKey = Deno.env.get("REEFAPI_API_KEY");
@@ -208,10 +297,7 @@ Deno.serve(async (req: Request) => {
     try {
       upstream = await fetch(endpoint, {
         method: "POST",
-        headers: {
-          "x-api-key": apiKey,
-          "content-type": "application/json",
-        },
+        headers: { "x-api-key": apiKey, "content-type": "application/json" },
         body: JSON.stringify(requestBody),
         signal: controller.signal,
       });
@@ -225,11 +311,7 @@ Deno.serve(async (req: Request) => {
       return Response.json({ error: "Product source request failed" }, { status: 502, headers: corsHeaders });
     }
 
-    const result = envelope as {
-      ok?: unknown;
-      data?: { results?: unknown };
-      error?: { code?: unknown };
-    };
+    const result = envelope as { ok?: unknown; data?: { results?: unknown }; error?: { code?: unknown } };
     if (result.ok !== true || !Array.isArray(result.data?.results)) {
       console.error("[external-products] ReefAPI returned an invalid response", {
         country,
@@ -245,6 +327,13 @@ Deno.serve(async (req: Request) => {
       : result.data.results
         .map((item) => normalizeNoonProduct(item as NoonProduct, country as "ae" | "eg"))
         .filter((item): item is NonNullable<typeof item> => item !== null);
+
+    try {
+      await writeCachedProducts(supabaseUrl, serviceKey, country, language, products);
+    } catch {
+      console.error("[external-products] Cache write failed");
+      return Response.json({ error: "Product source temporarily unavailable" }, { status: 503, headers: corsHeaders });
+    }
 
     return Response.json({ products }, { headers: corsHeaders });
   } catch (error) {

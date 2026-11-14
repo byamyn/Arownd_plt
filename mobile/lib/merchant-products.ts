@@ -4,7 +4,6 @@ import { z } from "zod";
 import { getSupabaseClient } from "@/lib/supabase";
 import type { MerchantProductInput } from "@/lib/merchant-product-create-state";
 import {
-  getNextPrimaryProductImageId,
   getProductImageExtension,
   getProductImageStoragePath,
   PRODUCT_IMAGE_MAX_BYTES,
@@ -210,58 +209,13 @@ export async function addMerchantProductImage(
 ): Promise<MerchantProductImage> {
   const userId = await assertOwnedStore(storeId);
   const client = getSupabaseClient();
-
-  const { data: offer, error: offerError } = await client
-    .from("store_offers")
-    .select("id")
-    .eq("id", offerId)
-    .eq("store_id", storeId)
-    .maybeSingle();
-
-  if (offerError) throw offerError;
-  if (!offer) throw new Error("merchant_offer_not_found");
-
-  const { data: currentImages, error: imagesError } = await client
-    .from("product_images")
-    .select("id, is_primary")
-    .eq("offer_id", offerId)
-    .limit(PRODUCT_IMAGE_MAX_COUNT);
-
-  if (imagesError) throw imagesError;
-  if ((currentImages ?? []).length >= PRODUCT_IMAGE_MAX_COUNT) {
-    throw new Error("product_image_limit_reached");
-  }
-
   const uploaded = await uploadProductImage(userId, asset, "edit");
-  const { data: latestImages, error: latestImagesError } = await client
-    .from("product_images")
-    .select("id, is_primary")
-    .eq("offer_id", offerId)
-    .limit(PRODUCT_IMAGE_MAX_COUNT);
 
-  if (latestImagesError || (latestImages ?? []).length >= PRODUCT_IMAGE_MAX_COUNT) {
-    const { error: cleanupError } = await client.storage
-      .from("product-media")
-      .remove([uploaded.path]);
-
-    if (cleanupError) {
-      throw new Error("product_image_upload_cleanup_required", {
-        cause: latestImagesError ?? new Error("product_image_limit_reached")
-      });
-    }
-    if (latestImagesError) throw latestImagesError;
-    throw new Error("product_image_limit_reached");
-  }
-
-  const { data, error } = await client
-    .from("product_images")
-    .insert({
-      offer_id: offerId,
-      image_url: uploaded.url,
-      is_primary: !(latestImages ?? []).some((image) => image.is_primary)
-    })
-    .select("id, image_url, is_primary")
-    .single();
+  const { data, error } = await client.rpc("add_merchant_product_image", {
+    _offer_id: offerId,
+    _image_path: uploaded.path,
+    _image_url: uploaded.url
+  });
 
   if (error) {
     const { error: cleanupError } = await client.storage
@@ -274,7 +228,9 @@ export async function addMerchantProductImage(
     throw error;
   }
 
-  return MerchantProductImageSchema.parse(data as unknown);
+  const rows = z.array(MerchantProductImageSchema).parse(data as unknown);
+  if (rows.length !== 1) throw new Error("merchant_product_image_not_created");
+  return rows[0];
 }
 
 export async function removeMerchantProductImage(
@@ -285,55 +241,15 @@ export async function removeMerchantProductImage(
   const userId = await assertOwnedStore(storeId);
   const client = getSupabaseClient();
 
-  const { data: offer, error: offerError } = await client
-    .from("store_offers")
-    .select("id")
-    .eq("id", offerId)
-    .eq("store_id", storeId)
-    .maybeSingle();
+  const { data, error } = await client.rpc("remove_merchant_product_image", {
+    _offer_id: offerId,
+    _image_id: imageId
+  });
 
-  if (offerError) throw offerError;
-  if (!offer) throw new Error("merchant_offer_not_found");
-
-  const { data: currentImages, error: imagesError } = await client
-    .from("product_images")
-    .select("id, image_url, is_primary")
-    .eq("offer_id", offerId);
-
-  if (imagesError) throw imagesError;
-
-  const imageReferences = z.array(MerchantProductImageSchema).parse(currentImages ?? []);
-  const image = imageReferences.find((item) => item.id === imageId);
-  if (!image) throw new Error("merchant_product_image_not_found");
-
-  const { data: removed, error: deleteError } = await client
-    .from("product_images")
-    .delete()
-    .eq("offer_id", offerId)
-    .eq("id", imageId)
-    .select("id, image_url, is_primary")
-    .maybeSingle();
-
-  if (deleteError) throw deleteError;
-  if (!removed) throw new Error("merchant_product_image_not_removed");
-
-  let primaryPromotionPending = false;
-  const nextPrimaryId = getNextPrimaryProductImageId(
-    imageReferences,
-    imageId
-  );
-
-  if (nextPrimaryId) {
-    const { data: promotedImage, error: primaryError } = await client
-      .from("product_images")
-      .update({ is_primary: true })
-      .eq("offer_id", offerId)
-      .eq("id", nextPrimaryId)
-      .select("id")
-      .maybeSingle();
-
-    primaryPromotionPending = !!primaryError || !promotedImage;
-  }
+  if (error) throw error;
+  const rows = z.array(MerchantProductImageSchema).parse(data as unknown);
+  if (rows.length !== 1) throw new Error("merchant_product_image_not_removed");
+  const removed = rows[0];
 
   const { data: remainingReferences, error: referencesError } = await client
     .from("product_images")
@@ -344,13 +260,13 @@ export async function removeMerchantProductImage(
   if (referencesError || (remainingReferences ?? []).length > 0) {
     return {
       storageCleanupPending: !!referencesError,
-      primaryPromotionPending
+      primaryPromotionPending: false
     };
   }
 
   const storagePath = getProductImageStoragePath(removed.image_url, userId);
   if (!storagePath) {
-    return { storageCleanupPending: true, primaryPromotionPending };
+    return { storageCleanupPending: true, primaryPromotionPending: false };
   }
 
   const { error: storageError } = await client.storage
@@ -359,7 +275,7 @@ export async function removeMerchantProductImage(
 
   return {
     storageCleanupPending: !!storageError,
-    primaryPromotionPending
+    primaryPromotionPending: false
   };
 }
 
