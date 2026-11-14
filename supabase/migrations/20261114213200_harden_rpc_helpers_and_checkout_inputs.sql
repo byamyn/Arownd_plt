@@ -37,10 +37,10 @@ begin
     join pg_catalog.pg_namespace n on n.oid = p.pronamespace
     where n.nspname in ('public', 'private')
       and (
-        pg_catalog.position('public.is_store_owner(' in p.prosrc) > 0
-        or pg_catalog.position('public.is_order_owner(' in p.prosrc) > 0
-        or pg_catalog.position('public.is_offer_owner(' in p.prosrc) > 0
-        or pg_catalog.position('public.is_order_merchant(' in p.prosrc) > 0
+        pg_catalog.strpos('public.is_store_owner(' in p.prosrc) > 0
+        or pg_catalog.strpos('public.is_order_owner(' in p.prosrc) > 0
+        or pg_catalog.strpos('public.is_offer_owner(' in p.prosrc) > 0
+        or pg_catalog.strpos('public.is_order_merchant(' in p.prosrc) > 0
       )
   loop
     definition := pg_catalog.pg_get_functiondef(fn.oid);
@@ -77,32 +77,6 @@ begin
       ''
     );
   end loop;
-end;
-$migration$;
-
--- Bound the checkout JSON payload at the server boundary. Cart options are
--- represented by a JSON object of string selections in the mobile client.
-do $migration$
-declare
-  definition text;
-  old_fragment text := $old$    if jsonb_typeof(it) <> 'object' then raise exception 'invalid_item'; end if;$old$;
-  new_fragment text := $new$    if jsonb_typeof(it) <> 'object' then raise exception 'invalid_item'; end if;
-    if jsonb_typeof(coalesce(it -> 'options', '{}'::jsonb)) is distinct from 'object'
-       or octet_length(coalesce(it -> 'options', '{}'::jsonb)::text) > 2048 then
-      raise exception 'invalid_item_options';
-    end if;$new$;
-begin
-  select pg_catalog.pg_get_functiondef(
-    'public.create_checkout_order_for_account(jsonb,text,bigint,bigint,text,text,text,text,text,text,uuid)'::pg_catalog.regprocedure
-  )
-  into definition;
-
-  if pg_catalog.position(old_fragment in definition) = 0 then
-    raise exception 'checkout_function_source_does_not_match_expected_version';
-  end if;
-
-  definition := pg_catalog.replace(definition, old_fragment, new_fragment);
-  execute definition;
 end;
 $migration$;
 
