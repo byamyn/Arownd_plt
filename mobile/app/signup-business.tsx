@@ -40,6 +40,7 @@ export default function BusinessSignupScreen() {
   const {
     control,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting }
   } = useForm<BusinessSignupInput>({
     resolver: zodResolver(businessSignupSchema),
@@ -160,11 +161,7 @@ export default function BusinessSignupScreen() {
               />
             )}
           />
-          <Controller
-            control={control}
-            name="password"
-            render={({ field: { value } }) => <PasswordStrengthMeter password={value} />}
-          />
+          <PasswordStrengthMeter password={watch("password")} />
 
           <Controller
             control={control}
