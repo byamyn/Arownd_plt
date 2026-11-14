@@ -144,7 +144,9 @@ export default function CheckoutScreen() {
       void queryClient.invalidateQueries({ queryKey: ["customer-orders"] });
     },
     onError: (error) => {
-      const message = error instanceof Error ? error.message : "";
+      const message = error && typeof error === "object" && "message" in error
+        ? String(error.message)
+        : "";
       if (message.includes("pending_order_limit_reached")) {
         setFormError(translate("checkoutPendingLimit"));
       } else if (message.includes("cannot_purchase_own_store")) {
