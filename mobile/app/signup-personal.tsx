@@ -40,6 +40,7 @@ export default function PersonalSignupScreen() {
   const {
     control,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting }
   } = useForm<PersonalSignupInput>({
     resolver: zodResolver(personalSignupSchema),
@@ -144,11 +145,7 @@ export default function PersonalSignupScreen() {
               />
             )}
           />
-          <Controller
-            control={control}
-            name="password"
-            render={({ field: { value } }) => <PasswordStrengthMeter password={value} />}
-          />
+          <PasswordStrengthMeter password={watch("password")} />
 
           <Controller
             control={control}
