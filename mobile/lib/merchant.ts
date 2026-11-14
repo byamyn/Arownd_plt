@@ -413,9 +413,17 @@ export async function rejectMerchantOrder(
   reason: string | null = null
 ): Promise<void> {
   assertActionRateLimit("merchant:reject:" + merchantOrderId, 2_000);
+  const normalizedReason = reason?.trim() ?? null;
+  if (normalizedReason && normalizedReason.length > 500) {
+    throw new Error("merchant_rejection_reason_too_long");
+  }
+  if (normalizedReason && /(https?:\\/\\/|www\\.)/i.test(normalizedReason)) {
+    throw new Error("merchant_rejection_reason_links_not_allowed");
+  }
+
   const { error } = await getSupabaseClient().rpc("merchant_reject_order", {
     _merchant_order_id: merchantOrderId,
-    _reason: reason
+    _reason: normalizedReason
   });
 
   if (error) throw error;
