@@ -1,20 +1,42 @@
-name: Android production release (paused pending Expo signing setup)
+name: Android production release (Expo EAS)
 
-# The previous release workflow targeted the legacy root Capacitor project.
-# Production release builds stay disabled until the Expo app is linked to EAS
-# and its Android upload credentials are configured for the native mobile app.
 on:
   workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: arownd-android-production-build
+  cancel-in-progress: false
+
 jobs:
-  release-paused:
+  build-production:
+    name: Build Android production AAB with EAS
     runs-on: ubuntu-latest
+    timeout-minutes: 120
+    defaults:
+      run:
+        working-directory: mobile
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
     steps:
-      - name: Explain release prerequisite
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Validate Expo authentication
+        shell: bash
         run: |
-          echo "::notice::Production AAB/APK release is intentionally paused."
-          echo "The native app is mobile/ (Expo + React Native), not the legacy root android/ Capacitor project."
-          echo "Link mobile/ to its EAS project and configure Android signing before enabling production releases."
+          set -euo pipefail
+          test -n "$EXPO_TOKEN" || {
+            echo "::error::Missing repository Actions secret EXPO_TOKEN. Add an Expo access token under Settings > Secrets and variables > Actions."
+            exit 1
+          }
+
+      - name: Build Android production app bundle
+        run: npx --yes eas-cli build --platform android --profile production --non-interactive
