@@ -111,7 +111,7 @@ export function validateMerchantOfferValues(
   if (
     !Number.isSafeInteger(price) ||
     price <= 0 ||
-    price > 2_147_483_647 ||
+    price > 50_000_000 ||
     !Number.isInteger(stock) ||
     stock < 0 ||
     stock > 9999
