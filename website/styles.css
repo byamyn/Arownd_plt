@@ -1336,3 +1336,16 @@ button[aria-disabled="true"],
  .join-email-note .button { width:100%; }
  .join-detail-actions { align-items:flex-start; flex-direction:column; gap:16px; }
 }
+
+
+/* Contextual icons for Join Arownd actions and program cards */
+.join-program-icon { width:48px; height:48px; display:grid; place-items:center; margin-bottom:22px; border:1px solid rgba(255,240,31,.28); border-radius:12px; color:#FFF01F; background:rgba(255,240,31,.07); }
+.join-program-icon .ui-icon { width:23px; height:23px; }
+.join-program-card .join-program-tag { margin-top:0; }
+.join-card-link { gap:0; }
+.join-card-link::after { content:""; display:block; width:0; height:1px; margin-inline-start:0; background:#FFF01F; transition:width .2s ease,margin .2s ease; }
+.join-program-card:hover .join-card-link::after { width:22px; margin-inline-start:9px; }
+.icon-slot { display:inline-flex; align-items:center; justify-content:center; margin-inline-start:8px; vertical-align:middle; }
+.icon-slot .ui-icon { width:17px; height:17px; }
+.join-email-note .button .icon-slot { margin-inline-start:10px; }
+.join-contact-band .button .icon-slot { margin-inline-start:10px; }
