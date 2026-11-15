@@ -153,7 +153,7 @@ export function AuthCaptchaHost() {
               javaScriptEnabled
               domStorageEnabled
               thirdPartyCookiesEnabled
-              originWhitelist={["http://*", "https://*", "about:blank"]}
+              originWhitelist={["*"]}
               onShouldStartLoadWithRequest={handleNavigation}
               onError={() => {
                 setLoading(false);
