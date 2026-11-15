@@ -61,11 +61,12 @@ export function AuthCaptchaHost() {
       );
       const page = await response.text();
 
-      if (!response.ok || !page.toLowerCase().includes("<html")) {
+      if (!response.ok || !page.toLowerCase().includes("<html") || !page.toLowerCase().includes("</head>")) {
         throw new Error("AUTH_CAPTCHA_LOAD_FAILED");
       }
 
-      setHtml(page);
+      const contentSecurityPolicy = '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; script-src https://challenges.cloudflare.com \'unsafe-inline\'; frame-src https://challenges.cloudflare.com; connect-src https://challenges.cloudflare.com; style-src \'unsafe-inline\'; base-uri \'none\'; form-action \'none\'">';
+      setHtml(page.replace(/<\/head>/i, contentSecurityPolicy + "</head>"));
     } catch {
       setLoading(false);
       setLoadError(true);
@@ -171,7 +172,7 @@ export function AuthCaptchaHost() {
           ) : null}
 
           {loading ? (
-            <View style={styles.stateOverlay}>
+            <View style={[styles.stateOverlay, { backgroundColor: theme.colors.surface }]}>
               <ActivityIndicator size="large" color="#D6C400" />
               <Text style={[styles.stateText, { color: theme.colors.foreground }]}>
                 {translate("captchaLoading")}
@@ -184,8 +185,8 @@ export function AuthCaptchaHost() {
               <Text style={[styles.stateText, { color: theme.colors.foreground }]}>
                 {translate("captchaLoadError")}
               </Text>
-              <Pressable onPress={() => void loadChallenge()} style={styles.retryButton}>
-                <Text style={styles.retryText}>{translate("retry")}</Text>
+              <Pressable onPress={() => void loadChallenge()} style={[styles.retryButton, { backgroundColor: theme.colors.accent }]}>
+                <Text style={[styles.retryText, { color: theme.colors.accentForeground }]}>{translate("retry")}</Text>
               </Pressable>
             </View>
           ) : null}
