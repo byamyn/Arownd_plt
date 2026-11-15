@@ -7,16 +7,12 @@ let activeLanguage: Language = "ar";
 
 export const messages = {
   ar: {
-    import AsyncStorage from "@react-native-async-storage/async-storage";
-import { createContext, createElement, useCallback, useContext, useEffect, useMemo, useState, type PropsWithChildren } from "react";
-import { I18nManager } from "react-native";
-
-const LANGUAGE_STORAGE_KEY = "arownd:app-language";
-let activeLanguage: Language = "ar";
-
-export const messages = {
-  ar: {
-    
+    appName: "Arownd",
+    captchaTitle: "التحقق الأمني",
+    captchaSubtitle: "أكمل التحقق للعودة إلى Arownd ومتابعة العملية.",
+    captchaLoading: "جارٍ تحميل التحقق الآمن…",
+    captchaLoadError: "تعذر تحميل التحقق. تحقق من اتصال الإنترنت ثم أعد المحاولة.",
+    captchaCancel: "إلغاء التحقق",
     authEyebrow: "تجربة تسوّق محلية",
     loginTitle: "مرحبًا بعودتك",
     loginSubtitle: "سجّل الدخول لمتابعة تجربتك على Arownd.",
