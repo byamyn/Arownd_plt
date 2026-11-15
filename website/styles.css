@@ -1284,3 +1284,55 @@ button[aria-disabled="true"],
     min-width: 0;
   }
 }
+
+
+/* Join Arownd program pages */
+.join-hero { background: radial-gradient(circle at 12% 18%, rgba(255,240,31,.09), transparent 28%), #101010; }
+.join-hero .inner-hero-inner { min-height: 350px; padding-block: 86px 78px; }
+.join-hero .section-kicker, .join-program-tag { color: #FFF01F; font: 600 10px/1.6 var(--font-en); letter-spacing: 1.5px; }
+.join-hero h1 span { color: #FFF01F; background: none; }
+.join-section .section-heading h2 { color: #fff; font-size: clamp(30px,4vw,46px); }
+.join-section .section-heading h2 span { color: #FFF01F; }
+.join-program-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); border:1px solid #303030; border-radius:12px; overflow:hidden; }
+.join-program-card { min-height:320px; display:flex; flex-direction:column; align-items:flex-start; padding:28px 25px; border-left:1px solid #303030; color:#fff; text-decoration:none; background:linear-gradient(150deg,rgba(255,255,255,.035),transparent 70%); transition:background .2s ease,transform .2s ease; }
+.join-program-card:last-child { border-left:0; }
+.join-program-card:hover { background:rgba(255,240,31,.065); }
+.join-program-number { color:#FFF01F; font:600 12px var(--font-en); }
+.join-program-tag { margin-top:30px; }
+.join-program-card h3 { margin:12px 0 13px; font:700 clamp(20px,2vw,25px)/1.35 var(--font-en); direction:ltr; text-align:left; }
+.join-program-card p { margin:0; color:#aaa; font-size:13px; line-height:2; }
+.join-card-link { display:flex; align-items:center; gap:12px; margin-top:auto; padding-top:26px; color:#FFF01F; font-size:12px; font-weight:700; }
+.join-card-link span { font-size:19px; transition:transform .2s ease; }
+.join-program-card:hover .join-card-link span { transform:translateX(-4px); }
+.join-contact-band { width:min(1080px,calc(100% - 64px)); margin:0 auto 90px; padding:34px 38px; display:flex; align-items:center; justify-content:space-between; gap:25px; border:1px solid #333; border-radius:12px; background:#111; }
+.join-contact-band h2 { margin:10px 0 7px; font-size:clamp(22px,3vw,30px); }
+.join-contact-band p { margin:0; color:#aaa; font-size:13px; line-height:1.9; }
+.join-contact-band .section-kicker { color:#FFF01F; font:600 10px var(--font-en); letter-spacing:1.4px; }
+.join-detail-actions { display:flex; align-items:center; flex-wrap:wrap; gap:22px; margin-top:28px; }
+.join-detail-actions .text-link { color:#ddd; font-size:13px; text-decoration:underline; text-decoration-color:#FFF01F; text-underline-offset:5px; }
+.join-detail-section { display:grid; grid-template-columns:.8fr 1.2fr; gap:38px 70px; }
+.join-detail-copy .section-kicker { color:#FFF01F; font:600 10px var(--font-en); letter-spacing:1.5px; }
+.join-detail-copy h2 { margin:15px 0; font:700 clamp(26px,3vw,38px)/1.3 var(--font-en); direction:ltr; text-align:right; }
+.join-detail-copy > p { color:#aaa; font-size:14px; line-height:2.1; }
+.join-detail-list { border-top:1px solid #303030; }
+.join-detail-item { display:flex; gap:20px; padding:23px 0; border-bottom:1px solid #303030; }
+.join-detail-item > span { color:#FFF01F; font:600 12px var(--font-en); padding-top:4px; }
+.join-detail-item h3 { margin:0 0 7px; font-size:16px; }
+.join-detail-item p { margin:0; color:#aaa; font-size:12px; line-height:1.9; }
+.join-email-note { grid-column:1/-1; display:flex; align-items:center; justify-content:space-between; gap:25px; padding:26px 30px; border:1px solid #333; border-radius:10px; background:#111; }
+.join-email-note strong { font-size:16px; }
+.join-email-note p { margin:8px 0; color:#aaa; font-size:12px; line-height:1.9; }
+.join-email-note a:not(.button) { color:#FFF01F; font:600 13px var(--font-en); direction:ltr; display:inline-block; }
+@media(max-width:760px) {
+ .join-hero .inner-hero-inner { padding-block:62px 56px; }
+ .join-program-grid { grid-template-columns:1fr; }
+ .join-program-card { min-height:255px; padding:24px 21px; border-left:0; border-bottom:1px solid #303030; }
+ .join-program-card:last-child { border-bottom:0; }
+ .join-contact-band { width:calc(100% - 42px); margin-bottom:60px; align-items:stretch; flex-direction:column; padding:26px 22px; }
+ .join-contact-band .button { width:100%; }
+ .join-detail-section { grid-template-columns:1fr; gap:28px; }
+ .join-detail-copy h2 { text-align:right; }
+ .join-email-note { align-items:stretch; flex-direction:column; padding:23px 20px; }
+ .join-email-note .button { width:100%; }
+ .join-detail-actions { align-items:flex-start; flex-direction:column; gap:16px; }
+}
