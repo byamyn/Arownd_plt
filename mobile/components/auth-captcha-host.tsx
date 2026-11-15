@@ -66,7 +66,7 @@ export function AuthCaptchaHost() {
       }
 
       const contentSecurityPolicy = '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; script-src https://challenges.cloudflare.com \'unsafe-inline\'; frame-src https://challenges.cloudflare.com; connect-src https://challenges.cloudflare.com; style-src \'unsafe-inline\'; base-uri \'none\'; form-action \'none\'">';
-      setHtml(page.replace(/<\/head>/i, contentSecurityPolicy + "</head>"));
+      setHtml(page.replace(/<head[^>]*>/i, (head) => head + contentSecurityPolicy));
     } catch {
       setLoading(false);
       setLoadError(true);
