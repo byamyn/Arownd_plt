@@ -7,7 +7,16 @@ let activeLanguage: Language = "ar";
 
 export const messages = {
   ar: {
-    appName: "Arownd",
+    import AsyncStorage from "@react-native-async-storage/async-storage";
+import { createContext, createElement, useCallback, useContext, useEffect, useMemo, useState, type PropsWithChildren } from "react";
+import { I18nManager } from "react-native";
+
+const LANGUAGE_STORAGE_KEY = "arownd:app-language";
+let activeLanguage: Language = "ar";
+
+export const messages = {
+  ar: {
+    
     authEyebrow: "تجربة تسوّق محلية",
     loginTitle: "مرحبًا بعودتك",
     loginSubtitle: "سجّل الدخول لمتابعة تجربتك على Arownd.",
@@ -943,6 +952,11 @@ export const messages = {
   },
   en: {
     appName: "Arownd",
+    captchaTitle: "Security verification",
+    captchaSubtitle: "Complete the verification to return to Arownd and continue.",
+    captchaLoading: "Loading secure verification…",
+    captchaLoadError: "Could not load verification. Check your connection and try again.",
+    captchaCancel: "Cancel verification",
     authEyebrow: "Your local shopping experience",
     loginTitle: "Welcome back",
     loginSubtitle: "Sign in to continue your Arownd experience.",
