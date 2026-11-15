@@ -16,6 +16,7 @@ import { useEffect, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import Logo from "@/components/logo";
+import { AuthCaptchaHost } from "@/components/auth-captcha-host";
 import { CartFlyOverlay } from "@/components/cart-fly-overlay";
 import { ThemeProvider, useAppTheme, useThemePreference } from "@/lib/design-system";
 import { getSupabaseClient } from "@/lib/supabase";
@@ -165,6 +166,7 @@ function RootLayoutContent() {
             }}
           />
         </LocaleProvider>
+        <AuthCaptchaHost />
       </QueryClientProvider>
 
       <CartFlyOverlay />
