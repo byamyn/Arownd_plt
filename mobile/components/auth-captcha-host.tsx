@@ -181,7 +181,7 @@ export function AuthCaptchaHost() {
           ) : null}
 
           {loadError ? (
-            <View style={styles.stateOverlay}>
+            <View style={[styles.stateOverlay, { backgroundColor: theme.colors.surface }]}>
               <Text style={[styles.stateText, { color: theme.colors.foreground }]}>
                 {translate("captchaLoadError")}
               </Text>
