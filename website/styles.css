@@ -1025,3 +1025,123 @@ html { scroll-padding-top: 110px; }
     padding-inline: 16px;
   }
 }
+
+
+/* Unified, polished button system */
+.button,
+.header-cta {
+  min-height: 52px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 0 21px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color .18s ease, color .18s ease, border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+.button-dark {
+  background: #FFF01F;
+  color: #000000;
+  box-shadow: 0 5px 16px rgba(255,240,31,.13);
+}
+.button-dark:hover {
+  background: #F0E100;
+  color: #000000;
+  box-shadow: 0 8px 22px rgba(255,240,31,.2);
+  transform: translateY(-2px);
+}
+.button-secondary {
+  border-color: rgba(255,255,255,.42);
+  background: rgba(255,255,255,.035);
+  color: #FFFFFF;
+  box-shadow: none;
+}
+.button-secondary:hover {
+  border-color: #FFF01F;
+  background: rgba(255,240,31,.1);
+  color: #FFF01F;
+  transform: translateY(-2px);
+}
+.button:active,
+.header-cta:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+.button:focus-visible,
+.header-cta:focus-visible {
+  outline: 2px solid #FFF01F;
+  outline-offset: 4px;
+}
+.button .icon-slot,
+.header-cta .icon-slot {
+  width: 29px;
+  height: 29px;
+  display: inline-flex;
+  flex: 0 0 29px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: rgba(0,0,0,.09);
+}
+.button-secondary .icon-slot {
+  background: rgba(255,255,255,.09);
+}
+.button .ui-icon,
+.header-cta .ui-icon {
+  width: 17px;
+  height: 17px;
+}
+.header-cta {
+  min-height: 44px;
+  padding-inline: 16px;
+  border-color: #FFF01F;
+  background: #FFF01F;
+  color: #000000;
+  box-shadow: none;
+}
+.header-cta:hover {
+  border-color: #F0E100;
+  background: #F0E100;
+  color: #000000;
+  transform: translateY(-2px);
+}
+.hero-actions {
+  align-items: center;
+  gap: 13px;
+}
+.hero-actions .button {
+  min-width: 190px;
+}
+@media (max-width: 760px) {
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .hero-actions .button {
+    min-height: 49px;
+    min-width: 0;
+    flex: 1 1 185px;
+    padding-inline: 14px;
+    gap: 9px;
+    font-size: 12px;
+  }
+}
+@media (max-width: 390px) {
+  .hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .hero-actions .button {
+    width: 100%;
+    flex: 0 0 auto;
+  }
+}
