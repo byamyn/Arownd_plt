@@ -160,7 +160,7 @@ export function AuthCaptchaHost() {
                 setLoadError(true);
               }}
               onHttpError={(event) => {
-                if (event.nativeEvent.status >= 400) {
+                if (event.nativeEvent.statusCode >= 400) {
                   setLoading(false);
                   setLoadError(true);
                 }
