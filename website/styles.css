@@ -1000,3 +1000,28 @@ html { scroll-padding-top: 110px; }
 
 /* Prominent app-download action in the homepage hero */
 .hero-actions .hero-download-button { margin-top: 0; }
+
+
+/* Fix button contrast after the global dark-theme color overrides. */
+.button-dark {
+  background: #FFF01F;
+  color: #000000;
+}
+.button-dark:hover {
+  background: #F0E100;
+  color: #000000;
+}
+.button-dark:focus-visible {
+  outline-color: #FFF01F;
+}
+@media (max-width: 760px) {
+  .hero-actions {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .hero-actions .button {
+    min-height: 48px;
+    gap: 12px;
+    padding-inline: 16px;
+  }
+}
