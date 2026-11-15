@@ -2,8 +2,22 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
 const RETURN_URL = "com.arownd.app://captcha";
 
-function htmlResponse(status: number, title: string, message: string): Response {
-  const html = `<!doctype html>
+function htmlResponse(body: string, status = 200): Response {
+  const headers = new Headers({
+    "Cache-Control": "no-store, max-age=0",
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "no-referrer",
+    "Content-Security-Policy": "default-src 'none'; script-src https://challenges.cloudflare.com 'unsafe-inline'; frame-src https://challenges.cloudflare.com; connect-src https://challenges.cloudflare.com; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+  });
+  headers.set("Content-Type", "text/html; charset=utf-8");
+  return new Response(
+    new Blob([body], { type: "text/html;charset=utf-8" }),
+    { status, headers }
+  );
+}
+
+function messagePage(title: string, message: string): string {
+  return `<!doctype html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8">
@@ -18,16 +32,6 @@ function htmlResponse(status: number, title: string, message: string): Response 
 </head>
 <body><main><h1>${title}</h1><p>${message}</p></main></body>
 </html>`;
-  return new Response(html, {
-    status,
-    headers: {
-      "Content-Type": "text/html; charset=utf-8",
-      "Cache-Control": "no-store, max-age=0",
-      "X-Content-Type-Options": "nosniff",
-      "Referrer-Policy": "no-referrer",
-      "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; frame-ancestors 'none'"
-    }
-  });
 }
 
 Deno.serve((request: Request) => {
@@ -41,12 +45,18 @@ Deno.serve((request: Request) => {
   const requestUrl = new URL(request.url);
   const returnUrl = requestUrl.searchParams.get("return_url");
   if (returnUrl !== RETURN_URL) {
-    return htmlResponse(400, "طلب غير صالح", "تعذر بدء عملية التحقق. ارجع إلى التطبيق وحاول مرة أخرى.");
+    return htmlResponse(messagePage(
+      "طلب غير صالح",
+      "تعذر بدء عملية التحقق. ارجع إلى التطبيق وحاول مرة أخرى."
+    ), 400);
   }
 
   const siteKey = Deno.env.get("TURNSTILE_SITE_KEY")?.trim() ?? "";
   if (!/^[A-Za-z0-9_-]{10,100}$/.test(siteKey)) {
-    return htmlResponse(503, "التحقق غير مهيأ", "لم يكتمل إعداد التحقق الآمن لهذا التطبيق بعد.");
+    return htmlResponse(messagePage(
+      "التحقق غير مهيأ",
+      "لم يكتمل إعداد التحقق الآمن لهذا التطبيق بعد."
+    ), 503);
   }
 
   const page = `<!doctype html>
@@ -95,14 +105,5 @@ Deno.serve((request: Request) => {
   </main>
 </body>
 </html>`;
-  return new Response(page, {
-    status: 200,
-    headers: {
-      "Content-Type": "text/html; charset=utf-8",
-      "Cache-Control": "no-store, max-age=0",
-      "X-Content-Type-Options": "nosniff",
-      "Referrer-Policy": "no-referrer",
-      "Content-Security-Policy": "default-src 'none'; script-src https://challenges.cloudflare.com 'unsafe-inline'; frame-src https://challenges.cloudflare.com; connect-src https://challenges.cloudflare.com; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
-    }
-  });
+  return htmlResponse(page);
 });
