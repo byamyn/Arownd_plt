@@ -1256,3 +1256,31 @@ button[aria-disabled="true"],
   }
 }
 
+/* Download page: keep the primary action legible inside the dark content panel. */
+.content-section .button.button-dark {
+  background: #FFF01F;
+  color: #000000;
+}
+
+.content-section .button.button-dark:hover {
+  background: #F0E100;
+  color: #000000;
+}
+
+.download-panel .button {
+  min-width: 220px;
+  margin-block: 4px;
+}
+
+@media (max-width: 760px) {
+  .download-panel {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 26px 22px;
+  }
+
+  .download-panel .button {
+    width: 100%;
+    min-width: 0;
+  }
+}
