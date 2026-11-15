@@ -1,4 +1,5 @@
 import * as Linking from "expo-linking";
+import { requestAuthCaptchaToken } from "@/lib/auth-captcha";
 
 import { getSelectedCountryCode, syncSelectedCountryCodeFromProfile } from "@/lib/country-service";
 import { clearPendingInviteCode, getPendingInviteCode } from "@/lib/invite-service";
@@ -13,50 +14,9 @@ import type {
 } from "@/lib/auth-validation";
 
 const AUTH_CAPTCHA_ENABLED = process.env.EXPO_PUBLIC_AUTH_CAPTCHA_ENABLED === "true";
-const TURNSTILE_CHALLENGE_URL = "https://nagzoafkitfsqlcwsdau.supabase.co/functions/v1/turnstile-challenge";
-const CAPTCHA_RETURN_URL = "com.arownd.app://captcha";
-
 async function getAuthCaptchaToken(): Promise<string | undefined> {
   if (!AUTH_CAPTCHA_ENABLED) return undefined;
-
-  return new Promise((resolve, reject) => {
-    let settled = false;
-    const finish = (error?: Error, token?: string) => {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timeout);
-      subscription.remove();
-      if (error) reject(error);
-      else resolve(token);
-    };
-
-    const subscription = Linking.addEventListener("url", ({ url }) => {
-      let callbackUrl: URL;
-      try {
-        callbackUrl = new URL(url);
-      } catch {
-        return;
-      }
-
-      if (callbackUrl.protocol !== "com.arownd.app:" || callbackUrl.hostname !== "captcha") return;
-      const token = callbackUrl.searchParams.get("token");
-      if (!token) {
-        finish(new Error("AUTH_CAPTCHA_TOKEN_MISSING"));
-        return;
-      }
-      finish(undefined, token);
-    });
-
-    const timeout = setTimeout(() => {
-      finish(new Error("AUTH_CAPTCHA_TIMEOUT"));
-    }, 180_000);
-
-    void Linking.openURL(
-      TURNSTILE_CHALLENGE_URL + "?return_url=" + encodeURIComponent(CAPTCHA_RETURN_URL)
-    ).catch((error: unknown) => {
-      finish(error instanceof Error ? error : new Error("AUTH_CAPTCHA_OPEN_FAILED"));
-    });
-  });
+  return requestAuthCaptchaToken();
 }
 
 export async function signIn(input: LoginInput): Promise<void> {
