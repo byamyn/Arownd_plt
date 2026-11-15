@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - ".github/workflows/eas-android-preview-build.yml"
+      - "mobile/**"
   workflow_dispatch:
 
 permissions:
@@ -55,10 +56,18 @@ jobs:
         run: npx --yes eas-cli build --platform android --profile preview --non-interactive --wait
 
       - name: Download completed APK
+        shell: bash
         run: |
           set -euo pipefail
           mkdir -p dist
-          npx --yes eas-cli build:download --latest --platform android --path ./dist/arownd-android.apk
+
+          BUILD_ID="$(npx --yes eas-cli build:list --platform android --build-profile preview --limit 1 --json | jq -r '.[0].id // empty')"
+          test -n "$BUILD_ID" || { echo "::error::Could not determine the completed EAS preview build ID"; exit 1; }
+
+          npx --yes eas-cli build:download --build-id "$BUILD_ID" --non-interactive
+          DOWNLOADED_APK="$(find . -maxdepth 2 -type f -name '*.apk' -print -quit)"
+          test -n "$DOWNLOADED_APK" || { echo "::error::EAS did not download an APK"; exit 1; }
+          cp "$DOWNLOADED_APK" ./dist/arownd-android.apk
           test -s ./dist/arownd-android.apk
 
       - name: Publish APK to GitHub Releases
