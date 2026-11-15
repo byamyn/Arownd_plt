@@ -1145,3 +1145,114 @@ html { scroll-padding-top: 110px; }
     flex: 0 0 auto;
   }
 }
+
+/* Consistent interaction states for every native website control */
+button,
+[role="button"] {
+  font: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid #FFF01F;
+  outline-offset: 4px;
+}
+
+button:disabled,
+button[aria-disabled="true"],
+[role="button"][aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: .48;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Mobile navigation control */
+.menu-toggle {
+  width: 44px;
+  height: 44px;
+  display: none;
+  flex: 0 0 44px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid rgba(255,255,255,.24);
+  border-radius: 8px;
+  background: #171717;
+  color: #FFFFFF;
+  cursor: pointer;
+  box-shadow: 0 3px 12px rgba(0,0,0,.16);
+  transition: background-color .18s ease, border-color .18s ease, color .18s ease, transform .18s ease, box-shadow .18s ease;
+}
+
+.menu-toggle:hover {
+  border-color: #FFF01F;
+  background: rgba(255,240,31,.1);
+  color: #FFF01F;
+}
+
+.menu-toggle:active {
+  transform: scale(.96);
+  box-shadow: none;
+}
+
+.menu-toggle[aria-expanded="true"] {
+  border-color: #FFF01F;
+  background: #FFF01F;
+  color: #000000;
+}
+
+.menu-toggle .menu-icon {
+  width: 21px;
+  height: 21px;
+}
+
+/* Dropdown trigger shares the same accessible control language */
+.more-toggle {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: #FFFFFF;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color .18s ease, border-color .18s ease, color .18s ease;
+}
+
+.more-toggle:hover,
+.nav-more.open .more-toggle {
+  border-color: rgba(255,240,31,.45);
+  background: rgba(255,240,31,.09);
+  color: #FFF01F;
+}
+
+@media (max-width: 760px) {
+  .menu-toggle {
+    display: inline-flex;
+  }
+
+  .more-toggle {
+    width: 100%;
+    justify-content: flex-start;
+    padding-inline: 12px;
+    border-radius: 6px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button,
+  .header-cta,
+  .menu-toggle,
+  .more-toggle {
+    transition: none;
+  }
+}
+
