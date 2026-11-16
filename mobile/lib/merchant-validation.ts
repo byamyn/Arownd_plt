@@ -3,10 +3,6 @@ import { z } from "zod";
 export const merchantStoreSchema = z.object({
   storeName: z.string().trim().min(2, "merchantValidationStoreName").max(100, "merchantValidationStoreName"),
   phone: z.string().trim().regex(/^[+0-9٠-٩۰-۹()\s-]{7,20}$/, "merchantValidationPhone"),
-  whatsapp: z.string().trim().max(20, "merchantValidationWhatsApp").refine(
-    (value) => value.length === 0 || /^[+0-9٠-٩۰-۹()\s-]{7,20}$/.test(value),
-    "merchantValidationWhatsApp"
-  ),
   regionId: z.number().int().positive().nullable().refine(
     (value) => value !== null,
     "merchantValidationPrimaryRegion"
@@ -16,8 +12,8 @@ export const merchantStoreSchema = z.object({
   addressLine: z.string().trim().min(4, "merchantValidationAddress").max(300, "merchantValidationAddress"),
   open: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "merchantValidationTime"),
   close: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "merchantValidationTime"),
-  category: z.string().trim().min(1, "merchantValidationCategory"),
-  subcategories: z.array(z.string().min(1)).max(30, "merchantValidationSubcategories")
+  category: z.string().trim().max(100).nullable().optional(),
+  subcategories: z.array(z.string().min(1)).max(30, "merchantValidationSubcategories").default([])
 }).superRefine((value, context) => {
   if (new Set(value.subcategories).size !== value.subcategories.length) {
     context.addIssue({
