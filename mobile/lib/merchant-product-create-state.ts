@@ -79,7 +79,7 @@ export function validateMerchantProductInput(input: {
     category: input.category,
     brand: brand || null,
     description: description || null,
-    options: { sizes, colors }
+    options: { sizes: sizes ?? [], colors: colors ?? [] }
   };
 }
 
