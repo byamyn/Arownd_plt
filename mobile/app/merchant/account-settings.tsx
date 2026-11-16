@@ -33,7 +33,7 @@ export default function MerchantAccountSettingsScreen() {
         <View style={styles.center}>
           <UiText>{translate("merchantLoadError")}</UiText>
           <PressableSurface onPress={() => void access.refetch()} style={styles.retry}>
-            <UiText style={{ color: theme.colors.accent }}>{translate("merchantRetry")}</UiText>
+            <UiText style={{ color: theme.colors.accentMuted }}>{translate("merchantRetry")}</UiText>
           </PressableSurface>
         </View>
       </SafeAreaView>
