@@ -55,8 +55,13 @@ export default function MerchantAnalyticsScreen() {
   return (
     <SafeAreaView edges={["top", "left", "right"]} style={[styles.safe, { backgroundColor: theme.colors.background }]}>
       <RefreshableScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} refreshing={access.isFetching || analytics.isFetching} onRefresh={() => { void Promise.all([access.refetch(), analytics.refetch()]); }}>
-        <AppHeader
-          title={translate("merchantAnalyticsTitle")}        />
+        <AppHeader title={translate("merchantAnalyticsTitle")} />
+
+        <View style={styles.overviewHeader}>
+          <UiText style={[styles.overviewEyebrow, { color: theme.colors.muted }]}>{translate("merchantAnalyticsRevenue")}</UiText>
+          <UiText style={[styles.overviewValue, { color: theme.colors.foreground }]}>{formatMarketPrice(data.delivered_revenue, accountCurrency.data)}</UiText>
+          <UiText style={[styles.overviewCaption, { color: theme.colors.muted }]}>{translate("merchantAnalyticsRevenueNote")}</UiText>
+        </View>
 
         <Heading level={3}>{translate("merchantAnalyticsOrders")}</Heading>
         <View style={styles.grid}>
@@ -71,19 +76,11 @@ export default function MerchantAnalyticsScreen() {
           ))}
         </View>
 
-        <Heading level={3}>{translate("merchantAnalyticsRevenue")}</Heading>
-        <View style={styles.revenueMetrics}>
-          <MerchantMetricCard
-            label={translate("merchantAnalyticsRevenue")}
-            value={formatMarketPrice(data.delivered_revenue, accountCurrency.data)}
-            valueTone="accent"
-            style={styles.revenueMetric}
-          />
-          <View style={[styles.metricDivider, { backgroundColor: theme.colors.border }]} />
+        <View style={styles.averageCard}>
           <MerchantMetricCard
             label={translate("merchantAnalyticsAverage")}
             value={formatMarketPrice(data.average_delivered_order, accountCurrency.data)}
-            style={styles.revenueMetric}
+            style={styles.averageMetric}
           />
         </View>
 
@@ -151,15 +148,18 @@ function Message({ theme, label, loading = false, actionLabel, onAction, busy = 
 function createStyles(theme: AppTheme) {
   return StyleSheet.create({
     safe: { flex: 1 },
-    content: { padding: designTokens.spacing.xl, paddingBottom: designTokens.spacing.xxl, gap: designTokens.spacing.xl },
+    content: { padding: designTokens.spacing.xl, paddingBottom: designTokens.spacing.xxl, gap: designTokens.spacing.lg },
+    overviewHeader: { padding: designTokens.spacing.xl, borderRadius: theme.radius.xl, backgroundColor: theme.colors.surface, borderWidth: StyleSheet.hairlineWidth, borderColor: theme.colors.border, gap: designTokens.spacing.sm },
+    overviewEyebrow: { fontSize: designTokens.typography.caption, fontWeight: "600", textAlign: "auto" },
+    overviewValue: { fontSize: 30, lineHeight: 38, fontWeight: "800", textAlign: "auto", fontVariant: ["tabular-nums"] },
+    overviewCaption: { fontSize: designTokens.typography.caption - 1, lineHeight: 18, textAlign: "auto" },
     subtitle: { fontSize: designTokens.typography.caption + 1, lineHeight: 20, textAlign: "auto" },
     grid: { flexDirection: "row", flexWrap: "wrap", gap: designTokens.spacing.sm },
     inventoryGrid: { flexDirection: "row", flexWrap: "wrap", gap: designTokens.spacing.sm },
     metricCard: { width: "48%", flexGrow: 1, minHeight: 104, justifyContent: "center" },
     inventoryWideCard: { width: "100%", flex: 0, flexGrow: 0, alignSelf: "stretch", minHeight: 96 },
-    revenueMetrics: { flexDirection: "row", alignItems: "stretch", gap: designTokens.spacing.md },
-    revenueMetric: { flex: 1, minWidth: 0, minHeight: 94, padding: designTokens.spacing.md, gap: designTokens.spacing.xs, justifyContent: "center" },
-    metricDivider: { width: StyleSheet.hairlineWidth, alignSelf: "stretch" },
+    averageCard: { flexDirection: "row" },
+    averageMetric: { width: "100%", minHeight: 82, padding: designTokens.spacing.md, justifyContent: "center" },
     chartCard: { gap: designTokens.spacing.md },
     dayRow: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.sm },
     dayLabel: { width: 48, fontSize: designTokens.typography.caption - 1, textAlign: "auto" },
