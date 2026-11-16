@@ -548,7 +548,6 @@ function Message({ theme, label, loading = false, actionLabel, onAction, busy = 
           <LoadingState label={label} />
         ) : actionLabel && onAction ? (
           <ErrorState title={label} retryLabel={actionLabel} busy={busy} onRetry={onAction} />
-        ) : (
         )}
       </View>
     </SafeAreaView>
