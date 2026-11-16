@@ -4,16 +4,18 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { CustomerNavigation } from "@/components/customer-navigation";
 import { useAppTheme } from "@/lib/theme";
+import { useLanguage } from "@/lib/i18n";
 
 export default function MerchantLayout() {
   const theme = useAppTheme();
+  const { language } = useLanguage();
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <Stack
         screenOptions={{
           headerShown: false,
-          animation: "slide_from_right",
+          animation: language === "ar" ? "slide_from_left" : "slide_from_right",
           contentStyle: { backgroundColor: theme.colors.background }
         }}
       />
