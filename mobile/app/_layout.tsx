@@ -1,4 +1,4 @@
-import { LocaleProvider, Stack, router } from "expo-router";
+import { LocaleProvider, Stack, router, usePathname } from "expo-router";
 import * as Notifications from "expo-notifications";
 import { StatusBar } from "expo-status-bar";
 import { useFonts } from "expo-font";
@@ -11,7 +11,7 @@ import {
   Inter_800ExtraBold
 } from "@expo-google-fonts/inter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ActivityIndicator, Platform, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Animated, Easing, Platform, StyleSheet, View } from "react-native";
 import { useEffect, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -74,8 +74,30 @@ function RootLayoutContent() {
   const theme = useAppTheme();
   const insets = useSafeAreaInsets();
   const { language, isReady: languageReady } = useLanguage();
+  const pathname = usePathname();
+  const screenScale = useRef(new Animated.Value(1)).current;
+  const previousPathname = useRef(pathname);
   const { isReady: themeReady } = useThemePreference();
   const appReady = (fontsLoaded || Boolean(fontError)) && themeReady && languageReady;
+
+  useEffect(() => {
+    if (previousPathname.current === pathname) return;
+    const previousPath = previousPathname.current;
+    previousPathname.current = pathname;
+    // Product details owns its native bottom-sheet transition; do not animate its stack container.
+    if (previousPath.startsWith("/product/") || pathname.startsWith("/product/")) return;
+
+    screenScale.stopAnimation();
+    screenScale.setValue(0.98);
+    const animation = Animated.timing(screenScale, {
+      toValue: 1,
+      duration: 280,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true
+    });
+    animation.start();
+    return () => animation.stop();
+  }, [pathname, screenScale]);
 
   useEffect(() => {
     if (!appReady) return;
@@ -158,13 +180,17 @@ function RootLayoutContent() {
       <QueryClientProvider client={queryClient}>
         <StatusBar style={theme.mode === "dark" ? "light" : "dark"} />
         <LocaleProvider direction={language === "ar" ? "rtl" : "ltr"}>
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              animation: language === "ar" ? "slide_from_left" : "slide_from_right",
-              contentStyle: { backgroundColor: theme.colors.background }
-            }}
-          />
+          <Animated.View style={[styles.navigation, { transform: [{ scale: screenScale }] }]}>
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                animation: "fade",
+                animationDuration: 280,
+                animationMatchesGesture: true,
+                contentStyle: { backgroundColor: theme.colors.background }
+              }}
+            />
+          </Animated.View>
         </LocaleProvider>
         <AuthCaptchaHost />
       </QueryClientProvider>
@@ -189,6 +215,9 @@ function RootLayoutContent() {
 }
 
 const styles = StyleSheet.create({
+  navigation: {
+    flex: 1
+  },
   root: {
     flex: 1
   },
