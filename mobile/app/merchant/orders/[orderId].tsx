@@ -150,8 +150,6 @@ export default function MerchantOrderDetailsScreen() {
     <SafeAreaView edges={["top", "left", "right"]} style={[styles.safe, { backgroundColor: theme.colors.background }]}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <AppHeader title={translate("merchantOrderDetailTitle")}/>
-        <UiText style={[styles.eyebrow, { color: theme.colors.accentMuted }]}>{translate("merchantOrderNumber")} {customerOrder.id.slice(0, 8)}</UiText>
-        <UiText style={[styles.subtitle, { color: theme.colors.muted }]}>{new Date(customerOrder.created_at).toLocaleString(language === "ar" ? "ar-DZ" : "en-DZ")}</UiText>
 
         <MerchantOrderCard>
           <View style={styles.summaryRow}>
