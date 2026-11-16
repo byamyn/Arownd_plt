@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { RefreshableScrollView, AppHeader, Button, Card, ErrorState, FilterBar, FilterChip, Icon, Image as UiImage, ProductCardSkeleton, MediaViewer, MerchantMetricCard, MerchantStatusBadge, PressableSurface, Text as UiText, TextField } from "@/components/ui";
+import { RefreshableScrollView, AppHeader, Button, Card, ErrorState, FilterBar, FilterChip, Icon, Image as UiImage, ProductCardSkeleton, MediaViewer, MerchantMetricCard, MerchantStatusBadge, PressableSurface, SearchField, Text as UiText, TextField } from "@/components/ui";
 import {
   fetchMerchantAccess
 } from "@/lib/merchant";
@@ -146,8 +146,23 @@ export default function MerchantProductsScreen() {
   return (
     <SafeAreaView edges={["top", "left", "right"]} style={[styles.safe, { backgroundColor: theme.colors.background }]}>
       <RefreshableScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} refreshing={access.isFetching || products.isFetching} onRefresh={() => { void Promise.all([access.refetch(), products.refetch()]); }}>
-        <AppHeader
-          title={translate("merchantProductsTitle")}        />
+        <AppHeader title={translate("merchantProductsTitle")} />
+
+        <SearchField
+          value={search}
+          onChangeText={setSearch}
+          placeholder={translate("merchantProductsSearchPlaceholder")}
+          accessibilityLabel={translate("merchantProductsSearchPlaceholder")}
+          returnKeyType="search"
+          style={styles.searchField}
+        />
+
+        <FilterBar style={styles.filters}>
+          <FilterChip label={translate("merchantProductsFilterAll")} selected={filter === "all"} onPress={() => setFilter("all")} />
+          <FilterChip label={translate("merchantProductsFilterLow")} selected={filter === "low"} onPress={() => setFilter("low")} leading={<Icon name="alert-circle" size={14} color={filter === "low" ? (theme.mode === "dark" ? theme.colors.accent : theme.colors.accentForeground) : theme.colors.muted} accessibilityHidden />} />
+          <FilterChip label={translate("merchantProductsFilterOut")} selected={filter === "out"} onPress={() => setFilter("out")} leading={<Icon name="package-x" size={14} color={filter === "out" ? (theme.mode === "dark" ? theme.colors.accent : theme.colors.accentForeground) : theme.colors.muted} accessibilityHidden />} />
+          <FilterChip label={translate("merchantProductsHidden")} selected={filter === "hidden"} onPress={() => setFilter("hidden")} leading={<Icon name="eye-off" size={14} color={filter === "hidden" ? (theme.mode === "dark" ? theme.colors.accent : theme.colors.accentForeground) : theme.colors.muted} accessibilityHidden />} />
+        </FilterBar>
 
         <Button label={translate("merchantProductCreateOpen")} onPress={() => router.push("/merchant/products/new")} fullWidth />
 
@@ -156,22 +171,6 @@ export default function MerchantProductsScreen() {
           <MerchantMetricCard label={translate("merchantProductsSummaryLow")} value={String(summary.low)} valueTone="warning" style={styles.summaryCard} />
           <MerchantMetricCard label={translate("merchantProductsSummaryOut")} value={String(summary.out)} valueTone="danger" style={styles.summaryCard} />
         </View>
-
-        <TextField
-          value={search}
-          onChangeText={setSearch}
-          placeholder={translate("merchantProductsSearchPlaceholder")}
-          accessibilityLabel={translate("merchantProductsSearchPlaceholder")}
-          returnKeyType="search"
-          style={[styles.searchInput, { color: theme.colors.foreground, backgroundColor: theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface, borderColor: theme.colors.border }]}
-        />
-
-        <FilterBar style={styles.filters}>
-          <FilterChip label={translate("merchantProductsFilterAll")} selected={filter === "all"} onPress={() => setFilter("all")} />
-          <FilterChip label={translate("merchantProductsFilterLow")} selected={filter === "low"} onPress={() => setFilter("low")} />
-          <FilterChip label={translate("merchantProductsFilterOut")} selected={filter === "out"} onPress={() => setFilter("out")} />
-          <FilterChip label={translate("merchantProductsHidden")} selected={filter === "hidden"} onPress={() => setFilter("hidden")} />
-        </FilterBar>
 
         {notice ? (
           <View style={[styles.feedback, { backgroundColor: theme.colors.successSurface, borderColor: theme.colors.successBorder }]}>
@@ -261,6 +260,29 @@ function MerchantOfferCard({
 
   return (
     <Card style={{ backgroundColor: theme.colors.surface, width: "100%" }} contentStyle={styles.offerCard}>
+      <View style={styles.postHeader}>
+        <View style={styles.productInfo}>
+          <UiText style={[styles.productName, { color: theme.colors.foreground }]} numberOfLines={2}>
+            {offer.product.name}
+          </UiText>
+          {offer.product.brand ? (
+            <UiText style={[styles.productBrand, { color: theme.colors.muted }]} numberOfLines={1}>
+              {offer.product.brand}
+            </UiText>
+          ) : null}
+        </View>
+        <View style={styles.badgeColumn}>
+          <MerchantStatusBadge
+            label={inventoryLabel}
+            tone={inventoryLevel === "out" ? "danger" : inventoryLevel === "low" ? "warning" : "success"}
+          />
+          <MerchantStatusBadge
+            label={offer.is_merchant_hidden ? translate("merchantProductsHidden") : translate("merchantProductsVisible")}
+            tone={offer.is_merchant_hidden ? "neutral" : "accent"}
+          />
+        </View>
+      </View>
+
       <PressableSurface
         accessibilityRole={image ? "button" : undefined}
         accessibilityLabel={translate("merchantProductImagesLabel")}
@@ -280,28 +302,7 @@ function MerchantOfferCard({
         )}
       </PressableSurface>
 
-      <View style={styles.badgeRow}>
-        <MerchantStatusBadge
-          label={inventoryLabel}
-          tone={inventoryLevel === "out" ? "danger" : inventoryLevel === "low" ? "warning" : "success"}
-        />
-        <MerchantStatusBadge
-          label={offer.is_merchant_hidden ? translate("merchantProductsHidden") : translate("merchantProductsVisible")}
-          tone={offer.is_merchant_hidden ? "neutral" : "accent"}
-        />
-      </View>
-
-      <View style={styles.productInfo}>
-        <UiText style={[styles.productName, { color: theme.colors.foreground }]} numberOfLines={2}>
-          {offer.product.name}
-        </UiText>
-        {offer.product.brand ? (
-          <UiText style={[styles.productBrand, { color: theme.colors.muted }]} numberOfLines={1}>
-            {offer.product.brand}
-          </UiText>
-        ) : null}
-      </View>
-
+      <View style={styles.postBody}>
       <View style={styles.inputsRow}>
         <View style={styles.inputGroup}>
           <UiText style={[styles.inputLabel, { color: theme.colors.muted }]}>{translate("merchantProductsPriceLabel")}</UiText>
@@ -358,6 +359,8 @@ function MerchantOfferCard({
         />
       </View>
 
+      </View>
+
       <MediaViewer
         visible={galleryOpen}
         onRequestClose={() => setGalleryOpen(false)}
@@ -410,8 +413,8 @@ function MessageScreen({
         <AppHeader
           title={translate("merchantProductsTitle")}        />
         {loading ? (
-          <View style={{ width: "100%", flexDirection: "row", flexWrap: "wrap", gap: designTokens.spacing.md }}>
-            {[0, 1, 2, 3].map((item) => <ProductCardSkeleton key={item} style={{ width: "47%", flex: 0 }} />)}
+          <View style={{ width: "100%", gap: designTokens.spacing.lg }}>
+            {[0, 1, 2].map((item) => <ProductCardSkeleton key={item} style={{ width: "100%", flex: 0 }} />)}
           </View>
         ) : onAction && actionLabel ? (
           <ErrorState title={title ?? label ?? ""} retryLabel={actionLabel} busy={busy} onRetry={onAction} />
@@ -426,15 +429,11 @@ function MessageScreen({
 function createStyles(theme: AppTheme) {
   return StyleSheet.create({
     safe: { flex: 1 },
-    content: { padding: designTokens.spacing.xl, paddingBottom: designTokens.spacing.xxl, gap: designTokens.spacing.lg },
-    header: { alignItems: "flex-start", gap: designTokens.spacing.xs },
-    eyebrow: { fontSize: designTokens.typography.caption - 1, fontWeight: designTokens.fontWeights.extrabold },
-    title: { width: "100%", fontSize: designTokens.typography.display - 4, lineHeight: 33, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
-    subtitle: { width: "100%", fontSize: designTokens.typography.caption + 1, lineHeight: 20, textAlign: "auto" },
+    content: { padding: designTokens.spacing.lg, paddingBottom: designTokens.spacing.xxl, gap: designTokens.spacing.md },
     summaryGrid: { flexDirection: "row", gap: designTokens.spacing.sm },
-    summaryCard: { flex: 1, minHeight: 88, alignItems: "flex-start", justifyContent: "center", paddingHorizontal: designTokens.spacing.md },
-    searchInput: { minHeight: designTokens.dimensions.controlHeight.lg, borderWidth: 1, borderRadius: designTokens.radius.md, paddingHorizontal: designTokens.spacing.lg, textAlign: "auto", fontSize: designTokens.typography.body - 1 },
-    filters: { flexDirection: "row", flexWrap: "wrap", gap: designTokens.spacing.sm },
+    summaryCard: { flex: 1, minHeight: 84, alignItems: "flex-start", justifyContent: "center", paddingHorizontal: designTokens.spacing.md },
+    searchField: { width: "100%" },
+    filters: { paddingVertical: designTokens.spacing.xs, paddingEnd: designTokens.spacing.xs },
     filterButton: { minHeight: 42, borderWidth: 1, borderRadius: designTokens.radius.pill, paddingHorizontal: 15, justifyContent: "center", alignItems: "center" },
     filterLabel: { fontSize: designTokens.typography.caption, fontWeight: designTokens.fontWeights.extrabold },
     feedback: { borderWidth: 1, borderRadius: designTokens.radius.sm, padding: designTokens.spacing.md },
@@ -442,10 +441,13 @@ function createStyles(theme: AppTheme) {
     emptyCard: { gap: designTokens.spacing.sm, alignItems: "flex-start" },
     emptyTitle: { fontSize: designTokens.typography.body, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
     emptyHint: { fontSize: designTokens.typography.caption, lineHeight: 18, textAlign: "auto" },
-    offerGrid: { flexDirection: "row", flexWrap: "wrap", alignItems: "flex-start", gap: designTokens.spacing.md },
-    offerGridItem: { flexBasis: "47%", flexGrow: 1, maxWidth: "50%", minWidth: 0 },
-    offerCard: { padding: designTokens.spacing.sm, gap: designTokens.spacing.sm },
-    productImage: { width: "100%", aspectRatio: 1, borderRadius: designTokens.radius.md, overflow: "hidden", alignItems: "center", justifyContent: "center" },
+    offerGrid: { width: "100%", flexDirection: "column", gap: designTokens.spacing.lg },
+    offerGridItem: { width: "100%", minWidth: 0 },
+    offerCard: { padding: 0, gap: 0, overflow: "hidden" },
+    postHeader: { width: "100%", flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: designTokens.spacing.sm, padding: designTokens.spacing.md },
+    badgeColumn: { flexDirection: "row", flexWrap: "wrap", justifyContent: "flex-end", gap: designTokens.spacing.xs },
+    productImage: { width: "100%", aspectRatio: 1, borderRadius: 0, overflow: "hidden", alignItems: "center", justifyContent: "center" },
+    postBody: { width: "100%", padding: designTokens.spacing.md, gap: designTokens.spacing.md },
     image: { width: "100%", height: "100%" },
     galleryOverlay: { flex: 1, justifyContent: "center", padding: designTokens.spacing.lg },
     galleryCard: { borderWidth: 1, borderRadius: designTokens.radius.md, padding: designTokens.spacing.lg, gap: designTokens.spacing.md },
@@ -455,13 +457,12 @@ function createStyles(theme: AppTheme) {
     galleryImages: { flexDirection: "row", gap: designTokens.spacing.md, paddingVertical: 4 },
     galleryImage: { width: 260, height: 300, borderRadius: designTokens.radius.sm, backgroundColor: theme.colors.surfaceMuted },
     imageFallback: { fontSize: designTokens.typography.title + 2, fontWeight: designTokens.fontWeights.extrabold },
-    productInfo: { width: "100%", alignItems: "flex-start", gap: designTokens.spacing.xs },
+    productInfo: { flex: 1, minWidth: 0, alignItems: "flex-start", gap: designTokens.spacing.xs },
     productName: { width: "100%", fontSize: designTokens.typography.body - 1, lineHeight: 19, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
     productBrand: { width: "100%", fontSize: designTokens.typography.caption - 1, textAlign: "auto" },
-    badgeRow: { flexDirection: "row", flexWrap: "wrap", gap: designTokens.spacing.xs, marginTop: 2 },
     currentPrice: { fontSize: designTokens.typography.caption + 1, fontWeight: designTokens.fontWeights.extrabold, marginTop: 1 },
-    inputsRow: { flexDirection: "column", gap: designTokens.spacing.sm },
-    inputGroup: { width: "100%", gap: designTokens.spacing.xs },
+    inputsRow: { flexDirection: "row", gap: designTokens.spacing.sm },
+    inputGroup: { flex: 1, minWidth: 0, gap: designTokens.spacing.xs },
     inputLabel: { fontSize: designTokens.typography.caption, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
     stockHint: { fontSize: designTokens.typography.caption - 2, lineHeight: 14, textAlign: "auto" },
     valueInput: { width: "100%", minHeight: 42, borderWidth: 1, borderRadius: designTokens.radius.sm, paddingHorizontal: designTokens.spacing.sm, textAlign: "auto", fontSize: designTokens.typography.caption + 1, fontWeight: designTokens.fontWeights.extrabold },
