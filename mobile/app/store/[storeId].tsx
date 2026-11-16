@@ -80,6 +80,7 @@ export default function StoreDetailsScreen() {
   const [ownerImageBusy, setOwnerImageBusy] = useState<"logo" | "cover" | null>(null);
   const [ownerImageError, setOwnerImageError] = useState(false);
   const [ownerImageSaved, setOwnerImageSaved] = useState(false);
+  const [ownerInlineField, setOwnerInlineField] = useState<"name" | "description" | null>(null);
   const ownerSave = useMutation({
     mutationFn: async () => {
       if (!ownerSettings.data || !ownerDraft || !ownerStoreId) throw new Error("merchant_store_settings_missing");
@@ -88,6 +89,7 @@ export default function StoreDetailsScreen() {
     },
     onSuccess: async () => {
       setOwnerEditMode(false);
+      setOwnerInlineField(null);
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["customer-store", storeId] }),
         queryClient.invalidateQueries({ queryKey: ["merchant-store-settings", ownerStoreId] }),
@@ -181,13 +183,13 @@ export default function StoreDetailsScreen() {
 
       <Card contentStyle={styles.storeHero}>
         {details.cover_url ? (
-          <UiImage uri={details.cover_url} accessibilityLabel={translate("merchantStoreCover")} aspectRatio={16 / 9} style={styles.coverImage} />
+          <UiImage uri={(isStoreOwner && ownerDraft?.cover_url) || details.cover_url} accessibilityLabel={translate("merchantStoreCover")} aspectRatio={16 / 9} style={styles.coverImage} />
         ) : (
           <View style={[styles.coverImage, { backgroundColor: theme.colors.surfaceMuted }]} />
         )}
         <View style={styles.storeIdentity}>
           <View style={styles.avatarWrap}>
-            <Avatar name={details.name} imageUri={details.logo_url || undefined} size={76} accessibilityLabel={details.name} />
+            <Avatar name={(isStoreOwner && ownerDraft?.name) || details.name} imageUri={(isStoreOwner && ownerDraft?.logo_url) || details.logo_url || undefined} size={76} accessibilityLabel={details.name} />
             <View style={[styles.statusDot, { backgroundColor: getStoreOpenState(details.opening_hours, details.country_code) ? "#16A34A" : "#DC2626", borderColor: theme.colors.surface }]} />
           </View>
           <View style={styles.storeInfo}>
