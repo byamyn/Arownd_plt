@@ -63,6 +63,7 @@ export default function MerchantStoreSettingsScreen() {
   const [regionPickerLevel, setRegionPickerLevel] = useState<"primary" | "secondary">("primary");
   const [imageBusy, setImageBusy] = useState<"logo" | null>(null);
   const [imageError, setImageError] = useState(false);
+  const [imageErrorDetail, setImageErrorDetail] = useState<string | null>(null);
   const [imageSaved, setImageSaved] = useState(false);
   const [imageCleanupPending, setImageCleanupPending] = useState(false);
   const [locationBusy, setLocationBusy] = useState(false);
@@ -212,6 +213,7 @@ export default function MerchantStoreSettingsScreen() {
     if (!storeId || imageBusy || mutation.isPending) return;
     setImageBusy("logo");
     setImageError(false);
+    setImageErrorDetail(null);
     setImageSaved(false);
     setImageCleanupPending(false);
     try {
@@ -249,8 +251,12 @@ export default function MerchantStoreSettingsScreen() {
         queryClient.invalidateQueries({ queryKey: ["customer-store", storeId] }),
         queryClient.invalidateQueries({ queryKey: ["customer-store-offers"] })
       ]);
-    } catch {
+    } catch (error) {
       setImageError(true);
+      const detail = error && typeof error === "object" && "code" in error && typeof error.code === "string"
+        ? error.code
+        : error instanceof Error ? error.message : "unknown_error";
+      setImageErrorDetail(detail.slice(0, 160));
     } finally {
       setImageBusy(null);
     }
@@ -304,7 +310,12 @@ export default function MerchantStoreSettingsScreen() {
               />
             </View>
           </View>
-          {imageError ? <UiText style={[styles.error, { color: theme.mode === "light" ? theme.colors.dangerText : theme.colors.danger }]}>{translate("merchantStoreImageUploadError")}</UiText> : null}
+          {imageError ? (
+            <View style={styles.field}>
+              <UiText style={[styles.error, { color: theme.mode === "light" ? theme.colors.dangerText : theme.colors.danger }]}>{translate("merchantStoreImageUploadError")}</UiText>
+              {imageErrorDetail ? <UiText style={[styles.hint, { color: theme.colors.muted }]}>{imageErrorDetail}</UiText> : null}
+            </View>
+          ) : null}
           {imageSaved ? <UiText style={[styles.success, { color: theme.mode === "light" ? theme.colors.successText : theme.colors.success }]}>{translate("merchantStoreImageSaved")}</UiText> : null}
           {imageCleanupPending ? <UiText style={[styles.error, { color: theme.mode === "light" ? theme.colors.dangerText : theme.colors.danger }]}>{translate("merchantStoreImageCleanupPending")}</UiText> : null}
         </Card>
