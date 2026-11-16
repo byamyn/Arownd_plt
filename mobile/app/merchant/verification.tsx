@@ -138,8 +138,8 @@ export default function MerchantVerificationScreen() {
 function Requirement({ label, complete, theme }: { label: string; complete: boolean; theme: AppTheme }) {
   return (
     <View style={requirementStyles.row}>
-      <View style={[requirementStyles.indicator, { backgroundColor: complete ? theme.colors.success : theme.colors.surfaceSecondary }]}>
-        <UiText style={{ color: complete ? theme.colors.surface : theme.colors.muted, fontWeight: "800" }}>
+      <View style={[requirementStyles.indicator, { backgroundColor: complete ? theme.colors.successSurface : theme.colors.surfaceSecondary }]}>
+        <UiText style={{ color: complete ? theme.colors.successText : theme.colors.muted, fontWeight: "800" }}>
           {complete ? "✓" : "–"}
         </UiText>
       </View>
