@@ -237,7 +237,7 @@ export default function MerchantNewProductScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <AppHeader title={translate("merchantProductCreateTitle")} leading={<Button label={translate("merchantProductCreateBack")} onPress={() => router.back()} variant="ghost" size="sm" />} />
+          <AppHeader title={translate("merchantProductCreateTitle")}/>
           <UiText style={[styles.subtitle, { color: theme.colors.muted }]}>{translate("merchantProductCreateSubtitle")}</UiText>
 
           <Card contentStyle={styles.card}>
@@ -646,9 +646,7 @@ function MessageScreen({
     <SafeAreaView edges={["top", "left", "right"]} style={[styles.safe, { backgroundColor: theme.colors.background }]}>
       <View style={styles.message}>
         <AppHeader
-          title={translate("merchantProductCreateTitle")}
-          leading={<Button label={translate("merchantProductCreateBack")} onPress={() => router.replace("/merchant/products")} variant="ghost" size="sm" />}
-        />
+          title={translate("merchantProductCreateTitle")}        />
         <UiText style={[styles.subtitle, { color: theme.colors.muted }]}>
           {translate("merchantProductCreateSubtitle")}
         </UiText>
