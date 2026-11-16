@@ -17,6 +17,7 @@ Description, WhatsApp, category, map coordinates, and phone OTP are not verifica
 - `approved`: reviewed and approved; the store's `is_verified` flag is true.
 - `rejected`: reviewed and rejected with a required reviewer note.
 - `draft`: a previously pending request whose required store profile changed before review. The merchant must submit a new request.
+- If a verified store changes any required identity field, its badge is revoked automatically and the updated profile must pass a fresh review.
 
 Every submission and review decision is written to `store_verification_audit_events`.
 
