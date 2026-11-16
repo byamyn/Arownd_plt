@@ -158,28 +158,6 @@ export default function ProductDetailsScreen() {
             showsVerticalScrollIndicator={false}
             refreshControl={<RefreshControl refreshing={product.isFetching || offers.isFetching || reviews.isFetching} onRefresh={() => { void Promise.all([product.refetch(), offers.refetch(), reviews.refetch()]); }} tintColor={theme.colors.accent} />}
           >
-            {selectedOffer ? (
-              <View style={styles.purchaseFooter}>
-          <Button
-            label={addMutation.isPending ? translate("productAddingToCart") : addMutation.isSuccess ? translate("productAddedToCart") : translate("productAddToCart")}
-            onPress={() => addMutation.mutate({
-              offerId: selectedOffer.id,
-              productId: selectedOffer.product_id,
-              name: product.data?.name ?? selectedOffer.product.name,
-              price: selectedOffer.price,
-              quantity,
-              options: {
-                ...(selectedColor ? { color: selectedColor } : {}),
-                ...(selectedSize ? { size: selectedSize } : {})
-              }
-            })}
-            loading={addMutation.isPending}
-            disabled={!canAdd}
-            fullWidth
-          />
-          {addMutation.isError ? <UiText tone="danger" style={styles.mutationError}>{translate("genericError")}</UiText> : null}
-              </View>
-            ) : null}
       <View ref={imageAnchorRef} collapsable={false}>
         {imageUrl ? <ProductImageGallery images={galleryImages} selectedIndex={Math.min(selectedImageIndex, Math.max(0, galleryImages.length - 1))} accessibilityLabel={productDetails.name} onSelect={setSelectedImageIndex} imageStyle={styles.heroImage} /> : <View style={[styles.heroImage, { backgroundColor: theme.colors.surfaceMuted }]}><Icon name="image" size={42} color={theme.colors.subtle} accessibilityHidden /></View>}
       </View>
@@ -282,6 +260,28 @@ export default function ProductDetailsScreen() {
       <ContentReportAction targetType="product" targetId={productId} />
             <ReviewPanel targetType="product" targetId={productId} />
           </ScrollView>
+          {selectedOffer ? (
+            <View style={[styles.purchaseFooter, { backgroundColor: theme.colors.background, borderTopColor: theme.colors.border }]}>
+              <Button
+                label={addMutation.isPending ? translate("productAddingToCart") : addMutation.isSuccess ? translate("productAddedToCart") : translate("productAddToCart")}
+                onPress={() => addMutation.mutate({
+                  offerId: selectedOffer.id,
+                  productId: selectedOffer.product_id,
+                  name: product.data?.name ?? selectedOffer.product.name,
+                  price: selectedOffer.price,
+                  quantity,
+                  options: {
+                    ...(selectedColor ? { color: selectedColor } : {}),
+                    ...(selectedSize ? { size: selectedSize } : {})
+                  }
+                })}
+                loading={addMutation.isPending}
+                disabled={!canAdd}
+                fullWidth
+              />
+              {addMutation.isError ? <UiText tone="danger" style={styles.mutationError}>{translate("genericError")}</UiText> : null}
+            </View>
+          ) : null}
         </View>
       </View>
     </>
