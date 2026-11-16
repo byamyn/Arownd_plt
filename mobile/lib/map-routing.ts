@@ -121,7 +121,10 @@ function distanceToSegmentMeters(position: RoutePoint, start: RoutePoint, end: R
 
 export function distanceToRouteMeters(position: RoutePoint, route: RoutePoint[]): number {
   if (route.length === 0) return Number.POSITIVE_INFINITY;
-  if (route.length === 1) return distanceBetweenCoordinates(position, route[0]);
+  if (route.length === 1) {
+    const onlyPoint = route[0];
+    return onlyPoint ? distanceBetweenCoordinates(position, onlyPoint) : Number.POSITIVE_INFINITY;
+  }
 
   const stride = Math.max(1, Math.floor(route.length / 160));
   let nearest = Number.POSITIVE_INFINITY;
