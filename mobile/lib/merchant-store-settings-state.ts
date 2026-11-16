@@ -49,6 +49,8 @@ export const MerchantStoreSettingsSchema = z.object({
   whatsapp: z.string().trim().max(20).refine((value) => value.length === 0 || /^[+0-9()\s-]{7,20}$/.test(value)),
   commune: z.string().trim().min(2).max(80),
   address_line: z.string().trim().min(4).max(300),
+  latitude: z.number().min(-90).max(90).nullable().default(null),
+  longitude: z.number().min(-180).max(180).nullable().default(null),
   opening_hours: z.object({
     open: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/),
     close: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/),
@@ -56,6 +58,14 @@ export const MerchantStoreSettingsSchema = z.object({
   }),
   instagram_url: z.string().trim().max(300).refine(isHttpsUrl),
   facebook_url: z.string().trim().max(300).refine(isHttpsUrl)
+}).superRefine((values, context) => {
+  if ((values.latitude === null) !== (values.longitude === null)) {
+    context.addIssue({
+      code: "custom",
+      path: ["latitude"],
+      message: "store_location_coordinates_must_be_paired"
+    });
+  }
 });
 
 export type MerchantStoreSettings = z.infer<typeof MerchantStoreSettingsSchema>;

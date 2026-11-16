@@ -18,6 +18,8 @@ const StoreSettingsRecordSchema = z.object({
   whatsapp: z.string().nullable(),
   commune: z.string().nullable(),
   address_line: z.string().nullable(),
+  latitude: z.preprocess((value: unknown) => value == null ? null : Number(value), z.number().min(-90).max(90).nullable()).default(null),
+  longitude: z.preprocess((value: unknown) => value == null ? null : Number(value), z.number().min(-180).max(180).nullable()).default(null),
   opening_hours: z.object({
     open: z.string(),
     close: z.string(),
@@ -34,7 +36,7 @@ export async function fetchMyMerchantStoreSettings(storeId: string): Promise<Mer
   if (!auth.user) throw new Error("not_authenticated");
 
   const { data, error } = await client.from("stores")
-    .select("id, owner_id, country_code, name, description, phone, whatsapp, region_id, secondary_region_id, commune, address_line, opening_hours, logo_url, cover_url, instagram_url, facebook_url")
+    .select("id, owner_id, country_code, name, description, phone, whatsapp, region_id, secondary_region_id, commune, address_line, latitude, longitude, opening_hours, logo_url, cover_url, instagram_url, facebook_url")
     .eq("id", storeId)
     .eq("owner_id", auth.user.id)
     .maybeSingle();
@@ -53,6 +55,8 @@ export async function fetchMyMerchantStoreSettings(storeId: string): Promise<Mer
     whatsapp: record.whatsapp ?? "",
     commune: record.commune ?? "",
     address_line: record.address_line ?? "",
+    latitude: record.latitude,
+    longitude: record.longitude,
     opening_hours: record.opening_hours,
     instagram_url: record.instagram_url ?? "",
     facebook_url: record.facebook_url ?? ""

@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import * as Location from "expo-location";
 import * as ImagePicker from "expo-image-picker";
 import { Redirect, router } from "expo-router";
 import { useEffect, useState } from "react";
@@ -41,6 +42,9 @@ export default function MerchantStoreSettingsScreen() {
   const [imageError, setImageError] = useState(false);
   const [imageSaved, setImageSaved] = useState(false);
   const [imageCleanupPending, setImageCleanupPending] = useState(false);
+  const [locationBusy, setLocationBusy] = useState(false);
+  const [locationError, setLocationError] = useState(false);
+  const [locationCaptured, setLocationCaptured] = useState(false);
   const mutation = useMutation({
     mutationFn: (values: MerchantStoreSettings) => updateMyMerchantStoreSettings(storeId ?? "", values),
     onSuccess: async (_data, values) => {
@@ -49,7 +53,10 @@ export default function MerchantStoreSettingsScreen() {
       setFormDirty(false);
       setFormError(false);
       setFieldErrors({});
-      await queryClient.invalidateQueries({ queryKey: ["merchant-dashboard", storeId] });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["merchant-dashboard", storeId] }),
+        queryClient.invalidateQueries({ queryKey: ["map-stores"] })
+      ]);
     },
     onError: () => setFormError(true)
   });
@@ -114,6 +121,41 @@ export default function MerchantStoreSettingsScreen() {
       : [...form.opening_hours.closed_days, day];
     update("opening_hours", { ...form.opening_hours, closed_days: closedDays });
   };
+  const captureStoreLocation = async () => {
+    if (locationBusy || mutation.isPending) return;
+    setLocationBusy(true);
+    setLocationError(false);
+    setLocationCaptured(false);
+
+    try {
+      const permission = await Location.requestForegroundPermissionsAsync();
+      if (permission.status !== "granted") {
+        setLocationError(true);
+        return;
+      }
+
+      const position = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced
+      });
+      const { latitude, longitude } = position.coords;
+      if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+        setLocationError(true);
+        return;
+      }
+
+      setForm((current) => current ? { ...current, latitude, longitude } : current);
+      setFormDirty(true);
+      setFormError(false);
+      setFieldErrors({});
+      mutation.reset();
+      setLocationCaptured(true);
+    } catch {
+      setLocationError(true);
+    } finally {
+      setLocationBusy(false);
+    }
+  };
+
   const chooseStoreImage = async () => {
     if (!storeId || imageBusy || mutation.isPending) return;
     setImageBusy("logo");
@@ -235,6 +277,26 @@ export default function MerchantStoreSettingsScreen() {
           </View> : null}
           <Field label={translate("merchantStoreSettingsCommune")} value={form.commune} onChangeText={(value) => update("commune", value)} theme={theme} disabled={mutation.isPending} error={fieldErrors.commune} />
           <Field label={translate("merchantStoreSettingsAddress")} value={form.address_line} onChangeText={(value) => update("address_line", value)} theme={theme} hint={translate("merchantStoreSettingsAddressHint")} disabled={mutation.isPending} error={fieldErrors.address_line} />
+          <View style={styles.field}>
+            <UiText style={[styles.label, { color: theme.colors.foreground }]}>{translate("merchantStoreMapLocationLabel")}</UiText>
+            <UiText style={[styles.hint, { color: theme.colors.muted }]}>
+              {form.latitude !== null && form.longitude !== null
+                ? `${form.latitude.toFixed(5)}, ${form.longitude.toFixed(5)}`
+                : translate("merchantStoreMapLocationMissing")}
+            </UiText>
+            <UiText style={[styles.hint, { color: theme.colors.muted }]}>{translate("merchantStoreMapLocationHint")}</UiText>
+            <Button
+              label={translate("merchantStoreMapLocationAction")}
+              onPress={() => void captureStoreLocation()}
+              loading={locationBusy}
+              disabled={locationBusy || mutation.isPending}
+              variant="outline"
+              size="sm"
+              fullWidth
+            />
+            {locationError ? <UiText style={[styles.error, { color: theme.mode === "light" ? theme.colors.dangerText : theme.colors.danger }]}>{translate("merchantStoreMapLocationError")}</UiText> : null}
+            {locationCaptured ? <UiText style={[styles.success, { color: theme.colors.success }]}>{translate("merchantStoreMapLocationCaptured")}</UiText> : null}
+          </View>
         </Card>
 
         <Card contentStyle={styles.sectionCard}>
