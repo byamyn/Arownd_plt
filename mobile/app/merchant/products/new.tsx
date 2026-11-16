@@ -351,7 +351,7 @@ export default function MerchantNewProductScreen() {
           </Card>
 
           <Card contentStyle={styles.card}>
-            <FormField label={translate("merchantProductNameLabel")} hint={translate("merchantProductNameHint")} theme={theme}>
+            <FormField label={translate("merchantProductNameLabel")} hint={translate("merchantProductNameHint")} error={fieldErrors.name} theme={theme}>
               <TextField
                 value={form.name}
                 onChangeText={(value) => update("name", value)}
@@ -361,14 +361,13 @@ export default function MerchantNewProductScreen() {
                 maxLength={120}
                 textAlign="auto"
                 style={styles.input}
-                error={fieldErrors.name}
                 returnKeyType="next"
               />
             </FormField>
 
             <View style={styles.row}>
               <View style={styles.half}>
-                <FormField label={translate("merchantProductPriceLabel")} theme={theme}>
+                <FormField label={translate("merchantProductPriceLabel")} error={fieldErrors.price} theme={theme}>
                   <TextField
                     value={form.price}
                     onChangeText={(value) => update("price", value)}
@@ -377,12 +376,11 @@ export default function MerchantNewProductScreen() {
                     placeholderTextColor={theme.colors.placeholder}
                     keyboardType="number-pad"
                     style={styles.input}
-                    error={fieldErrors.price}
                   />
                 </FormField>
               </View>
               <View style={styles.half}>
-                <FormField label={translate("merchantProductStockLabel")} theme={theme}>
+                <FormField label={translate("merchantProductStockLabel")} error={fieldErrors.stock} theme={theme}>
                   <TextField
                     value={form.stock}
                     onChangeText={(value) => update("stock", value)}
@@ -391,7 +389,6 @@ export default function MerchantNewProductScreen() {
                     placeholderTextColor={theme.colors.placeholder}
                     keyboardType="number-pad"
                     style={styles.input}
-                    error={fieldErrors.stock}
                   />
                 </FormField>
               </View>
