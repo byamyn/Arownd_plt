@@ -123,7 +123,6 @@ export async function fetchMapStores(): Promise<MapStore[]> {
   const { data, error } = await getSupabaseClient()
     .from("stores")
     .select("id, name, logo_url, commune, address_line, latitude, longitude, is_verified")
-    .eq("is_verified", true)
     .not("latitude", "is", null)
     .not("longitude", "is", null)
     .order("name", { ascending: true })
