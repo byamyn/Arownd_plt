@@ -13,6 +13,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import {
   ActivityIndicator,
   Alert,
+  Animated,
   Image,
   Pressable,
   ScrollView,
@@ -21,7 +22,6 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Location from "expo-location";
-import { SvgXml } from "react-native-svg";
 
 import { CustomerNavigation } from "@/components/customer-navigation";
 import { BottomSheet, Button, Icon, Text as UiText } from "@/components/ui";
@@ -42,7 +42,6 @@ import {
 import { fetchLocalizedMapStyle } from "@/lib/map-style";
 import { designTokens, useAppTheme } from "@/lib/theme";
 import { VerifiedBadge } from "@/components/ui/identity";
-import { STORE_ICON_XML } from "@/components/store-map-marker-asset";
 
 const MAP_LIGHT_STYLE = "https://tiles.openfreemap.org/styles/liberty";
 const MAP_DARK_STYLE = "https://tiles.openfreemap.org/styles/dark";
@@ -59,10 +58,36 @@ type NavigationSession = {
   isRerouting: boolean;
 };
 
-function StoreMapMarker() {
+function StoreMapMarker({ selected, verified }: { selected: boolean; verified: boolean }) {
+  const scale = useRef(new Animated.Value(selected ? 1.18 : 1)).current;
+
+  useEffect(() => {
+    const animation = Animated.spring(scale, {
+      toValue: selected ? 1.18 : 1,
+      useNativeDriver: true,
+      speed: 20,
+      bounciness: 6
+    });
+    animation.start();
+    return () => animation.stop();
+  }, [scale, selected]);
+
   return (
     <View style={styles.markerWrap} pointerEvents="none">
-      <SvgXml xml={STORE_ICON_XML} width={56} height={56} />
+      <Animated.View
+        style={[
+          styles.markerCircle,
+          selected && styles.markerSelected,
+          { transform: [{ scale }] }
+        ]}
+      >
+        <Icon name="store" size={22} color="#000000" accessibilityHidden />
+        {verified ? (
+          <View style={styles.markerVerified}>
+            <Icon name="check" size={9} color="#FFFF00" accessibilityHidden />
+          </View>
+        ) : null}
+      </Animated.View>
     </View>
   );
 }
@@ -417,10 +442,13 @@ export default function MapScreen() {
               key={store.id}
               id={store.id}
               lngLat={[store.longitude, store.latitude]}
-              anchor="bottom"
+              anchor="center"
               onPress={() => setSelectedStoreId(store.id)}
             >
-              <StoreMapMarker />
+              <StoreMapMarker
+                selected={selectedStoreId === store.id}
+                verified={store.is_verified}
+              />
             </Marker>
           ))}
 
@@ -647,11 +675,46 @@ const styles = StyleSheet.create({
     shadowRadius: 4
   },
   markerWrap: {
-    width: 56,
-    height: 58,
+    width: 60,
+    height: 60,
     alignItems: "center",
     justifyContent: "center",
     overflow: "visible"
+  },
+  markerCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "#FFFF00",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.12)",
+    elevation: 3,
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3
+  },
+  markerSelected: {
+    borderWidth: 2,
+    borderColor: "#000000",
+    elevation: 8,
+    shadowOpacity: 0.28,
+    shadowRadius: 6
+  },
+  markerVerified: {
+    position: "absolute",
+    right: -3,
+    bottom: -3,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: "#111111",
+    borderWidth: 2,
+    borderColor: "#FFFF00",
+    alignItems: "center",
+    justifyContent: "center"
   },
   storeCard: {
     gap: designTokens.spacing.lg
