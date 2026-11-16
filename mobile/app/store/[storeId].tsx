@@ -182,14 +182,26 @@ export default function StoreDetailsScreen() {
       />
 
       <Card contentStyle={styles.storeHero}>
-        {details.cover_url ? (
-          <UiImage uri={(isStoreOwner && ownerDraft?.cover_url) || details.cover_url} accessibilityLabel={translate("merchantStoreCover")} aspectRatio={16 / 9} style={styles.coverImage} />
-        ) : (
-          <View style={[styles.coverImage, { backgroundColor: theme.colors.surfaceMuted }]} />
-        )}
+        <View style={styles.coverWrap}>
+          {(isStoreOwner && ownerDraft?.cover_url) || details.cover_url ? (
+            <UiImage uri={(isStoreOwner && ownerDraft?.cover_url) || details.cover_url} accessibilityLabel={translate("merchantStoreCover")} aspectRatio={16 / 9} style={styles.coverImage} />
+          ) : (
+            <View style={[styles.coverImage, { backgroundColor: theme.colors.surfaceMuted }]} />
+          )}
+          {isStoreOwner ? (
+            <Pressable accessibilityRole="button" accessibilityLabel={translate("merchantStoreChangeCover")} onPress={() => void chooseOwnerImage("cover")} style={styles.imageEditButton}>
+              <Icon name="camera" size={17} color={theme.colors.foreground} accessibilityHidden />
+            </Pressable>
+          ) : null}
+        </View>
         <View style={styles.storeIdentity}>
           <View style={styles.avatarWrap}>
             <Avatar name={(isStoreOwner && ownerDraft?.name) || details.name} imageUri={(isStoreOwner && ownerDraft?.logo_url) || details.logo_url || undefined} size={76} accessibilityLabel={details.name} />
+            {isStoreOwner ? (
+              <Pressable accessibilityRole="button" accessibilityLabel={translate("merchantStoreChangeLogo")} onPress={() => void chooseOwnerImage("logo")} style={styles.logoEditButton}>
+                <Icon name="camera" size={13} color={theme.colors.foreground} accessibilityHidden />
+              </Pressable>
+            ) : null}
             <View style={[styles.statusDot, { backgroundColor: getStoreOpenState(details.opening_hours, details.country_code) ? "#16A34A" : "#DC2626", borderColor: theme.colors.surface }]} />
           </View>
           <View style={styles.storeInfo}>
@@ -199,7 +211,7 @@ export default function StoreDetailsScreen() {
                   <TextField label={translate("merchantStoreSettingsName")} value={ownerDraft?.name ?? details.name} onChangeText={(name) => setOwnerDraft((current) => current ? { ...current, name } : current)} maxLength={100} />
                 </View>
               ) : (
-                <Pressable disabled={!isStoreOwner} onPress={() => { setOwnerDraft(ownerSettings.data ?? ownerDraft); setOwnerInlineField("name"); }} style={styles.inlineEditable}>
+                <Pressable disabled={!isStoreOwner || ownerSettings.isPending || !ownerDraft} onPress={() => setOwnerInlineField("name")} style={styles.inlineEditable}>
                   <UiText style={[styles.storeName, { color: theme.colors.foreground, flexShrink: 1 }]}>{(isStoreOwner && ownerDraft?.name) || details.name}</UiText>
                   {isStoreOwner ? <Icon name="pencil" size={14} color={theme.colors.muted} accessibilityHidden /> : null}
                 </Pressable>
@@ -211,7 +223,7 @@ export default function StoreDetailsScreen() {
                 <TextField label={translate("merchantStoreSettingsDescription")} value={ownerDraft?.description ?? details.description ?? ""} onChangeText={(description) => setOwnerDraft((current) => current ? { ...current, description } : current)} multiline maxLength={2000} />
               </View>
             ) : (
-              <Pressable disabled={!isStoreOwner} onPress={() => { setOwnerDraft(ownerSettings.data ?? ownerDraft); setOwnerInlineField("description"); }} style={styles.inlineEditable}>
+              <Pressable disabled={!isStoreOwner} onPress={() => setOwnerInlineField("description")} style={styles.inlineEditable}>
                 <UiText numberOfLines={2} style={[styles.storeDescription, { color: theme.colors.muted }]}>{(isStoreOwner && ownerDraft?.description) || details.description || (isStoreOwner ? translate("merchantStoreInlineAddDescription") : "")}</UiText>
                 {isStoreOwner ? <Icon name="pencil" size={14} color={theme.colors.muted} accessibilityHidden /> : null}
               </Pressable>
@@ -450,6 +462,9 @@ const styles = StyleSheet.create({
   ownerDayChip: { borderWidth: 1, borderRadius: designTokens.radius.pill, paddingHorizontal: designTokens.spacing.md, paddingVertical: designTokens.spacing.sm },
   ownerImageActions: { flexDirection: "row", flexWrap: "wrap", gap: designTokens.spacing.sm },
   coverImage: { width: "100%", borderRadius: designTokens.radius.lg },
+  coverWrap: { position: "relative" },
+  imageEditButton: { position: "absolute", right: designTokens.spacing.md, bottom: designTokens.spacing.md, width: 36, height: 36, borderRadius: designTokens.radius.pill, backgroundColor: "#FFFFFF", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "#E5E7EB" },
+  logoEditButton: { position: "absolute", right: -3, top: -3, width: 26, height: 26, borderRadius: designTokens.radius.pill, backgroundColor: "#FFFFFF", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "#E5E7EB", zIndex: 2 },
   avatarWrap: { position: "relative" },
   statusDot: { position: "absolute", right: 1, bottom: 2, width: 15, height: 15, borderRadius: 8, borderWidth: 2 },
   statusLabel: { fontSize: designTokens.typography.caption, fontWeight: designTokens.fontWeights.semibold },
