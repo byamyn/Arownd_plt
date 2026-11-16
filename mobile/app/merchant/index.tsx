@@ -16,7 +16,7 @@ import { fetchStoreDetails, fetchStoreOffers, formatMarketPrice } from "@/lib/ca
 import { translate, type TranslationKey, useLanguage } from "@/lib/i18n";
 import { designTokens, useAppTheme, type AppTheme } from "@/lib/theme";
 import type { MerchantDashboardOrder } from "@/lib/merchant-dashboard-state";
-import { RefreshableScrollView, Button, Card, ErrorState, Icon, IconButton, Image as UiImage, MetricCardSkeleton, OrderCardSkeleton, MerchantStatusBadge, PriceDisplay, PressableSurface, Text as UiText } from "@/components/ui";
+import { RefreshableScrollView, AppHeader, Button, Card, ErrorState, Icon, IconButton, Image as UiImage, MetricCardSkeleton, OrderCardSkeleton, MerchantStatusBadge, PriceDisplay, PressableSurface, Text as UiText } from "@/components/ui";
 
 export default function MerchantEntryScreen() {
   useLanguage();
@@ -115,17 +115,17 @@ export default function MerchantEntryScreen() {
   return (
     <SafeAreaView edges={["top", "left", "right"]} style={[styles.safe, { backgroundColor: theme.colors.background }]}>
       <RefreshableScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} refreshing={access.isFetching || dashboard.isFetching} onRefresh={() => { void Promise.all([access.refetch(), dashboard.refetch()]); }}>
-        <View style={styles.dashboardHeading}>
-          <UiText accessibilityRole="header" style={[styles.title, { color: theme.colors.foreground }]}>
-            {translate("merchantDashboardTitle")}
-          </UiText>
-          <IconButton
-            icon={<Icon name="settings" size={20} color={theme.colors.foreground} accessibilityHidden />}
-            accessibilityLabel={translate("settingsTitle")}
-            onPress={() => router.push("/merchant/account-settings")}
-            variant="surface"
-          />
-        </View>
+        <AppHeader
+          title={translate("merchantDashboardTitle")}
+          trailing={
+            <IconButton
+              icon={<Icon name="settings" size={20} color={theme.colors.foreground} accessibilityHidden />}
+              accessibilityLabel={translate("settingsTitle")}
+              onPress={() => router.push("/merchant/account-settings")}
+              variant="surface"
+            />
+          }
+        />
 
         <Card style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.border, borderWidth: 1 }} contentStyle={styles.storeCard}>
           <View style={styles.storeHeader}>
