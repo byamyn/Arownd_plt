@@ -567,8 +567,8 @@ function Message({ theme, label, loading = false, actionLabel, onAction, busy = 
 function createStyles(theme: AppTheme) {
   return StyleSheet.create({
     safe: { flex: 1 },
-    content: { padding: designTokens.spacing.lg, paddingBottom: designTokens.spacing.lg, gap: designTokens.spacing.md },
-    sectionCard: { padding: designTokens.spacing.lg, gap: designTokens.spacing.md },
+    content: { padding: designTokens.spacing.xl, paddingBottom: designTokens.spacing.xxl, gap: designTokens.spacing.lg },
+    sectionCard: { padding: designTokens.spacing.lg, gap: designTokens.spacing.lg },
     footer: { paddingHorizontal: designTokens.spacing.lg, paddingVertical: designTokens.spacing.md, borderTopWidth: StyleSheet.hairlineWidth },
     backText: { fontSize: designTokens.typography.caption + 1, fontWeight: designTokens.fontWeights.extrabold },
     subtitle: { fontSize: designTokens.typography.caption + 1, lineHeight: 20, textAlign: "auto" },
@@ -576,7 +576,7 @@ function createStyles(theme: AppTheme) {
     brandingRow: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md },
     brandingDetails: { flex: 1, alignItems: "flex-start", gap: designTokens.spacing.sm },
     brandingHint: { fontSize: designTokens.typography.caption, textAlign: "auto" },
-    logoPreview: { width: 88, height: 88, borderRadius: designTokens.radius.pill },
+    logoPreview: { width: 92, height: 92, borderRadius: designTokens.radius.pill },
     hint: { fontSize: designTokens.typography.caption, textAlign: "auto" },
     imagePlaceholder: { alignItems: "center", justifyContent: "center" },
     modalHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
@@ -586,7 +586,7 @@ function createStyles(theme: AppTheme) {
     wilayaText: { textAlign: "auto", fontSize: designTokens.typography.body - 1, fontWeight: designTokens.fontWeights.bold },
     mapLocationActions: { gap: designTokens.spacing.sm },
     mapPickerContent: { gap: designTokens.spacing.md },
-    mapPickerContainer: { height: 430, borderWidth: StyleSheet.hairlineWidth, borderRadius: designTokens.radius.md, overflow: "hidden", position: "relative" },
+    mapPickerContainer: { height: 400, borderWidth: StyleSheet.hairlineWidth, borderRadius: designTokens.radius.md, overflow: "hidden", position: "relative" },
     mapPickerCenterMarker: { position: "absolute", left: "50%", top: "50%", marginLeft: -19, marginTop: -38, alignItems: "center", justifyContent: "center" },
     mapPickerLocateButton: { position: "absolute", top: 12, end: 12, width: 44, height: 44, borderRadius: 22, borderWidth: StyleSheet.hairlineWidth, alignItems: "center", justifyContent: "center", elevation: 3 },
     field: { gap: designTokens.spacing.xs, flex: 1 },
