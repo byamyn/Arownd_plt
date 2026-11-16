@@ -68,7 +68,7 @@ export default function CustomerHomeScreen() {
                   void queryClient.prefetchQuery({ queryKey: ["approved-reviews", "product", item.product.id], queryFn: () => fetchApprovedReviews("product", item.product.id), staleTime: 60_000 });
                   router.push({ pathname: "/product/[productId]", params: { productId: item.product.id } });
                 }}
-                style={{ width: 172, flexGrow: 0, flexShrink: 0 }}
+                style={{ width: 172, flexGrow: 0, flexShrink: 0, backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border, borderWidth: StyleSheet.hairlineWidth, elevation: 1 }}
               />
             ))}
           </ScrollView>
