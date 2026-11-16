@@ -377,7 +377,6 @@ export default function MerchantNewProductScreen() {
                     placeholderTextColor={theme.colors.placeholder}
                     keyboardType="number-pad"
                     style={styles.input}
-                    error={fieldErrors.stock}
                     error={fieldErrors.price}
                   />
                 </FormField>
@@ -392,6 +391,7 @@ export default function MerchantNewProductScreen() {
                     placeholderTextColor={theme.colors.placeholder}
                     keyboardType="number-pad"
                     style={styles.input}
+                    error={fieldErrors.stock}
                   />
                 </FormField>
               </View>
