@@ -15,7 +15,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import {
   createMerchantProductOffer
 } from "@/lib/merchant-products";
-import { validateMerchantProductInput } from "@/lib/merchant-product-create-state";
+import {
+  merchantCategorySupportsColors,
+  merchantCategorySupportsSizes,
+  validateMerchantProductInput
+} from "@/lib/merchant-product-create-state";
 import {
   PRODUCT_IMAGE_MAX_COUNT,
   PRODUCT_IMAGE_MAX_BYTES,
@@ -63,6 +67,7 @@ export default function MerchantNewProductScreen() {
   const queryClient = useQueryClient();
   const [form, setForm] = useState<ProductForm>(INITIAL_FORM);
   const [categoryPickerOpen, setCategoryPickerOpen] = useState(false);
+  const [showAdditionalDetails, setShowAdditionalDetails] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [selectedImages, setSelectedImages] = useState<ImagePickerAsset[]>([]);
   const [previewImage, setPreviewImage] = useState<{ uri: string } | null>(null);
@@ -91,8 +96,19 @@ export default function MerchantNewProductScreen() {
     () => categories.data?.find((item) => item.id === form.category) ?? null,
     [categories.data, form.category]
   );
+  const showSizes = merchantCategorySupportsSizes(form.category);
+  const showColors = merchantCategorySupportsColors(form.category);
 
   const update = (key: keyof ProductForm, value: string): void => {
+    if (key === "category") {
+      setForm((current) => ({
+        ...current,
+        category: value,
+        sizes: merchantCategorySupportsSizes(value) ? current.sizes : "",
+        colors: merchantCategorySupportsColors(value) ? current.colors : ""
+      }));
+      return;
+    }
     setForm((current) => ({ ...current, [key]: value }));
   };
 
@@ -369,71 +385,95 @@ export default function MerchantNewProductScreen() {
               </PressableSurface>
             </FormField>
 
-            <FormField label={translate("merchantProductBrandLabel")} hint={translate("merchantProductBrandHint")} theme={theme}>
-              <TextField
-                value={form.brand}
-                onChangeText={(value) => update("brand", value)}
-                accessibilityLabel={translate("merchantProductBrandLabel")}
-                placeholder={translate("merchantProductBrandPlaceholder")}
-                placeholderTextColor={theme.colors.placeholder}
-                maxLength={80}
-                textAlign="auto"
-                style={styles.input}
-              />
-            </FormField>
-
-            <FormField
-              label={translate("merchantProductSizesLabel")}
-              hint={translate("merchantProductOptionsHint")}
-              theme={theme}
+            <PressableSurface
+              accessibilityRole="button"
+              accessibilityState={{ expanded: showAdditionalDetails }}
+              onPress={() => setShowAdditionalDetails((current) => !current)}
+              style={[styles.selectButton, { borderColor: theme.colors.inputBorder, backgroundColor: theme.colors.surfaceMuted }]}
             >
-              <TextField
-                value={form.sizes}
-                onChangeText={(value) => update("sizes", value)}
-                accessibilityLabel={translate("merchantProductSizesLabel")}
-                placeholder={translate("merchantProductSizesPlaceholder")}
-                placeholderTextColor={theme.colors.placeholder}
-                maxLength={850}
-                textAlign="auto"
-                style={styles.input}
-              />
-            </FormField>
+              <View style={styles.row}>
+                <UiText style={[styles.sectionTitle, { color: theme.colors.foreground }]}>
+                  {translate("merchantProductAdditionalDetails")}
+                </UiText>
+                <UiText style={[styles.hint, { color: theme.colors.muted }]}>
+                  {translate("merchantProductOptional")}
+                </UiText>
+                <Icon name={showAdditionalDetails ? "chevron-up" : "chevron-down"} size={18} color={theme.colors.muted} accessibilityHidden />
+              </View>
+            </PressableSurface>
 
-            <FormField label={translate("merchantProductColorsLabel")} hint={translate("merchantProductColorsHint")} theme={theme}>
-              <TextField
-                value={form.colors}
-                onChangeText={(value) => update("colors", value)}
-                accessibilityLabel={translate("merchantProductColorsLabel")}
-                placeholder={translate("merchantProductColorsPlaceholder")}
-                placeholderTextColor={theme.colors.placeholder}
-                maxLength={850}
-                textAlign="auto"
-                style={styles.input}
-              />
-            </FormField>
+            {showAdditionalDetails ? (
+              <>
+                <FormField label={translate("merchantProductBrandLabel")} hint={translate("merchantProductBrandHint")} theme={theme}>
+                  <TextField
+                    value={form.brand}
+                    onChangeText={(value) => update("brand", value)}
+                    accessibilityLabel={translate("merchantProductBrandLabel")}
+                    placeholder={translate("merchantProductBrandPlaceholder")}
+                    placeholderTextColor={theme.colors.placeholder}
+                    maxLength={80}
+                    textAlign="auto"
+                    style={styles.input}
+                  />
+                </FormField>
+                <FormField label={translate("merchantProductDescriptionLabel")} hint={translate("merchantProductDescriptionHint")} theme={theme}>
+                  <TextField
+                    value={form.description}
+                    onChangeText={(value) => update("description", value)}
+                    accessibilityLabel={translate("merchantProductDescriptionLabel")}
+                    placeholder={translate("merchantProductDescriptionPlaceholder")}
+                    placeholderTextColor={theme.colors.placeholder}
+                    maxLength={3000}
+                    multiline
+                    numberOfLines={5}
+                    textAlign="auto"
+                    textAlignVertical="top"
+                    style={[styles.input, styles.textarea]}
+                  />
+                </FormField>
+              </>
+            ) : null}
 
-            <FormField label={translate("merchantProductDescriptionLabel")} hint={translate("merchantProductDescriptionHint")} theme={theme}>
-              <TextField
-                value={form.description}
-                onChangeText={(value) => update("description", value)}
-                accessibilityLabel={translate("merchantProductDescriptionLabel")}
-                placeholder={translate("merchantProductDescriptionPlaceholder")}
-                placeholderTextColor={theme.colors.placeholder}
-                maxLength={3000}
-                multiline
-                numberOfLines={5}
-                textAlign="auto"
-                textAlignVertical="top"
-                style={[styles.input, styles.textarea]}
-              />
-            </FormField>
-
-
-            <View style={[styles.note, { backgroundColor: theme.colors.surfaceMuted }]}>
-              <UiText style={[styles.noteText, { color: theme.colors.muted }]}>
-                {translate("merchantProductVariantsStockHint")}
-              </UiText>
-            </View>
+            {showSizes || showColors ? (
+              <View style={styles.optionsSection}>
+                <UiText style={[styles.sectionTitle, { color: theme.colors.foreground }]}>
+                  {translate("merchantProductOptionsTitle")}
+                </UiText>
+                {showSizes ? (
+                  <FormField label={translate("merchantProductSizesLabel")} hint={translate("merchantProductOptionsHint")} theme={theme}>
+                    <TextField
+                      value={form.sizes}
+                      onChangeText={(value) => update("sizes", value)}
+                      accessibilityLabel={translate("merchantProductSizesLabel")}
+                      placeholder={translate("merchantProductSizesPlaceholder")}
+                      placeholderTextColor={theme.colors.placeholder}
+                      maxLength={850}
+                      textAlign="auto"
+                      style={styles.input}
+                    />
+                  </FormField>
+                ) : null}
+                {showColors ? (
+                  <FormField label={translate("merchantProductColorsLabel")} hint={translate("merchantProductColorsHint")} theme={theme}>
+                    <TextField
+                      value={form.colors}
+                      onChangeText={(value) => update("colors", value)}
+                      accessibilityLabel={translate("merchantProductColorsLabel")}
+                      placeholder={translate("merchantProductColorsPlaceholder")}
+                      placeholderTextColor={theme.colors.placeholder}
+                      maxLength={850}
+                      textAlign="auto"
+                      style={styles.input}
+                    />
+                  </FormField>
+                ) : null}
+                <View style={[styles.note, { backgroundColor: theme.colors.surfaceMuted }]}>
+                  <UiText style={[styles.noteText, { color: theme.colors.muted }]}>
+                    {translate("merchantProductVariantsStockHint")}
+                  </UiText>
+                </View>
+              </View>
+            ) : null}
 
             {submitError ? (
               <View style={[styles.errorBox, { backgroundColor: theme.colors.dangerSurface, borderColor: theme.colors.dangerBorder }]}>
