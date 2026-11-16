@@ -79,3 +79,43 @@ export function validateMerchantProductInput(input: {
     options: { sizes, colors }
   };
 }
+
+
+export type MerchantProductCreateErrorKind =
+  | "cleanup"
+  | "permission"
+  | "category"
+  | "merchant"
+  | "input"
+  | "data"
+  | "network"
+  | "unknown";
+
+export function classifyMerchantProductCreateError(error: unknown): MerchantProductCreateErrorKind {
+  const value = error && typeof error === "object"
+    ? error as { code?: unknown; message?: unknown }
+    : {};
+  const code = typeof value.code === "string" ? value.code : "";
+  const message = typeof value.message === "string" ? value.message.toLowerCase() : "";
+  const combined = message;
+
+  if (combined.includes("cleanup_required")) return "cleanup";
+  if (combined.includes("invalid_merchant_product_category")) return "category";
+  if (
+    combined.includes("merchant_role_required") ||
+    combined.includes("merchant_account_required") ||
+    combined.includes("merchant_store_not_found") ||
+    combined.includes("not_authenticated")
+  ) return "merchant";
+  if (combined.includes("invalid_merchant_product_input") || combined.includes("invalid_merchant_product_options")) {
+    return "input";
+  }
+  if (code === "42501" || combined.includes("row-level security") || combined.includes("permission denied")) {
+    return "permission";
+  }
+  if (["23503", "23505", "23514", "22P02", "22003"].includes(code)) return "data";
+  if (error instanceof TypeError || code === "NETWORK_ERROR" || combined.includes("network request failed")) {
+    return "network";
+  }
+  return "unknown";
+}
