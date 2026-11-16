@@ -213,13 +213,15 @@ export function ProductImageGallery({
   return (
     <View accessibilityLabel={accessibilityLabel} style={{ gap: designTokens.spacing.sm }}>
       {selectedSource ? <Image source={selectedSource} resizeMode="cover" style={[{ width: "100%", aspectRatio: 1, borderRadius: theme.radius.xl, backgroundColor: theme.colors.surfaceMuted }, imageStyle]} /> : null}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ flexDirection: "row", gap: designTokens.spacing.sm }}>
-        {images.map((uri, index) => (
-          <Pressable key={uri + index} accessibilityRole="button" accessibilityLabel={`${accessibilityLabel} ${index + 1}`} accessibilityState={{ selected: index === selectedIndex }} onPress={() => onSelect(index)} style={{ borderRadius: theme.radius.md, borderWidth: index === selectedIndex ? 2 : 1, borderColor: index === selectedIndex ? theme.colors.accentMuted : theme.colors.border, overflow: "hidden" }}>
-            <Image source={{ uri }} resizeMode="cover" style={{ width: 64, height: 64 }} />
-          </Pressable>
-        ))}
-      </ScrollView>
+      {images.length > 1 ? (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ flexDirection: "row", gap: designTokens.spacing.sm }}>
+          {images.map((uri, index) => (
+            <Pressable key={uri + index} accessibilityRole="button" accessibilityLabel={`${accessibilityLabel} ${index + 1}`} accessibilityState={{ selected: index === selectedIndex }} onPress={() => onSelect(index)} style={{ borderRadius: theme.radius.md, borderWidth: index === selectedIndex ? 2 : 1, borderColor: index === selectedIndex ? theme.colors.accentMuted : theme.colors.border, overflow: "hidden" }}>
+              <Image source={{ uri }} resizeMode="cover" style={{ width: 64, height: 64 }} />
+            </Pressable>
+          ))}
+        </ScrollView>
+      ) : null}
     </View>
   );
 }
