@@ -281,7 +281,6 @@ export default function MerchantStoreSettingsScreen() {
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <AppHeader
           title={translate("merchantStoreSettingsTitle")}        />
-        <UiText style={[styles.subtitle, { color: theme.colors.muted }]}>{translate("merchantStoreSettingsSubtitle")}</UiText>
 
         <Card contentStyle={styles.sectionCard}>
           <Heading level={3}>{translate("merchantStoreLogo")}</Heading>
@@ -545,15 +544,11 @@ function Message({ theme, label, loading = false, actionLabel, onAction, busy = 
       <View style={styles.message}>
         <AppHeader
           title={translate("merchantStoreSettingsTitle")}        />
-        <UiText style={[styles.subtitle, { color: theme.colors.muted }]}>
-          {translate("merchantStoreSettingsSubtitle")}
-        </UiText>
         {loading ? (
           <LoadingState label={label} />
         ) : actionLabel && onAction ? (
           <ErrorState title={label} retryLabel={actionLabel} busy={busy} onRetry={onAction} />
         ) : (
-          <UiText style={[styles.subtitle, { color: theme.colors.foreground }]}>{label}</UiText>
         )}
       </View>
     </SafeAreaView>
