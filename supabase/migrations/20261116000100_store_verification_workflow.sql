@@ -318,7 +318,7 @@ begin
   if not public.is_store_verification_reviewer() then
     raise exception 'not_authorized';
   end if;
-  if _decision not in ('approved', 'rejected') then
+  if _decision is null or _decision not in ('approved', 'rejected') then
     raise exception 'invalid_verification_decision';
   end if;
   if _decision = 'rejected' and v_note is null then
