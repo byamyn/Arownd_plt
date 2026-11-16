@@ -329,6 +329,8 @@ export default function MerchantStoreSettingsScreen() {
               <Button label={translate("merchantStoreImageUpload")} onPress={() => void chooseStoreImage("cover")} loading={imageBusy === "cover"} disabled={imageBusy !== null || mutation.isPending} variant="outline" size="sm" />
             </View>
           </View>
+          {fieldErrors.logo_url ? <UiText accessibilityRole="alert" style={[styles.error, { color: theme.colors.danger }]}>{fieldErrors.logo_url}</UiText> : null}
+          {fieldErrors.cover_url ? <UiText accessibilityRole="alert" style={[styles.error, { color: theme.colors.danger }]}>{fieldErrors.cover_url}</UiText> : null}
           {imageError ? (
             <View style={styles.field}>
               <UiText style={[styles.error, { color: theme.mode === "light" ? theme.colors.dangerText : theme.colors.danger }]}>{translate("merchantStoreImageUploadError")}</UiText>
