@@ -100,6 +100,22 @@ export default function StoreDetailsScreen() {
                 </Svg>
               </Pressable>
             ) : null}
+            {details.whatsapp ? (
+              <Pressable
+                accessibilityRole="link"
+                accessibilityLabel="WhatsApp"
+                onPress={() => {
+                  const number = details.whatsapp!.replace(/[^\\d]/g, "");
+                  void Linking.openURL(`https://wa.me/${number}`);
+                }}
+                style={({ pressed }) => [styles.socialButton, styles.whatsappButton, pressed && styles.socialButtonPressed]}
+              >
+                <Svg width={21} height={21} viewBox="0 0 24 24">
+                  <Path d="M20.1 11.8a8.1 8.1 0 0 1-12 7.1L3 20l1.2-5a8.1 8.1 0 1 1 15.9-3.2Z" stroke="#25D366" strokeWidth={1.8} strokeLinejoin="round" fill="none" />
+                  <Path d="M8.2 7.8c.2-.4.4-.4.7-.4h.5c.2 0 .3.1.4.4l.7 1.6c.1.2.1.4-.1.6l-.5.6c-.2.2-.2.3-.1.5.4.8 1 1.4 1.8 1.8.2.1.4.1.5-.1l.7-.8c.2-.2.4-.2.6-.1l1.5.7c.2.1.3.2.3.4 0 .3-.2 1.1-.7 1.5-.5.4-1 .6-1.6.5-1-.2-2.2-.8-3.3-1.8-1.1-1-1.8-2.2-2-3.2-.2-.8.1-1.6.6-2.2Z" fill="#25D366" />
+                </Svg>
+              </Pressable>
+            ) : null}
             {details.facebook_url ? (
               <Pressable
                 accessibilityRole="link"
@@ -201,6 +217,7 @@ const styles = StyleSheet.create({
   socialButton: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: "#FFFFFF", borderWidth: StyleSheet.hairlineWidth, borderColor: "#E5E7EB" },
   instagramButton: { borderColor: "#F2D5E5" },
   facebookButton: { borderColor: "#D7E6FF" },
+  whatsappButton: { borderColor: "#CDEFD9" },
   socialButtonPressed: { opacity: 0.65, transform: [{ scale: 0.96 }] },
   storeInfo: { flex: 1, alignItems: "flex-start", gap: designTokens.spacing.xs },
   storeNameRow: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.xs, maxWidth: "100%" },
