@@ -140,8 +140,6 @@ export default function MerchantOrdersScreen() {
       <RefreshableScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} refreshing={access.isFetching || dashboard.isFetching} onRefresh={() => { void Promise.all([access.refetch(), dashboard.refetch()]); }}>
         <AppHeader
           title={translate("merchantOrdersPageTitle")}        />
-        <UiText style={[styles.eyebrow, { color: theme.colors.accentMuted }]}>{dashboard.data.store.name}</UiText>
-        <UiText style={[styles.subtitle, { color: theme.colors.muted }]}>{translate("merchantOrdersPageSubtitle")}</UiText>
 
         <FilterBar style={styles.filters}>
           {FILTERS.map((item) => (
