@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useImage } from "expo-image";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { Alert, Linking, Pressable, StyleSheet, View } from "react-native";
@@ -12,6 +13,13 @@ import { fetchMapStores, fetchStoreDetails, fetchStoreOffers } from "@/lib/catal
 import { translate } from "@/lib/i18n";
 import { designTokens, useAppTheme } from "@/lib/theme";
 
+const STORE_MARKER_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><circle cx="24" cy="24" r="21" fill="#FDE72A" stroke="#FFFFFF" stroke-width="3"/><path d="M12 20.5 14.5 14h19l2.5 6.5v2a3 3 0 0 1-5.5 1.6A3 3 0 0 1 25 24a3 3 0 0 1-5.5 0A3 3 0 0 1 14 22.5v-2ZM15 26h18v9H15z" fill="#171717"/><path d="M21 29h6v6h-6z" fill="#FDE72A"/></svg>`;
+
+type GoogleMapPlace = {
+  name: string;
+  coordinates: { latitude: number; longitude: number };
+};
+
 type UserMapLocation = {
   coordinates: {
     latitude: number;
@@ -23,9 +31,11 @@ type UserMapLocation = {
 export default function MapScreen() {
   const theme = useAppTheme();
   const queryClient = useQueryClient();
+  const storeMarkerIcon = useImage(`data:image/svg+xml,${encodeURIComponent(STORE_MARKER_SVG)}`, { maxWidth: 48, maxHeight: 48 });
   const [userLocation, setUserLocation] = useState<UserMapLocation | undefined>();
   const [isLocating, setIsLocating] = useState(false);
   const [selectedStoreId, setSelectedStoreId] = useState<string | null>(null);
+  const [selectedPlace, setSelectedPlace] = useState<GoogleMapPlace | null>(null);
 
   const stores = useQuery({
     queryKey: ["map-stores"],
@@ -42,9 +52,10 @@ export default function MapScreen() {
         latitude: store.latitude,
         longitude: store.longitude
       },
-      showCallout: false
+      showCallout: false,
+      ...(storeMarkerIcon ? { icon: storeMarkerIcon, anchor: { x: 0.5, y: 0.5 } } : {})
     })),
-    [stores.data]
+    [stores.data, storeMarkerIcon]
   );
 
   const selectedStore = stores.data?.find((store) => store.id === selectedStoreId) ?? null;
@@ -98,12 +109,21 @@ export default function MapScreen() {
     router.push({ pathname: "/store/[storeId]", params: { storeId } });
   };
 
-  const openDirections = () => {
-    if (!selectedStore) return;
-    const destination = `${selectedStore.latitude},${selectedStore.longitude}`;
+  const openDirectionsTo = (coordinates: { latitude: number; longitude: number }) => {
+    const destination = `${coordinates.latitude},${coordinates.longitude}`;
     void Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${destination}`).catch(() => {
       Alert.alert(translate("mapDirectionsError"));
     });
+  };
+
+  const openDirections = () => {
+    if (!selectedStore) return;
+    openDirectionsTo({ latitude: selectedStore.latitude, longitude: selectedStore.longitude });
+  };
+
+  const openPlaceDirections = () => {
+    if (!selectedPlace) return;
+    openDirectionsTo(selectedPlace.coordinates);
   };
 
   return (
@@ -132,7 +152,14 @@ export default function MapScreen() {
             zoomGesturesEnabled: true
           }}
           markers={markers}
-          onMarkerClick={(marker) => setSelectedStoreId(marker.id ?? null)}
+          onMarkerClick={(marker) => {
+            setSelectedPlace(null);
+            setSelectedStoreId(marker.id ?? null);
+          }}
+          onPOIClick={(place) => {
+            setSelectedStoreId(null);
+            setSelectedPlace({ name: place.name, coordinates: place.coordinates });
+          }}
           {...(userLocation ? { userLocation } : {})}
         />
 
@@ -159,8 +186,11 @@ export default function MapScreen() {
       <CustomerNavigation />
 
       <BottomSheet
-        visible={Boolean(selectedStore)}
-        onRequestClose={() => setSelectedStoreId(null)}
+        visible={Boolean(selectedStore || selectedPlace)}
+        onRequestClose={() => {
+          setSelectedStoreId(null);
+          setSelectedPlace(null);
+        }}
       >
         {selectedStore ? (
           <>
@@ -186,6 +216,26 @@ export default function MapScreen() {
                 label={translate("mapDirections")}
                 onPress={openDirections}
                 variant="outline"
+                fullWidth
+                startIcon={<Icon name="navigation" size={18} color={theme.colors.foreground} accessibilityHidden />}
+              />
+            </View>
+          </>
+        ) : selectedPlace ? (
+          <>
+            <View style={styles.storeHeading}>
+              <View style={[styles.storeIcon, { backgroundColor: theme.colors.surfaceSecondary }]}>
+                <Icon name="map-pin" size={22} color={theme.colors.foreground} accessibilityHidden />
+              </View>
+              <View style={styles.storeCopy}>
+                <UiText weight="700" style={styles.storeName}>{selectedPlace.name}</UiText>
+                <UiText tone="muted" style={styles.storeLocation}>{translate("mapGooglePlaceLabel")}</UiText>
+              </View>
+            </View>
+            <View style={styles.actions}>
+              <Button
+                label={translate("mapDirections")}
+                onPress={openPlaceDirections}
                 fullWidth
                 startIcon={<Icon name="navigation" size={18} color={theme.colors.foreground} accessibilityHidden />}
               />

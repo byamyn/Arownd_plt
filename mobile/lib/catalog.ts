@@ -81,7 +81,8 @@ export type HomeProduct = z.infer<typeof HomeProductSchema>;
 export type FeaturedStore = z.infer<typeof FeaturedStoreSchema>;
 export type ProductSummary = z.infer<typeof ProductSummarySchema>;
 export type StoreDetails = z.infer<typeof StoreSummarySchema>;
-export type ProductOffer = z.infer<typeof ProductOfferSchema>;\nexport type MapStore = z.infer<typeof MapStoreSchema>;
+export type ProductOffer = z.infer<typeof ProductOfferSchema>;
+export type MapStore = z.infer<typeof MapStoreSchema>;
 export type OfferVariantOptions = { sizes: string[]; colors: string[] };
 
 export function getOfferVariantOptions(offer: ProductOffer | null | undefined): OfferVariantOptions {
