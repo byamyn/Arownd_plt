@@ -53,7 +53,7 @@ export default function MerchantAccountSettingsScreen() {
     },
     {
       key: "verification",
-      icon: "badge-check" as const,
+      icon: "circle-check" as const,
       title: translate("merchantAccountSettingsVerification"),
       description: translate("merchantAccountSettingsVerificationHint"),
       onPress: () => router.push("/merchant/verification")
