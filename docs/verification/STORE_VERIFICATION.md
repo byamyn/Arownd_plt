@@ -49,7 +49,10 @@ Assigned reviewers see the moderation entry in the account screen. The route is 
 ## Migration and rollout
 
 Migration source:
-`supabase/migrations/20261116000100_store_verification_workflow.sql`
+`supabase/migrations/20261116042240_store_verification_workflow.sql`
+
+Security follow-up:
+`supabase/migrations/20261116042302_revoke_store_verification_trigger_function_execute.sql`
 
 The migration:
 - Changes the default for new stores to `is_verified = false`.
@@ -59,6 +62,6 @@ The migration:
 - Adds server-side submission and review RPCs.
 - Invalidates a pending request when required store profile fields change.
 
-**This migration has been committed to the repository only. It has not been applied to the live Supabase database.** Do not apply it until the platform owner explicitly approves the migration and the target environment has been reconciled against the repository migration history.
+**Applied to the production Supabase project on 2026-11-16.** The migration reset all existing store verification flags to `false`; the three existing stores must complete a fresh review. The follow-up migration revokes direct `EXECUTE` access to the SECURITY DEFINER profile-change trigger function. The legacy migration history still contains repository/database drift; do not bulk-push or replay historical migrations without a separate reconciliation.
 
 The migration does not delete stores, products, offers, orders, or customer data.
