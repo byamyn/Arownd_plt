@@ -72,9 +72,6 @@ export default function MerchantAccountSettingsScreen() {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <AppHeader
           title={translate("merchantAccountSettingsTitle")}        />
-        <UiText style={[styles.subtitle, { color: theme.colors.muted }]}>
-          {translate("merchantAccountSettingsSubtitle")}
-        </UiText>
         <Card contentStyle={styles.linksCard}>
           {links.map((item, index) => (
             <PressableSurface
