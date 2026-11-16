@@ -14,9 +14,34 @@ import { ReviewPanel } from "@/components/review-panel";
 import { ContentReportAction } from "@/components/content-report-action";
 import { designTokens, useAppTheme } from "@/lib/theme";
 import { VerifiedBadge } from "@/components/ui/identity";
-import { AppHeader, Avatar, Button, Card, Icon, IconButton, RatingStars, SegmentedControl, StoreCardSkeleton, ProductCardSkeleton, Text as UiText } from "@/components/ui";
+import { AppHeader, Avatar, Button, Card, Icon, IconButton, Image as UiImage, RatingStars, SegmentedControl, StoreCardSkeleton, ProductCardSkeleton, Text as UiText } from "@/components/ui";
 
-type StoreTab = "products" | "about";
+type StoreTab = "products" | "about" | "reviews";
+
+function getStoreOpenState(openingHours: unknown, countryCode?: string | null): boolean {
+  if (!openingHours || typeof openingHours !== "object") return false;
+  const hours = openingHours as { open?: unknown; close?: unknown; closed_days?: unknown };
+  if (typeof hours.open !== "string" || typeof hours.close !== "string" || !Array.isArray(hours.closed_days)) return false;
+  const parseMinutes = (value: string) => {
+    const match = /^(\\d{2}):(\\d{2})$/.exec(value);
+    return match ? Number(match[1]) * 60 + Number(match[2]) : null;
+  };
+  const open = parseMinutes(hours.open);
+  const close = parseMinutes(hours.close);
+  if (open === null || close === null) return false;
+  const timeZone = countryCode === "DZ" ? "Africa/Algiers" : undefined;
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone, weekday: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23"
+  }).formatToParts(new Date());
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  const day = ({ Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 } as Record<string, number>)[values.weekday];
+  const now = Number(values.hour) * 60 + Number(values.minute);
+  const closedDays = hours.closed_days.filter((value): value is number => Number.isInteger(value));
+  if (close > open) return !closedDays.includes(day) && now >= open && now < close;
+  const previousDay = (day + 6) % 7;
+  return (!closedDays.includes(day) && now >= open) ||
+    (!closedDays.includes(previousDay) && now < close);
+}
 
 export default function StoreDetailsScreen() {
   useLanguage();
@@ -69,8 +94,16 @@ export default function StoreDetailsScreen() {
       />
 
       <Card contentStyle={styles.storeHero}>
+        {details.cover_url ? (
+          <UiImage uri={details.cover_url} accessibilityLabel={translate("merchantStoreCover")} aspectRatio={16 / 9} style={styles.coverImage} />
+        ) : (
+          <View style={[styles.coverImage, { backgroundColor: theme.colors.surfaceMuted }]} />
+        )}
         <View style={styles.storeIdentity}>
-          <Avatar name={details.name} imageUri={details.logo_url || undefined} size={76} accessibilityLabel={details.name} />
+          <View style={styles.avatarWrap}>
+            <Avatar name={details.name} imageUri={details.logo_url || undefined} size={76} accessibilityLabel={details.name} />
+            <View style={[styles.statusDot, { backgroundColor: getStoreOpenState(details.opening_hours, details.country_code) ? "#16A34A" : "#DC2626", borderColor: theme.colors.surface }]} />
+          </View>
           <View style={styles.storeInfo}>
             <View style={styles.storeNameRow}>
               <UiText style={[styles.storeName, { color: theme.colors.foreground, flexShrink: 1 }]}>{details.name}</UiText>
@@ -81,18 +114,27 @@ export default function StoreDetailsScreen() {
               <UiText numberOfLines={2} style={[styles.metaText, { color: theme.colors.muted }]}>{details.commune || details.address_line || translate("storeNoAddress")}</UiText>
             </View>
             {details.rating != null ? <RatingStars value={details.rating} showValue /> : null}
-          </View>
+            <UiText style={[styles.statusLabel, { color: getStoreOpenState(details.opening_hours, details.country_code) ? "#16A34A" : "#DC2626" }]}>
+              {translate(getStoreOpenState(details.opening_hours, details.country_code) ? "storeOpen" : "storeClosed")}
+            </UiText>
+              </View>
           <FavoriteButton kind="stores" id={storeId} iconOnly />
         </View>
-        {details.instagram_url || details.facebook_url ? (
+        {details.whatsapp || details.instagram_url || details.facebook_url || details.tiktok_url || details.website_url ? (
           <View style={styles.socialLinks}>
+            {details.whatsapp ? (
+              <Pressable accessibilityRole="link" accessibilityLabel="WhatsApp" onPress={() => {
+                const number = details.whatsapp!.replace(/[^\\d]/g, "");
+                void Linking.openURL(`https://wa.me/${number}`);
+              }} style={({ pressed }) => [styles.socialButton, styles.whatsappButton, pressed && styles.socialButtonPressed]}>
+                <Svg width={21} height={21} viewBox="0 0 24 24">
+                  <Path d="M20.1 11.8a8.1 8.1 0 0 1-12 7.1L3 20l1.2-5a8.1 8.1 0 1 1 15.9-3.2Z" stroke="#25D366" strokeWidth={1.8} strokeLinejoin="round" fill="none" />
+                  <Path d="M8.2 7.8c.2-.4.4-.4.7-.4h.5c.2 0 .3.1.4.4l.7 1.6c.1.2.1.4-.1.6l-.5.6c-.2.2-.2.3-.1.5.4.8 1 1.4 1.8 1.8.2.1.4.1.5-.1l.7-.8c.2-.2.4-.2.6-.1l1.5.7c.2.1.3.2.3.4 0 .3-.2 1.1-.7 1.5-.5.4-1 .6-1.6.5-1-.2-2.2-.8-3.3-1.8-1.1-1-1.8-2.2-2-3.2-.2-.8.1-1.6.6-2.2Z" fill="#25D366" />
+                </Svg>
+              </Pressable>
+            ) : null}
             {details.instagram_url ? (
-              <Pressable
-                accessibilityRole="link"
-                accessibilityLabel="Instagram"
-                onPress={() => void Linking.openURL(details.instagram_url!)}
-                style={({ pressed }) => [styles.socialButton, styles.instagramButton, pressed && styles.socialButtonPressed]}
-              >
+              <Pressable accessibilityRole="link" accessibilityLabel="Instagram" onPress={() => void Linking.openURL(details.instagram_url!)} style={({ pressed }) => [styles.socialButton, styles.instagramButton, pressed && styles.socialButtonPressed]}>
                 <Svg width={21} height={21} viewBox="0 0 24 24" fill="none">
                   <Rect x={3.25} y={3.25} width={17.5} height={17.5} rx={5.2} stroke="#C13584" strokeWidth={2} />
                   <Circle cx={12} cy={12} r={4.1} stroke="#C13584" strokeWidth={2} />
@@ -100,32 +142,25 @@ export default function StoreDetailsScreen() {
                 </Svg>
               </Pressable>
             ) : null}
-            {details.whatsapp ? (
-              <Pressable
-                accessibilityRole="link"
-                accessibilityLabel="WhatsApp"
-                onPress={() => {
-                  const number = details.whatsapp!.replace(/[^\\d]/g, "");
-                  void Linking.openURL(`https://wa.me/${number}`);
-                }}
-                style={({ pressed }) => [styles.socialButton, styles.whatsappButton, pressed && styles.socialButtonPressed]}
-              >
-                <Svg width={21} height={21} viewBox="0 0 24 24">
-                  <Path d="M20.1 11.8a8.1 8.1 0 0 1-12 7.1L3 20l1.2-5a8.1 8.1 0 1 1 15.9-3.2Z" stroke="#25D366" strokeWidth={1.8} strokeLinejoin="round" fill="none" />
-                  <Path d="M8.2 7.8c.2-.4.4-.4.7-.4h.5c.2 0 .3.1.4.4l.7 1.6c.1.2.1.4-.1.6l-.5.6c-.2.2-.2.3-.1.5.4.8 1 1.4 1.8 1.8.2.1.4.1.5-.1l.7-.8c.2-.2.4-.2.6-.1l1.5.7c.2.1.3.2.3.4 0 .3-.2 1.1-.7 1.5-.5.4-1 .6-1.6.5-1-.2-2.2-.8-3.3-1.8-1.1-1-1.8-2.2-2-3.2-.2-.8.1-1.6.6-2.2Z" fill="#25D366" />
-                </Svg>
-              </Pressable>
-            ) : null}
             {details.facebook_url ? (
-              <Pressable
-                accessibilityRole="link"
-                accessibilityLabel="Facebook"
-                onPress={() => void Linking.openURL(details.facebook_url!)}
-                style={({ pressed }) => [styles.socialButton, styles.facebookButton, pressed && styles.socialButtonPressed]}
-              >
+              <Pressable accessibilityRole="link" accessibilityLabel="Facebook" onPress={() => void Linking.openURL(details.facebook_url!)} style={({ pressed }) => [styles.socialButton, styles.facebookButton, pressed && styles.socialButtonPressed]}>
                 <Svg width={21} height={21} viewBox="0 0 24 24">
                   <Path d="M14.1 21v-8.2h2.8l.42-3.2H14.1V7.55c0-.93.26-1.56 1.61-1.56h1.72V3.12c-.3-.04-1.33-.12-2.52-.12-2.5 0-4.21 1.53-4.21 4.34V9.6H7.9v3.2h2.8V21h3.4Z" fill="#1877F2" />
                 </Svg>
+              </Pressable>
+            ) : null}
+            {details.tiktok_url ? (
+              <Pressable accessibilityRole="link" accessibilityLabel="TikTok" onPress={() => void Linking.openURL(details.tiktok_url!)} style={({ pressed }) => [styles.socialButton, pressed && styles.socialButtonPressed]}>
+                <Svg width={21} height={21} viewBox="0 0 24 24">
+                  <Path d="M15.2 3h-3.1v11.3a2.6 2.6 0 1 1-2.6-2.6c.4 0 .8.1 1.1.2V8.7a6 6 0 1 0 4.6 5.8V8.8a8 8 0 0 0 4.5 1.4V7.1c-2.5-.1-4.3-1.7-4.5-4.1Z" fill="#111111" />
+                  <Path d="M15.2 3h-1.1c.3 2.1 1.9 3.7 4.5 4.1v1.1c.4.1.8.1 1.1.1V7.1c-2.5-.1-4.3-1.7-4.5-4.1Z" fill="#25F4EE" />
+                  <Path d="M10.6 8.7v3.2c-.3-.1-.7-.2-1.1-.2a2.6 2.6 0 0 0-2.6 2.6c0 .3 0 .6.1.8a2.6 2.6 0 0 1 4.1-2.1V8.8c-.2-.1-.4-.1-.5-.1Z" fill="#FE2C55" />
+                </Svg>
+              </Pressable>
+            ) : null}
+            {details.website_url ? (
+              <Pressable accessibilityRole="link" accessibilityLabel={translate("merchantStoreSettingsWebsite")} onPress={() => void Linking.openURL(details.website_url!)} style={({ pressed }) => [styles.socialButton, pressed && styles.socialButtonPressed]}>
+                <Icon name="globe" size={21} color="#2563EB" accessibilityHidden />
               </Pressable>
             ) : null}
           </View>
@@ -146,11 +181,12 @@ export default function StoreDetailsScreen() {
         accessibilityLabel={translate("storeAboutTitle")}
         options={[
           { key: "products", label: translate("storeProductsTitle") },
-          { key: "about", label: translate("storeAboutTitle") }
+          { key: "about", label: translate("storeAboutTitle") },
+          { key: "reviews", label: translate("storeReviewsTitle") }
         ]}
         value={tab}
         onChange={(value) => {
-          if (value === "products" || value === "about") setTab(value);
+          if (value === "products" || value === "about" || value === "reviews") setTab(value);
         }}
         style={styles.tabs}
       />
@@ -192,7 +228,7 @@ export default function StoreDetailsScreen() {
             )}
           </View>
         )
-      ) : (
+      ) : tab === "about" ? (
         <>
           <Card contentStyle={styles.aboutCard}>
             <UiText style={[styles.aboutTitle, { color: theme.colors.foreground }]}>{translate("storeAboutTitle")}</UiText>
@@ -203,8 +239,9 @@ export default function StoreDetailsScreen() {
             {details.whatsapp ? <><UiText style={[styles.fieldTitle, { color: theme.colors.foregroundSecondary }]}>{translate("storeWhatsApp")}</UiText><UiText style={[styles.description, { color: theme.colors.muted }]}>{details.whatsapp}</UiText></> : null}
           </Card>
           <ContentReportAction targetType="store" targetId={storeId} />
-          <ReviewPanel targetType="store" targetId={storeId} />
         </>
+      ) : (
+        <ReviewPanel targetType="store" targetId={storeId} />
       )}
     </CustomerScreen>
   );
@@ -212,6 +249,10 @@ export default function StoreDetailsScreen() {
 
 const styles = StyleSheet.create({
   storeHero: { padding: designTokens.spacing.lg, gap: designTokens.spacing.md },
+  coverImage: { width: "100%", borderRadius: designTokens.radius.lg },
+  avatarWrap: { position: "relative" },
+  statusDot: { position: "absolute", right: 1, bottom: 2, width: 15, height: 15, borderRadius: 8, borderWidth: 2 },
+  statusLabel: { fontSize: designTokens.typography.caption, fontWeight: designTokens.fontWeights.semibold },
   storeIdentity: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md },
   socialLinks: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.sm },
   socialButton: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: "#FFFFFF", borderWidth: StyleSheet.hairlineWidth, borderColor: "#E5E7EB" },
