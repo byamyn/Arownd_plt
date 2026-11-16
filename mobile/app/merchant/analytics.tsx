@@ -9,7 +9,7 @@ import { fetchMerchantAccess } from "@/lib/merchant";
 import { fetchMerchantAnalytics } from "@/lib/merchant-analytics";
 import { translate, useLanguage } from "@/lib/i18n";
 import { designTokens, useAppTheme, type AppTheme } from "@/lib/theme";
-import { RefreshableScrollView, AppHeader, Button, ChartCard, ErrorState, Heading, MetricCardSkeleton, Skeleton, MerchantMetricCard, Text as UiText } from "@/components/ui";
+import { RefreshableScrollView, AppHeader, ChartCard, ErrorState, Heading, MetricCardSkeleton, Skeleton, MerchantMetricCard, Text as UiText } from "@/components/ui";
 
 export default function MerchantAnalyticsScreen() {
   const { language } = useLanguage();
@@ -56,9 +56,7 @@ export default function MerchantAnalyticsScreen() {
     <SafeAreaView edges={["top", "left", "right"]} style={[styles.safe, { backgroundColor: theme.colors.background }]}>
       <RefreshableScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} refreshing={access.isFetching || analytics.isFetching} onRefresh={() => { void Promise.all([access.refetch(), analytics.refetch()]); }}>
         <AppHeader
-          title={translate("merchantAnalyticsTitle")}
-          leading={<Button label={translate("back")} onPress={() => router.back()} variant="ghost" size="sm" />}
-        />
+          title={translate("merchantAnalyticsTitle")}        />
         <UiText style={[styles.subtitle, { color: theme.colors.muted }]}>{translate("merchantAnalyticsSubtitle")}</UiText>
 
         <Heading level={3}>{translate("merchantAnalyticsOrders")}</Heading>
@@ -131,9 +129,7 @@ function Message({ theme, label, loading = false, actionLabel, onAction, busy = 
     <SafeAreaView edges={["top", "left", "right"]} style={[styles.safe, { backgroundColor: theme.colors.background }]}>
       <View style={styles.message}>
         <AppHeader
-          title={translate("merchantAnalyticsTitle")}
-          leading={<Button label={translate("back")} onPress={() => router.back()} variant="ghost" size="sm" />}
-        />
+          title={translate("merchantAnalyticsTitle")}        />
         <UiText style={[styles.subtitle, { color: theme.colors.muted }]}>
           {translate("merchantAnalyticsSubtitle")}
         </UiText>
