@@ -43,17 +43,17 @@ grant execute on function public.is_store_verification_reviewer() to authenticat
 create table if not exists public.store_verification_requests (
   id uuid primary key default gen_random_uuid(),
   store_id uuid not null references public.stores(id) on delete cascade,
-  submitted_by uuid not null references auth.users(id) on delete restrict,
+  submitted_by uuid not null references auth.users(id) on delete cascade,
   status text not null default 'pending'
     check (status in ('draft', 'pending', 'approved', 'rejected')),
   profile_snapshot jsonb not null,
   submitted_at timestamptz not null default now(),
   reviewed_at timestamptz,
-  reviewed_by uuid references auth.users(id) on delete restrict,
+  reviewed_by uuid references auth.users(id) on delete set null,
   review_note text,
   created_at timestamptz not null default now(),
   constraint store_verification_review_fields_check check (
-    (status in ('approved', 'rejected') and reviewed_at is not null and reviewed_by is not null)
+    (status in ('approved', 'rejected') and reviewed_at is not null)
     or (status in ('draft', 'pending') and reviewed_at is null and reviewed_by is null)
   )
 );
