@@ -10,6 +10,7 @@ import {
   CustomerScreen,
   CustomerHeading,
   EmptyState,
+  ErrorState,
   ProductTile,
   SectionTitle
 } from "@/components/customer-ui";
