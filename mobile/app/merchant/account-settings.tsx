@@ -116,20 +116,20 @@ export default function MerchantAccountSettingsScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1 },
   content: {
-    padding: designTokens.spacing.lg,
+    padding: designTokens.spacing.xl,
     paddingBottom: designTokens.spacing.xxl,
-    gap: designTokens.spacing.md
+    gap: designTokens.spacing.lg
   },
   subtitle: {
-    fontSize: designTokens.typography.body,
-    lineHeight: 22
+    fontSize: designTokens.typography.caption + 1,
+    lineHeight: 20
   },
   linksCard: {
     paddingHorizontal: designTokens.spacing.md,
     paddingVertical: 0
   },
   link: {
-    minHeight: 76,
+    minHeight: 82,
     flexDirection: "row",
     alignItems: "center",
     gap: designTokens.spacing.md,
