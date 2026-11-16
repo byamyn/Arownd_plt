@@ -266,8 +266,8 @@ export default function StoreDetailsScreen() {
                 {ownerImageError ? <UiText style={[styles.ownerEditorHint, { color: theme.colors.danger }]}>{translate("merchantStoreImageUploadError")}</UiText> : null}
                 {ownerSave.isError ? <UiText style={[styles.ownerEditorHint, { color: theme.colors.danger }]}>{translate("merchantStoreSettingsSaveError")}</UiText> : null}
                 <View style={styles.ownerImageActions}>
-                  <Button label={translate("save")} onPress={() => ownerSave.mutate()} loading={ownerSave.isPending} disabled={!ownerDraft || ownerImageBusy !== null || ownerSettings.isPending} />
-                  <Button label={translate("cancel")} variant="ghost" disabled={ownerSave.isPending || ownerImageBusy !== null} onPress={() => { setOwnerDraft({ name: details.name, description: details.description ?? "" }); setOwnerEditMode(false); ownerSave.reset(); setOwnerImageError(false); }} />
+                  <Button label={translate("merchantStoreSettingsSave")} onPress={() => ownerSave.mutate()} loading={ownerSave.isPending} disabled={!ownerDraft || ownerImageBusy !== null || ownerSettings.isPending} />
+                  <Button label={translate("captchaCancel")} variant="ghost" disabled={ownerSave.isPending || ownerImageBusy !== null} onPress={() => { setOwnerDraft({ name: details.name, description: details.description ?? "" }); setOwnerEditMode(false); ownerSave.reset(); setOwnerImageError(false); }} />
                 </View>
                 <Button label={translate("merchantStoreSettingsTitle")} variant="ghost" size="sm" onPress={() => router.push("/merchant/settings")} startIcon={<Icon name="settings" size={16} color={theme.colors.muted} accessibilityHidden />} />
               </>
