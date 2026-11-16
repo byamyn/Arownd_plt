@@ -113,7 +113,7 @@ export default function MerchantVerificationScreen() {
             onPress={() => router.push("/merchant/settings")}
             style={[styles.settingsLink, { borderColor: theme.colors.border }]}
           >
-            <UiText style={[styles.settingsLinkText, { color: theme.colors.accent }]}>
+            <UiText style={[styles.settingsLinkText, { color: theme.colors.accentMuted }]}>
               {translate("verificationEditStoreDetails")}
             </UiText>
           </PressableSurface>
