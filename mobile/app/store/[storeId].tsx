@@ -119,7 +119,7 @@ export default function StoreDetailsScreen() {
             <UiText style={[styles.statusLabel, { color: getStoreOpenState(details.opening_hours, details.country_code) ? "#16A34A" : "#DC2626" }]}>
               {translate(getStoreOpenState(details.opening_hours, details.country_code) ? "storeOpen" : "storeClosed")}
             </UiText>
-              </View>
+          </View>
           <FavoriteButton kind="stores" id={storeId} iconOnly />
         </View>
         {details.whatsapp || details.instagram_url || details.facebook_url || details.tiktok_url || details.website_url ? (
@@ -176,7 +176,6 @@ export default function StoreDetailsScreen() {
             startIcon={<Icon name="navigation" size={18} color={theme.colors.foreground} accessibilityHidden />}
           />
         ) : null}
-        {details.description ? <UiText numberOfLines={2} style={[styles.storeDescription, { color: theme.colors.muted }]}>{details.description}</UiText> : null}
       </Card>
 
       <SegmentedControl
