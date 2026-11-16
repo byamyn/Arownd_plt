@@ -148,7 +148,6 @@ export default function MerchantProductsScreen() {
       <RefreshableScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} refreshing={access.isFetching || products.isFetching} onRefresh={() => { void Promise.all([access.refetch(), products.refetch()]); }}>
         <AppHeader
           title={translate("merchantProductsTitle")}        />
-        <UiText style={[styles.subtitle, { color: theme.colors.muted }]}>{translate("merchantProductsSubtitle")}</UiText>
 
         <Button label={translate("merchantProductCreateOpen")} onPress={() => router.push("/merchant/products/new")} fullWidth />
 
@@ -410,9 +409,6 @@ function MessageScreen({
       <View style={styles.messageContainer}>
         <AppHeader
           title={translate("merchantProductsTitle")}        />
-        <UiText style={[styles.subtitle, { color: theme.colors.muted }]}>
-          {translate("merchantProductsSubtitle")}
-        </UiText>
         {loading ? (
           <View style={{ width: "100%", flexDirection: "row", flexWrap: "wrap", gap: designTokens.spacing.md }}>
             {[0, 1, 2, 3].map((item) => <ProductCardSkeleton key={item} style={{ width: "47%", flex: 0 }} />)}
