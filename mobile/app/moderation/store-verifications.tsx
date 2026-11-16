@@ -12,10 +12,11 @@ import {
   type StoreVerificationQueueItem
 } from "@/lib/store-verification";
 import { translate, useLanguage } from "@/lib/i18n";
+import { getRegionDisplayName } from "@/lib/country-regions";
 import { designTokens, useAppTheme, type AppTheme } from "@/lib/theme";
 
 export default function StoreVerificationModerationScreen() {
-  useLanguage();
+  const { language } = useLanguage();
   const theme = useAppTheme();
   const styles = createStyles(theme);
   const queryClient = useQueryClient();
@@ -109,7 +110,18 @@ export default function StoreVerificationModerationScreen() {
                 </UiText>
               </View>
             </View>
-            <Detail label={translate("merchantStoreWilayaLabel")} value={String(item.store.region_id)} theme={theme} />
+            <Detail
+              label={translate("verificationRegion")}
+              value={item.store.region ? getRegionDisplayName(item.store.region, language) : String(item.store.region_id)}
+              theme={theme}
+            />
+            {item.store.secondary_region ? (
+              <Detail
+                label={translate("verificationSecondaryRegion")}
+                value={getRegionDisplayName(item.store.secondary_region, language)}
+                theme={theme}
+              />
+            ) : null}
             <Detail label={translate("verificationCommune")} value={item.store.commune ?? translate("verificationMissingValue")} theme={theme} />
             <Detail label={translate("verificationAddress")} value={item.store.address_line ?? translate("verificationMissingValue")} theme={theme} />
             <Detail label={translate("verificationWorkingHours")} value={item.store.opening_hours.open + " – " + item.store.opening_hours.close} theme={theme} />
