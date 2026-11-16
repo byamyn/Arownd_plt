@@ -379,11 +379,11 @@ const stylesForComponents = StyleSheet.create({
 function createStyles(theme: AppTheme) {
   return StyleSheet.create({
     safe: { flex: 1 },
-    content: { padding: designTokens.spacing.lg, paddingBottom: designTokens.spacing.xxl, gap: designTokens.spacing.lg },
+    content: { padding: designTokens.spacing.xl, paddingBottom: designTokens.spacing.xxl, gap: designTokens.spacing.lg },
     eyebrow: { fontSize: designTokens.typography.caption, fontWeight: designTokens.fontWeights.extrabold },
     subtitle: { fontSize: designTokens.typography.caption + 1, lineHeight: 19, textAlign: "auto" },
-    summaryRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: designTokens.spacing.md },
-    amount: { fontSize: designTokens.typography.subtitle, fontWeight: designTokens.fontWeights.extrabold },
+    summaryRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: designTokens.spacing.md, paddingBottom: designTokens.spacing.sm },
+    amount: { fontSize: designTokens.typography.title, lineHeight: 29, fontWeight: designTokens.fontWeights.extrabold, fontVariant: ["tabular-nums"] },
     sectionHeading: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: designTokens.spacing.sm },
     sectionTitle: { fontSize: designTokens.typography.body, lineHeight: 21, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
     itemRow: { minHeight: 64, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: designTokens.spacing.md, borderBottomWidth: StyleSheet.hairlineWidth, paddingVertical: designTokens.spacing.sm },
