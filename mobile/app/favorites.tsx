@@ -12,8 +12,6 @@ import {
   Icon,
   IconButton,
   Image,
-  PriceText,
-  ProductCard,
   ProductCardSkeleton,
   StoreCardSkeleton,
   RatingStars,
@@ -25,6 +23,7 @@ import {
   CustomerScreen,
   EmptyState,
   ErrorState,
+  ProductTile,
 } from "@/components/customer-ui";
 import { chooseBestProductOffer, fetchProductDetails, fetchProductOffers, fetchStoreDetails, fetchStoreOffers, formatMarketPrice, getPrimaryImage } from "@/lib/catalog";
 import { fetchBrowsingCurrencyCode } from "@/lib/country-service";
@@ -138,34 +137,20 @@ export default function FavoritesScreen() {
         <View style={styles.productGrid}>
           {content.data.products.map(({ id, offer }) => (
             <View key={id} style={styles.productItem}>
-              <ProductCard
+              <ProductTile
                 style={styles.productCard}
+                name={offer.product.name}
+                store={offer.store.name}
+                price={browsingCurrency.data ? formatMarketPrice(offer.price, browsingCurrency.data) : "—"}
+                imageUrl={getPrimaryImage(offer)}
+                action={<FavoriteToggle kind="products" id={id} />}
                 onPress={() => {
                   void queryClient.prefetchQuery({ queryKey: ["customer-product", id], queryFn: () => fetchProductDetails(id), staleTime: 60_000 });
                   void queryClient.prefetchQuery({ queryKey: ["customer-product-offers", id], queryFn: () => fetchProductOffers(id), staleTime: 30_000 });
                   void queryClient.prefetchQuery({ queryKey: ["approved-reviews", "product", id], queryFn: () => fetchApprovedReviews("product", id), staleTime: 60_000 });
                   router.push({ pathname: "/product/[productId]", params: { productId: id } });
                 }}
-                accessibilityLabel={offer.product.name}
-                contentStyle={styles.productContent}
-                media={
-                  <View style={styles.productMedia}>
-                    <Image
-                      uri={getPrimaryImage(offer) ?? undefined}
-                      accessibilityLabel={offer.product.name}
-                      aspectRatio={1}
-                      style={styles.productImage}
-                    />
-                    <View style={styles.favoriteOverlay}>
-                      <FavoriteToggle kind="products" id={id} />
-                    </View>
-                  </View>
-                }
-              >
-                <Heading level={3} numberOfLines={2}>{offer.product.name}</Heading>
-                <Caption numberOfLines={1}>{offer.store.name}</Caption>
-                <PriceText value={browsingCurrency.data ? formatMarketPrice(offer.price, browsingCurrency.data) : "—"} tone="accentMuted" />
-              </ProductCard>
+              />
             </View>
           ))}
         </View>
@@ -215,15 +200,7 @@ function createStyles(theme: AppTheme) {
       gap: designTokens.spacing.md
     },
     productItem: { width: "48%" },
-    productCard: {
-      backgroundColor: theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface,
-      borderColor: theme.mode === "light" ? "transparent" : theme.colors.border,
-      borderRadius: designTokens.radius.xl
-    },
-    productContent: { gap: designTokens.spacing.xs, padding: designTokens.spacing.md },
-    productMedia: { position: "relative", backgroundColor: theme.mode === "dark" ? theme.colors.surfaceSecondary : theme.colors.surfaceMuted },
-    productImage: { borderRadius: 0 },
-    favoriteOverlay: { position: "absolute", top: 7, end: 7 },
+    productCard: { width: "100%" },
     storeList: { gap: designTokens.spacing.md },
     storeCard: {
       backgroundColor: theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface,
