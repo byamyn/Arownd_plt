@@ -119,9 +119,11 @@ export default function MerchantOrdersScreen() {
         </FilterBar>
 
         <View style={styles.listHeading}>
-          <UiText style={[styles.countText, { color: theme.colors.muted }]}>
-            {formatNumber(visibleOrders.length)} / {formatNumber(dashboard.data.orders.length)}
-          </UiText>
+          <View style={[styles.countPill, { backgroundColor: theme.colors.surfaceSecondary }]}>
+            <UiText style={[styles.countText, { color: theme.colors.foreground }]}>
+              {formatNumber(visibleOrders.length)} / {formatNumber(dashboard.data.orders.length)}
+            </UiText>
+          </View>
           <UiText style={[styles.sectionTitle, { color: theme.colors.foreground }]}>
             {translate("merchantRecentOrdersTitle")}
           </UiText>
@@ -301,13 +303,14 @@ const stylesForScreen = StyleSheet.create({
 function createStyles(theme: AppTheme) {
   return StyleSheet.create({
     safe: { flex: 1 },
-    content: { padding: designTokens.spacing.lg, paddingBottom: designTokens.spacing.xxl, gap: designTokens.spacing.lg },
+    content: { padding: designTokens.spacing.xl, paddingBottom: designTokens.spacing.xxl, gap: designTokens.spacing.lg },
     eyebrow: { fontSize: designTokens.typography.caption, fontWeight: designTokens.fontWeights.extrabold },
     subtitle: { fontSize: designTokens.typography.caption + 1, lineHeight: 19, textAlign: "auto" },
     filters: { paddingVertical: designTokens.spacing.xs },
     listHeading: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
     sectionTitle: { fontSize: designTokens.typography.body, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
-    countText: { fontSize: designTokens.typography.caption, fontWeight: designTokens.fontWeights.extrabold },
+    countPill: { minHeight: 30, paddingHorizontal: designTokens.spacing.md, borderRadius: designTokens.radius.pill, alignItems: "center", justifyContent: "center" },
+    countText: { fontSize: designTokens.typography.caption, fontWeight: designTokens.fontWeights.extrabold, fontVariant: ["tabular-nums"] },
     orderList: { gap: designTokens.spacing.md },
     orderHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: designTokens.spacing.sm },
     orderCode: { fontSize: designTokens.typography.caption + 1, fontWeight: designTokens.fontWeights.extrabold },
