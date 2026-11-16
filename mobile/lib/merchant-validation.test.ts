@@ -9,28 +9,21 @@ import {
 const validStore = {
   storeName: "متجر النخبة",
   phone: "0550123456",
-  whatsapp: "",
   regionId: 16,
   secondaryRegionId: null,
   commune: "باب الزوار",
   addressLine: "شارع الاستقلال، الجزائر",
   open: "09:00",
-  close: "18:00",
-  category: "fashion",
-  subcategories: ["clothes"]
+  close: "18:00"
 };
 
 describe("merchantStoreSchema", () => {
-  it("accepts a complete store profile", () => {
+  it("accepts the simplified store profile without a category", () => {
     expect(merchantStoreSchema.safeParse(validStore).success).toBe(true);
   });
 
-  it("requires a primary region and a main category", () => {
-    expect(merchantStoreSchema.safeParse({
-      ...validStore,
-      regionId: null,
-      category: ""
-    }).success).toBe(false);
+  it("requires a primary region", () => {
+    expect(merchantStoreSchema.safeParse({ ...validStore, regionId: null }).success).toBe(false);
   });
 
   it("rejects invalid phone numbers and invalid time formats", () => {
@@ -41,19 +34,15 @@ describe("merchantStoreSchema", () => {
     }).success).toBe(false);
   });
 
-  it("accepts Arabic-Indic and Persian digits in phone fields", () => {
+  it("accepts Arabic-Indic digits in the phone field", () => {
     expect(merchantStoreSchema.safeParse({
       ...validStore,
-      phone: "٠٥٥٠ ١٢٣ ٤٥٦",
-      whatsapp: "۰۵۵۰ ۱۲۳ ۴۵۶"
+      phone: "٠٥٥٠ ١٢٣ ٤٥٦"
     }).success).toBe(true);
   });
 
-  it("rejects duplicate subcategories", () => {
-    expect(merchantStoreSchema.safeParse({
-      ...validStore,
-      subcategories: ["clothes", "clothes"]
-    }).success).toBe(false);
+  it("accepts a category when supplied but does not require one", () => {
+    expect(merchantStoreSchema.safeParse({ ...validStore, category: "fashion" }).success).toBe(true);
   });
 });
 
@@ -66,7 +55,6 @@ describe("merchant store helpers", () => {
     expect(merchantStoreErrorKey(new Error("store_already_exists"))).toBe("merchantErrorStoreExists");
     expect(merchantStoreErrorKey(new Error("secondary_region_required"))).toBe("merchantValidationSecondaryRegionRequired");
     expect(merchantStoreErrorKey(new Error("invalid_country_phone"))).toBe("merchantValidationPhone");
-    expect(merchantStoreErrorKey(new Error("invalid_country_whatsapp"))).toBe("merchantValidationWhatsApp");
     expect(merchantStoreErrorKey(new Error("invalid_phone"))).toBe("merchantValidationPhone");
     expect(merchantStoreErrorKey(new Error("unexpected"))).toBe("merchantErrorGeneric");
   });
