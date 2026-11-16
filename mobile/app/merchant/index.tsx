@@ -155,7 +155,7 @@ export default function MerchantEntryScreen() {
             </View>
           </View>
           <View style={styles.storeActions}>
-            <Button label={translate("merchantPreviewStore")} onPress={() => {
+            <Button label={translate("merchantMyStore")} onPress={() => {
               void queryClient.prefetchQuery({ queryKey: ["customer-store", data.store.id], queryFn: () => fetchStoreDetails(data.store.id), staleTime: 60_000 });
               void queryClient.prefetchQuery({ queryKey: ["customer-store-offers", data.store.id], queryFn: () => fetchStoreOffers(data.store.id), staleTime: 30_000 });
               router.push({ pathname: "/store/[storeId]", params: { storeId: data.store.id } });
