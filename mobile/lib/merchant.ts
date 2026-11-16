@@ -112,7 +112,6 @@ export async function createMerchantStore(
     throw new Error("secondary_region_required");
   }
   const phone = normalizePhoneForCallingCode(values.phone, regionContext.callingCode);
-  const whatsapp = values.whatsapp ? normalizePhoneForCallingCode(values.whatsapp, regionContext.callingCode) : null;
 
   const client = getSupabaseClient();
   const { data: authData, error: authError } = await client.auth.getUser();
@@ -124,7 +123,7 @@ export async function createMerchantStore(
     _store_name: values.storeName,
     _slug: createStoreSlug(values.storeName, suffix),
     _phone: phone,
-    _whatsapp: whatsapp,
+    _whatsapp: null,
     _region_id: values.regionId,
     _secondary_region_id: values.secondaryRegionId,
     _commune: values.commune,
@@ -136,7 +135,7 @@ export async function createMerchantStore(
       close: values.close,
       closed_days: []
     },
-    _category: values.category,
+    _category: values.category?.trim() || null,
     _subcategories: values.subcategories
   });
 
