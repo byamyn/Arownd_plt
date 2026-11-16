@@ -7,7 +7,7 @@ import { CustomerScreen, EmptyState, ErrorState, LoadingState } from "@/componen
 import { AppHeader, Button, Card, Icon, IconButton, OfferCard, PriceDisplay, ProductImageGallery, ProductQuantitySelector, ProductVariantSelector, RatingStars, StockBadge, ProductCardSkeleton, Text as UiText } from "@/components/ui";
 import { CartButton } from "@/components/cart-button";
 import { FavoriteButton } from "@/components/favorite-button";
-import { chooseBestProductOffer, fetchProductDetails, fetchProductOffers, formatMarketPrice, getOfferVariantOptions, getPrimaryImage } from "@/lib/catalog";
+import { chooseBestProductOffer, fetchProductDetails, fetchProductOffers, formatMarketPrice, getOfferVariantOptions } from "@/lib/catalog";
 import { fetchBrowsingCurrencyCode } from "@/lib/country-service";
 import { addToCart, CART_QUERY_KEY } from "@/lib/cart";
 import { emitCartFly } from "@/lib/cart-fly";
@@ -26,6 +26,7 @@ export default function ProductDetailsScreen() {
   const [size, setSize] = useState("");
   const [color, setColor] = useState("");
   const [quantity, setQuantity] = useState(1);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const imageAnchorRef = useRef<ComponentRef<typeof View>>(null);
   const cartFlyImageRef = useRef<string | null>(null);
   const queryClient = useQueryClient();
@@ -78,7 +79,16 @@ export default function ProductDetailsScreen() {
   const productOffers = offers.data ?? [];
   const bestOffer = chooseBestProductOffer(productOffers);
   const selectedOffer = productOffers.find((offer) => offer.id === selectedOfferId) ?? bestOffer;
-  const imageUrl = selectedOffer ? getPrimaryImage(selectedOffer) : productOffers.map(getPrimaryImage).find(Boolean) ?? null;
+  const selectedOfferImages = (selectedOffer?.images ?? [])
+    .filter((image): image is typeof image & { image_url: string } => typeof image.image_url === "string" && image.image_url.trim().length > 0)
+    .sort((a, b) => Number(Boolean(b.is_primary)) - Number(Boolean(a.is_primary)))
+    .map((image) => image.image_url);
+  const fallbackImages = productOffers.flatMap((offer) => offer.images)
+    .filter((image): image is typeof image & { image_url: string } => typeof image.image_url === "string" && image.image_url.trim().length > 0)
+    .sort((a, b) => Number(Boolean(b.is_primary)) - Number(Boolean(a.is_primary)))
+    .map((image) => image.image_url);
+  const galleryImages = [...new Set(selectedOfferImages.length > 0 ? selectedOfferImages : fallbackImages)];
+  const imageUrl = galleryImages[selectedImageIndex] ?? galleryImages[0] ?? null;
   cartFlyImageRef.current = imageUrl;
   const variants = getOfferVariantOptions(selectedOffer);
   const selectedSize = variants.sizes.includes(size) ? size : variants.sizes[0] ?? "";
@@ -123,7 +133,7 @@ export default function ProductDetailsScreen() {
         trailing={<CartButton />}
       />
       <View ref={imageAnchorRef} collapsable={false}>
-        {imageUrl ? <ProductImageGallery images={[imageUrl]} accessibilityLabel={productDetails.name} onSelect={() => undefined} imageStyle={styles.heroImage} /> : <View style={[styles.heroImage, { backgroundColor: theme.colors.surfaceMuted }]}><Icon name="image" size={42} color={theme.colors.subtle} accessibilityHidden /></View>}
+        {imageUrl ? <ProductImageGallery images={galleryImages} selectedIndex={Math.min(selectedImageIndex, Math.max(0, galleryImages.length - 1))} accessibilityLabel={productDetails.name} onSelect={setSelectedImageIndex} imageStyle={styles.heroImage} /> : <View style={[styles.heroImage, { backgroundColor: theme.colors.surfaceMuted }]}><Icon name="image" size={42} color={theme.colors.subtle} accessibilityHidden /></View>}
       </View>
       <Card contentStyle={styles.infoCard}>
         <UiText weight="700" style={styles.productName}>{productDetails.name}</UiText>
@@ -155,7 +165,7 @@ export default function ProductDetailsScreen() {
             <OfferCard
               key={offer.id}
               accessibilityLabel={offer.store.name}
-              onPress={() => { setSelectedOfferId(offer.id); setSize(""); setColor(""); setQuantity(1); addMutation.reset(); }}
+              onPress={() => { setSelectedOfferId(offer.id); setSelectedImageIndex(0); setSize(""); setColor(""); setQuantity(1); addMutation.reset(); }}
               style={[styles.offerCard, { borderColor: active ? theme.colors.accent : theme.colors.border, backgroundColor: active ? (theme.mode === "light" ? theme.colors.accent : theme.colors.surfaceMuted) : (theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface) }]}
               compact
               contentStyle={styles.offerCardContent}
