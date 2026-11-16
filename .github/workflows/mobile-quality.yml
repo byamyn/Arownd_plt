@@ -1,4 +1,5 @@
 name: Arownd Native quality checks
+# Re-run quality checks after mobile lockfile regeneration.
 
 on:
   push:
