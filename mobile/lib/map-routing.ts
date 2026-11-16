@@ -26,7 +26,7 @@ type OsrmResponse = {
   routes?: Array<{
     distance?: number;
     duration?: number;
-    geometry?: { coordinates?: number[][] };
+    geometry?: { coordinates?: [number, number][] };
     legs?: Array<{
       steps?: Array<{
         name?: string;
@@ -35,7 +35,7 @@ type OsrmResponse = {
         maneuver?: {
           type?: string;
           modifier?: string;
-          location?: number[];
+          location?: [number, number];
         };
       }>;
     }>;
@@ -104,10 +104,12 @@ export function distanceToRouteMeters(position: RoutePoint, route: RoutePoint[])
   let nearest = Number.POSITIVE_INFINITY;
 
   for (let index = 0; index < route.length; index += stride) {
-    nearest = Math.min(nearest, distanceBetweenCoordinates(position, route[index]));
+    const point = route[index];
+    if (point) nearest = Math.min(nearest, distanceBetweenCoordinates(position, point));
   }
 
-  nearest = Math.min(nearest, distanceBetweenCoordinates(position, route[route.length - 1]));
+  const lastPoint = route[route.length - 1];
+  if (lastPoint) nearest = Math.min(nearest, distanceBetweenCoordinates(position, lastPoint));
   return nearest;
 }
 
@@ -134,6 +136,7 @@ export function getActiveStepIndex(
   let nextIndex = Math.min(currentIndex, Math.max(0, steps.length - 1));
   while (nextIndex < steps.length - 1) {
     const currentStep = steps[nextIndex];
+    if (!currentStep) break;
     const distance = distanceBetweenCoordinates(position, currentStep.location);
     if (currentStep.maneuverType === "depart" && distance <= 28) break;
     if (distance > 28) break;

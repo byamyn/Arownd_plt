@@ -79,8 +79,8 @@ describe("map routing helpers", () => {
   });
 
   it("localizes maneuver instructions", () => {
-    expect(getManeuverInstruction(steps[1], "ar")).toContain("انعطف يسارًا");
-    expect(getManeuverInstruction(steps[1], "en")).toContain("Turn left");
+    expect(getManeuverInstruction(steps[1]!, "ar")).toContain("انعطف يسارًا");
+    expect(getManeuverInstruction(steps[1]!, "en")).toContain("Turn left");
   });
 
   it("formats route distance and duration in the selected language", () => {
