@@ -24,7 +24,7 @@ import { fetchLocalizedMapStyle } from "@/lib/map-style";
 import { designTokens, useAppTheme, type AppTheme } from "@/lib/theme";
 
 const STORE_FIELD_ERROR_KEYS: Record<string, import("@/lib/i18n").TranslationKey> = {
-  name: "merchantStoreNameInvalid", description: "merchantStoreDescriptionTooLong", phone: "merchantStorePhoneInvalid", whatsapp: "merchantStoreWhatsappInvalid", commune: "merchantStoreCommuneInvalid", address_line: "merchantStoreAddressInvalid", region_id: "merchantStoreRegionRequired", secondary_region_id: "merchantStoreSecondaryRegionRequired", "opening_hours.open": "merchantStoreOpeningTimeInvalid", "opening_hours.close": "merchantStoreOpeningTimeInvalid", "opening_hours.closed_days": "merchantStoreClosedDaysInvalid", instagram_url: "merchantStoreSocialUrlInvalid", facebook_url: "merchantStoreSocialUrlInvalid", logo_url: "merchantStoreImageUrlInvalid", cover_url: "merchantStoreImageUrlInvalid", latitude: "merchantStoreCoordinatesInvalid"
+  name: "merchantStoreNameInvalid", description: "merchantStoreDescriptionTooLong", phone: "merchantStorePhoneInvalid", whatsapp: "merchantStoreWhatsappInvalid", commune: "merchantStoreCommuneInvalid", address_line: "merchantStoreAddressInvalid", region_id: "merchantStoreRegionRequired", secondary_region_id: "merchantStoreSecondaryRegionRequired", "opening_hours.open": "merchantStoreOpeningTimeInvalid", "opening_hours.close": "merchantStoreOpeningTimeInvalid", "opening_hours.closed_days": "merchantStoreClosedDaysInvalid", instagram_url: "merchantStoreSocialUrlInvalid", facebook_url: "merchantStoreSocialUrlInvalid", tiktok_url: "merchantStoreSocialUrlInvalid", website_url: "merchantStoreSocialUrlInvalid", logo_url: "merchantStoreImageUrlInvalid", cover_url: "merchantStoreImageUrlInvalid", latitude: "merchantStoreCoordinatesInvalid"
 };
 
 const MAP_LIGHT_STYLE = "https://tiles.openfreemap.org/styles/liberty";
@@ -431,6 +431,8 @@ export default function MerchantStoreSettingsScreen() {
           <UiText style={[styles.hint, { color: theme.colors.muted }]}>{translate("merchantStoreSettingsSocialHint")}</UiText>
           <Field label={translate("merchantStoreSettingsInstagram")} value={form.instagram_url} onChangeText={(value) => update("instagram_url", value)} theme={theme} keyboardType="url" disabled={mutation.isPending} error={fieldErrors.instagram_url} />
           <Field label={translate("merchantStoreSettingsFacebook")} value={form.facebook_url} onChangeText={(value) => update("facebook_url", value)} theme={theme} keyboardType="url" disabled={mutation.isPending} error={fieldErrors.facebook_url} />
+          <Field label={translate("merchantStoreSettingsTikTok")} value={form.tiktok_url} onChangeText={(value) => update("tiktok_url", value)} theme={theme} keyboardType="url" disabled={mutation.isPending} error={fieldErrors.tiktok_url} />
+          <Field label={translate("merchantStoreSettingsWebsite")} value={form.website_url} onChangeText={(value) => update("website_url", value)} theme={theme} keyboardType="url" disabled={mutation.isPending} error={fieldErrors.website_url} />
         </Card>
 
         {formError && mutation.isError ? <UiText accessibilityRole="alert" style={[styles.error, { color: theme.mode === "light" ? theme.colors.dangerText : theme.colors.danger }]}>{translate("merchantStoreSettingsSaveError")}</UiText> : null}
