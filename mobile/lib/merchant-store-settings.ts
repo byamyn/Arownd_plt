@@ -26,7 +26,9 @@ const StoreSettingsRecordSchema = z.object({
     closed_days: z.array(z.number())
   }).passthrough(),
   instagram_url: z.string().nullable(),
-  facebook_url: z.string().nullable()
+  facebook_url: z.string().nullable(),
+  tiktok_url: z.string().nullable(),
+  website_url: z.string().nullable()
 });
 
 export async function fetchMyMerchantStoreSettings(storeId: string): Promise<MerchantStoreSettings> {
@@ -36,7 +38,7 @@ export async function fetchMyMerchantStoreSettings(storeId: string): Promise<Mer
   if (!auth.user) throw new Error("not_authenticated");
 
   const { data, error } = await client.from("stores")
-    .select("id, owner_id, country_code, name, description, phone, whatsapp, region_id, secondary_region_id, commune, address_line, latitude, longitude, opening_hours, logo_url, cover_url, instagram_url, facebook_url")
+    .select("id, owner_id, country_code, name, description, phone, whatsapp, region_id, secondary_region_id, commune, address_line, latitude, longitude, opening_hours, logo_url, cover_url, instagram_url, facebook_url, tiktok_url, website_url")
     .eq("id", storeId)
     .eq("owner_id", auth.user.id)
     .maybeSingle();
@@ -59,7 +61,9 @@ export async function fetchMyMerchantStoreSettings(storeId: string): Promise<Mer
     longitude: record.longitude,
     opening_hours: record.opening_hours,
     instagram_url: record.instagram_url ?? "",
-    facebook_url: record.facebook_url ?? ""
+    facebook_url: record.facebook_url ?? "",
+    tiktok_url: record.tiktok_url ?? "",
+    website_url: record.website_url ?? ""
   });
 }
 
@@ -84,7 +88,9 @@ export async function updateMyMerchantStoreSettings(
     logo_url: values.logo_url || null,
     cover_url: values.cover_url || null,
     instagram_url: values.instagram_url || null,
-    facebook_url: values.facebook_url || null
+    facebook_url: values.facebook_url || null,
+    tiktok_url: values.tiktok_url || null,
+    website_url: values.website_url || null
   }).eq("id", storeId).eq("owner_id", auth.user.id).select("id").maybeSingle();
   if (error) throw error;
   if (!data) throw new Error("merchant_store_not_updated");
