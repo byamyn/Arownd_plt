@@ -67,7 +67,7 @@ export async function registerDeviceForPushNotifications(language: "ar" | "en"):
       name: language === "ar" ? "تحديثات Arownd" : "Arownd updates",
       importance: Notifications.AndroidImportance.MAX,
       vibrationPattern: [0, 250, 250, 250],
-      lightColor: "#FFF01F"
+      lightColor: "#FFFF00"
     });
   }
 
