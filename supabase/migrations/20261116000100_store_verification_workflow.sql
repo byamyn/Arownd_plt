@@ -284,6 +284,7 @@ declare
   v_request public.store_verification_requests;
   v_store public.stores;
   v_snapshot jsonb;
+  v_store_id uuid;
   v_note text := nullif(btrim(coalesce(_note, '')), '');
 begin
   if auth.uid() is null then
@@ -302,7 +303,7 @@ begin
     raise exception 'verification_review_note_too_long';
   end if;
 
-  select r.store_id into v_request.store_id
+  select r.store_id into v_store_id
   from public.store_verification_requests r
   where r.id = _request_id;
   if not found then
@@ -313,7 +314,7 @@ begin
   -- same lock order, preventing a request/store deadlock during concurrent edits.
   select s.* into v_store
   from public.stores s
-  where s.id = v_request.store_id
+  where s.id = v_store_id
   for update;
   if not found then
     raise exception 'merchant_store_not_found';
