@@ -18,6 +18,14 @@ import { AppHeader, Avatar, Button, Card, Icon, IconButton, Image as UiImage, Ra
 
 type StoreTab = "products" | "about" | "reviews";
 
+const STORE_TIME_ZONES: Record<string, string> = {
+  DZ: "Africa/Algiers",
+  MA: "Africa/Casablanca",
+  EG: "Africa/Cairo",
+  SA: "Asia/Riyadh",
+  AE: "Asia/Dubai"
+};
+
 function getStoreOpenState(openingHours: unknown, countryCode?: string | null): boolean {
   if (!openingHours || typeof openingHours !== "object") return false;
   const hours = openingHours as { open?: unknown; close?: unknown; closed_days?: unknown };
@@ -29,7 +37,7 @@ function getStoreOpenState(openingHours: unknown, countryCode?: string | null): 
   const open = parseMinutes(hours.open);
   const close = parseMinutes(hours.close);
   if (open === null || close === null) return false;
-  const timeZone = countryCode === "DZ" ? "Africa/Algiers" : undefined;
+  const timeZone = countryCode ? STORE_TIME_ZONES[countryCode] : undefined;
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone, weekday: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23"
   }).formatToParts(new Date());
