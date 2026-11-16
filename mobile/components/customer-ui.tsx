@@ -80,32 +80,47 @@ export function SectionTitle({ title, subtitle, action, onAction }: {
   );
 }
 
-export function ProductTile({ name, store, price, imageUrl, onPress, style }: {
+export function ProductTile({ name, store, price, imageUrl, onPress, style, action }: {
   name: string;
   store: string;
   price: string;
   imageUrl: string | null;
   onPress?: () => void;
   style?: StyleProp<ViewStyle>;
+  action?: ReactNode;
 }) {
   const theme = useAppTheme();
   return (
-    <ProductCard
+    <PressableSurface
       onPress={onPress}
       disabled={!onPress}
       accessibilityLabel={`${name}، ${store}، ${price}`}
-      style={[styles.productTile, { backgroundColor: theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface }, style]}
-      media={
-        <View style={[styles.productImage, { backgroundColor: theme.mode === "dark" ? theme.colors.surfaceSecondary : theme.colors.surfaceMuted }]}>
-          {imageUrl ? <UiImage uri={imageUrl} accessibilityLabel={name} aspectRatio={1} style={StyleSheet.absoluteFill} /> : <Icon name="image" size={32} color={theme.colors.subtle} accessibilityHidden />}
-        </View>
-      }
-      contentStyle={styles.productContent}
+      style={[
+        styles.productTile,
+        {
+          backgroundColor: theme.colors.surface,
+          borderColor: theme.colors.border,
+          borderWidth: theme.mode === "light" ? StyleSheet.hairlineWidth : 1
+        },
+        style
+      ]}
     >
-      <UiText numberOfLines={2} weight="700" style={styles.productName}>{name}</UiText>
-      {store.trim().length > 0 ? <Caption numberOfLines={1}>{store}</Caption> : null}
-      <PriceDisplay value={price} />
-    </ProductCard>
+      <View style={[styles.productImage, { backgroundColor: theme.colors.surfaceMuted }]}>
+        {imageUrl ? <UiImage uri={imageUrl} accessibilityLabel={name} aspectRatio={1} style={StyleSheet.absoluteFill} /> : <Icon name="image" size={34} color={theme.colors.subtle} accessibilityHidden />}
+        {action ? <View style={styles.productAction}>{action}</View> : null}
+      </View>
+      <View style={styles.productContent}>
+        <View style={styles.productStore}>
+          <Icon name="store" size={13} color={theme.colors.muted} accessibilityHidden />
+          <Caption numberOfLines={1}>{store}</Caption>
+        </View>
+        <UiText numberOfLines={2} weight="700" style={styles.productName}>{name}</UiText>
+        <View style={[styles.productPrice, { borderTopColor: theme.colors.border }]}>
+          <PriceDisplay value={price} />
+          <Icon name="arrow-left" size={15} color={theme.colors.accent} accessibilityHidden />
+        </View>
+      </View>
+    </PressableSurface>
   );
 }
 
@@ -160,10 +175,13 @@ const styles = StyleSheet.create({
   sectionTitle: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: designTokens.spacing.md, gap: designTokens.spacing.sm },
   sectionCopy: { flex: 1, gap: designTokens.spacing.xs, alignItems: "flex-start" },
   sectionAction: { fontSize: designTokens.typography.caption + 1, fontWeight: "700" },
-  productTile: { width: 158 },
-  productContent: { padding: designTokens.spacing.sm + 1, gap: designTokens.spacing.xs + 1 },
-  productImage: { height: 132, borderRadius: designTokens.radius.md, overflow: "hidden", alignItems: "center", justifyContent: "center" },
-  productName: { minHeight: 38 },
+  productTile: { width: 172, borderRadius: designTokens.radius.lg, padding: designTokens.spacing.sm, gap: designTokens.spacing.sm, overflow: "hidden" },
+  productContent: { gap: designTokens.spacing.sm, alignItems: "stretch", paddingHorizontal: 2 },
+  productImage: { height: 144, borderRadius: designTokens.radius.md, overflow: "hidden", alignItems: "center", justifyContent: "center" },
+  productStore: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.xs, minHeight: 18 },
+  productName: { minHeight: 40, lineHeight: 20, textAlign: "auto" },
+  productPrice: { minHeight: 38, borderTopWidth: StyleSheet.hairlineWidth, paddingTop: designTokens.spacing.xs, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  productAction: { position: "absolute", top: 7, end: 7 }
   storeTileRow: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.sm },
   storeTile: { minHeight: 82, borderRadius: designTokens.radius.lg - 1, padding: designTokens.spacing.md - 1, flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md - 1 },
   storeDirectionsButton: { width: 46, height: 46, borderRadius: designTokens.radius.md, borderWidth: 1, alignItems: "center", justifyContent: "center" },
