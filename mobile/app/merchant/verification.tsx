@@ -187,14 +187,14 @@ const messageStyles = StyleSheet.create({
 function createStyles(theme: AppTheme) {
   return StyleSheet.create({
     safe: { flex: 1 },
-    content: { padding: designTokens.spacing.lg, paddingBottom: designTokens.spacing.xl, gap: designTokens.spacing.md },
+    content: { padding: designTokens.spacing.xl, paddingBottom: designTokens.spacing.xxl, gap: designTokens.spacing.lg },
     subtitle: { fontSize: designTokens.typography.caption + 1, lineHeight: 20, textAlign: "auto" },
-    statusCard: { gap: designTokens.spacing.sm, borderWidth: StyleSheet.hairlineWidth, borderColor: theme.colors.border },
+    statusCard: { gap: designTokens.spacing.md, borderWidth: StyleSheet.hairlineWidth, borderColor: theme.colors.border },
     statusTitle: { fontSize: designTokens.typography.body + 1, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
     statusHint: { fontSize: designTokens.typography.caption + 1, lineHeight: 20, textAlign: "auto" },
     reviewNote: { padding: designTokens.spacing.md, borderRadius: designTokens.radius.sm, gap: 4 },
     reviewNoteTitle: { fontSize: designTokens.typography.caption, fontWeight: designTokens.fontWeights.bold, textAlign: "auto" },
-    requirementsCard: { gap: designTokens.spacing.md, borderWidth: StyleSheet.hairlineWidth, borderColor: theme.colors.border },
+    requirementsCard: { gap: designTokens.spacing.lg, borderWidth: StyleSheet.hairlineWidth, borderColor: theme.colors.border },
     sectionTitle: { fontSize: designTokens.typography.body, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
     settingsLink: { borderWidth: StyleSheet.hairlineWidth, borderRadius: designTokens.radius.sm, padding: designTokens.spacing.md, alignItems: "center" },
     settingsLinkText: { fontSize: designTokens.typography.caption + 1, fontWeight: designTokens.fontWeights.bold },
