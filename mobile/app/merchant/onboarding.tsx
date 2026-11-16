@@ -2,7 +2,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Redirect, router } from "expo-router";
 import { useEffect, useState, type ReactNode } from "react";
-import { z } from "zod";
 import { Controller, useForm } from "react-hook-form";
 import {
   KeyboardAvoidingView,
@@ -19,7 +18,6 @@ import { fetchCheckoutRegions } from "@/lib/checkout";
 import {
   createMerchantStore,
   fetchMerchantAccess,
-  fetchMerchantCategories,
   fetchMerchantSignupBusinessName
 } from "@/lib/merchant";
 import {
@@ -29,7 +27,6 @@ import {
   type MerchantStoreFormInput
 } from "@/lib/merchant-validation";
 import { translate, type TranslationKey, useLanguage } from "@/lib/i18n";
-import { getLocalizedMerchantCategoryLabel } from "@/lib/locale-data";
 import { getRegionDisplayName, getRegionLevelDisplayName } from "@/lib/country-regions";
 import { designTokens, useAppTheme, type AppTheme } from "@/lib/theme";
 import { BottomSheet, AppHeader, Button, Card, ErrorState, LoadingState, PressableSurface, Text as UiText, TextField } from "@/components/ui";
@@ -61,13 +58,6 @@ export default function MerchantOnboardingScreen() {
   });
 
   const regionOptions = useQuery({ queryKey: ["merchant-regions"], queryFn: () => fetchCheckoutRegions(), enabled: canStartOnboarding, staleTime: Infinity });
-  const categories = useQuery({
-    queryKey: ["merchant-categories"],
-    queryFn: fetchMerchantCategories,
-    enabled: canStartOnboarding,
-    staleTime: 5 * 60 * 1000
-  });
-
   const {
     control,
     handleSubmit,
@@ -80,15 +70,12 @@ export default function MerchantOnboardingScreen() {
     defaultValues: {
       storeName: "",
       phone: "",
-      whatsapp: "",
       regionId: null,
       secondaryRegionId: null,
       commune: "",
       addressLine: "",
       open: "09:00",
-      close: "18:00",
-      category: "",
-      subcategories: []
+      close: "18:00"
     }
   });
 
@@ -101,13 +88,9 @@ export default function MerchantOnboardingScreen() {
 
   const regionId = watch("regionId");
   const secondaryOptions = useQuery({ queryKey: ["merchant-regions", regionId], queryFn: () => fetchCheckoutRegions(regionId), enabled: canStartOnboarding && regionId !== null, staleTime: Infinity });
-  const categoryId = watch("category");
-  const selectedSubcategories = watch("subcategories");
   const selectedRegion = regionOptions.data?.regions.find((item) => item.id === regionId);
   const secondaryRegionId = watch("secondaryRegionId");
   const selectedSecondaryRegion = secondaryOptions.data?.regions.find((item) => item.id === secondaryRegionId);
-  const mainCategories = (categories.data ?? []).filter((item) => item.parentId === null);
-  const subcategories = (categories.data ?? []).filter((item) => item.parentId === categoryId);
 
   const submit = handleSubmit(async (values) => {
     setSubmitError(null);
@@ -146,20 +129,19 @@ export default function MerchantOnboardingScreen() {
   if (access.data.status === "merchant_ready") return <Redirect href="/merchant" />;
   if (!canStartOnboarding) return <Redirect href="/merchant" />;
 
-  if (regionOptions.isPending || categories.isPending) {
+  if (regionOptions.isPending) {
     return <LoadingScreen theme={theme} label={translate("merchantOnboardingLoading")} />;
   }
 
-  if (regionOptions.isError || categories.isError) {
+  if (regionOptions.isError) {
     return (
       <MessageScreen
         theme={theme}
-        title={regionOptions.isError ? translate("merchantWilayasError") : translate("merchantCategoriesError")}
+        title={translate("merchantWilayasError")}
         actionLabel={translate("merchantRetry")}
-        busy={regionOptions.isFetching || categories.isFetching}
+        busy={regionOptions.isFetching}
         onAction={() => {
           if (regionOptions.isError) void regionOptions.refetch();
-          if (categories.isError) void categories.refetch();
         }}
       />
     );
@@ -242,36 +224,6 @@ export default function MerchantOnboardingScreen() {
               )}
             />
 
-            <Controller
-              control={control}
-              name="whatsapp"
-              render={({ field, fieldState }) => (
-                <FormField
-                  theme={theme}
-                  label={translate("merchantStoreWhatsAppLabel")}
-                  hint={translate("merchantStoreWhatsAppHint")}
-                  error={fieldError(fieldState.error?.message)}
-                >
-                  <View style={styles.phoneInputRow}>
-                    <View style={[styles.phoneCallingCode, { borderColor: theme.colors.inputBorder, backgroundColor: theme.colors.surfaceSecondary }]}>
-                      <UiText style={[styles.phoneCallingCodeText, { color: theme.colors.muted }]}>{regionOptions.data?.callingCode ?? ""}</UiText>
-                    </View>
-                    <TextField
-                      value={field.value}
-                      onChangeText={field.onChange}
-                      onBlur={field.onBlur}
-                      accessibilityLabel={translate("merchantStoreWhatsAppLabel")}
-                      placeholder={translate("merchantStoreWhatsAppPlaceholder")}
-                      placeholderTextColor={theme.colors.placeholder}
-                      style={[styles.input, styles.phoneNumberInput]}
-                      keyboardType="phone-pad"
-                      maxLength={20}
-                      textAlign="auto"
-                    />
-                  </View>
-                </FormField>
-              )}
-            />
           </Card>
 
           <Card contentStyle={styles.section}>
@@ -371,99 +323,6 @@ export default function MerchantOnboardingScreen() {
 
           <Card contentStyle={styles.section}>
             <UiText style={[styles.sectionTitle, { color: theme.colors.foreground }]}>
-              {translate("merchantStoreCategoryLabel")}
-            </UiText>
-            <UiText style={[styles.hint, { color: theme.colors.muted }]}>
-              {translate("merchantStoreCategoryHint")}
-            </UiText>
-
-            {mainCategories.length === 0 ? (
-              <UiText style={[styles.errorText, { color: theme.mode === "light" ? theme.colors.dangerText : theme.colors.danger }]}>
-                {translate("merchantNoCategories")}
-              </UiText>
-            ) : (
-              <View style={styles.categoryGrid}>
-                {mainCategories.map((category) => (
-                  <PressableSurface
-                    key={category.id}
-                    accessibilityRole="button"
-                    accessibilityLabel={getLocalizedMerchantCategoryLabel(category.id, category.label, language)}
-                    accessibilityState={{ selected: categoryId === category.id }}
-                    onPress={() => {
-                      setValue("category", category.id, { shouldValidate: true });
-                      setValue("subcategories", [], { shouldValidate: true });
-                    }}
-                    style={[
-                      styles.categoryOption,
-                      {
-                        borderColor: categoryId === category.id ? (theme.mode === "light" ? theme.colors.accent : theme.colors.accentMuted) : theme.colors.border,
-                        backgroundColor: categoryId === category.id ? (theme.mode === "light" ? theme.colors.accent : theme.colors.surfaceSecondary) : theme.colors.surfaceMuted
-                      }
-                    ]}
-                  >
-                    <UiText style={[styles.categoryText, { color: categoryId === category.id && theme.mode === "dark" ? theme.colors.accentMuted : theme.colors.foreground }]}>
-                      {getLocalizedMerchantCategoryLabel(category.id, category.label, language)}
-                    </UiText>
-                  </PressableSurface>
-                ))}
-              </View>
-            )}
-            {fieldError(errors.category?.message) ? (
-              <UiText style={[styles.errorText, { color: theme.mode === "light" ? theme.colors.dangerText : theme.colors.danger }]}>
-                {fieldError(errors.category?.message)}
-              </UiText>
-            ) : null}
-
-            {categoryId ? (
-              <View style={styles.subcategoryGroup}>
-                <UiText style={[styles.fieldLabel, { color: theme.colors.muted }]}>
-                  {translate("merchantStoreSubcategoriesLabel")}
-                </UiText>
-                {subcategories.length === 0 ? (
-                  <UiText style={[styles.hint, { color: theme.colors.muted }]}>
-                    {translate("merchantNoSubcategories")}
-                  </UiText>
-                ) : (
-                  <View style={styles.chipList}>
-                    {subcategories.map((category) => {
-                      const selected = selectedSubcategories.includes(category.id);
-                      return (
-                        <PressableSurface
-                          key={category.id}
-                          accessibilityRole="button"
-                          accessibilityLabel={getLocalizedMerchantCategoryLabel(category.id, category.label, language)}
-                          accessibilityState={{ selected }}
-                          onPress={() => {
-                            const next = selected
-                              ? selectedSubcategories.filter((id) => id !== category.id)
-                              : [...selectedSubcategories, category.id];
-                            setValue("subcategories", next, { shouldValidate: true });
-                          }}
-                          style={[
-                            styles.chip,
-                            {
-                              borderColor: selected ? (theme.mode === "light" ? theme.colors.accent : theme.colors.accentMuted) : theme.colors.border,
-                              backgroundColor: selected ? (theme.mode === "light" ? theme.colors.accent : theme.colors.surfaceSecondary) : theme.colors.surfaceMuted
-                            }
-                          ]}
-                        >
-                          <UiText style={[styles.chipText, { color: selected && theme.mode === "dark" ? theme.colors.accentMuted : theme.colors.foreground }]}>
-                            {getLocalizedMerchantCategoryLabel(category.id, category.label, language)}
-                          </UiText>
-                        </PressableSurface>
-                      );
-                    })}
-                  </View>
-                )}
-                <UiText style={[styles.hint, { color: theme.colors.muted }]}>
-                  {translate("merchantStoreSubcategoriesHint")}
-                </UiText>
-              </View>
-            ) : null}
-          </Card>
-
-          <Card contentStyle={styles.section}>
-            <UiText style={[styles.sectionTitle, { color: theme.colors.foreground }]}>
               {translate("merchantStoreHoursTitle")}
             </UiText>
             <View style={styles.hoursRow}>
@@ -525,7 +384,7 @@ export default function MerchantOnboardingScreen() {
             </View>
           ) : null}
 
-          <Button label={translate("merchantStoreSubmit")} onPress={() => void submit()} loading={isSubmitting} disabled={mainCategories.length === 0} fullWidth />
+          <Button label={translate("merchantStoreSubmit")} onPress={() => void submit()} loading={isSubmitting} fullWidth />
         </ScrollView>
       </KeyboardAvoidingView>
 
