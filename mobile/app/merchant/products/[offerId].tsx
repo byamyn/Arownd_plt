@@ -333,7 +333,7 @@ export default function MerchantEditProductScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <AppHeader title={translate("merchantProductEditTitle")} leading={<Button label={translate("merchantProductEditBack")} onPress={() => router.replace("/merchant/products")} variant="ghost" size="sm" />} />
+          <AppHeader title={translate("merchantProductEditTitle")}/>
           <UiText style={[styles.subtitle, { color: theme.colors.muted }]}>{translate("merchantProductEditSubtitle")}</UiText>
 
                     <Card contentStyle={styles.card}>
@@ -705,9 +705,7 @@ function MessageScreen({
     <SafeAreaView edges={["top", "left", "right"]} style={[styles.safe, { backgroundColor: theme.colors.background }]}>
       <View style={styles.message}>
         <AppHeader
-          title={translate("merchantProductEditTitle")}
-          leading={<Button label={translate("merchantProductEditBack")} onPress={() => router.replace("/merchant/products")} variant="ghost" size="sm" />}
-        />
+          title={translate("merchantProductEditTitle")}        />
         <UiText style={[styles.subtitle, { color: theme.colors.muted }]}>
           {translate("merchantProductEditSubtitle")}
         </UiText>
