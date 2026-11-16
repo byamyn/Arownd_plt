@@ -12,8 +12,6 @@ import {
   fetchMerchantDashboard,
   fetchMerchantOrderDetails
 } from "@/lib/merchant";
-import { fetchMerchantProducts } from "@/lib/merchant-products";
-import { fetchMerchantAnalytics } from "@/lib/merchant-analytics";
 import { fetchStoreDetails, fetchStoreOffers, formatMarketPrice } from "@/lib/catalog";
 import { translate, type TranslationKey, useLanguage } from "@/lib/i18n";
 import { designTokens, useAppTheme, type AppTheme } from "@/lib/theme";
@@ -112,12 +110,15 @@ export default function MerchantEntryScreen() {
   }
 
   const data = dashboard.data;
-  const recentOrders = data.orders.slice(0, 5);
+  const recentOrders = data.orders.filter((order) => order.status === "pending").slice(0, 5);
 
   return (
     <SafeAreaView edges={["top", "left", "right"]} style={[styles.safe, { backgroundColor: theme.colors.background }]}>
       <RefreshableScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} refreshing={access.isFetching || dashboard.isFetching} onRefresh={() => { void Promise.all([access.refetch(), dashboard.refetch()]); }}>
-        <View style={styles.headerActions}>
+        <View style={styles.dashboardHeading}>
+          <UiText accessibilityRole="header" style={[styles.title, { color: theme.colors.foreground }]}>
+            {translate("merchantDashboardTitle")}
+          </UiText>
           <IconButton
             icon={<Icon name="settings" size={20} color={theme.colors.foreground} accessibilityHidden />}
             accessibilityLabel={translate("settingsTitle")}
@@ -126,21 +127,9 @@ export default function MerchantEntryScreen() {
           />
         </View>
 
-        <View style={styles.dashboardHeading}>
-          <UiText style={[styles.eyebrow, { color: theme.colors.accentMuted }]}>
-            {translate("merchantDashboardEyebrow")}
-          </UiText>
-          <UiText accessibilityRole="header" style={[styles.title, { color: theme.colors.foreground }]}>
-            {translate("merchantDashboardTitle")}
-          </UiText>
-          <UiText style={[styles.body, { color: theme.colors.muted }]}>
-            {translate("merchantDashboardSubtitle")}
-          </UiText>
-        </View>
-
-        <Card style={{ backgroundColor: theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface }} contentStyle={styles.storeCard}>
+        <Card style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.border, borderWidth: 1 }} contentStyle={styles.storeCard}>
           <View style={styles.storeHeader}>
-            <View style={[styles.storeAvatar, { backgroundColor: theme.mode === "dark" ? theme.colors.surfaceSecondary : theme.colors.surfaceMuted, borderColor: theme.colors.border }]}>
+            <View style={[styles.storeAvatar, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border }]}>
               {data.store.logo_url ? (
                 <UiImage uri={data.store.logo_url} accessibilityLabel={data.store.name} aspectRatio={1} style={styles.storeImage} />
               ) : (
@@ -156,7 +145,7 @@ export default function MerchantEntryScreen() {
               </UiText>
               <View style={styles.storeBadges}>
                 <MerchantStatusBadge label={data.store.is_verified ? translate("merchantStoreVerified") : translate("merchantStoreNotVerified")} tone={data.store.is_verified ? "success" : "warning"} />
-                <View style={[styles.statusPill, { backgroundColor: theme.mode === "dark" ? theme.colors.surfaceSecondary : theme.colors.surfaceMuted }]}>
+                <View style={[styles.statusPill, { backgroundColor: theme.colors.surfaceSecondary }]}>
                   <UiText style={[styles.statusPillText, { color: theme.colors.muted }]}>
                     {translate("merchantStoreRating")}: {data.store.rating == null ? "—" : data.store.rating.toFixed(1)}
                   </UiText>
@@ -235,41 +224,6 @@ export default function MerchantEntryScreen() {
             ))}
           </Card>
         )}
-
-
-        <View style={styles.sectionHeading}>
-          <UiText style={[styles.sectionTitle, { color: theme.colors.foreground }]}>
-            {translate("merchantManagementTitle")}
-          </UiText>
-        </View>
-        <View style={styles.managementGrid}>
-          {[
-            { key: "orders", label: translate("merchantManageOrders"), icon: "shopping-bag", path: "/merchant/orders" },
-            { key: "products", label: translate("merchantManageProducts"), icon: "package", path: "/merchant/products" },
-            { key: "addProduct", label: translate("merchantAddProductShortcut"), icon: "plus", path: "/merchant/products/new" },
-            { key: "analytics", label: translate("merchantAnalyticsTitle"), icon: "layout-grid", path: "/merchant/analytics" }
-          ].map((item) => (
-            <PressableSurface
-              key={item.key}
-              accessibilityRole="button"
-              accessibilityLabel={item.label}
-              onPress={() => {
-                if (storeId && item.key === "products") void queryClient.prefetchQuery({ queryKey: ["merchant-products", storeId], queryFn: () => fetchMerchantProducts(storeId), staleTime: 30_000 });
-                if (storeId && item.key === "analytics") void queryClient.prefetchQuery({ queryKey: ["merchant-analytics", storeId], queryFn: () => fetchMerchantAnalytics(storeId), staleTime: 30_000 });
-                router.push(item.path as "/merchant/orders" | "/merchant/products" | "/merchant/products/new" | "/merchant/analytics");
-              }}
-              style={[styles.managementTile, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}
-            >
-              <View style={[styles.managementIcon, { backgroundColor: theme.mode === "dark" ? theme.colors.surfaceSecondary : theme.colors.surfaceMuted }]}>
-                <Icon name={item.icon as "shopping-bag" | "package" | "layout-grid" | "plus"} color={theme.colors.accentMuted} size={20} accessibilityHidden />
-              </View>
-              <View style={styles.managementTileFooter}>
-                <UiText style={[styles.managementLabel, { color: theme.colors.foreground }]}>{item.label}</UiText>
-                <Icon name="chevron-left" color={theme.colors.muted} size={17} accessibilityHidden />
-              </View>
-            </PressableSurface>
-          ))}
-        </View>
 
 
       </RefreshableScrollView>
@@ -355,8 +309,7 @@ function createStyles(theme: AppTheme) {
   return StyleSheet.create({
     safe: { flex: 1 },
     content: { padding: designTokens.spacing.xl, paddingBottom: designTokens.spacing.xxl, gap: designTokens.spacing.xl },
-    headerActions: { flexDirection: "row", justifyContent: "flex-end" },
-    dashboardHeading: { alignItems: "flex-start", gap: designTokens.spacing.xs },
+    dashboardHeading: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: designTokens.spacing.md },
     entryContent: { flexGrow: 1, padding: designTokens.spacing.xl, gap: designTokens.spacing.xl },
     header: { alignItems: "flex-start", gap: designTokens.spacing.sm },
     backButton: { minHeight: 42, alignSelf: "flex-start", justifyContent: "center", paddingHorizontal: 3 },
@@ -369,11 +322,6 @@ function createStyles(theme: AppTheme) {
     storeHeader: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md },
     storeAvatar: { width: 58, height: 58, borderWidth: 1, borderRadius: designTokens.radius.pill, overflow: "hidden", alignItems: "center", justifyContent: "center" },
     storeActions: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.sm },
-    managementGrid: { flexDirection: "row", flexWrap: "wrap", gap: designTokens.spacing.sm },
-    managementTile: { width: "48%", flexGrow: 1, minHeight: 120, borderWidth: 1, borderRadius: designTokens.radius.lg, padding: designTokens.spacing.md, justifyContent: "space-between", gap: designTokens.spacing.md },
-    managementTileFooter: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: designTokens.spacing.xs },
-    managementIcon: { width: 42, height: 42, borderRadius: designTokens.radius.md, alignItems: "center", justifyContent: "center" },
-    managementLabel: { flex: 1, fontSize: designTokens.typography.caption + 1, lineHeight: 18, fontWeight: designTokens.fontWeights.bold, textAlign: "auto" },
     storeImage: { width: "100%", height: "100%" },
     storeAvatarText: { fontSize: designTokens.typography.display - 4, fontWeight: designTokens.fontWeights.extrabold },
     storeInfo: { flex: 1, alignItems: "flex-start", gap: designTokens.spacing.xs },
