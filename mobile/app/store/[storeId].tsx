@@ -97,8 +97,8 @@ export default function StoreDetailsScreen() {
     }
   });
   useEffect(() => {
-    if (ownerSettings.data && !ownerEditMode) setOwnerDraft(ownerSettings.data);
-  }, [ownerSettings.data, ownerEditMode]);
+    if (ownerSettings.data && (!ownerEditMode || !ownerDraft)) setOwnerDraft(ownerSettings.data);
+  }, [ownerSettings.data, ownerEditMode, ownerDraft]);
   const [tab, setTab] = useState<StoreTab>("products");
   const [search, setSearch] = useState("");
   const store = useQuery({
@@ -335,7 +335,7 @@ export default function StoreDetailsScreen() {
                 <Button label={translate("merchantStoreSettingsTitle")} variant="ghost" size="sm" onPress={() => router.push("/merchant/settings")} startIcon={<Icon name="settings" size={16} color={theme.colors.muted} accessibilityHidden />} />
               </>
             ) : (
-              <Button label={translate("merchantStoreCustomize")} onPress={() => { setOwnerDraft(ownerSettings.data ?? null); setOwnerEditMode(true); }} variant="primary" fullWidth startIcon={<Icon name="palette" size={18} color={theme.colors.accentForeground} accessibilityHidden />} />
+              <Button label={translate("merchantStoreCustomize")} onPress={() => { setOwnerDraft(ownerSettings.data ?? null); setOwnerEditMode(true); }} disabled={ownerSettings.isPending || ownerSettings.isError} variant="primary" fullWidth startIcon={<Icon name="palette" size={18} color={theme.colors.accentForeground} accessibilityHidden />} />
             )}
           </View>
         ) : null}
