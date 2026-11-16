@@ -1,5 +1,5 @@
 export const brandColors = {
-  primary: "#FFF01F",
+  primary: "#FFFF00",
   primaryHover: "#F0E100",
   primaryPressed: "#D9CC00",
   black: "#000000",
@@ -53,7 +53,7 @@ export const themeColors = {
     border: "#262626",
     input: "#262626",
     inputBorder: "#707070",
-    focus: "#FFF01F"
+    focus: "#FFFF00"
   }
 } as const;
 
