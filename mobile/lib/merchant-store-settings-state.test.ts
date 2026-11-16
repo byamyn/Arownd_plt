@@ -14,7 +14,9 @@ const valid = {
   address_line: "شارع الاستقلال رقم 10",
   opening_hours: { open: "09:00", close: "20:00", closed_days: [5] },
   instagram_url: "",
-  facebook_url: ""
+  facebook_url: "",
+  tiktok_url: "",
+  website_url: ""
 };
 
 describe("MerchantStoreSettingsSchema", () => {
@@ -62,8 +64,12 @@ describe("MerchantStoreSettingsSchema", () => {
     expect(MerchantStoreSettingsSchema.safeParse({
       ...valid,
       instagram_url: "https://instagram.com/example",
-      facebook_url: "https://facebook.com/example"
+      facebook_url: "https://facebook.com/example",
+      tiktok_url: "https://www.tiktok.com/@example",
+      website_url: "https://example.com"
     }).success).toBe(true);
+    expect(MerchantStoreSettingsSchema.safeParse({ ...valid, tiktok_url: "javascript:alert(1)" }).success).toBe(false);
+    expect(MerchantStoreSettingsSchema.safeParse({ ...valid, website_url: "http://example.com" }).success).toBe(false);
     expect(MerchantStoreSettingsSchema.safeParse({
       ...valid,
       opening_hours: { ...valid.opening_hours, open: "29:90" }
