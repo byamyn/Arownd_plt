@@ -8,6 +8,7 @@ import { CustomerScreen, CustomerSearch, EmptyState, ErrorState, ProductTile, Se
 import { FavoriteButton } from "@/components/favorite-button";
 import { fetchProductDetails, fetchProductOffers, fetchStoreDetails, fetchStoreOffers, formatMarketPrice, getPrimaryImage } from "@/lib/catalog";
 import { fetchBrowsingCurrencyCode } from "@/lib/country-service";
+import { fetchMerchantAccess } from "@/lib/merchant";
 import { fetchApprovedReviews } from "@/lib/reviews";
 import { translate, useLanguage } from "@/lib/i18n";
 import { ReviewPanel } from "@/components/review-panel";
@@ -61,6 +62,7 @@ export default function StoreDetailsScreen() {
   const theme = useAppTheme();
   const queryClient = useQueryClient();
   const browsingCurrency = useQuery({ queryKey: ["browsing-country-currency"], queryFn: fetchBrowsingCurrencyCode, staleTime: 60_000 });
+  const merchantAccess = useQuery({ queryKey: ["merchant-access"], queryFn: fetchMerchantAccess, retry: false, staleTime: 30_000 });
   const [tab, setTab] = useState<StoreTab>("products");
   const [search, setSearch] = useState("");
   const store = useQuery({
@@ -95,6 +97,8 @@ export default function StoreDetailsScreen() {
   if (!store.data) return <CustomerScreen><EmptyState title={translate("detailNotFound")} hint={translate("storeNoDescription")} /></CustomerScreen>;
 
   const details = store.data;
+  const isStoreOwner = merchantAccess.data?.status === "merchant_ready" &&
+    merchantAccess.data.store?.id === details.id;
   return (
     <CustomerScreen
       refreshing={store.isFetching || (tab === "products" && offers.isFetching)}
@@ -185,6 +189,15 @@ export default function StoreDetailsScreen() {
             variant="outline"
             fullWidth
             startIcon={<Icon name="navigation" size={18} color={theme.colors.foreground} accessibilityHidden />}
+          />
+        ) : null}
+        {isStoreOwner ? (
+          <Button
+            label={translate("merchantStoreSettingsTitle")}
+            onPress={() => router.push("/merchant/settings")}
+            variant="primary"
+            fullWidth
+            startIcon={<Icon name="settings" size={18} color={theme.colors.accentForeground} accessibilityHidden />}
           />
         ) : null}
       </Card>
