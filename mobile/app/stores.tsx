@@ -95,6 +95,7 @@ export default function StoresScreen() {
                   commune={store.commune}
                   rating={store.rating}
                   verified={store.is_verified}
+                  onDirections={store.latitude != null && store.longitude != null ? () => router.push({ pathname: "/map", params: { storeId: store.id, directions: "1" } }) : undefined}
                   onPress={() => {
                     void queryClient.prefetchQuery({ queryKey: ["customer-store", store.id], queryFn: () => fetchStoreDetails(store.id), staleTime: 60_000 });
                     void queryClient.prefetchQuery({ queryKey: ["customer-store-offers", store.id], queryFn: () => fetchStoreOffers(store.id), staleTime: 30_000 });

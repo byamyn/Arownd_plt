@@ -109,7 +109,7 @@ export function ProductTile({ name, store, price, imageUrl, onPress, style }: {
   );
 }
 
-export function StoreTile({ name, description, logoUrl, commune, rating, verified = false, onPress }: {
+export function StoreTile({ name, description, logoUrl, commune, rating, verified = false, onPress, onDirections }: {
   name: string;
   description?: string | null | undefined;
   logoUrl?: string | null | undefined;
@@ -117,16 +117,18 @@ export function StoreTile({ name, description, logoUrl, commune, rating, verifie
   rating?: number | null | undefined;
   verified?: boolean;
   onPress?: () => void;
+  onDirections?: () => void;
 }) {
   const theme = useAppTheme();
   return (
-    <PressableSurface
-      accessibilityRole="button"
-      accessibilityLabel={`${name}${commune ? `، ${commune}` : ""}${rating != null ? `، ${rating.toFixed(1)}` : ""}${verified ? `، ${translate("storeVerified")}` : ""}`}
-      onPress={onPress}
-      disabled={!onPress}
-      style={[styles.storeTile, { backgroundColor: theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface, borderWidth: theme.mode === "light" ? 0 : 1, borderColor: theme.colors.border }]}
-    >
+    <View style={styles.storeTileRow}>
+      <PressableSurface
+        accessibilityRole="button"
+        accessibilityLabel={`${name}${commune ? `، ${commune}` : ""}${rating != null ? `، ${rating.toFixed(1)}` : ""}${verified ? `، ${translate("storeVerified")}` : ""}`}
+        onPress={onPress}
+        disabled={!onPress}
+        style={[styles.storeTile, { flex: 1, backgroundColor: theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface, borderWidth: theme.mode === "light" ? 0 : 1, borderColor: theme.colors.border }]}
+      >
       <View style={[styles.storeLogo, { backgroundColor: theme.mode === "dark" ? theme.colors.surfaceSecondary : theme.colors.surfaceMuted }]}>
         {logoUrl ? <UiImage uri={logoUrl} accessibilityLabel={name} aspectRatio={1} style={StyleSheet.absoluteFill} /> : <Icon name="store" size={28} color={theme.colors.subtle} accessibilityHidden />}
       </View>
@@ -138,8 +140,13 @@ export function StoreTile({ name, description, logoUrl, commune, rating, verifie
         <Caption numberOfLines={1}>{commune || description || translate("storeNoDescription")}</Caption>
         {rating != null ? <RatingStars value={rating} size={14} showValue /> : null}
       </View>
-
-    </PressableSurface>
+      </PressableSurface>
+      {onDirections ? (
+        <PressableSurface accessibilityRole="button" accessibilityLabel={translate("mapDirections")} onPress={onDirections} style={[styles.storeDirectionsButton, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border }]}>
+          <Icon name="navigation" size={19} color={theme.colors.foreground} accessibilityHidden />
+        </PressableSurface>
+      ) : null}
+    </View>
   );
 }
 
@@ -157,7 +164,9 @@ const styles = StyleSheet.create({
   productContent: { padding: designTokens.spacing.sm + 1, gap: designTokens.spacing.xs + 1 },
   productImage: { height: 132, borderRadius: designTokens.radius.md, overflow: "hidden", alignItems: "center", justifyContent: "center" },
   productName: { minHeight: 38 },
+  storeTileRow: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.sm },
   storeTile: { minHeight: 82, borderRadius: designTokens.radius.lg - 1, padding: designTokens.spacing.md - 1, flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md - 1 },
+  storeDirectionsButton: { width: 46, height: 46, borderRadius: designTokens.radius.md, borderWidth: 1, alignItems: "center", justifyContent: "center" },
   storeLogo: { width: 54, height: 54, borderRadius: designTokens.radius.md + 2, overflow: "hidden", alignItems: "center", justifyContent: "center" },
   storeInfo: { flex: 1, gap: designTokens.spacing.xs, alignItems: "flex-start" },
 });

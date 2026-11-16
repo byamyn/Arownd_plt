@@ -9,7 +9,7 @@ import {
   UserLocation
 } from "@maplibre/maplibre-react-native";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import {
   ActivityIndicator,
   Alert,
@@ -81,6 +81,7 @@ function StoreMapMarker() {
 export default function MapScreen() {
   const theme = useAppTheme();
   const queryClient = useQueryClient();
+  const { storeId: requestedStoreId, directions: requestedDirections } = useLocalSearchParams<{ storeId?: string; directions?: string }>();
   const { language } = useLanguage();
   const isDark = theme.mode === "dark";
   const styleUrl = isDark ? MAP_DARK_STYLE : MAP_LIGHT_STYLE;
@@ -96,6 +97,7 @@ export default function MapScreen() {
   const watchSubscriptionRef = useRef<Location.LocationSubscription | null>(null);
   const lastRerouteAtRef = useRef(0);
   const navigationRef = useRef<NavigationSession | null>(null);
+  const hasAutoStartedDirectionsRef = useRef(false);
 
   navigationRef.current = navigation;
 
@@ -113,6 +115,11 @@ export default function MapScreen() {
   });
 
   const selectedStore = stores.data?.find((store) => store.id === selectedStoreId) ?? null;
+
+  useEffect(() => {
+    if (requestedDirections !== "1" || !requestedStoreId || !stores.data || selectedStoreId) return;
+    if (stores.data.some((store) => store.id === requestedStoreId)) setSelectedStoreId(requestedStoreId);
+  }, [requestedDirections, requestedStoreId, stores.data, selectedStoreId]);
 
   const visibleStores = useMemo(() => {
     const allStores = stores.data ?? [];
@@ -262,6 +269,12 @@ export default function MapScreen() {
       setIsStartingNavigation(false);
     }
   };
+
+  useEffect(() => {
+    if (requestedDirections !== "1" || !selectedStore || selectedStore.id !== requestedStoreId || hasAutoStartedDirectionsRef.current) return;
+    hasAutoStartedDirectionsRef.current = true;
+    void startNavigation();
+  }, [requestedDirections, requestedStoreId, selectedStore]);
 
   const stopNavigation = () => {
     setNavigation(null);
