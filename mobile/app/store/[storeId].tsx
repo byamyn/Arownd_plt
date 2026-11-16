@@ -281,6 +281,12 @@ export default function StoreDetailsScreen() {
             startIcon={<Icon name="navigation" size={18} color={theme.colors.foreground} accessibilityHidden />}
           />
         ) : null}
+        {isStoreOwner && ownerInlineField ? (
+          <View style={styles.ownerInlineActions}>
+            <Button label={translate("merchantStoreSettingsSave")} size="sm" onPress={() => ownerSave.mutate()} loading={ownerSave.isPending} disabled={!ownerDraft || ownerSave.isPending || ownerSettings.isPending} />
+            <Button label={translate("merchantStoreEditCancel")} size="sm" variant="ghost" disabled={ownerSave.isPending} onPress={() => { setOwnerDraft(ownerSettings.data ?? null); setOwnerInlineField(null); ownerSave.reset(); }} />
+          </View>
+        ) : null}
         {isStoreOwner ? (
           <View style={styles.ownerEditor}>
             {ownerEditMode ? (
@@ -434,6 +440,9 @@ export default function StoreDetailsScreen() {
 const styles = StyleSheet.create({
   storeHero: { padding: designTokens.spacing.lg, gap: designTokens.spacing.md },
   ownerEditor: { gap: designTokens.spacing.md, paddingTop: designTokens.spacing.sm, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: "#D1D5DB" },
+  ownerInlineActions: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.sm },
+  inlineEditable: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.xs, maxWidth: "100%" },
+  inlineField: { width: "100%", flexShrink: 1 },
   ownerEditorTitle: { fontSize: designTokens.typography.subtitle, fontWeight: designTokens.fontWeights.bold, textAlign: "auto" },
   ownerEditorHint: { fontSize: designTokens.typography.caption, textAlign: "auto" },
   ownerTimeField: { flex: 1, minWidth: 120 },
