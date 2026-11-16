@@ -222,7 +222,11 @@ const styles = StyleSheet.create({
   content: { flex: 1, margin: 16, borderRadius: 18, overflow: "hidden" },
   webView: { flex: 1, backgroundColor: "transparent" },
   stateOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
     alignItems: "center",
     justifyContent: "center",
     gap: 14,
