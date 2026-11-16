@@ -89,6 +89,7 @@ export async function fetchMerchantCategories(): Promise<MerchantCategory[]> {
     .from("categories")
     .select("id, parent_id, label_ar, emoji")
     .eq("is_active", true)
+    .is("parent_id", null)
     .order("sort_order");
 
   if (error) throw error;
@@ -136,7 +137,7 @@ export async function createMerchantStore(
       closed_days: []
     },
     _category: values.category?.trim() || null,
-    _subcategories: values.subcategories
+    _subcategories: []
   });
 
   if (error) throw new Error(`${error.code ?? ""} ${error.message}`.trim());

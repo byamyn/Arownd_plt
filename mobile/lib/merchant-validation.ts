@@ -12,16 +12,7 @@ export const merchantStoreSchema = z.object({
   addressLine: z.string().trim().min(4, "merchantValidationAddress").max(300, "merchantValidationAddress"),
   open: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "merchantValidationTime"),
   close: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "merchantValidationTime"),
-  category: z.string().trim().max(100).nullable().optional(),
-  subcategories: z.array(z.string().min(1)).max(30, "merchantValidationSubcategories").default([])
-}).superRefine((value, context) => {
-  if (new Set(value.subcategories).size !== value.subcategories.length) {
-    context.addIssue({
-      code: "custom",
-      path: ["subcategories"],
-      message: "merchantValidationSubcategories"
-    });
-  }
+  category: z.string().trim().max(100).nullable().optional()
 });
 
 export type MerchantStoreFormInput = z.input<typeof merchantStoreSchema>;

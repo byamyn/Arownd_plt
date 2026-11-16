@@ -7,39 +7,29 @@ import {
 import type { MerchantCategory } from "@/lib/merchant";
 
 const categories: MerchantCategory[] = [
-  { id: "fashion", parentId: null, label: "الأزياء", emoji: "👗" },
-  { id: "clothes", parentId: "fashion", label: "الملابس", emoji: "👕" },
-  { id: "shoes", parentId: "fashion", label: "الأحذية", emoji: "👟" },
-  { id: "books", parentId: null, label: "الكتب", emoji: "📚" },
-  { id: "orphan", parentId: "missing-parent", label: "تصنيف مستقل", emoji: "🛍️" }
+  { id: "fashion", parentId: null, label: "الأزياء والأناقة", emoji: "👗" },
+  { id: "electronics", parentId: null, label: "التكنولوجيا والأجهزة الإلكترونية", emoji: "📱" },
+  { id: "beauty", parentId: null, label: "الجمال والعناية", emoji: "✨" },
+  { id: "home", parentId: null, label: "المنزل والأثاث", emoji: "🏠" },
+  { id: "misc", parentId: null, label: "مستلزمات ومنتجات متنوعة", emoji: "🛍️" },
+  { id: "old-child", parentId: "fashion", label: "فئة فرعية قديمة", emoji: "👕" }
 ];
 
-describe("groupMerchantCategories", () => {
-  it("groups child categories under their parent and preserves root order", () => {
-    expect(groupMerchantCategories(categories)).toEqual([
-      {
-        parent: categories[0],
-        children: [categories[1], categories[2]]
-      },
-      {
-        parent: categories[3],
-        children: []
-      },
-      {
-        parent: categories[4],
-        children: []
-      }
-    ]);
+describe("marketplace main categories", () => {
+  it("returns only root categories and preserves their order", () => {
+    expect(groupMerchantCategories(categories)).toEqual(
+      categories.slice(0, 5).map((parent) => ({ parent, children: [] }))
+    );
   });
 
-  it("allows choosing leaf categories and roots without children only", () => {
+  it("makes only the five root categories selectable", () => {
     const groups = groupMerchantCategories(categories);
-
     expect(getSelectableMerchantCategories(groups).map((category) => category.id)).toEqual([
-      "clothes",
-      "shoes",
-      "books",
-      "orphan"
+      "fashion",
+      "electronics",
+      "beauty",
+      "home",
+      "misc"
     ]);
   });
 

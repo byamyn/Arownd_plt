@@ -136,9 +136,12 @@ describe("getOfferVariantOptions", () => {
 });
 
 describe("getCategoryFilterIds", () => {
-  it("includes child category identifiers for a main category", () => {
-    expect(getCategoryFilterIds("fashion")).toContain("shoes");
-    expect(getCategoryFilterIds("fashion")).toContain("bags");
+  it("filters by the selected main category only", () => {
+    expect(getCategoryFilterIds("fashion")).toEqual(["fashion"]);
+    expect(getCategoryFilterIds("electronics")).toEqual(["electronics"]);
+    expect(getCategoryFilterIds("beauty")).toEqual(["beauty"]);
+    expect(getCategoryFilterIds("home")).toEqual(["home"]);
+    expect(getCategoryFilterIds("misc")).toEqual(["misc"]);
   });
 
   it("keeps unknown category identifiers intact", () => {

@@ -158,21 +158,8 @@ export async function fetchVerifiedStoresByRegion(countryCode: string, regionId:
   return FeaturedStoreSchema.array().parse(data as unknown);
 }
 
-const CATEGORY_FILTERS: Record<string, readonly string[]> = {
-  fashion: ["fashion", "clothes", "shoes", "bags"],
-  electronics: ["electronics", "phones", "computers", "gadgets", "phone-accessories"],
-  beauty: ["beauty", "perfumes", "makeup", "skincare"],
-  home: ["home", "furniture", "home-tools", "decor", "kitchenware"],
-  kids: ["kids", "kids-clothes", "toys", "kids-essentials"],
-  food: ["food", "sweets", "groceries", "home-food"],
-  sports: ["sports", "sportswear", "sports-gear", "hobbies"],
-  "gifts-crafts": ["gifts-crafts", "gifts", "handmade", "stationery"],
-  digital: ["digital", "design", "web-dev", "digital-services", "digital-products"],
-  cars: ["cars", "car-accessories", "car-parts", "car-maintenance"]
-};
-
 export function getCategoryFilterIds(category: string): readonly string[] {
-  return CATEGORY_FILTERS[category] ?? [category];
+  return [category];
 }
 
 export async function searchCatalogProducts(query: string, category?: string): Promise<HomeProduct[]> {

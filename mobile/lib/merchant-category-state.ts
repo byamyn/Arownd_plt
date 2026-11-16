@@ -8,21 +8,13 @@ export type MerchantCategoryGroup = {
 export function groupMerchantCategories(
   categories: MerchantCategory[]
 ): MerchantCategoryGroup[] {
-  const categoryIds = new Set(categories.map((category) => category.id));
-  const roots = categories.filter(
-    (category) => category.parentId === null || !categoryIds.has(category.parentId)
-  );
-
-  return roots.map((parent) => ({
-    parent,
-    children: categories.filter((category) => category.parentId === parent.id)
-  }));
+  return categories
+    .filter((category) => category.parentId === null)
+    .map((parent) => ({ parent, children: [] }));
 }
 
 export function getSelectableMerchantCategories(
   groups: MerchantCategoryGroup[]
 ): MerchantCategory[] {
-  return groups.flatMap((group) =>
-    group.children.length > 0 ? group.children : [group.parent]
-  );
+  return groups.map((group) => group.parent);
 }
