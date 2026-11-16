@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  getMerchantProductInputErrors,
   parseMerchantOptionList,
   validateMerchantProductInput
 } from "@/lib/merchant-product-create-state";
@@ -24,6 +25,15 @@ describe("parseMerchantOptionList", () => {
   it("rejects more than twenty values or values longer than forty characters", () => {
     expect(parseMerchantOptionList(Array.from({ length: 21 }, (_, index) => String(index)).join(","))).toBeNull();
     expect(parseMerchantOptionList("x".repeat(41))).toBeNull();
+  });
+});
+
+describe("getMerchantProductInputErrors", () => {
+  it("returns errors for the exact invalid fields", () => {
+    expect(getMerchantProductInputErrors({ ...validInput, name: "", price: "1.5", stock: "", category: "" })).toEqual({ name: "required", price: "invalid", stock: "required", category: "required" });
+  });
+  it("identifies malformed option lists on their own fields", () => {
+    expect(getMerchantProductInputErrors({ ...validInput, sizes: "x".repeat(41) })).toEqual({ sizes: "invalid_options" });
   });
 });
 

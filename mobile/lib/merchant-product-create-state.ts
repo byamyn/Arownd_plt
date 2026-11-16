@@ -31,6 +31,27 @@ export function parseMerchantOptionList(value: string): string[] | null {
   return unique;
 }
 
+export type MerchantProductField = "name" | "price" | "stock" | "category" | "brand" | "description" | "sizes" | "colors";
+export type MerchantProductFieldError = "required" | "invalid" | "too_long" | "too_large" | "invalid_options";
+export type MerchantProductFieldErrors = Partial<Record<MerchantProductField, MerchantProductFieldError>>;
+
+export function getMerchantProductInputErrors(input: { name: string; price: string; stock: string; category: string; brand: string; description: string; sizes: string; colors: string; }): MerchantProductFieldErrors {
+  const errors: MerchantProductFieldErrors = {};
+  const name = input.name.trim(), priceText = input.price.trim(), stockText = input.stock.trim();
+  const price = Number(priceText), stock = Number(stockText);
+  const sizes = merchantCategorySupportsSizes(input.category) ? parseMerchantOptionList(input.sizes) : [];
+  const colors = merchantCategorySupportsColors(input.category) ? parseMerchantOptionList(input.colors) : [];
+  if (!name) errors.name = "required"; else if (name.length < 2 || name.length > 120) errors.name = "too_long";
+  if (!priceText) errors.price = "required"; else if (!Number.isSafeInteger(price) || price <= 0) errors.price = "invalid"; else if (price > 50_000_000) errors.price = "too_large";
+  if (!stockText) errors.stock = "required"; else if (!Number.isInteger(stock) || stock < 0) errors.stock = "invalid"; else if (stock > 9999) errors.stock = "too_large";
+  if (!input.category.trim()) errors.category = "required";
+  if (input.brand.trim().length > 80) errors.brand = "too_long";
+  if (input.description.trim().length > 3000) errors.description = "too_long";
+  if (sizes === null) errors.sizes = "invalid_options";
+  if (colors === null) errors.colors = "invalid_options";
+  return errors;
+}
+
 export function validateMerchantProductInput(input: {
   name: string;
   price: string;
@@ -49,25 +70,7 @@ export function validateMerchantProductInput(input: {
   const sizes = merchantCategorySupportsSizes(input.category) ? parseMerchantOptionList(input.sizes) : [];
   const colors = merchantCategorySupportsColors(input.category) ? parseMerchantOptionList(input.colors) : [];
 
-  if (
-    name.length < 2 ||
-    name.length > 120 ||
-    !input.price.trim() ||
-    !Number.isSafeInteger(price) ||
-    price <= 0 ||
-    price > 50_000_000 ||
-    !input.stock.trim() ||
-    !Number.isInteger(stock) ||
-    stock < 0 ||
-    stock > 9999 ||
-    !input.category.trim() ||
-    brand.length > 80 ||
-    description.length > 3000 ||
-    sizes === null ||
-    colors === null
-  ) {
-    return null;
-  }
+  if (Object.keys(getMerchantProductInputErrors(input)).length > 0) return null;
 
   return {
     name,

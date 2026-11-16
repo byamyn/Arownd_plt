@@ -19,7 +19,9 @@ import {
   classifyMerchantProductCreateError,
   merchantCategorySupportsColors,
   merchantCategorySupportsSizes,
-  validateMerchantProductInput
+  getMerchantProductInputErrors,
+  validateMerchantProductInput,
+  type MerchantProductField
 } from "@/lib/merchant-product-create-state";
 import {
   PRODUCT_IMAGE_MAX_COUNT,
@@ -75,6 +77,7 @@ export default function MerchantNewProductScreen() {
   const [imagePickerBusy, setImagePickerBusy] = useState(false);
   const [imageError, setImageError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<MerchantProductField, string>>>({});
 
   const access = useQuery({
     queryKey: ["merchant-access"],
@@ -101,6 +104,8 @@ export default function MerchantNewProductScreen() {
   const showColors = merchantCategorySupportsColors(form.category);
 
   const update = (key: keyof ProductForm, value: string): void => {
+    setFieldErrors((current) => { const next = { ...current }; delete next[key]; if (key === "category") { delete next.sizes; delete next.colors; } return next; });
+    setSubmitError(null);
     if (key === "category") {
       setForm((current) => ({
         ...current,
@@ -168,14 +173,25 @@ export default function MerchantNewProductScreen() {
   const submit = async (): Promise<void> => {
     if (!storeId || submitting || imagePickerBusy) return;
 
-    const values = validateMerchantProductInput(form);
-    if (!values) {
-      setSubmitError(translate("merchantProductCreateValidation"));
+    const errors = getMerchantProductInputErrors(form);
+    if (Object.keys(errors).length > 0) {
+      const messageKeys = {
+        name: errors.name === "required" ? "merchantProductNameRequired" : "merchantProductNameInvalid",
+        price: errors.price === "required" ? "merchantProductPriceRequired" : errors.price === "too_large" ? "merchantProductPriceTooLarge" : "merchantProductPriceInvalid",
+        stock: errors.stock === "required" ? "merchantProductStockRequired" : errors.stock === "too_large" ? "merchantProductStockTooLarge" : "merchantProductStockInvalid",
+        category: "merchantProductCategoryRequired", brand: "merchantProductBrandTooLong", description: "merchantProductDescriptionTooLong", sizes: "merchantProductOptionsInvalid", colors: "merchantProductOptionsInvalid"
+      } as const;
+      const nextErrors = Object.fromEntries(Object.entries(errors).map(([field]) => [field, translate(messageKeys[field as MerchantProductField])])) as Partial<Record<MerchantProductField, string>>;
+      setFieldErrors(nextErrors);
+      if (errors.brand || errors.description || errors.sizes || errors.colors) setShowAdditionalDetails(true);
+      setSubmitError(null);
       return;
     }
-
+    const values = validateMerchantProductInput(form);
+    if (!values) return;
     setSubmitting(true);
     setSubmitError(null);
+    setFieldErrors({});
 
     try {
       await createMerchantProductOffer(storeId, values, selectedImages);
@@ -242,6 +258,8 @@ export default function MerchantNewProductScreen() {
         <ScrollView
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
+          automaticallyAdjustKeyboardInsets
+          keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}
           showsVerticalScrollIndicator={false}
         >
           <AppHeader title={translate("merchantProductCreateTitle")}/>
@@ -343,6 +361,7 @@ export default function MerchantNewProductScreen() {
                 maxLength={120}
                 textAlign="auto"
                 style={styles.input}
+                error={fieldErrors.name}
                 returnKeyType="next"
               />
             </FormField>
@@ -358,6 +377,8 @@ export default function MerchantNewProductScreen() {
                     placeholderTextColor={theme.colors.placeholder}
                     keyboardType="number-pad"
                     style={styles.input}
+                    error={fieldErrors.stock}
+                    error={fieldErrors.price}
                   />
                 </FormField>
               </View>
@@ -376,12 +397,12 @@ export default function MerchantNewProductScreen() {
               </View>
             </View>
 
-            <FormField label={translate("merchantProductCategoryLabel")} theme={theme}>
+            <FormField label={translate("merchantProductCategoryLabel")} error={fieldErrors.category} theme={theme}>
               <PressableSurface
                 accessibilityRole="button"
                 accessibilityLabel={translate("merchantProductCategoryLabel")}
                 onPress={() => setCategoryPickerOpen(true)}
-                style={[styles.selectButton, { borderColor: (theme.colors.inputBorder), backgroundColor: theme.colors.background }]}
+                style={[styles.selectButton, { borderColor: fieldErrors.category ? theme.colors.danger : theme.colors.inputBorder, backgroundColor: theme.colors.background }]}
               >
                 <UiText style={[styles.selectText, { color: selectedCategory ? theme.colors.foreground : theme.colors.placeholder }]}>
                   {selectedCategory
@@ -420,6 +441,7 @@ export default function MerchantNewProductScreen() {
                     maxLength={80}
                     textAlign="auto"
                     style={styles.input}
+                    error={fieldErrors.brand}
                   />
                 </FormField>
                 <FormField label={translate("merchantProductDescriptionLabel")} hint={translate("merchantProductDescriptionHint")} theme={theme}>
@@ -435,6 +457,7 @@ export default function MerchantNewProductScreen() {
                     textAlign="auto"
                     textAlignVertical="top"
                     style={[styles.input, styles.textarea]}
+                    error={fieldErrors.description}
                   />
                 </FormField>
               </>
@@ -456,6 +479,7 @@ export default function MerchantNewProductScreen() {
                       maxLength={850}
                       textAlign="auto"
                       style={styles.input}
+                      error={fieldErrors.sizes}
                     />
                   </FormField>
                 ) : null}
@@ -470,6 +494,7 @@ export default function MerchantNewProductScreen() {
                       maxLength={850}
                       textAlign="auto"
                       style={styles.input}
+                      error={fieldErrors.colors}
                     />
                   </FormField>
                 ) : null}
@@ -614,11 +639,13 @@ function CategoryOption({
 function FormField({
   label,
   hint,
+  error,
   theme,
   children
 }: {
   label: string;
   hint?: string;
+  error?: string;
   theme: AppTheme;
   children: ReactNode;
 }) {
@@ -627,7 +654,7 @@ function FormField({
     <View style={styles.field}>
       <UiText style={[styles.label, { color: theme.colors.foreground }]}>{label}</UiText>
       {children}
-      {hint ? <UiText style={[styles.hint, { color: theme.colors.subtle }]}>{hint}</UiText> : null}
+      {error ? <UiText accessibilityRole="alert" style={[styles.hint, { color: theme.colors.danger }]}>{error}</UiText> : hint ? <UiText style={[styles.hint, { color: theme.colors.subtle }]}>{hint}</UiText> : null}
     </View>
   );
 }

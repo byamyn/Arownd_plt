@@ -3,7 +3,7 @@ import * as Location from "expo-location";
 import * as ImagePicker from "expo-image-picker";
 import { Redirect, router } from "expo-router";
 import { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   Camera,
@@ -22,6 +22,10 @@ import { translate, useLanguage } from "@/lib/i18n";
 import { getRegionDisplayName, getRegionLevelDisplayName } from "@/lib/country-regions";
 import { fetchLocalizedMapStyle } from "@/lib/map-style";
 import { designTokens, useAppTheme, type AppTheme } from "@/lib/theme";
+
+const STORE_FIELD_ERROR_KEYS: Record<string, import("@/lib/i18n").TranslationKey> = {
+  name: "merchantStoreNameInvalid", description: "merchantStoreDescriptionTooLong", phone: "merchantStorePhoneInvalid", whatsapp: "merchantStoreWhatsappInvalid", commune: "merchantStoreCommuneInvalid", address_line: "merchantStoreAddressInvalid", region_id: "merchantStoreRegionRequired", secondary_region_id: "merchantStoreSecondaryRegionRequired", "opening_hours.open": "merchantStoreOpeningTimeInvalid", "opening_hours.close": "merchantStoreOpeningTimeInvalid", "opening_hours.closed_days": "merchantStoreClosedDaysInvalid", instagram_url: "merchantStoreSocialUrlInvalid", facebook_url: "merchantStoreSocialUrlInvalid", logo_url: "merchantStoreImageUrlInvalid", cover_url: "merchantStoreImageUrlInvalid", latitude: "merchantStoreCoordinatesInvalid"
+};
 
 const MAP_LIGHT_STYLE = "https://tiles.openfreemap.org/styles/liberty";
 const MAP_DARK_STYLE = "https://tiles.openfreemap.org/styles/dark";
@@ -58,10 +62,10 @@ export default function MerchantStoreSettingsScreen() {
   });
   const [formDirty, setFormDirty] = useState(false);
   const [formError, setFormError] = useState(false);
-  const [fieldErrors, setFieldErrors] = useState<Record<string, boolean>>({});
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [regionPickerOpen, setRegionPickerOpen] = useState(false);
   const [regionPickerLevel, setRegionPickerLevel] = useState<"primary" | "secondary">("primary");
-  const [imageBusy, setImageBusy] = useState<"logo" | null>(null);
+  const [imageBusy, setImageBusy] = useState<"logo" | "cover" | null>(null);
   const [imageError, setImageError] = useState(false);
   const [imageErrorDetail, setImageErrorDetail] = useState<string | null>(null);
   const [imageSaved, setImageSaved] = useState(false);
@@ -111,7 +115,7 @@ export default function MerchantStoreSettingsScreen() {
     setFormDirty(true);
     setRegionPickerOpen(false);
     setFormError(false);
-    setFieldErrors({});
+    setFieldErrors((current) => { const next = { ...current }; delete next.region_id; delete next.secondary_region_id; delete next.commune; return next; });
     mutation.reset();
   };
   const selectSecondaryRegion = (regionId: number) => {
@@ -120,7 +124,7 @@ export default function MerchantStoreSettingsScreen() {
     setFormDirty(true);
     setRegionPickerOpen(false);
     setFormError(false);
-    setFieldErrors({});
+    setFieldErrors((current) => { const next = { ...current }; delete next.secondary_region_id; return next; });
     mutation.reset();
   };
   const update = <K extends keyof MerchantStoreSettings>(key: K, value: MerchantStoreSettings[K]) => {
@@ -128,7 +132,12 @@ export default function MerchantStoreSettingsScreen() {
     setForm((current) => current ? { ...current, [key]: value } : current);
     setFormDirty(true);
     setFormError(false);
-    setFieldErrors({});
+    setFieldErrors((current) => {
+      const next = { ...current };
+      if (key === "opening_hours") { delete next["opening_hours.open"]; delete next["opening_hours.close"]; delete next["opening_hours.closed_days"]; }
+      else { delete next[String(key)]; if (key === "region_id") { delete next.secondary_region_id; delete next.commune; } }
+      return next;
+    });
     mutation.reset();
   };
   const updateHours = (key: "open" | "close", value: string) => {
@@ -209,9 +218,9 @@ export default function MerchantStoreSettingsScreen() {
     }
   };
 
-  const chooseStoreImage = async () => {
+  const chooseStoreImage = async (kind: "logo" | "cover") => {
     if (!storeId || imageBusy || mutation.isPending) return;
-    setImageBusy("logo");
+    setImageBusy(kind);
     setImageError(false);
     setImageErrorDetail(null);
     setImageSaved(false);
@@ -234,11 +243,12 @@ export default function MerchantStoreSettingsScreen() {
         setImageError(true);
         return;
       }
-      const uploaded = await uploadMerchantStoreImage(storeId, asset, "logo");
-      setForm((current) => current ? { ...current, logo_url: uploaded.url } : current);
+      const uploaded = await uploadMerchantStoreImage(storeId, asset, kind);
+      const imageField = kind === "logo" ? "logo_url" : "cover_url";
+      setForm((current) => current ? { ...current, [imageField]: uploaded.url } : current);
       queryClient.setQueryData<MerchantStoreSettings>(
         ["merchant-store-settings", storeId],
-        (current) => current ? { ...current, logo_url: uploaded.url } : current
+        (current) => current ? { ...current, [imageField]: uploaded.url } : current
       );
       setImageSaved(true);
       setImageCleanupPending(uploaded.cleanupPending);
@@ -264,18 +274,19 @@ export default function MerchantStoreSettingsScreen() {
   const submit = () => {
     if (imageBusy || locationBusy || mutation.isPending) return;
     if (regionOptions.data?.levels[1]?.is_required && form.secondary_region_id === null) {
-      setFieldErrors({ secondary_region_id: true });
-      setFormError(true);
+      setFieldErrors({ secondary_region_id: translate("merchantStoreSecondaryRegionRequired") });
+      setFormError(false);
       return;
     }
     const parsed = MerchantStoreSettingsSchema.safeParse(form);
     if (!parsed.success) {
-      const nextFieldErrors = parsed.error.issues.reduce<Record<string, boolean>>((errors, issue) => {
-        errors[issue.path.join(".")] = true;
+      const nextFieldErrors = parsed.error.issues.reduce<Record<string, string>>((errors, issue) => {
+        const path = issue.path.join(".");
+        errors[path] = translate(STORE_FIELD_ERROR_KEYS[path] ?? "merchantStoreFieldInvalid");
         return errors;
       }, {});
       setFieldErrors(nextFieldErrors);
-      setFormError(true);
+      setFormError(false);
       return;
     }
     setFieldErrors({});
@@ -284,7 +295,8 @@ export default function MerchantStoreSettingsScreen() {
 
   return (
     <SafeAreaView edges={["top", "left", "right", "bottom"]} style={[styles.safe, { backgroundColor: theme.colors.background }]}>
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <KeyboardAvoidingView style={styles.safe} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+      <ScrollView style={styles.safe} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}>
         <AppHeader
           title={translate("merchantStoreSettingsTitle")}        />
 
@@ -302,12 +314,19 @@ export default function MerchantStoreSettingsScreen() {
               <UiText style={[styles.brandingHint, { color: theme.colors.muted }]}>{translate("merchantStoreLogoHint")}</UiText>
               <Button
                 label={translate("merchantStoreImageUpload")}
-                onPress={() => void chooseStoreImage()}
+                onPress={() => void chooseStoreImage("logo")}
                 loading={imageBusy === "logo"}
                 disabled={imageBusy !== null || mutation.isPending}
                 variant="outline"
                 size="sm"
               />
+            </View>
+          </View>
+          <View style={styles.coverRow}>
+            {form.cover_url ? <UiImage uri={form.cover_url} accessibilityLabel={translate("merchantStoreCover")} aspectRatio={16 / 9} style={styles.coverPreview} /> : <View style={[styles.coverPreview, styles.imagePlaceholder, { backgroundColor: theme.colors.surfaceMuted }]}><Icon name="image" color={theme.colors.muted} size={28} accessibilityHidden /></View>}
+            <View style={styles.brandingDetails}>
+              <UiText style={[styles.brandingHint, { color: theme.colors.muted }]}>{translate("merchantStoreCover")}</UiText>
+              <Button label={translate("merchantStoreImageUpload")} onPress={() => void chooseStoreImage("cover")} loading={imageBusy === "cover"} disabled={imageBusy !== null || mutation.isPending} variant="outline" size="sm" />
             </View>
           </View>
           {imageError ? (
@@ -335,14 +354,14 @@ export default function MerchantStoreSettingsScreen() {
             <PressableSurface accessibilityRole="button" accessibilityLabel={regionOptions.data ? getRegionLevelDisplayName(regionOptions.data.selectedLevel, language) : "Region"} onPress={() => { setRegionPickerLevel("primary"); setRegionPickerOpen(true); }} disabled={mutation.isPending} style={[styles.input, styles.select, { backgroundColor: theme.colors.background, borderColor: theme.colors.inputBorder }]}>
               <UiText style={{ color: theme.colors.foreground, fontSize: designTokens.typography.body - 1, textAlign: "auto" }}>{selectedRegion ? getRegionDisplayName(selectedRegion, language) : regionOptions.data ? getRegionLevelDisplayName(regionOptions.data.selectedLevel, language) : ""}</UiText>
             </PressableSurface>
-            {fieldErrors.region_id ? <UiText style={[styles.error, { color: theme.mode === "light" ? theme.colors.dangerText : theme.colors.danger }]}>{translate("merchantStoreSettingsValidation")}</UiText> : null}
+            {fieldErrors.region_id ? <UiText accessibilityRole="alert" style={[styles.error, { color: theme.colors.danger }]}>{fieldErrors.region_id}</UiText> : null}
           </View>
           {regionOptions.data?.levels[1] ? <View style={styles.field}>
             <UiText style={[styles.label, { color: theme.colors.foreground }]}>{getRegionLevelDisplayName(regionOptions.data.levels[1], language)}</UiText>
             <PressableSurface accessibilityRole="button" accessibilityLabel={getRegionLevelDisplayName(regionOptions.data.levels[1], language)} onPress={() => { setRegionPickerLevel("secondary"); setRegionPickerOpen(true); }} disabled={mutation.isPending || !form.region_id || secondaryOptions.isPending || secondaryOptions.isError || secondaryOptions.data?.regions.length === 0} style={[styles.input, styles.select, { backgroundColor: theme.colors.background, borderColor: theme.colors.inputBorder }]}>
               <UiText style={{ color: theme.colors.foreground, fontSize: designTokens.typography.body - 1, textAlign: "auto" }}>{selectedSecondaryRegion ? getRegionDisplayName(selectedSecondaryRegion, language) : getRegionLevelDisplayName(regionOptions.data.levels[1], language)}</UiText>
             </PressableSurface>
-            {fieldErrors.secondary_region_id ? <UiText style={[styles.error, { color: theme.mode === "light" ? theme.colors.dangerText : theme.colors.danger }]}>{translate("merchantStoreSettingsValidation")}</UiText> : null}
+            {fieldErrors.secondary_region_id ? <UiText accessibilityRole="alert" style={[styles.error, { color: theme.colors.danger }]}>{fieldErrors.secondary_region_id}</UiText> : null}
           </View> : null}
           <Field label={translate("merchantStoreSettingsCommune")} value={form.commune} onChangeText={(value) => update("commune", value)} theme={theme} disabled={mutation.isPending} error={fieldErrors.commune} />
           <Field label={translate("merchantStoreSettingsAddress")} value={form.address_line} onChangeText={(value) => update("address_line", value)} theme={theme} hint={translate("merchantStoreSettingsAddressHint")} disabled={mutation.isPending} error={fieldErrors.address_line} />
@@ -354,6 +373,7 @@ export default function MerchantStoreSettingsScreen() {
                 : translate("merchantStoreMapLocationMissing")}
             </UiText>
             <UiText style={[styles.hint, { color: theme.colors.muted }]}>{translate("merchantStoreMapLocationHint")}</UiText>
+            {fieldErrors.latitude ? <UiText accessibilityRole="alert" style={[styles.error, { color: theme.colors.danger }]}>{fieldErrors.latitude}</UiText> : null}
             <View style={styles.mapLocationActions}>
               <Button
                 label={translate("merchantStoreMapChoose")}
@@ -389,7 +409,7 @@ export default function MerchantStoreSettingsScreen() {
             </View>
           </View>
           <UiText style={[styles.hint, { color: theme.colors.muted }]}>{translate("merchantStoreSettingsHoursHint")}</UiText>
-          {fieldErrors["opening_hours.closed_days"] ? <UiText style={[styles.error, { color: theme.mode === "light" ? theme.colors.dangerText : theme.colors.danger }]}>{translate("merchantStoreSettingsValidation")}</UiText> : null}
+          {fieldErrors["opening_hours.closed_days"] ? <UiText accessibilityRole="alert" style={[styles.error, { color: theme.colors.danger }]}>{fieldErrors["opening_hours.closed_days"]}</UiText> : null}
           <View style={styles.field}>
             <UiText style={[styles.label, { color: theme.colors.foreground }]}>{translate("merchantStoreSettingsClosedDays")}</UiText>
             <UiText style={[styles.hint, { color: theme.colors.muted }]}>{translate("merchantStoreSettingsClosedDaysHint")}</UiText>
@@ -411,7 +431,7 @@ export default function MerchantStoreSettingsScreen() {
           <Field label={translate("merchantStoreSettingsFacebook")} value={form.facebook_url} onChangeText={(value) => update("facebook_url", value)} theme={theme} keyboardType="url" disabled={mutation.isPending} error={fieldErrors.facebook_url} />
         </Card>
 
-        {formError ? <UiText style={[styles.error, { color: theme.mode === "light" ? theme.colors.dangerText : theme.colors.danger }]}>{translate(mutation.isError ? "merchantStoreSettingsSaveError" : "merchantStoreSettingsValidation")}</UiText> : null}
+        {formError && mutation.isError ? <UiText accessibilityRole="alert" style={[styles.error, { color: theme.mode === "light" ? theme.colors.dangerText : theme.colors.danger }]}>{translate("merchantStoreSettingsSaveError")}</UiText> : null}
         {mutation.isSuccess ? <UiText style={[styles.success, { color: theme.mode === "light" ? theme.colors.successText : theme.colors.success }]}>{translate("merchantStoreSettingsSaved")}</UiText> : null}
       </ScrollView>
 
@@ -419,6 +439,7 @@ export default function MerchantStoreSettingsScreen() {
         <Button label={translate("merchantStoreSettingsSave")} onPress={submit} loading={mutation.isPending} disabled={imageBusy !== null || locationBusy || mutation.isPending} fullWidth />
       </View>
 
+      </KeyboardAvoidingView>
       <BottomSheet visible={mapPickerOpen} onRequestClose={() => setMapPickerOpen(false)} maxHeight="92%">
         <View style={styles.mapPickerContent}>
           <View style={styles.modalHeader}>
@@ -525,7 +546,7 @@ export default function MerchantStoreSettingsScreen() {
   );
 }
 
-function Field({ label, value, onChangeText, theme, multiline = false, keyboardType = "default", maxLength, placeholder, hint, disabled = false, error = false }: {
+function Field({ label, value, onChangeText, theme, multiline = false, keyboardType = "default", maxLength, placeholder, hint, disabled = false, error }: {
   label: string;
   value: string;
   onChangeText: (value: string) => void;
@@ -536,12 +557,12 @@ function Field({ label, value, onChangeText, theme, multiline = false, keyboardT
   placeholder?: string;
   hint?: string;
   disabled?: boolean;
-  error?: boolean | undefined;
+  error?: string | undefined;
 }) {
   const styles = createStyles(theme);
   return <View style={styles.field}>
     <UiText style={[styles.label, { color: theme.colors.foreground }]}>{label}</UiText>
-    <TextField accessibilityLabel={label} value={value} onChangeText={onChangeText} editable={!disabled} keyboardType={keyboardType} multiline={multiline} maxLength={maxLength ?? (multiline ? 2000 : 300)} placeholder={placeholder} textAlign="auto" textAlignVertical={multiline ? "top" : "center"} placeholderTextColor={theme.colors.placeholder} error={error ? translate("merchantStoreSettingsValidation") : undefined} style={[styles.input, { color: theme.colors.foreground, backgroundColor: theme.colors.background }, multiline && styles.textarea]} />
+    <TextField accessibilityLabel={label} value={value} onChangeText={onChangeText} editable={!disabled} keyboardType={keyboardType} multiline={multiline} maxLength={maxLength ?? (multiline ? 2000 : 300)} placeholder={placeholder} textAlign="auto" textAlignVertical={multiline ? "top" : "center"} placeholderTextColor={theme.colors.placeholder} error={error} style={[styles.input, { color: theme.colors.foreground, backgroundColor: theme.colors.background }, multiline && styles.textarea]} />
     {hint ? <UiText style={[styles.hint, { color: theme.colors.muted }]}>{hint}</UiText> : null}
   </View>;
 }
@@ -577,6 +598,8 @@ function createStyles(theme: AppTheme) {
     brandingDetails: { flex: 1, alignItems: "flex-start", gap: designTokens.spacing.sm },
     brandingHint: { fontSize: designTokens.typography.caption, textAlign: "auto" },
     logoPreview: { width: 92, height: 92, borderRadius: designTokens.radius.pill },
+    coverRow: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md },
+    coverPreview: { width: 150, height: 84, borderRadius: designTokens.radius.md },
     hint: { fontSize: designTokens.typography.caption, textAlign: "auto" },
     imagePlaceholder: { alignItems: "center", justifyContent: "center" },
     modalHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
