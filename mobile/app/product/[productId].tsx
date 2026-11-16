@@ -178,38 +178,6 @@ export default function ProductDetailsScreen() {
         {productDetails.description?.trim() ? <UiText tone="muted" style={styles.description}>{productDetails.description.trim()}</UiText> : null}
       </Card>
 
-      <View style={styles.section}>
-        <UiText weight="800" style={styles.sectionTitle}>{translate("productOffersTitle")}</UiText>
-        {offers.isPending ? <LoadingState label={translate("stateLoading")} /> : offers.isError ? (
-          <ErrorState title={translate("catalogLoadError")} retryLabel={translate("retry")} busy={offers.isFetching} onRetry={() => void offers.refetch()} />
-        ) : productOffers.length === 0 ? (
-          <EmptyState icon="shopping-bag" title={translate("productNoOffers")} hint={translate("productNoDescription")} />
-        ) : productOffers.map((offer) => {
-          const active = selectedOffer?.id === offer.id;
-          const available = offer.is_available && offer.stock_quantity > 0;
-          return (
-            <OfferCard
-              key={offer.id}
-              accessibilityLabel={offer.store.name}
-              onPress={() => { setSelectedOfferId(offer.id); setSelectedImageIndex(0); setSize(""); setColor(""); setQuantity(1); addMutation.reset(); }}
-              style={[styles.offerCard, { borderColor: active ? theme.colors.accent : theme.colors.border, backgroundColor: active ? (theme.mode === "light" ? theme.colors.accent : theme.colors.surfaceMuted) : (theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface) }]}
-              compact
-              contentStyle={styles.offerCardContent}
-            >
-              <View style={styles.offerInfo}>
-                <UiText weight="800" style={[styles.offerStore, active && theme.mode === "dark" && { color: theme.colors.accentMuted }]}>{offer.store.name}</UiText>
-                {offer.store.commune || offer.store.address_line ? <UiText tone="muted" style={[styles.metaText, active && theme.mode === "light" && { color: theme.colors.accentForeground }]}>{offer.store.commune || offer.store.address_line}</UiText> : null}
-                <StockBadge
-                  label={available ? offer.stock_quantity <= 3 ? translate("productLowStock") : translate("productAvailable") : translate("productUnavailable")}
-                  tone={available ? offer.stock_quantity <= 3 ? "warning" : "success" : "danger"}
-                />
-              </View>
-              <PriceDisplay value={browsingCurrency.data ? formatMarketPrice(offer.price, browsingCurrency.data) : "—"} style={styles.offerPriceDisplay} />
-            </OfferCard>
-          );
-        })}
-      </View>
-
       {selectedOffer ? (
         <Card style={styles.purchaseCardSurface} contentStyle={styles.purchaseCard}>
           {variants.colors.length > 0 ? (
