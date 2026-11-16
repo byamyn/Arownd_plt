@@ -49,7 +49,7 @@ create table if not exists public.store_verification_requests (
   profile_snapshot jsonb not null,
   submitted_at timestamptz not null default now(),
   reviewed_at timestamptz,
-  reviewed_by uuid references auth.users(id) on delete set null,
+  reviewed_by uuid references auth.users(id) on delete restrict,
   review_note text,
   created_at timestamptz not null default now(),
   constraint store_verification_review_fields_check check (
@@ -302,20 +302,29 @@ begin
     raise exception 'verification_review_note_too_long';
   end if;
 
-  select r.* into v_request
+  select r.store_id into v_request.store_id
   from public.store_verification_requests r
-  where r.id = _request_id
-  for update;
-  if not found or v_request.status <> 'pending' then
+  where r.id = _request_id;
+  if not found then
     raise exception 'verification_request_not_pending';
   end if;
 
+  -- Lock the store before its request. The profile-change trigger uses the
+  -- same lock order, preventing a request/store deadlock during concurrent edits.
   select s.* into v_store
   from public.stores s
   where s.id = v_request.store_id
   for update;
   if not found then
     raise exception 'merchant_store_not_found';
+  end if;
+
+  select r.* into v_request
+  from public.store_verification_requests r
+  where r.id = _request_id
+  for update;
+  if not found or v_request.status <> 'pending' then
+    raise exception 'verification_request_not_pending';
   end if;
 
   v_snapshot := jsonb_build_object(
