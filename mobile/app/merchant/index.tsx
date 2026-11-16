@@ -14,6 +14,7 @@ import {
 } from "@/lib/merchant";
 import { fetchStoreDetails, fetchStoreOffers, formatMarketPrice } from "@/lib/catalog";
 import { translate, type TranslationKey, useLanguage } from "@/lib/i18n";
+import { VerifiedBadge } from "@/components/ui/identity";
 import { designTokens, useAppTheme, type AppTheme } from "@/lib/theme";
 import type { MerchantDashboardOrder } from "@/lib/merchant-dashboard-state";
 import { RefreshableScrollView, AppHeader, Button, Card, ErrorState, Icon, IconButton, Image as UiImage, MetricCardSkeleton, OrderCardSkeleton, MerchantStatusBadge, PriceDisplay, PressableSurface, Text as UiText } from "@/components/ui";
@@ -137,14 +138,14 @@ export default function MerchantEntryScreen() {
               )}
             </View>
             <View style={styles.storeInfo}>
-              <UiText style={[styles.storeName, { color: theme.colors.foreground }]} numberOfLines={2}>
-                {data.store.name}
-              </UiText>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: designTokens.spacing.xs }}>
+                <UiText style={[styles.storeName, { color: theme.colors.foreground, flexShrink: 1 }]} numberOfLines={2}>{data.store.name}</UiText>
+                {data.store.is_verified ? <VerifiedBadge size={18} accessibilityLabel={translate("storeVerified")} /> : null}
+              </View>
               <UiText style={[styles.storeMeta, { color: theme.colors.muted }]} numberOfLines={1}>
                 {data.store.commune || translate("merchantStoreLocationMissing")}
               </UiText>
               <View style={styles.storeBadges}>
-                <MerchantStatusBadge label={data.store.is_verified ? translate("merchantStoreVerified") : translate("merchantStoreNotVerified")} tone={data.store.is_verified ? "success" : "warning"} />
                 <View style={[styles.statusPill, { backgroundColor: theme.colors.surfaceSecondary }]}>
                   <UiText style={[styles.statusPillText, { color: theme.colors.muted }]}>
                     {translate("merchantStoreRating")}: {data.store.rating == null ? "—" : data.store.rating.toFixed(1)}

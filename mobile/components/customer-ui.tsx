@@ -10,6 +10,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { translate } from "@/lib/i18n";
+import { VerifiedBadge } from "@/components/ui/identity";
 import { designTokens, useAppTheme } from "@/lib/theme";
 import { Button, Caption, Heading, Icon, Image as UiImage, PriceDisplay, ProductCard, PressableSurface, RatingStars, RefreshableScrollView, SearchField, Text as UiText } from "@/components/ui";
 export { EmptyState, ErrorState, LoadingState } from "@/components/ui";
@@ -130,11 +131,14 @@ export function StoreTile({ name, description, logoUrl, commune, rating, verifie
         {logoUrl ? <UiImage uri={logoUrl} accessibilityLabel={name} aspectRatio={1} style={StyleSheet.absoluteFill} /> : <Icon name="store" size={28} color={theme.colors.subtle} accessibilityHidden />}
       </View>
       <View style={styles.storeInfo}>
-        <UiText numberOfLines={1} weight="700" >{name}</UiText>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: designTokens.spacing.xs, maxWidth: "100%" }}>
+          <UiText numberOfLines={1} weight="700" style={{ flexShrink: 1 }}>{name}</UiText>
+          {verified ? <VerifiedBadge size={17} accessibilityLabel={translate("storeVerified")} /> : null}
+        </View>
         <Caption numberOfLines={1}>{commune || description || translate("storeNoDescription")}</Caption>
         {rating != null ? <RatingStars value={rating} size={14} showValue /> : null}
       </View>
-      {verified ? <Icon name="check" size={18} color={theme.colors.success} accessibilityLabel={translate("storeVerified")} /> : null}
+
     </PressableSurface>
   );
 }

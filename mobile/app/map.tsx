@@ -41,6 +41,7 @@ import {
 } from "@/lib/map-routing";
 import { fetchLocalizedMapStyle } from "@/lib/map-style";
 import { designTokens, useAppTheme } from "@/lib/theme";
+import { VerifiedBadge } from "@/components/ui/identity";
 
 const MAP_LIGHT_STYLE = "https://tiles.openfreemap.org/styles/liberty";
 const MAP_DARK_STYLE = "https://tiles.openfreemap.org/styles/dark";
@@ -561,9 +562,10 @@ export default function MapScreen() {
                   </View>
                 )}
                 <View style={styles.storeCopy}>
-                  <UiText weight="700" style={styles.storeName} numberOfLines={2}>
-                    {selectedStore.name}
-                  </UiText>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                    <UiText weight="700" style={[styles.storeName, { flexShrink: 1 }]} numberOfLines={2}>{selectedStore.name}</UiText>
+                    {selectedStore.is_verified ? <VerifiedBadge size={17} accessibilityLabel={translate("storeVerified", language)} /> : null}
+                  </View>
                   {selectedStore.is_verified ? (
                     <View style={[styles.verifiedBadge, { backgroundColor: theme.colors.successSurface }]}>
                       <Icon name="check" size={13} color={theme.colors.success} accessibilityHidden />

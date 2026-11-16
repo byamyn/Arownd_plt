@@ -12,6 +12,7 @@ import { translate, useLanguage } from "@/lib/i18n";
 import { ReviewPanel } from "@/components/review-panel";
 import { ContentReportAction } from "@/components/content-report-action";
 import { designTokens, useAppTheme } from "@/lib/theme";
+import { VerifiedBadge } from "@/components/ui/identity";
 import { AppHeader, Avatar, Card, Icon, IconButton, RatingStars, SegmentedControl, StoreCardSkeleton, ProductCardSkeleton, Text as UiText } from "@/components/ui";
 
 type StoreTab = "products" | "about";
@@ -64,13 +65,14 @@ export default function StoreDetailsScreen() {
           name={details.name}
           imageUri={details.logo_url || undefined}
           size={76}
-          verified={details.is_verified ?? false}
           accessibilityLabel={details.name}
         />
         <View style={styles.storeInfo}>
-          <UiText style={[styles.storeName, { color: theme.colors.foreground }]}>{details.name}</UiText>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: designTokens.spacing.xs }}>
+            <UiText style={[styles.storeName, { color: theme.colors.foreground, flexShrink: 1 }]}>{details.name}</UiText>
+            {details.is_verified ? <VerifiedBadge size={18} accessibilityLabel={translate("storeVerified")} /> : null}
+          </View>
           <UiText style={[styles.metaText, { color: theme.colors.muted }]}>{details.commune || details.address_line || translate("storeNoAddress")}</UiText>
-          <UiText style={[styles.verified, { color: details.is_verified ? theme.colors.success : theme.colors.muted }]}>{details.is_verified ? translate("storeVerified") : translate("storeUnverified")}</UiText>
           {details.rating != null ? <RatingStars value={details.rating} showValue /> : null}
         </View>
         <FavoriteButton kind="stores" id={storeId} iconOnly />

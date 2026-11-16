@@ -21,6 +21,15 @@ export type AvatarProps = {
   style?: StyleProp<ViewStyle>;
 };
 
+export function VerifiedBadge({ size = 18, accessibilityLabel = "Verified" }: { size?: number; accessibilityLabel?: string }) {
+  const theme = useAppTheme();
+  return (
+    <View accessible accessibilityRole="image" accessibilityLabel={accessibilityLabel} style={{ width: size, height: size, borderRadius: size / 2, alignItems: "center", justifyContent: "center", backgroundColor: theme.colors.accent }}>
+      <Icon name="check" size={size * 0.66} color={theme.colors.accentForeground} accessibilityHidden />
+    </View>
+  );
+}
+
 export function Avatar({
   name,
   imageUri,
@@ -125,14 +134,14 @@ export function IdentityRow({
 
   return (
     <View style={[{ flexDirection: "row", alignItems: "center", gap: theme.spacing.md }, style]}>
-      <Avatar name={name} imageUri={imageUri} size={avatarSize} verified={verified} />
+      <Avatar name={name} imageUri={imageUri} size={avatarSize} />
       <View style={{ flex: 1, gap: theme.spacing.xs }}>
-        <UiText
-          numberOfLines={1}
-          style={{ color: theme.colors.foreground, fontSize: theme.typography.subtitle, fontWeight: theme.fontWeights.bold, textAlign: "auto" }}
-        >
-          {name}
-        </UiText>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: theme.spacing.xs }}>
+          <UiText numberOfLines={1} style={{ color: theme.colors.foreground, fontSize: theme.typography.subtitle, fontWeight: theme.fontWeights.bold, textAlign: "auto", flexShrink: 1 }}>
+            {name}
+          </UiText>
+          {verified ? <VerifiedBadge size={17} accessibilityLabel="Verified account" /> : null}
+        </View>
         {subtitle ? (
           <UiText
             numberOfLines={2}

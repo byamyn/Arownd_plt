@@ -40,7 +40,6 @@ export default function MerchantOrdersScreen() {
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState<OrderFilter>("all");
   const [hideClosedOrders, setHideClosedOrders] = useState(true);
-  const [hidePreferenceStoreId, setHidePreferenceStoreId] = useState<string | null>(null);
 
   const access = useQuery({
     queryKey: ["merchant-access"],
@@ -61,30 +60,20 @@ export default function MerchantOrdersScreen() {
   useEffect(() => {
     if (!storeId) return;
     let active = true;
-    setHidePreferenceStoreId(null);
     void AsyncStorage.getItem(`arownd:merchant:${storeId}:hide-closed-orders`)
       .then((value) => {
         if (!active) return;
         setHideClosedOrders(value !== "show");
-        setHidePreferenceStoreId(storeId);
       })
       .catch(() => {
         if (!active) return;
         setHideClosedOrders(true);
-        setHidePreferenceStoreId(storeId);
       });
     return () => {
       active = false;
     };
   }, [storeId]);
 
-  useEffect(() => {
-    if (!storeId || hidePreferenceStoreId !== storeId) return;
-    void AsyncStorage.setItem(
-      `arownd:merchant:${storeId}:hide-closed-orders`,
-      hideClosedOrders ? "hide" : "show"
-    ).catch(() => undefined);
-  }, [hideClosedOrders, hidePreferenceStoreId, storeId]);
 
 
 
@@ -139,7 +128,8 @@ export default function MerchantOrdersScreen() {
     <SafeAreaView edges={["top", "left", "right"]} style={[styles.safe, { backgroundColor: theme.colors.background }]}>
       <RefreshableScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} refreshing={access.isFetching || dashboard.isFetching} onRefresh={() => { void Promise.all([access.refetch(), dashboard.refetch()]); }}>
         <AppHeader
-          title={translate("merchantOrdersPageTitle")}        />
+          title={translate("merchantOrdersPageTitle")}
+        />
 
         <FilterBar style={styles.filters}>
           {FILTERS.map((item) => (
@@ -154,7 +144,13 @@ export default function MerchantOrdersScreen() {
 
         <Button
           label={translate(hideClosedOrders ? "merchantShowClosedOrders" : "merchantHideClosedOrders")}
-          onPress={() => setHideClosedOrders((current) => !current)}
+          onPress={() => {
+            const nextValue = !hideClosedOrders;
+            setHideClosedOrders(nextValue);
+            if (storeId) {
+              void AsyncStorage.setItem(`arownd:merchant:${storeId}:hide-closed-orders`, nextValue ? "hide" : "show").catch(() => undefined);
+            }
+          }}
           variant="outline"
           size="sm"
         />
@@ -291,9 +287,6 @@ function LoadingScreen({ theme, label }: { theme: AppTheme; label: string }) {
           <UiText accessibilityRole="header" style={[stylesForScreen.headingTitle, { color: theme.colors.foreground }]}>
             {translate("merchantOrdersPageTitle")}
           </UiText>
-          <UiText style={[stylesForScreen.headingSubtitle, { color: theme.colors.muted }]}>
-            {translate("merchantOrdersPageSubtitle")}
-          </UiText>
         </View>
         <View style={{ width: "100%", gap: designTokens.spacing.md }}>
           {[0, 1, 2, 3].map((item) => <OrderCardSkeleton key={item} />)}
@@ -323,9 +316,6 @@ function MessageScreen({
           <UiText accessibilityRole="header" style={[stylesForScreen.headingTitle, { color: theme.colors.foreground }]}>
             {translate("merchantOrdersPageTitle")}
           </UiText>
-          <UiText style={[stylesForScreen.headingSubtitle, { color: theme.colors.muted }]}>
-            {translate("merchantOrdersPageSubtitle")}
-          </UiText>
         </View>
         <ErrorState title={title} retryLabel={actionLabel} busy={busy} onRetry={onAction} />
       </View>
@@ -338,7 +328,6 @@ const stylesForScreen = StyleSheet.create({
   center: { flex: 1, padding: designTokens.spacing.xxl, alignItems: "center", justifyContent: "center", gap: designTokens.spacing.lg },
   heading: { width: "100%", alignItems: "flex-start", gap: designTokens.spacing.xs },
   headingTitle: { fontSize: designTokens.typography.title, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
-  headingSubtitle: { fontSize: designTokens.typography.caption + 1, lineHeight: 19, textAlign: "auto" }
 });
 
 function createStyles(theme: AppTheme) {

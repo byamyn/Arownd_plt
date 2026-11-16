@@ -37,7 +37,6 @@ const studioTabs: NavigationTab[] = [
   { id: "orders", label: "merchantOrdersPageTitle", icon: "file-text", path: "/merchant/orders" },
   { id: "products", label: "merchantProductsTitle", icon: "package", path: "/merchant/products" },
   { id: "analytics", label: "merchantAnalyticsTitle", icon: "layout-grid", path: "/merchant/analytics" },
-  { id: "businessSettings", label: "merchantAccountSettingsTitle", icon: "settings", path: "/merchant/account-settings" }
 ];
 
 export function CustomerNavigation() {
