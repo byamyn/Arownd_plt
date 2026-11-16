@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import * as ImagePicker from "expo-image-picker";
 import { Linking, Pressable, StyleSheet, View } from "react-native";
 import Svg, { Circle, Path, Rect } from "react-native-svg";
 
@@ -9,13 +10,16 @@ import { FavoriteButton } from "@/components/favorite-button";
 import { fetchProductDetails, fetchProductOffers, fetchStoreDetails, fetchStoreOffers, formatMarketPrice, getPrimaryImage } from "@/lib/catalog";
 import { fetchBrowsingCurrencyCode } from "@/lib/country-service";
 import { fetchMerchantAccess } from "@/lib/merchant";
+import { fetchMyMerchantStoreSettings, updateMyMerchantStoreSettings } from "@/lib/merchant-store-settings";
+import { MerchantStoreSettingsSchema } from "@/lib/merchant-store-settings-state";
+import { STORE_IMAGE_MAX_BYTES, uploadMerchantStoreImage, validateStoreImageAsset } from "@/lib/merchant-store-images";
 import { fetchApprovedReviews } from "@/lib/reviews";
 import { translate, useLanguage } from "@/lib/i18n";
 import { ReviewPanel } from "@/components/review-panel";
 import { ContentReportAction } from "@/components/content-report-action";
 import { designTokens, useAppTheme } from "@/lib/theme";
 import { VerifiedBadge } from "@/components/ui/identity";
-import { AppHeader, Avatar, Button, Card, Icon, IconButton, Image as UiImage, RatingStars, SegmentedControl, StoreCardSkeleton, ProductCardSkeleton, Text as UiText } from "@/components/ui";
+import { AppHeader, Avatar, Button, Card, Icon, IconButton, Image as UiImage, RatingStars, SegmentedControl, StoreCardSkeleton, ProductCardSkeleton, Text as UiText, TextField } from "@/components/ui";
 
 type StoreTab = "products" | "about" | "reviews";
 
@@ -63,6 +67,37 @@ export default function StoreDetailsScreen() {
   const queryClient = useQueryClient();
   const browsingCurrency = useQuery({ queryKey: ["browsing-country-currency"], queryFn: fetchBrowsingCurrencyCode, staleTime: 60_000 });
   const merchantAccess = useQuery({ queryKey: ["merchant-access"], queryFn: fetchMerchantAccess, retry: false, staleTime: 30_000 });
+  const ownerStoreId = merchantAccess.data?.status === "merchant_ready" &&
+    merchantAccess.data.store?.id === storeId ? storeId : null;
+  const ownerSettings = useQuery({
+    queryKey: ["merchant-store-settings", ownerStoreId],
+    queryFn: () => fetchMyMerchantStoreSettings(ownerStoreId ?? ""),
+    enabled: Boolean(ownerStoreId),
+    retry: false
+  });
+  const [ownerEditMode, setOwnerEditMode] = useState(false);
+  const [ownerDraft, setOwnerDraft] = useState<{ name: string; description: string } | null>(null);
+  const [ownerImageBusy, setOwnerImageBusy] = useState<"logo" | "cover" | null>(null);
+  const [ownerImageError, setOwnerImageError] = useState(false);
+  const ownerSave = useMutation({
+    mutationFn: async () => {
+      if (!ownerSettings.data || !ownerDraft || !ownerStoreId) throw new Error("merchant_store_settings_missing");
+      const values = MerchantStoreSettingsSchema.parse({ ...ownerSettings.data, name: ownerDraft.name, description: ownerDraft.description });
+      await updateMyMerchantStoreSettings(ownerStoreId, values);
+    },
+    onSuccess: async () => {
+      setOwnerEditMode(false);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["customer-store", storeId] }),
+        queryClient.invalidateQueries({ queryKey: ["merchant-store-settings", ownerStoreId] }),
+        queryClient.invalidateQueries({ queryKey: ["merchant-dashboard", ownerStoreId] }),
+        queryClient.invalidateQueries({ queryKey: ["map-stores"] })
+      ]);
+    }
+  });
+  useEffect(() => {
+    if (ownerSettings.data && !ownerEditMode) setOwnerDraft({ name: ownerSettings.data.name, description: ownerSettings.data.description });
+  }, [ownerSettings.data, ownerEditMode]);
   const [tab, setTab] = useState<StoreTab>("products");
   const [search, setSearch] = useState("");
   const store = useQuery({
@@ -97,8 +132,34 @@ export default function StoreDetailsScreen() {
   if (!store.data) return <CustomerScreen><EmptyState title={translate("detailNotFound")} hint={translate("storeNoDescription")} /></CustomerScreen>;
 
   const details = store.data;
-  const isStoreOwner = merchantAccess.data?.status === "merchant_ready" &&
-    merchantAccess.data.store?.id === details.id;
+  const isStoreOwner = ownerStoreId === details.id;
+  const chooseOwnerImage = async (kind: "logo" | "cover") => {
+    if (!ownerStoreId || ownerImageBusy || ownerSave.isPending) return;
+    setOwnerImageBusy(kind);
+    setOwnerImageError(false);
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"], allowsMultipleSelection: false, selectionLimit: 1, quality: 0.85
+      });
+      if (result.canceled) return;
+      const asset = result.assets[0];
+      if (!asset || (asset.fileSize != null && asset.fileSize > STORE_IMAGE_MAX_BYTES) || !validateStoreImageAsset(asset)) {
+        setOwnerImageError(true);
+        return;
+      }
+      await uploadMerchantStoreImage(ownerStoreId, asset, kind);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["customer-store", storeId] }),
+        queryClient.invalidateQueries({ queryKey: ["merchant-store-settings", ownerStoreId] }),
+        queryClient.invalidateQueries({ queryKey: ["merchant-dashboard", ownerStoreId] }),
+        queryClient.invalidateQueries({ queryKey: ["map-stores"] })
+      ]);
+    } catch {
+      setOwnerImageError(true);
+    } finally {
+      setOwnerImageBusy(null);
+    }
+  };
   return (
     <CustomerScreen
       refreshing={store.isFetching || (tab === "products" && offers.isFetching)}
@@ -192,13 +253,28 @@ export default function StoreDetailsScreen() {
           />
         ) : null}
         {isStoreOwner ? (
-          <Button
-            label={translate("merchantStoreSettingsTitle")}
-            onPress={() => router.push("/merchant/settings")}
-            variant="primary"
-            fullWidth
-            startIcon={<Icon name="settings" size={18} color={theme.colors.accentForeground} accessibilityHidden />}
-          />
+          <View style={styles.ownerEditor}>
+            {ownerEditMode ? (
+              <>
+                <UiText style={[styles.ownerEditorTitle, { color: theme.colors.foreground }]}>{translate("merchantStoreInlineEditTitle")}</UiText>
+                <TextField label={translate("merchantStoreSettingsName")} value={ownerDraft?.name ?? details.name} onChangeText={(name) => setOwnerDraft((current) => ({ name, description: current?.description ?? details.description ?? "" }))} editable={!ownerSave.isPending} maxLength={100} />
+                <TextField label={translate("merchantStoreSettingsDescription")} value={ownerDraft?.description ?? details.description ?? ""} onChangeText={(description) => setOwnerDraft((current) => ({ name: current?.name ?? details.name, description }))} editable={!ownerSave.isPending} multiline maxLength={2000} />
+                <View style={styles.ownerImageActions}>
+                  <Button label={translate("merchantStoreChangeLogo")} variant="outline" size="sm" disabled={ownerImageBusy !== null || ownerSave.isPending} loading={ownerImageBusy === "logo"} onPress={() => void chooseOwnerImage("logo")} />
+                  <Button label={translate("merchantStoreChangeCover")} variant="outline" size="sm" disabled={ownerImageBusy !== null || ownerSave.isPending} loading={ownerImageBusy === "cover"} onPress={() => void chooseOwnerImage("cover")} />
+                </View>
+                {ownerImageError ? <UiText style={[styles.ownerEditorHint, { color: theme.colors.danger }]}>{translate("merchantStoreImageUploadError")}</UiText> : null}
+                {ownerSave.isError ? <UiText style={[styles.ownerEditorHint, { color: theme.colors.danger }]}>{translate("merchantStoreSettingsSaveError")}</UiText> : null}
+                <View style={styles.ownerImageActions}>
+                  <Button label={translate("save")} onPress={() => ownerSave.mutate()} loading={ownerSave.isPending} disabled={!ownerDraft || ownerImageBusy !== null || ownerSettings.isPending} />
+                  <Button label={translate("cancel")} variant="ghost" disabled={ownerSave.isPending || ownerImageBusy !== null} onPress={() => { setOwnerDraft({ name: details.name, description: details.description ?? "" }); setOwnerEditMode(false); ownerSave.reset(); setOwnerImageError(false); }} />
+                </View>
+                <Button label={translate("merchantStoreSettingsTitle")} variant="ghost" size="sm" onPress={() => router.push("/merchant/settings")} startIcon={<Icon name="settings" size={16} color={theme.colors.muted} accessibilityHidden />} />
+              </>
+            ) : (
+              <Button label={translate("merchantStoreCustomize")} onPress={() => { setOwnerDraft({ name: details.name, description: details.description ?? "" }); setOwnerEditMode(true); }} variant="primary" fullWidth startIcon={<Icon name="edit-3" size={18} color={theme.colors.accentForeground} accessibilityHidden />} />
+            )}
+          </View>
         ) : null}
       </Card>
 
@@ -274,6 +350,10 @@ export default function StoreDetailsScreen() {
 
 const styles = StyleSheet.create({
   storeHero: { padding: designTokens.spacing.lg, gap: designTokens.spacing.md },
+  ownerEditor: { gap: designTokens.spacing.md, paddingTop: designTokens.spacing.sm, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: "#D1D5DB" },
+  ownerEditorTitle: { fontSize: designTokens.typography.subtitle, fontWeight: designTokens.fontWeights.bold, textAlign: "auto" },
+  ownerEditorHint: { fontSize: designTokens.typography.caption, textAlign: "auto" },
+  ownerImageActions: { flexDirection: "row", flexWrap: "wrap", gap: designTokens.spacing.sm },
   coverImage: { width: "100%", borderRadius: designTokens.radius.lg },
   avatarWrap: { position: "relative" },
   statusDot: { position: "absolute", right: 1, bottom: 2, width: 15, height: 15, borderRadius: 8, borderWidth: 2 },
