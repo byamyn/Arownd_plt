@@ -87,3 +87,25 @@ describe("validateMerchantProductInput", () => {
     expect(validateMerchantProductInput({ ...validInput, description: "x".repeat(3001) })).toBeNull();
   });
 });
+
+
+describe("classifyMerchantProductCreateError", () => {
+  it("classifies cleanup failures before generic permission errors", async () => {
+    const { classifyMerchantProductCreateError } = await import("@/lib/merchant-product-create-state");
+    expect(classifyMerchantProductCreateError(new Error("product_creation_failed_storage_cleanup_required"))).toBe("cleanup");
+  });
+
+  it("maps known database validation and authorization failures", async () => {
+    const { classifyMerchantProductCreateError } = await import("@/lib/merchant-product-create-state");
+    expect(classifyMerchantProductCreateError(new Error("invalid_merchant_product_category"))).toBe("category");
+    expect(classifyMerchantProductCreateError(new Error("merchant_role_required"))).toBe("merchant");
+    expect(classifyMerchantProductCreateError({ code: "42501", message: "permission denied" })).toBe("permission");
+    expect(classifyMerchantProductCreateError({ code: "23503", message: "foreign key violation" })).toBe("data");
+    expect(classifyMerchantProductCreateError(new Error("invalid_merchant_product_input"))).toBe("input");
+  });
+
+  it("does not expose unrecognized backend messages as a classification", async () => {
+    const { classifyMerchantProductCreateError } = await import("@/lib/merchant-product-create-state");
+    expect(classifyMerchantProductCreateError(new Error("private database detail"))).toBe("unknown");
+  });
+});
