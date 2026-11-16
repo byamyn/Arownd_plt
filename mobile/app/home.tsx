@@ -6,7 +6,6 @@ import { Caption, Icon, IconButton, Image as UiImage, PriceDisplay, PressableSur
 import Logo from "@/components/logo";
 import {
   CustomerScreen,
-  CustomerHeading,
   EmptyState,
   ErrorState,
   SectionTitle
@@ -38,11 +37,6 @@ export default function CustomerHomeScreen() {
           />
         </View>
       </View>
-
-      <CustomerHeading
-        title={translate("homeTitle")}
-        subtitle={translate("homeSubtitle")}
-      />
 
       <View>
         <SectionTitle title={translate("homeNewArrivals")} />
