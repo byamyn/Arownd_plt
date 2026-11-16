@@ -71,15 +71,7 @@ export default function MerchantAccountSettingsScreen() {
     <SafeAreaView edges={["top", "left", "right"]} style={[styles.safe, { backgroundColor: theme.colors.background }]}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <AppHeader
-          title={translate("merchantAccountSettingsTitle")}
-          leading={
-            <IconButton
-              accessibilityLabel={translate("back")}
-              onPress={() => router.replace("/merchant")}
-              icon={<Icon name="chevron-right" color={theme.colors.foreground} size={20} />}
-            />
-          }
-        />
+          title={translate("merchantAccountSettingsTitle")}        />
         <UiText style={[styles.subtitle, { color: theme.colors.muted }]}>
           {translate("merchantAccountSettingsSubtitle")}
         </UiText>
