@@ -641,7 +641,7 @@ export default function MerchantEditProductScreen() {
                     styles.categoryOption,
                     {
                       backgroundColor: productCategory === category.id ? theme.colors.surfaceMuted : theme.colors.background,
-                      borderColor: productCategory === category.id ? theme.colors.accent : theme.colors.border
+                      borderColor: productCategory === category.id ? (theme.mode === "light" ? theme.colors.accentMuted : theme.colors.accent) : theme.colors.border
                     }
                   ]}
                 >
