@@ -174,7 +174,7 @@ export default function MerchantStoreSettingsScreen() {
       : current);
     setFormDirty(true);
     setFormError(false);
-    setFieldErrors({});
+    setFieldErrors((current) => { const next = { ...current }; delete next.latitude; return next; });
     mutation.reset();
     setLocationCaptured(true);
     setLocationError(false);
@@ -208,7 +208,7 @@ export default function MerchantStoreSettingsScreen() {
       setForm((current) => current ? { ...current, latitude, longitude } : current);
       setFormDirty(true);
       setFormError(false);
-      setFieldErrors({});
+    setFieldErrors((current) => { const next = { ...current }; delete next.latitude; return next; });
       mutation.reset();
       setLocationCaptured(true);
     } catch {
