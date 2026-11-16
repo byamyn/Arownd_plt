@@ -91,6 +91,7 @@ export default function ProductDetailsScreen() {
 
   return (
     <CustomerScreen
+      contentStyle={{ gap: designTokens.spacing.md, paddingBottom: designTokens.spacing.xl }}
       refreshing={product.isFetching || offers.isFetching || reviews.isFetching}
       onRefresh={() => { void Promise.all([product.refetch(), offers.refetch(), reviews.refetch()]); }}
       footer={selectedOffer ? (
@@ -138,7 +139,7 @@ export default function ProductDetailsScreen() {
           {productDetails.brand ? <UiText tone="muted" style={styles.metaText}>{translate("productBrand")}: {productDetails.brand}</UiText> : null}
           {productDetails.category ? <UiText tone="muted" style={styles.metaText}>{translate("productCategory")}: {getLocalizedProductCategoryLabel(productDetails.category, language)}</UiText> : null}
         </View>
-        <UiText tone="muted" style={styles.description}>{productDetails.description || translate("productNoDescription")}</UiText>
+        {productDetails.description?.trim() ? <UiText tone="muted" style={styles.description}>{productDetails.description.trim()}</UiText> : null}
       </Card>
 
       <View style={styles.section}>
@@ -156,11 +157,12 @@ export default function ProductDetailsScreen() {
               accessibilityLabel={offer.store.name}
               onPress={() => { setSelectedOfferId(offer.id); setSize(""); setColor(""); setQuantity(1); addMutation.reset(); }}
               style={[styles.offerCard, { borderColor: active ? theme.colors.accent : theme.colors.border, backgroundColor: active ? (theme.mode === "light" ? theme.colors.accent : theme.colors.surfaceMuted) : (theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface) }]}
+              compact
               contentStyle={styles.offerCardContent}
             >
               <View style={styles.offerInfo}>
                 <UiText weight="800" style={[styles.offerStore, active && theme.mode === "dark" && { color: theme.colors.accentMuted }]}>{offer.store.name}</UiText>
-                <UiText tone="muted" style={[styles.metaText, active && theme.mode === "light" && { color: theme.colors.accentForeground }]}>{offer.store.commune || offer.store.address_line || " "}</UiText>
+                {offer.store.commune || offer.store.address_line ? <UiText tone="muted" style={[styles.metaText, active && theme.mode === "light" && { color: theme.colors.accentForeground }]}>{offer.store.commune || offer.store.address_line}</UiText> : null}
                 <StockBadge
                   label={available ? offer.stock_quantity <= 3 ? translate("productLowStock") : translate("productAvailable") : translate("productUnavailable")}
                   tone={available ? offer.stock_quantity <= 3 ? "warning" : "success" : "danger"}
@@ -226,8 +228,8 @@ export default function ProductDetailsScreen() {
 }
 
 const styles = StyleSheet.create({
-  heroImage: { height: 300, borderRadius: designTokens.radius.lg, overflow: "hidden", alignItems: "center", justifyContent: "center" },
-  infoCard: { borderRadius: designTokens.radius.md, padding: designTokens.spacing.lg, gap: designTokens.spacing.md },
+  heroImage: { height: 260, borderRadius: designTokens.radius.lg, overflow: "hidden", alignItems: "center", justifyContent: "center" },
+  infoCard: { borderRadius: designTokens.radius.md, padding: designTokens.spacing.md, gap: designTokens.spacing.sm },
   productName: { fontSize: designTokens.typography.title - 2, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
   priceDisplay: { justifyContent: "flex-end" },
   ratingRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: designTokens.spacing.md },
@@ -236,15 +238,15 @@ const styles = StyleSheet.create({
   metadata: { flexDirection: "row", flexWrap: "wrap", gap: designTokens.spacing.md },
   metaText: { fontSize: designTokens.typography.caption + 1, textAlign: "auto" },
   description: { fontSize: designTokens.typography.body - 1, lineHeight: 22, textAlign: "auto" },
-  section: { gap: designTokens.spacing.md },
+  section: { gap: designTokens.spacing.sm },
   sectionTitle: { fontSize: designTokens.typography.subtitle + 1, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
-  offerCard: { minHeight: 82, borderRadius: designTokens.radius.md },
+  offerCard: { minHeight: 68, borderRadius: designTokens.radius.md },
   offerCardContent: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: designTokens.spacing.md },
   offerInfo: { flex: 1, alignItems: "flex-start", gap: designTokens.spacing.xs },
   offerStore: { fontSize: designTokens.typography.body, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
   offerPriceDisplay: { justifyContent: "flex-start" },
   purchaseCardSurface: { borderRadius: designTokens.radius.md },
-  purchaseCard: { padding: designTokens.spacing.lg, gap: designTokens.spacing.md },
+  purchaseCard: { padding: designTokens.spacing.md, gap: designTokens.spacing.sm },
   optionGroup: { gap: designTokens.spacing.sm },
   optionLabel: { fontSize: designTokens.typography.caption + 1, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
   quantityRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
