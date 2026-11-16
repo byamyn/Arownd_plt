@@ -130,17 +130,18 @@ export default function MapScreen() {
       .slice(0, MAX_VISIBLE_STORE_MARKERS);
   }, [stores.data, mapCenter]);
 
+  const navigationRoute = navigation?.route ?? null;
   const routeFeatureCollection = useMemo(() => ({
     type: "FeatureCollection" as const,
-    features: navigation ? [{
+    features: navigationRoute ? [{
       type: "Feature" as const,
       properties: {},
       geometry: {
         type: "LineString" as const,
-        coordinates: navigation.route.coordinates.map((point) => [point.longitude, point.latitude])
+        coordinates: navigationRoute.coordinates.map((point) => [point.longitude, point.latitude])
       }
     }] : []
-  }), [navigation?.route]);
+  }), [navigationRoute]);
 
   useEffect(() => () => {
     watchSubscriptionRef.current?.remove();

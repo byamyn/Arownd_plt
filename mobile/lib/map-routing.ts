@@ -98,18 +98,42 @@ export function distanceBetweenCoordinates(first: RoutePoint, second: RoutePoint
   return 6_371_000 * 2 * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
 }
 
+function distanceToSegmentMeters(position: RoutePoint, start: RoutePoint, end: RoutePoint): number {
+  const earthRadius = 6_371_000;
+  const radians = (value: number) => value * Math.PI / 180;
+  const referenceLatitude = radians(position.latitude);
+  const project = (point: RoutePoint) => ({
+    x: earthRadius * Math.cos(referenceLatitude) * radians(point.longitude - position.longitude),
+    y: earthRadius * radians(point.latitude - position.latitude)
+  });
+  const first = project(start);
+  const second = project(end);
+  const deltaX = second.x - first.x;
+  const deltaY = second.y - first.y;
+  const segmentLengthSquared = deltaX * deltaX + deltaY * deltaY;
+  if (segmentLengthSquared === 0) return Math.hypot(first.x, first.y);
+
+  const projection = Math.max(0, Math.min(1,
+    -(first.x * deltaX + first.y * deltaY) / segmentLengthSquared
+  ));
+  return Math.hypot(first.x + projection * deltaX, first.y + projection * deltaY);
+}
+
 export function distanceToRouteMeters(position: RoutePoint, route: RoutePoint[]): number {
   if (route.length === 0) return Number.POSITIVE_INFINITY;
+  if (route.length === 1) return distanceBetweenCoordinates(position, route[0]);
+
   const stride = Math.max(1, Math.floor(route.length / 160));
   let nearest = Number.POSITIVE_INFINITY;
 
-  for (let index = 0; index < route.length; index += stride) {
-    const point = route[index];
-    if (point) nearest = Math.min(nearest, distanceBetweenCoordinates(position, point));
+  for (let index = 0; index < route.length - 1; index += stride) {
+    const start = route[index];
+    const end = route[Math.min(index + stride, route.length - 1)];
+    if (start && end) {
+      nearest = Math.min(nearest, distanceToSegmentMeters(position, start, end));
+    }
   }
 
-  const lastPoint = route[route.length - 1];
-  if (lastPoint) nearest = Math.min(nearest, distanceBetweenCoordinates(position, lastPoint));
   return nearest;
 }
 
@@ -138,7 +162,11 @@ export function getActiveStepIndex(
     const currentStep = steps[nextIndex];
     if (!currentStep) break;
     const distance = distanceBetweenCoordinates(position, currentStep.location);
-    if (currentStep.maneuverType === "depart" && distance <= 28) break;
+    if (currentStep.maneuverType === "depart") {
+      if (distance <= 28) break;
+      nextIndex += 1;
+      continue;
+    }
     if (distance > 28) break;
     nextIndex += 1;
   }
