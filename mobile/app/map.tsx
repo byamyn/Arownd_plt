@@ -79,7 +79,7 @@ export default function MapScreen() {
             zoomControlsEnabled: false,
             zoomGesturesEnabled: true
           }}
-          userLocation={userLocation}
+          {...(userLocation ? { userLocation } : {})}
         />
 
         <Pressable
