@@ -281,6 +281,39 @@ export default function StoreDetailsScreen() {
                       <View style={styles.ownerTimeField}><TextField label={translate("merchantStoreSettingsOpen")} value={ownerDraft.opening_hours.open} onChangeText={(open) => setOwnerDraft((current) => current ? { ...current, opening_hours: { ...current.opening_hours, open } } : current)} editable={!ownerSave.isPending} maxLength={5} placeholder="HH:MM" /></View>
                       <View style={styles.ownerTimeField}><TextField label={translate("merchantStoreSettingsClose")} value={ownerDraft.opening_hours.close} onChangeText={(close) => setOwnerDraft((current) => current ? { ...current, opening_hours: { ...current.opening_hours, close } } : current)} editable={!ownerSave.isPending} maxLength={5} placeholder="HH:MM" /></View>
                     </View>
+                    <UiText style={[styles.ownerEditorHint, { color: theme.colors.muted }]}>{translate("merchantStoreSettingsClosedDaysHint")}</UiText>
+                    <View style={styles.ownerDays}>
+                      {([
+                        { value: 6, key: "merchantWeekdaySaturday" },
+                        { value: 0, key: "merchantWeekdaySunday" },
+                        { value: 1, key: "merchantWeekdayMonday" },
+                        { value: 2, key: "merchantWeekdayTuesday" },
+                        { value: 3, key: "merchantWeekdayWednesday" },
+                        { value: 4, key: "merchantWeekdayThursday" },
+                        { value: 5, key: "merchantWeekdayFriday" }
+                      ] as const).map((day) => {
+                        const selected = ownerDraft.opening_hours.closed_days.includes(day.value);
+                        return (
+                          <Pressable
+                            key={day.value}
+                            accessibilityRole="button"
+                            accessibilityState={{ selected }}
+                            onPress={() => setOwnerDraft((current) => current ? {
+                              ...current,
+                              opening_hours: {
+                                ...current.opening_hours,
+                                closed_days: selected
+                                  ? current.opening_hours.closed_days.filter((value) => value !== day.value)
+                                  : [...current.opening_hours.closed_days, day.value]
+                              }
+                            } : current)}
+                            style={[styles.ownerDayChip, { backgroundColor: selected ? theme.colors.accent : theme.colors.surfaceMuted, borderColor: selected ? theme.colors.accent : theme.colors.border }]}
+                          >
+                            <UiText style={{ color: selected ? theme.colors.accentForeground : theme.colors.foreground, fontSize: designTokens.typography.caption }}>{translate(day.key)}</UiText>
+                          </Pressable>
+                        );
+                      })}
+                    </View>
                     <UiText style={[styles.ownerEditorTitle, { color: theme.colors.foreground }]}>{translate("merchantStoreSocialTitle")}</UiText>
                     <TextField label="Instagram" value={ownerDraft.instagram_url} onChangeText={(instagram_url) => setOwnerDraft((current) => current ? { ...current, instagram_url } : current)} editable={!ownerSave.isPending} keyboardType="url" autoCapitalize="none" maxLength={300} />
                     <TextField label="Facebook" value={ownerDraft.facebook_url} onChangeText={(facebook_url) => setOwnerDraft((current) => current ? { ...current, facebook_url } : current)} editable={!ownerSave.isPending} keyboardType="url" autoCapitalize="none" maxLength={300} />
@@ -384,6 +417,8 @@ const styles = StyleSheet.create({
   ownerEditorTitle: { fontSize: designTokens.typography.subtitle, fontWeight: designTokens.fontWeights.bold, textAlign: "auto" },
   ownerEditorHint: { fontSize: designTokens.typography.caption, textAlign: "auto" },
   ownerTimeField: { flex: 1, minWidth: 120 },
+  ownerDays: { flexDirection: "row", flexWrap: "wrap", gap: designTokens.spacing.xs },
+  ownerDayChip: { borderWidth: 1, borderRadius: designTokens.radius.full, paddingHorizontal: designTokens.spacing.md, paddingVertical: designTokens.spacing.sm },
   ownerImageActions: { flexDirection: "row", flexWrap: "wrap", gap: designTokens.spacing.sm },
   coverImage: { width: "100%", borderRadius: designTokens.radius.lg },
   avatarWrap: { position: "relative" },
