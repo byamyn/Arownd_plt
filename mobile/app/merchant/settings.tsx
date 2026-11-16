@@ -78,7 +78,8 @@ export default function MerchantStoreSettingsScreen() {
       setFieldErrors({});
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["merchant-dashboard", storeId] }),
-        queryClient.invalidateQueries({ queryKey: ["map-stores"] })
+        queryClient.invalidateQueries({ queryKey: ["map-stores"] }),
+        queryClient.invalidateQueries({ queryKey: ["my-store-verification", storeId] })
       ]);
     },
     onError: () => setFormError(true)
@@ -235,6 +236,7 @@ export default function MerchantStoreSettingsScreen() {
       );
       setImageSaved(true);
       setImageCleanupPending(uploaded.cleanupPending);
+      await queryClient.invalidateQueries({ queryKey: ["my-store-verification", storeId] });
     } catch {
       setImageError(true);
     } finally {
