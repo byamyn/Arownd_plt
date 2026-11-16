@@ -1,11 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, Stack, useLocalSearchParams } from "expo-router";
 import { useRef, useState, type ComponentRef } from "react";
-import { StyleSheet, View } from "react-native";
+import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 
-import { CustomerScreen, EmptyState, ErrorState, LoadingState } from "@/components/customer-ui";
-import { AppHeader, Button, Card, Icon, IconButton, OfferCard, PriceDisplay, ProductImageGallery, ProductQuantitySelector, ProductVariantSelector, RatingStars, StockBadge, ProductCardSkeleton, Text as UiText } from "@/components/ui";
-import { CartButton } from "@/components/cart-button";
+import { EmptyState, ErrorState, LoadingState } from "@/components/customer-ui";
+import { Button, Card, Icon, IconButton, OfferCard, PriceDisplay, ProductImageGallery, ProductQuantitySelector, ProductVariantSelector, RatingStars, StockBadge, ProductCardSkeleton, Text as UiText } from "@/components/ui";
 import { FavoriteButton } from "@/components/favorite-button";
 import { chooseBestProductOffer, fetchProductDetails, fetchProductOffers, formatMarketPrice, getOfferVariantOptions } from "@/lib/catalog";
 import { fetchBrowsingCurrencyCode } from "@/lib/country-service";
@@ -60,19 +59,62 @@ export default function ProductDetailsScreen() {
     enabled: Boolean(productId)
   });
 
-  if (product.isPending) return <CustomerScreen>
-    <AppHeader
-      title={translate("detailProductTitle")}
-      leading={<IconButton accessibilityLabel={translate("back")} onPress={() => router.back()} icon={<Icon name="chevron-right" size={22} color={theme.colors.foreground} />} />}
-      trailing={<CartButton />}
-    />
-    <ProductCardSkeleton style={{ width: "100%", flex: 0, minHeight: 320 }} />
-  </CustomerScreen>;
+  const sheetOptions = (
+    <Stack.Screen options={{
+      presentation: "transparentModal",
+      animation: "slide_from_bottom",
+      contentStyle: { backgroundColor: "transparent" }
+    }} />
+  );
+
+  if (product.isPending) return (
+    <>
+      {sheetOptions}
+      <View style={styles.overlay}>
+        <Pressable accessibilityRole="button" accessibilityLabel={translate("back")} onPress={() => router.back()} style={StyleSheet.absoluteFill} />
+        <View style={[styles.sheet, { backgroundColor: theme.colors.background }]}>
+          <View style={[styles.sheetHandle, { backgroundColor: theme.colors.border }]} />
+          <View style={styles.sheetHeader}>
+            <IconButton accessibilityLabel={translate("back")} onPress={() => router.back()} icon={<Icon name="chevron-down" size={22} color={theme.colors.foreground} />} />
+          </View>
+          <ProductCardSkeleton style={{ width: "100%", flex: 0, minHeight: 320 }} />
+        </View>
+      </View>
+    </>
+  );
   if (product.isError) {
-    return <CustomerScreen refreshing={product.isFetching} onRefresh={() => { void product.refetch(); }}><ErrorState title={translate("catalogLoadError")} retryLabel={translate("retry")} busy={product.isFetching} onRetry={() => void product.refetch()} /></CustomerScreen>;
+    return (
+      <>
+        {sheetOptions}
+        <View style={styles.overlay}>
+          <Pressable accessibilityRole="button" accessibilityLabel={translate("back")} onPress={() => router.back()} style={StyleSheet.absoluteFill} />
+          <View style={[styles.sheet, { backgroundColor: theme.colors.background }]}>
+            <View style={[styles.sheetHandle, { backgroundColor: theme.colors.border }]} />
+            <View style={styles.sheetHeader}>
+              <IconButton accessibilityLabel={translate("back")} onPress={() => router.back()} icon={<Icon name="chevron-down" size={22} color={theme.colors.foreground} />} />
+            </View>
+            <ErrorState title={translate("catalogLoadError")} retryLabel={translate("retry")} busy={product.isFetching} onRetry={() => void product.refetch()} />
+          </View>
+        </View>
+      </>
+    );
   }
   if (!product.data) {
-    return <CustomerScreen><EmptyState title={translate("detailNotFound")} hint={translate("productNoDescription")} /></CustomerScreen>;
+    return (
+      <>
+        {sheetOptions}
+        <View style={styles.overlay}>
+          <Pressable accessibilityRole="button" accessibilityLabel={translate("back")} onPress={() => router.back()} style={StyleSheet.absoluteFill} />
+          <View style={[styles.sheet, { backgroundColor: theme.colors.background }]}>
+            <View style={[styles.sheetHandle, { backgroundColor: theme.colors.border }]} />
+            <View style={styles.sheetHeader}>
+              <IconButton accessibilityLabel={translate("back")} onPress={() => router.back()} icon={<Icon name="chevron-down" size={22} color={theme.colors.foreground} />} />
+            </View>
+            <EmptyState title={translate("detailNotFound")} hint={translate("productNoDescription")} />
+          </View>
+        </View>
+      </>
+    );
   }
 
   const productDetails = product.data;
@@ -100,12 +142,24 @@ export default function ProductDetailsScreen() {
     : 0;
 
   return (
-    <CustomerScreen
-      contentStyle={{ gap: designTokens.spacing.md, paddingBottom: designTokens.spacing.xl }}
-      refreshing={product.isFetching || offers.isFetching || reviews.isFetching}
-      onRefresh={() => { void Promise.all([product.refetch(), offers.refetch(), reviews.refetch()]); }}
-      footer={selectedOffer ? (
-        <View style={styles.purchaseFooter}>
+    <>
+      {sheetOptions}
+      <View style={styles.overlay}>
+        <Pressable accessibilityRole="button" accessibilityLabel={translate("back")} onPress={() => router.back()} style={StyleSheet.absoluteFill} />
+        <View style={[styles.sheet, { backgroundColor: theme.colors.background }]}>
+          <View style={[styles.sheetHandle, { backgroundColor: theme.colors.border }]} />
+          <View style={styles.sheetHeader}>
+            <IconButton accessibilityLabel={translate("back")} onPress={() => router.back()} icon={<Icon name="chevron-down" size={22} color={theme.colors.foreground} />} />
+          </View>
+          <ScrollView
+            style={styles.sheetScroll}
+            contentContainerStyle={styles.sheetContent}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+            refreshControl={<RefreshControl refreshing={product.isFetching || offers.isFetching || reviews.isFetching} onRefresh={() => { void Promise.all([product.refetch(), offers.refetch(), reviews.refetch()]); }} tintColor={theme.colors.accent} />}
+          >
+            {selectedOffer ? (
+              <View style={styles.purchaseFooter}>
           <Button
             label={addMutation.isPending ? translate("productAddingToCart") : addMutation.isSuccess ? translate("productAddedToCart") : translate("productAddToCart")}
             onPress={() => addMutation.mutate({
@@ -124,14 +178,8 @@ export default function ProductDetailsScreen() {
             fullWidth
           />
           {addMutation.isError ? <UiText tone="danger" style={styles.mutationError}>{translate("genericError")}</UiText> : null}
-        </View>
-      ) : undefined}
-    >
-      <AppHeader
-        title={translate("detailProductTitle")}
-        leading={<IconButton accessibilityLabel={translate("back")} onPress={() => router.back()} icon={<Icon name="chevron-right" size={22} color={theme.colors.foreground} />} />}
-        trailing={<CartButton />}
-      />
+              </View>
+            ) : null}
       <View ref={imageAnchorRef} collapsable={false}>
         {imageUrl ? <ProductImageGallery images={galleryImages} selectedIndex={Math.min(selectedImageIndex, Math.max(0, galleryImages.length - 1))} accessibilityLabel={productDetails.name} onSelect={setSelectedImageIndex} imageStyle={styles.heroImage} /> : <View style={[styles.heroImage, { backgroundColor: theme.colors.surfaceMuted }]}><Icon name="image" size={42} color={theme.colors.subtle} accessibilityHidden /></View>}
       </View>
@@ -232,12 +280,21 @@ export default function ProductDetailsScreen() {
         />
       ) : null}
       <ContentReportAction targetType="product" targetId={productId} />
-      <ReviewPanel targetType="product" targetId={productId} />
-    </CustomerScreen>
+            <ReviewPanel targetType="product" targetId={productId} />
+          </ScrollView>
+        </View>
+      </View>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
+  overlay: { flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.42)" },
+  sheet: { height: "93%", maxHeight: "93%", width: "100%", borderTopLeftRadius: 26, borderTopRightRadius: 26, overflow: "hidden", paddingTop: designTokens.spacing.sm },
+  sheetHandle: { alignSelf: "center", width: 38, height: 4, borderRadius: 2, marginBottom: designTokens.spacing.xs },
+  sheetHeader: { minHeight: 42, paddingHorizontal: designTokens.spacing.xl, alignItems: "flex-start", justifyContent: "center" },
+  sheetScroll: { flex: 1 },
+  sheetContent: { gap: designTokens.spacing.md, paddingHorizontal: designTokens.spacing.xl, paddingTop: designTokens.spacing.sm, paddingBottom: designTokens.spacing.xl },
   heroImage: { height: 260, borderRadius: designTokens.radius.lg, overflow: "hidden", alignItems: "center", justifyContent: "center" },
   infoCard: { borderRadius: designTokens.radius.md, padding: designTokens.spacing.md, gap: designTokens.spacing.sm },
   productName: { fontSize: designTokens.typography.title - 2, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
