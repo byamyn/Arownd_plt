@@ -79,6 +79,7 @@ export default function StoreDetailsScreen() {
   const [ownerDraft, setOwnerDraft] = useState<MerchantStoreSettings | null>(null);
   const [ownerImageBusy, setOwnerImageBusy] = useState<"logo" | "cover" | null>(null);
   const [ownerImageError, setOwnerImageError] = useState(false);
+  const [ownerImageSaved, setOwnerImageSaved] = useState(false);
   const ownerSave = useMutation({
     mutationFn: async () => {
       if (!ownerSettings.data || !ownerDraft || !ownerStoreId) throw new Error("merchant_store_settings_missing");
@@ -137,6 +138,7 @@ export default function StoreDetailsScreen() {
     if (!ownerStoreId || ownerImageBusy || ownerSave.isPending) return;
     setOwnerImageBusy(kind);
     setOwnerImageError(false);
+    setOwnerImageSaved(false);
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ["images"], allowsMultipleSelection: false, selectionLimit: 1, quality: 0.85
@@ -147,7 +149,14 @@ export default function StoreDetailsScreen() {
         setOwnerImageError(true);
         return;
       }
-      await uploadMerchantStoreImage(ownerStoreId, asset, kind);
+      const uploaded = await uploadMerchantStoreImage(ownerStoreId, asset, kind);
+      const imageField = kind === "logo" ? "logo_url" : "cover_url";
+      setOwnerDraft((current) => current ? { ...current, [imageField]: uploaded.url } : current);
+      queryClient.setQueryData<MerchantStoreSettings>(
+        ["merchant-store-settings", ownerStoreId],
+        (current) => current ? { ...current, [imageField]: uploaded.url } : current
+      );
+      setOwnerImageSaved(true);
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["customer-store", storeId] }),
         queryClient.invalidateQueries({ queryKey: ["merchant-store-settings", ownerStoreId] }),
@@ -279,6 +288,7 @@ export default function StoreDetailsScreen() {
                     <TextField label={translate("merchantStoreSettingsWebsite")} value={ownerDraft.website_url} onChangeText={(website_url) => setOwnerDraft((current) => current ? { ...current, website_url } : current)} editable={!ownerSave.isPending} keyboardType="url" autoCapitalize="none" maxLength={300} />
                   </>
                 )}
+                {ownerImageSaved ? <UiText style={[styles.ownerEditorHint, { color: theme.colors.success }]}>{translate("merchantStoreImageSaved")}</UiText> : null}
                 <View style={styles.ownerImageActions}>
                   <Button label={translate("merchantStoreChangeLogo")} variant="outline" size="sm" disabled={ownerImageBusy !== null || ownerSave.isPending} loading={ownerImageBusy === "logo"} onPress={() => void chooseOwnerImage("logo")} />
                   <Button label={translate("merchantStoreChangeCover")} variant="outline" size="sm" disabled={ownerImageBusy !== null || ownerSave.isPending} loading={ownerImageBusy === "cover"} onPress={() => void chooseOwnerImage("cover")} />
