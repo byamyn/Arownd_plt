@@ -1,3 +1,18 @@
+const SIZE_CATEGORIES = new Set(["clothes", "shoes", "kids-clothes", "sportswear"]);
+const COLOR_CATEGORIES = new Set([
+  "clothes", "shoes", "kids-clothes", "sportswear", "bags",
+  "phones", "computers", "gadgets", "phone-accessories",
+  "furniture", "decor", "kitchenware", "toys", "sports-gear", "car-accessories"
+]);
+
+export function merchantCategorySupportsSizes(category: string): boolean {
+  return SIZE_CATEGORIES.has(category.trim());
+}
+
+export function merchantCategorySupportsColors(category: string): boolean {
+  return COLOR_CATEGORIES.has(category.trim());
+}
+
 export type MerchantProductInput = {
   name: string;
   price: number;
@@ -31,8 +46,8 @@ export function validateMerchantProductInput(input: {
   const description = input.description.trim();
   const price = Number(input.price);
   const stock = Number(input.stock);
-  const sizes = parseMerchantOptionList(input.sizes);
-  const colors = parseMerchantOptionList(input.colors);
+  const sizes = merchantCategorySupportsSizes(input.category) ? parseMerchantOptionList(input.sizes) : [];
+  const colors = merchantCategorySupportsColors(input.category) ? parseMerchantOptionList(input.colors) : [];
 
   if (
     name.length < 2 ||
