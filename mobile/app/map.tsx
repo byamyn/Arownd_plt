@@ -135,9 +135,9 @@ export default function MapScreen() {
             coordinates: { latitude: 28.0, longitude: 2.6 },
             zoom: 4.5
           }}
-          colorScheme={theme.mode === "dark" ? "DARK" : "LIGHT"}
+          colorScheme={theme.mode === "dark" ? GoogleMaps.MapColorScheme.DARK : GoogleMaps.MapColorScheme.LIGHT}
           properties={{
-            mapType: "SATELLITE",
+            mapType: GoogleMaps.MapType.SATELLITE,
             isBuildingEnabled: true,
             isMyLocationEnabled: false
           }}
@@ -157,8 +157,10 @@ export default function MapScreen() {
             setSelectedStoreId(marker.id ?? null);
           }}
           onPOIClick={(place) => {
+            const { latitude, longitude } = place.coordinates;
+            if (typeof latitude !== "number" || typeof longitude !== "number") return;
             setSelectedStoreId(null);
-            setSelectedPlace({ name: place.name, coordinates: place.coordinates });
+            setSelectedPlace({ name: place.name, coordinates: { latitude, longitude } });
           }}
           {...(userLocation ? { userLocation } : {})}
         />
