@@ -174,7 +174,7 @@ export default function MapScreen() {
                   {[selectedStore.commune, selectedStore.address_line].filter(Boolean).join(" · ") || translate("mapAddressUnavailable")}
                 </UiText>
               </View>
-              <Icon name="badge-check" size={20} color={theme.colors.success} accessibilityHidden />
+              <Icon name="check" size={20} color={theme.colors.success} accessibilityHidden />
             </View>
             <View style={styles.actions}>
               <Button
@@ -185,7 +185,7 @@ export default function MapScreen() {
               <Button
                 label={translate("mapDirections")}
                 onPress={openDirections}
-                variant="secondary"
+                variant="outline"
                 fullWidth
                 startIcon={<Icon name="navigation" size={18} color={theme.colors.foreground} accessibilityHidden />}
               />
