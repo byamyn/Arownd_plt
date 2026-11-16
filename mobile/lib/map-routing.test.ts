@@ -52,10 +52,18 @@ describe("map routing helpers", () => {
     expect(distanceToRouteMeters({ longitude: 0.005, latitude: 0 }, route)).toBeLessThan(1);
   });
 
-  it("advances to the next maneuver when the user reaches it", () => {
+  it("keeps the departure step while the user is still at the route origin", () => {
     expect(getActiveStepIndex(
       steps,
       { longitude: 3, latitude: 36 },
+      0
+    )).toBe(0);
+  });
+
+  it("advances after the user moves away from the departure point", () => {
+    expect(getActiveStepIndex(
+      steps,
+      { longitude: 3.0005, latitude: 36 },
       0
     )).toBe(1);
   });

@@ -133,7 +133,9 @@ export function getActiveStepIndex(
 ): number {
   let nextIndex = Math.min(currentIndex, Math.max(0, steps.length - 1));
   while (nextIndex < steps.length - 1) {
-    const distance = distanceBetweenCoordinates(position, steps[nextIndex].location);
+    const currentStep = steps[nextIndex];
+    const distance = distanceBetweenCoordinates(position, currentStep.location);
+    if (currentStep.maneuverType === "depart" && distance <= 28) break;
     if (distance > 28) break;
     nextIndex += 1;
   }

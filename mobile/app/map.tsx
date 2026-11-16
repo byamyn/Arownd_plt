@@ -310,8 +310,11 @@ export default function MapScreen() {
   const remainingRoute = navigation
     ? getRemainingRouteMetrics(navigation.route, navigation.currentStepIndex)
     : null;
-  const currentStepDistance = currentStep && userPosition
-    ? distanceBetweenCoordinates(userPosition, currentStep.location)
+  const distanceTargetStep = currentStep?.maneuverType === "depart"
+    ? navigation?.route.steps[navigation.currentStepIndex + 1] ?? currentStep
+    : currentStep;
+  const currentStepDistance = distanceTargetStep && userPosition
+    ? distanceBetweenCoordinates(userPosition, distanceTargetStep.location)
     : null;
 
   return (
