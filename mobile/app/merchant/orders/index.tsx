@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Redirect, router } from "expo-router";
-import { useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useEffect, useState } from "react";
 import {
   StyleSheet,
   View
@@ -19,7 +20,7 @@ import type { MerchantDashboardOrder } from "@/lib/merchant-dashboard-state";
 import { designTokens, useAppTheme, type AppTheme } from "@/lib/theme";
 import { RefreshableScrollView, AppHeader, Button, Card, ErrorState, FilterBar, FilterChip, Icon, OrderCardSkeleton, MerchantOrderCard, MerchantStatusBadge, PriceDisplay, Text as UiText } from "@/components/ui";
 
-type OrderFilter = "all" | "pending" | "quoted" | "confirmed" | "shipped" | "delivered" | "cancelled";
+type OrderFilter = "all" | "pending" | "quoted" | "confirmed" | "shipped" | "delivered" | "cancelled" | "rejected";
 
 const FILTERS: ReadonlyArray<{ value: OrderFilter; label: TranslationKey }> = [
   { value: "all", label: "merchantOrdersFilterAll" },
@@ -28,7 +29,8 @@ const FILTERS: ReadonlyArray<{ value: OrderFilter; label: TranslationKey }> = [
   { value: "confirmed", label: "merchantOrdersFilterConfirmed" },
   { value: "shipped", label: "merchantOrdersFilterShipped" },
   { value: "delivered", label: "merchantOrdersFilterDelivered" },
-  { value: "cancelled", label: "merchantOrdersFilterCancelled" }
+  { value: "cancelled", label: "merchantOrdersFilterCancelled" },
+  { value: "rejected", label: "merchantOrdersFilterRejected" }
 ];
 
 export default function MerchantOrdersScreen() {
@@ -37,6 +39,8 @@ export default function MerchantOrdersScreen() {
   const styles = createStyles(theme);
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState<OrderFilter>("all");
+  const [hideClosedOrders, setHideClosedOrders] = useState(true);
+  const [hidePreferenceStoreId, setHidePreferenceStoreId] = useState<string | null>(null);
 
   const access = useQuery({
     queryKey: ["merchant-access"],
@@ -53,6 +57,36 @@ export default function MerchantOrdersScreen() {
     enabled: ready,
     retry: false
   });
+
+  useEffect(() => {
+    if (!storeId) return;
+    let active = true;
+    setHidePreferenceStoreId(null);
+    void AsyncStorage.getItem(`arownd:merchant:${storeId}:hide-closed-orders`)
+      .then((value) => {
+        if (!active) return;
+        setHideClosedOrders(value !== "show");
+        setHidePreferenceStoreId(storeId);
+      })
+      .catch(() => {
+        if (!active) return;
+        setHideClosedOrders(true);
+        setHidePreferenceStoreId(storeId);
+      });
+    return () => {
+      active = false;
+    };
+  }, [storeId]);
+
+  useEffect(() => {
+    if (!storeId || hidePreferenceStoreId !== storeId) return;
+    void AsyncStorage.setItem(
+      `arownd:merchant:${storeId}:hide-closed-orders`,
+      hideClosedOrders ? "hide" : "show"
+    ).catch(() => undefined);
+  }, [hideClosedOrders, hidePreferenceStoreId, storeId]);
+
+
 
   if (access.isPending) {
     return <LoadingScreen theme={theme} label={translate("merchantLoading")} />;
@@ -89,13 +123,17 @@ export default function MerchantOrdersScreen() {
     );
   }
 
+  const availableOrders = hideClosedOrders
+    ? dashboard.data.orders.filter((order) => order.status !== "cancelled" && order.status !== "rejected")
+    : dashboard.data.orders;
+
   const visibleOrders = filter === "all"
-    ? dashboard.data.orders
-    : dashboard.data.orders.filter((order) => order.status === filter);
+    ? availableOrders
+    : availableOrders.filter((order) => order.status === filter);
 
   const getFilterCount = (value: OrderFilter) => value === "all"
-    ? dashboard.data.orders.length
-    : dashboard.data.orders.filter((order) => order.status === value).length;
+    ? availableOrders.length
+    : availableOrders.filter((order) => order.status === value).length;
 
   return (
     <SafeAreaView edges={["top", "left", "right"]} style={[styles.safe, { backgroundColor: theme.colors.background }]}>
@@ -117,6 +155,13 @@ export default function MerchantOrdersScreen() {
             />
           ))}
         </FilterBar>
+
+        <Button
+          label={translate(hideClosedOrders ? "merchantShowClosedOrders" : "merchantHideClosedOrders")}
+          onPress={() => setHideClosedOrders((current) => !current)}
+          variant="outline"
+          size="sm"
+        />
 
         <View style={styles.listHeading}>
           <View style={[styles.countPill, { backgroundColor: theme.colors.surfaceSecondary }]}>
