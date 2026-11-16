@@ -258,13 +258,13 @@ export default function MerchantEntryScreen() {
             {translate("merchantManagementTitle")}
           </UiText>
         </View>
-        <Card style={{ backgroundColor: theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface }} contentStyle={styles.managementCard}>
+        <View style={styles.managementGrid}>
           {[
             { key: "orders", label: translate("merchantManageOrders"), icon: "shopping-bag", path: "/merchant/orders" },
             { key: "products", label: translate("merchantManageProducts"), icon: "package", path: "/merchant/products" },
             { key: "addProduct", label: translate("merchantAddProductShortcut"), icon: "plus", path: "/merchant/products/new" },
             { key: "analytics", label: translate("merchantAnalyticsTitle"), icon: "layout-grid", path: "/merchant/analytics" }
-          ].map((item, index, items) => (
+          ].map((item) => (
             <PressableSurface
               key={item.key}
               accessibilityRole="button"
@@ -274,19 +274,18 @@ export default function MerchantEntryScreen() {
                 if (storeId && item.key === "analytics") void queryClient.prefetchQuery({ queryKey: ["merchant-analytics", storeId], queryFn: () => fetchMerchantAnalytics(storeId), staleTime: 30_000 });
                 router.push(item.path as "/merchant/orders" | "/merchant/products" | "/merchant/products/new" | "/merchant/analytics");
               }}
-              style={[
-                styles.managementRow,
-                index < items.length - 1 && { borderBottomColor: theme.colors.border, borderBottomWidth: StyleSheet.hairlineWidth }
-              ]}
+              style={[styles.managementTile, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}
             >
               <View style={[styles.managementIcon, { backgroundColor: theme.mode === "dark" ? theme.colors.surfaceSecondary : theme.colors.surfaceMuted }]}>
-                <Icon name={item.icon as "shopping-bag" | "package" | "layout-grid" | "plus"} color={theme.colors.accentMuted} size={19} accessibilityHidden />
+                <Icon name={item.icon as "shopping-bag" | "package" | "layout-grid" | "plus"} color={theme.colors.accentMuted} size={20} accessibilityHidden />
               </View>
-              <UiText style={[styles.managementLabel, { color: theme.colors.foreground }]}>{item.label}</UiText>
-              <Icon name="chevron-left" color={theme.colors.muted} size={18} accessibilityHidden />
+              <View style={styles.managementTileFooter}>
+                <UiText style={[styles.managementLabel, { color: theme.colors.foreground }]}>{item.label}</UiText>
+                <Icon name="chevron-left" color={theme.colors.muted} size={17} accessibilityHidden />
+              </View>
             </PressableSurface>
           ))}
-        </Card>
+        </View>
 
 
       </RefreshableScrollView>
@@ -386,10 +385,11 @@ function createStyles(theme: AppTheme) {
     storeHeader: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md },
     storeAvatar: { width: 58, height: 58, borderWidth: 1, borderRadius: designTokens.radius.pill, overflow: "hidden", alignItems: "center", justifyContent: "center" },
     storeActions: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.sm },
-    managementCard: { borderWidth: theme.mode === "light" ? 0 : 1, borderRadius: designTokens.radius.md, paddingHorizontal: designTokens.spacing.md, paddingVertical: designTokens.spacing.xs },
-    managementRow: { minHeight: 62, flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md, paddingVertical: designTokens.spacing.sm },
-    managementIcon: { width: 38, height: 38, borderRadius: designTokens.radius.md, alignItems: "center", justifyContent: "center" },
-    managementLabel: { flex: 1, fontSize: designTokens.typography.body - 1, fontWeight: designTokens.fontWeights.bold, textAlign: "auto" },
+    managementGrid: { flexDirection: "row", flexWrap: "wrap", gap: designTokens.spacing.sm },
+    managementTile: { width: "48%", flexGrow: 1, minHeight: 112, borderWidth: 1, borderRadius: designTokens.radius.lg, padding: designTokens.spacing.md, justifyContent: "space-between", gap: designTokens.spacing.md },
+    managementTileFooter: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: designTokens.spacing.xs },
+    managementIcon: { width: 42, height: 42, borderRadius: designTokens.radius.md, alignItems: "center", justifyContent: "center" },
+    managementLabel: { flex: 1, fontSize: designTokens.typography.caption + 1, lineHeight: 18, fontWeight: designTokens.fontWeights.bold, textAlign: "auto" },
     storeImage: { width: "100%", height: "100%" },
     storeAvatarText: { fontSize: designTokens.typography.display - 4, fontWeight: designTokens.fontWeights.extrabold },
     storeInfo: { flex: 1, alignItems: "flex-start", gap: designTokens.spacing.xs },
