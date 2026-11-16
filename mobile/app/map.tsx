@@ -21,9 +21,9 @@ import { designTokens, useAppTheme } from "@/lib/theme";
 
 const MAP_LIGHT_STYLE = "https://tiles.openfreemap.org/styles/liberty";
 const MAP_DARK_STYLE = "https://tiles.openfreemap.org/styles/dark";
-const EOX_SATELLITE_TILES = "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless_3857/default/g/${z}/${y}/${x}.jpg";
+const EOX_SATELLITE_TILES = "https://e.tiles.maps.eox.at/wmts/1.0.0/s2cloudless_3857/default/GoogleMapsCompatible/${z}/${y}/${x}.jpg";
 const EOX_ATTRIBUTION =
-  "EOxCloudless https://cloudless.eox.at by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016)";
+  "EOxCloudless https://cloudless.eox.at by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016 & 2017)";
 
 type CameraTarget = {
   longitude: number;
@@ -162,7 +162,7 @@ export default function MapScreen() {
             tiles={[EOX_SATELLITE_TILES]}
             tileSize={256}
             minzoom={0}
-            maxzoom={14}
+            maxzoom={13}
             attribution={EOX_ATTRIBUTION}
           >
             <Layer
