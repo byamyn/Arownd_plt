@@ -238,7 +238,6 @@ export default function MerchantNewProductScreen() {
           showsVerticalScrollIndicator={false}
         >
           <AppHeader title={translate("merchantProductCreateTitle")}/>
-          <UiText style={[styles.subtitle, { color: theme.colors.muted }]}>{translate("merchantProductCreateSubtitle")}</UiText>
 
           <Card contentStyle={styles.card}>
             <View style={styles.sectionHeader}>
@@ -647,9 +646,6 @@ function MessageScreen({
       <View style={styles.message}>
         <AppHeader
           title={translate("merchantProductCreateTitle")}        />
-        <UiText style={[styles.subtitle, { color: theme.colors.muted }]}>
-          {translate("merchantProductCreateSubtitle")}
-        </UiText>
         {loading ? (
           <LoadingState label={label} />
         ) : actionLabel && onAction ? (
