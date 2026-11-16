@@ -172,6 +172,12 @@ export default function MerchantEntryScreen() {
             }} variant="outline" size="sm" style={{ flex: 1 }} />
             <Button label={translate("merchantBackToProfile")} onPress={() => router.replace("/profile")} variant="ghost" size="sm" style={{ flex: 1 }} />
           </View>
+          <Button
+            label={translate("verificationMerchantTitle")}
+            onPress={() => router.push("/merchant/verification")}
+            variant="outline"
+            fullWidth
+          />
         </Card>
 
         <View style={styles.sectionHeading}>
