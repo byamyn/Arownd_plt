@@ -194,10 +194,28 @@ export default function StoreDetailsScreen() {
           </View>
           <View style={styles.storeInfo}>
             <View style={styles.storeNameRow}>
-              <UiText style={[styles.storeName, { color: theme.colors.foreground, flexShrink: 1 }]}>{details.name}</UiText>
+              {isStoreOwner && ownerInlineField === "name" ? (
+                <View style={styles.inlineField}>
+                  <TextField label={translate("merchantStoreSettingsName")} value={ownerDraft?.name ?? details.name} onChangeText={(name) => setOwnerDraft((current) => current ? { ...current, name } : current)} maxLength={100} />
+                </View>
+              ) : (
+                <Pressable disabled={!isStoreOwner} onPress={() => { setOwnerDraft(ownerSettings.data ?? ownerDraft); setOwnerInlineField("name"); }} style={styles.inlineEditable}>
+                  <UiText style={[styles.storeName, { color: theme.colors.foreground, flexShrink: 1 }]}>{(isStoreOwner && ownerDraft?.name) || details.name}</UiText>
+                  {isStoreOwner ? <Icon name="pencil" size={14} color={theme.colors.muted} accessibilityHidden /> : null}
+                </Pressable>
+              )}
               {details.is_verified ? <VerifiedBadge size={18} accessibilityLabel={translate("storeVerified")} /> : null}
             </View>
-            {details.description ? <UiText numberOfLines={2} style={[styles.storeDescription, { color: theme.colors.muted }]}>{details.description}</UiText> : null}
+            {isStoreOwner && ownerInlineField === "description" ? (
+              <View style={styles.inlineField}>
+                <TextField label={translate("merchantStoreSettingsDescription")} value={ownerDraft?.description ?? details.description ?? ""} onChangeText={(description) => setOwnerDraft((current) => current ? { ...current, description } : current)} multiline maxLength={2000} />
+              </View>
+            ) : (
+              <Pressable disabled={!isStoreOwner} onPress={() => { setOwnerDraft(ownerSettings.data ?? ownerDraft); setOwnerInlineField("description"); }} style={styles.inlineEditable}>
+                <UiText numberOfLines={2} style={[styles.storeDescription, { color: theme.colors.muted }]}>{(isStoreOwner && ownerDraft?.description) || details.description || (isStoreOwner ? translate("merchantStoreInlineAddDescription") : "")}</UiText>
+                {isStoreOwner ? <Icon name="pencil" size={14} color={theme.colors.muted} accessibilityHidden /> : null}
+              </Pressable>
+            )}
             <View style={styles.locationRow}>
               <Icon name="map-pin" size={14} color={theme.colors.muted} accessibilityHidden />
               <UiText numberOfLines={2} style={[styles.metaText, { color: theme.colors.muted }]}>{details.commune || details.address_line || translate("storeNoAddress")}</UiText>
