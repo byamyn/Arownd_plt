@@ -52,6 +52,17 @@ const FeaturedStoreSchema = StoreSummarySchema.extend({
   is_verified: z.boolean()
 });
 
+const MapStoreSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  logo_url: z.string().nullable().optional(),
+  commune: z.string().nullable().optional(),
+  address_line: z.string().nullable().optional(),
+  latitude: z.coerce.number().min(-90).max(90),
+  longitude: z.coerce.number().min(-180).max(180),
+  is_verified: z.boolean()
+}).passthrough();
+
 const ProductOfferSchema = z.object({
   id: z.string(),
   product_id: z.string(),
@@ -70,7 +81,7 @@ export type HomeProduct = z.infer<typeof HomeProductSchema>;
 export type FeaturedStore = z.infer<typeof FeaturedStoreSchema>;
 export type ProductSummary = z.infer<typeof ProductSummarySchema>;
 export type StoreDetails = z.infer<typeof StoreSummarySchema>;
-export type ProductOffer = z.infer<typeof ProductOfferSchema>;
+export type ProductOffer = z.infer<typeof ProductOfferSchema>;\nexport type MapStore = z.infer<typeof MapStoreSchema>;
 export type OfferVariantOptions = { sizes: string[]; colors: string[] };
 
 export function getOfferVariantOptions(offer: ProductOffer | null | undefined): OfferVariantOptions {
@@ -105,6 +116,20 @@ export async function fetchHomeProducts(): Promise<HomeProduct[]> {
 
   if (error) throw error;
   return HomeProductSchema.array().parse(data as unknown);
+}
+
+export async function fetchMapStores(): Promise<MapStore[]> {
+  const { data, error } = await getSupabaseClient()
+    .from("stores")
+    .select("id, name, logo_url, commune, address_line, latitude, longitude, is_verified")
+    .eq("is_verified", true)
+    .not("latitude", "is", null)
+    .not("longitude", "is", null)
+    .order("name", { ascending: true })
+    .limit(500);
+
+  if (error) throw error;
+  return MapStoreSchema.array().parse(data as unknown);
 }
 
 export async function fetchFeaturedStores(): Promise<FeaturedStore[]> {

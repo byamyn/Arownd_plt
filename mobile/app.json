@@ -14,7 +14,7 @@
       "policy": "appVersion"
     },
     "plugins": [
-      "expo-router",
+      "expo-router",\n      [\n        "expo-location",\n        {\n          "locationWhenInUsePermission": "يستخدم Arownd موقعك لعرض موقعك الحالي على الخريطة."\n        }\n      ],
       [
         "expo-image-picker",
         {
