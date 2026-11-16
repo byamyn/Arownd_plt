@@ -43,7 +43,11 @@ export default function StoreVerificationModerationScreen() {
         queryClient.invalidateQueries({ queryKey: ["store-verification-queue"] }),
         queryClient.invalidateQueries({ queryKey: ["my-store-verification"] }),
         queryClient.invalidateQueries({ queryKey: ["merchant-dashboard"] }),
-        queryClient.invalidateQueries({ queryKey: ["map-stores"] })
+        queryClient.invalidateQueries({ queryKey: ["map-stores"] }),
+        queryClient.invalidateQueries({ queryKey: ["customer-featured-stores"] }),
+        queryClient.invalidateQueries({ queryKey: ["customer-stores-by-region"] }),
+        queryClient.invalidateQueries({ queryKey: ["customer-store"] }),
+        queryClient.invalidateQueries({ queryKey: ["customer-store-offers"] })
       ]);
     }
   });
