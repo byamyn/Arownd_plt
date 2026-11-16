@@ -1,22 +1,44 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Camera,
   GeoJSONSource,
   Layer,
   Map as MapLibreMap,
+  Marker,
   RasterSource,
   UserLocation
 } from "@maplibre/maplibre-react-native";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
-import { Alert, Linking, Pressable, StyleSheet, View } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Location from "expo-location";
+import Svg, { Ellipse, Path } from "react-native-svg";
 
 import { CustomerNavigation } from "@/components/customer-navigation";
 import { BottomSheet, Button, Icon, Text as UiText } from "@/components/ui";
-import { fetchMapStores, fetchStoreDetails, fetchStoreOffers } from "@/lib/catalog";
-import { translate } from "@/lib/i18n";
+import { fetchMapStores, fetchStoreDetails, fetchStoreOffers, type MapStore } from "@/lib/catalog";
+import { translate, useLanguage } from "@/lib/i18n";
+import {
+  distanceBetweenCoordinates,
+  distanceToRouteMeters,
+  fetchDrivingRoute,
+  formatDistance,
+  formatDuration,
+  getActiveStepIndex,
+  getManeuverInstruction,
+  type DrivingRoute,
+  type RoutePoint
+} from "@/lib/map-routing";
+import { fetchLocalizedMapStyle } from "@/lib/map-style";
 import { designTokens, useAppTheme } from "@/lib/theme";
 
 const MAP_LIGHT_STYLE = "https://tiles.openfreemap.org/styles/liberty";
@@ -24,20 +46,56 @@ const MAP_DARK_STYLE = "https://tiles.openfreemap.org/styles/dark";
 const EOX_SATELLITE_TILES = "https://e.tiles.maps.eox.at/wmts/1.0.0/s2cloudless_3857/default/GoogleMapsCompatible/${z}/${y}/${x}.jpg";
 const EOX_ATTRIBUTION =
   "EOxCloudless https://cloudless.eox.at by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016 & 2017)";
+const MAX_VISIBLE_STORE_MARKERS = 120;
+const OFF_ROUTE_DISTANCE_METERS = 70;
+const REROUTE_COOLDOWN_MS = 15_000;
 
-type CameraTarget = {
-  longitude: number;
-  latitude: number;
+type NavigationSession = {
+  route: DrivingRoute;
+  currentStepIndex: number;
+  isRerouting: boolean;
 };
+
+function StoreMapMarker() {
+  return (
+    <View style={styles.markerWrap} pointerEvents="none">
+      <Svg width={48} height={58} viewBox="0 0 48 58">
+        <Ellipse cx="24" cy="53" rx="13" ry="3.5" fill="#111827" opacity="0.25" />
+        <Path d="M7 20 24 8 41 20 24 31Z" fill="#FFF5A6" stroke="#9A6B00" strokeWidth="1" />
+        <Path d="M7 20 24 31 24 49 7 38Z" fill="#FDE72A" stroke="#9A6B00" strokeWidth="1" />
+        <Path d="M24 31 41 20 41 38 24 49Z" fill="#D69B00" stroke="#9A6B00" strokeWidth="1" />
+        <Path d="M7 20 11 13 37 13 41 20 24 31Z" fill="#FFF08A" stroke="#9A6B00" strokeWidth="1" />
+        <Path d="M12 22 18 26 18 32 12 28Z" fill="#FFFFFF" stroke="#B98500" strokeWidth="0.8" />
+        <Path d="M27 34 35 29 35 35 27 40Z" fill="#FFF9D8" stroke="#B98500" strokeWidth="0.8" />
+        <Path d="M16 28 24 33 24 49 16 44Z" fill="#9B6200" opacity="0.9" />
+        <Path d="M19 30 22 32 22 45 19 43Z" fill="#FFF4B0" />
+        <Path d="M7 20 24 31 41 20" fill="none" stroke="#FFFFFF" strokeWidth="1.2" opacity="0.85" />
+      </Svg>
+      <View style={styles.markerHighlight} />
+    </View>
+  );
+}
 
 export default function MapScreen() {
   const theme = useAppTheme();
   const queryClient = useQueryClient();
+  const { language } = useLanguage();
   const isDark = theme.mode === "dark";
-  const [cameraTarget, setCameraTarget] = useState<CameraTarget | null>(null);
+  const styleUrl = isDark ? MAP_DARK_STYLE : MAP_LIGHT_STYLE;
+  const [cameraTarget, setCameraTarget] = useState<RoutePoint | null>(null);
+  const [mapCenter, setMapCenter] = useState<RoutePoint>({ longitude: 2.6, latitude: 28.0 });
   const [hasLocationPermission, setHasLocationPermission] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
+  const [userPosition, setUserPosition] = useState<RoutePoint | null>(null);
   const [selectedStoreId, setSelectedStoreId] = useState<string | null>(null);
+  const [navigation, setNavigation] = useState<NavigationSession | null>(null);
+  const [isStartingNavigation, setIsStartingNavigation] = useState(false);
+  const [navigationError, setNavigationError] = useState(false);
+  const watchSubscriptionRef = useRef<Location.LocationSubscription | null>(null);
+  const lastRerouteAtRef = useRef(0);
+  const navigationRef = useRef<NavigationSession | null>(null);
+
+  navigationRef.current = navigation;
 
   const stores = useQuery({
     queryKey: ["map-stores"],
@@ -45,49 +103,104 @@ export default function MapScreen() {
     staleTime: 60_000
   });
 
-  const storeFeatures = useMemo(() => ({
-    type: "FeatureCollection" as const,
-    features: (stores.data ?? []).map((store) => ({
-      type: "Feature" as const,
-      id: store.id,
-      properties: {
-        storeId: store.id,
-        name: store.name
-      },
-      geometry: {
-        type: "Point" as const,
-        coordinates: [store.longitude, store.latitude] as [number, number]
-      }
-    }))
-  }), [stores.data]);
+  const localizedStyle = useQuery({
+    queryKey: ["map-style", styleUrl, language],
+    queryFn: () => fetchLocalizedMapStyle(styleUrl, language),
+    staleTime: 24 * 60 * 60 * 1000,
+    retry: 1
+  });
 
   const selectedStore = stores.data?.find((store) => store.id === selectedStoreId) ?? null;
+
+  const visibleStores = useMemo(() => {
+    const allStores = stores.data ?? [];
+    return [...allStores]
+      .sort((left, right) => {
+        const leftDistance = distanceBetweenCoordinates(mapCenter, {
+          longitude: left.longitude,
+          latitude: left.latitude
+        });
+        const rightDistance = distanceBetweenCoordinates(mapCenter, {
+          longitude: right.longitude,
+          latitude: right.latitude
+        });
+        return leftDistance - rightDistance;
+      })
+      .slice(0, MAX_VISIBLE_STORE_MARKERS);
+  }, [stores.data, mapCenter]);
+
+  const routeFeatureCollection = useMemo(() => ({
+    type: "FeatureCollection" as const,
+    features: navigation ? [{
+      type: "Feature" as const,
+      properties: {},
+      geometry: {
+        type: "LineString" as const,
+        coordinates: navigation.route.coordinates.map((point) => [point.longitude, point.latitude])
+      }
+    }] : []
+  }), [navigation?.route]);
+
+  useEffect(() => () => {
+    watchSubscriptionRef.current?.remove();
+    watchSubscriptionRef.current = null;
+  }, []);
+
+  const startLocationTracking = async () => {
+    const permission = await Location.requestForegroundPermissionsAsync();
+    if (permission.status !== "granted") {
+      Alert.alert(
+        translate("mapLocationPermissionTitle", language),
+        translate("mapLocationPermissionMessage", language)
+      );
+      return null;
+    }
+
+    setHasLocationPermission(true);
+    const position = await Location.getCurrentPositionAsync({
+      accuracy: Location.Accuracy.Balanced
+    });
+    const currentPosition: RoutePoint = {
+      latitude: position.coords.latitude,
+      longitude: position.coords.longitude
+    };
+    setUserPosition(currentPosition);
+
+    if (!watchSubscriptionRef.current) {
+      watchSubscriptionRef.current = await Location.watchPositionAsync(
+        {
+          accuracy: Location.Accuracy.Balanced,
+          timeInterval: 2_000,
+          distanceInterval: 5
+        },
+        (nextPosition) => {
+          const next: RoutePoint = {
+            latitude: nextPosition.coords.latitude,
+            longitude: nextPosition.coords.longitude
+          };
+          setUserPosition(next);
+          if (navigationRef.current) setCameraTarget(next);
+        }
+      );
+    }
+
+    return currentPosition;
+  };
 
   const locateUser = async () => {
     if (isLocating) return;
     setIsLocating(true);
 
     try {
-      const permission = await Location.requestForegroundPermissionsAsync();
-      if (permission.status !== "granted") {
-        Alert.alert(
-          translate("mapLocationPermissionTitle"),
-          translate("mapLocationPermissionMessage")
-        );
-        return;
+      const currentPosition = await startLocationTracking();
+      if (currentPosition) {
+        setCameraTarget(currentPosition);
       }
-
-      const position = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced
-      });
-
-      setHasLocationPermission(true);
-      setCameraTarget({
-        latitude: position.coords.latitude,
-        longitude: position.coords.longitude
-      });
     } catch {
-      Alert.alert(translate("mapLocationPermissionTitle"), translate("mapLocationError"));
+      Alert.alert(
+        translate("mapLocationPermissionTitle", language),
+        translate("mapLocationError", language)
+      );
     } finally {
       setIsLocating(false);
     }
@@ -108,17 +221,94 @@ export default function MapScreen() {
       staleTime: 30_000
     });
 
+    setNavigation(null);
     setSelectedStoreId(null);
     router.push({ pathname: "/store/[storeId]", params: { storeId } });
   };
 
-  const openDirections = () => {
-    if (!selectedStore) return;
-    const destination = selectedStore.latitude + "," + selectedStore.longitude;
-    void Linking.openURL("https://www.google.com/maps/dir/?api=1&destination=" + destination).catch(() => {
-      Alert.alert(translate("mapDirectionsError"));
-    });
+  const startNavigation = async () => {
+    if (!selectedStore || isStartingNavigation) return;
+    setIsStartingNavigation(true);
+    setNavigationError(false);
+
+    try {
+      const origin = await startLocationTracking();
+      if (!origin) return;
+
+      const destination: RoutePoint = {
+        latitude: selectedStore.latitude,
+        longitude: selectedStore.longitude
+      };
+      const route = await fetchDrivingRoute(origin, destination);
+      if (route.coordinates.length < 2) throw new Error("route_geometry_missing");
+
+      setNavigation({
+        route,
+        currentStepIndex: 0,
+        isRerouting: false
+      });
+      lastRerouteAtRef.current = Date.now();
+      setCameraTarget(origin);
+    } catch {
+      setNavigationError(true);
+      Alert.alert(
+        translate("mapNavigationErrorTitle", language),
+        translate("mapNavigationError", language)
+      );
+    } finally {
+      setIsStartingNavigation(false);
+    }
   };
+
+  const stopNavigation = () => {
+    setNavigation(null);
+    setNavigationError(false);
+  };
+
+  useEffect(() => {
+    if (!navigation || !userPosition) return;
+
+    const nextStepIndex = getActiveStepIndex(
+      navigation.route.steps,
+      userPosition,
+      navigation.currentStepIndex
+    );
+    if (nextStepIndex !== navigation.currentStepIndex) {
+      setNavigation((current) => current
+        ? { ...current, currentStepIndex: nextStepIndex }
+        : current);
+    }
+
+    const distanceFromRoute = distanceToRouteMeters(userPosition, navigation.route.coordinates);
+    if (distanceFromRoute <= OFF_ROUTE_DISTANCE_METERS) return;
+    if (Date.now() - lastRerouteAtRef.current < REROUTE_COOLDOWN_MS) return;
+
+    lastRerouteAtRef.current = Date.now();
+    setNavigation((current) => current ? { ...current, isRerouting: true } : current);
+
+    const destination = selectedStore
+      ? { latitude: selectedStore.latitude, longitude: selectedStore.longitude }
+      : null;
+    if (!destination) {
+      setNavigation((current) => current ? { ...current, isRerouting: false } : current);
+      return;
+    }
+
+    void fetchDrivingRoute(userPosition, destination)
+      .then((route) => {
+        setNavigation((current) => current
+          ? { route, currentStepIndex: 0, isRerouting: false }
+          : current);
+      })
+      .catch(() => {
+        setNavigation((current) => current ? { ...current, isRerouting: false } : current);
+      });
+  }, [userPosition, navigation, selectedStore]);
+
+  const currentStep = navigation?.route.steps[navigation.currentStepIndex] ?? null;
+  const currentStepDistance = currentStep && userPosition
+    ? distanceBetweenCoordinates(userPosition, currentStep.location)
+    : null;
 
   return (
     <SafeAreaView
@@ -128,7 +318,7 @@ export default function MapScreen() {
       <View style={styles.mapContainer}>
         <MapLibreMap
           style={StyleSheet.absoluteFill}
-          mapStyle={isDark ? MAP_DARK_STYLE : MAP_LIGHT_STYLE}
+          mapStyle={localizedStyle.data ?? styleUrl}
           attribution
           attributionPosition={{ bottom: 8, left: 8 }}
           logo={false}
@@ -138,14 +328,18 @@ export default function MapScreen() {
             color: "#FFFFFF",
             intensity: isDark ? 0.35 : 0.75
           }}
+          onRegionDidChange={(event) => {
+            const [longitude, latitude] = event.nativeEvent.center;
+            setMapCenter({ longitude, latitude });
+          }}
         >
           <Camera
             {...(cameraTarget
               ? {
                   center: [cameraTarget.longitude, cameraTarget.latitude] as [number, number],
-                  zoom: 16,
-                  pitch: 48,
-                  duration: 900
+                  zoom: navigation ? 17 : 16,
+                  pitch: navigation ? 58 : 48,
+                  duration: 650
                 }
               : {
                   initialViewState: {
@@ -191,44 +385,41 @@ export default function MapScreen() {
             />
           ) : null}
 
-          <GeoJSONSource
-            id="arownd-store-markers"
-            data={storeFeatures}
-            onPress={(event) => {
-              const storeId = event.nativeEvent.features?.[0]?.properties?.storeId;
-              if (typeof storeId === "string") setSelectedStoreId(storeId);
-            }}
-          >
-            <Layer
-              id="arownd-store-marker-circles"
-              type="circle"
-              paint={{
-                "circle-color": "#FDE72A",
-                "circle-radius": 14,
-                "circle-stroke-color": "#FFFFFF",
-                "circle-stroke-width": 2.5
-              }}
-            />
-            <Layer
-              id="arownd-store-marker-labels"
-              type="symbol"
-              layout={{
-                "text-field": "A",
-                "text-font": ["Noto Sans Regular"],
-                "text-size": 12,
-                "text-allow-overlap": true,
-                "text-ignore-placement": true
-              }}
-              paint={{ "text-color": "#171717" }}
-            />
-          </GeoJSONSource>
+          {navigation ? (
+            <GeoJSONSource id="arownd-navigation-route" data={routeFeatureCollection}>
+              <Layer
+                id="arownd-navigation-route-line"
+                type="line"
+                layout={{ "line-cap": "round", "line-join": "round" }}
+                paint={{
+                  "line-color": "#246BFD",
+                  "line-width": 7,
+                  "line-opacity": 0.95,
+                  "line-blur": 0.2
+                }}
+              />
+            </GeoJSONSource>
+          ) : null}
+
+          {visibleStores.map((store) => (
+            <Marker
+              key={store.id}
+              id={store.id}
+              lngLat={[store.longitude, store.latitude]}
+              anchor="bottom"
+              onPress={() => setSelectedStoreId(store.id)}
+            >
+              <StoreMapMarker />
+            </Marker>
+          ))}
 
           {hasLocationPermission ? <UserLocation animated accuracy /> : null}
         </MapLibreMap>
 
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={translate("mapLocateMe")}
+          accessibilityLabel={translate("mapLocateMe", language)}
+          accessibilityState={{ disabled: isLocating }}
           onPress={() => void locateUser()}
           disabled={isLocating}
           style={[
@@ -242,7 +433,9 @@ export default function MapScreen() {
             }
           ]}
         >
-          <Icon name="locate-fixed" size={22} color={theme.colors.foreground} accessibilityHidden />
+          {isLocating
+            ? <ActivityIndicator size="small" color={theme.colors.foreground} />
+            : <Icon name="locate-fixed" size={22} color={theme.colors.foreground} accessibilityHidden />}
         </Pressable>
       </View>
 
@@ -250,37 +443,170 @@ export default function MapScreen() {
 
       <BottomSheet
         visible={Boolean(selectedStore)}
-        onRequestClose={() => setSelectedStoreId(null)}
+        onRequestClose={() => {
+          setSelectedStoreId(null);
+          if (navigation) stopNavigation();
+        }}
+        maxHeight="88%"
       >
         {selectedStore ? (
-          <>
-            <View style={styles.storeHeading}>
-              <View style={[styles.storeIcon, { backgroundColor: theme.colors.accent }]}>
-                <Icon name="store" size={22} color={theme.colors.accentForeground} accessibilityHidden />
+          navigation ? (
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.navigationContent}>
+              <View style={styles.navigationHeader}>
+                <View style={[styles.navigationBadge, { backgroundColor: theme.colors.successSurface }]}>
+                  <View style={[styles.liveDot, { backgroundColor: theme.colors.success }]} />
+                  <UiText tone="success" weight="700" style={styles.badgeText}>
+                    {translate("mapNavigationActive", language)}
+                  </UiText>
+                </View>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={translate("mapNavigationEnd", language)}
+                  onPress={stopNavigation}
+                  hitSlop={8}
+                  style={[styles.closeNavigation, { backgroundColor: theme.colors.surfaceSecondary }]}
+                >
+                  <Icon name="x" size={18} color={theme.colors.foreground} accessibilityHidden />
+                </Pressable>
               </View>
-              <View style={styles.storeCopy}>
-                <UiText weight="700" style={styles.storeName}>{selectedStore.name}</UiText>
-                <UiText tone="muted" style={styles.storeLocation}>
-                  {[selectedStore.commune, selectedStore.address_line].filter(Boolean).join(" · ") || translate("mapAddressUnavailable")}
-                </UiText>
+
+              <View style={styles.navigationDestination}>
+                {selectedStore.logo_url ? (
+                  <Image source={{ uri: selectedStore.logo_url }} style={styles.destinationLogo} />
+                ) : (
+                  <View style={[styles.destinationLogo, styles.destinationLogoFallback, { backgroundColor: theme.colors.accent }]}>
+                    <Icon name="store" size={22} color={theme.colors.accentForeground} accessibilityHidden />
+                  </View>
+                )}
+                <View style={styles.storeCopy}>
+                  <UiText weight="700" style={styles.storeName} numberOfLines={1}>{selectedStore.name}</UiText>
+                  <UiText tone="muted" style={styles.storeLocation} numberOfLines={2}>
+                    {[selectedStore.commune, selectedStore.address_line].filter(Boolean).join(" · ") || translate("mapAddressUnavailable", language)}
+                  </UiText>
+                </View>
               </View>
-              <Icon name="check" size={20} color={theme.colors.success} accessibilityHidden />
-            </View>
-            <View style={styles.actions}>
+
+              <View style={[styles.routeSummary, { backgroundColor: theme.colors.surfaceSecondary }]}>
+                <View style={styles.routeMetric}>
+                  <UiText weight="800" style={styles.routeMetricValue}>
+                    {formatDistance(navigation.route.distance, language)}
+                  </UiText>
+                  <UiText tone="muted" style={styles.routeMetricLabel}>
+                    {translate("mapNavigationDistance", language)}
+                  </UiText>
+                </View>
+                <View style={[styles.metricDivider, { backgroundColor: theme.colors.border }]} />
+                <View style={styles.routeMetric}>
+                  <UiText weight="800" style={styles.routeMetricValue}>
+                    {formatDuration(navigation.route.duration, language)}
+                  </UiText>
+                  <UiText tone="muted" style={styles.routeMetricLabel}>
+                    {translate("mapNavigationDuration", language)}
+                  </UiText>
+                </View>
+              </View>
+
+              <View style={[styles.instructionCard, { backgroundColor: theme.colors.surface }]}>
+                <View style={[styles.instructionIcon, { backgroundColor: theme.colors.accent }]}>
+                  <Icon name="navigation" size={24} color={theme.colors.accentForeground} accessibilityHidden />
+                </View>
+                <View style={styles.instructionCopy}>
+                  <UiText tone="muted" style={styles.routeMetricLabel}>
+                    {translate("mapNavigationNext", language)}
+                  </UiText>
+                  <UiText weight="700" style={styles.instructionText}>
+                    {currentStep
+                      ? getManeuverInstruction(currentStep, language)
+                      : translate("mapNavigationContinue", language)}
+                  </UiText>
+                  {currentStepDistance !== null ? (
+                    <UiText tone="muted" style={styles.storeLocation}>
+                      {formatDistance(currentStepDistance, language)}
+                    </UiText>
+                  ) : null}
+                </View>
+              </View>
+
+              {navigation.isRerouting ? (
+                <View style={styles.reroutingRow}>
+                  <ActivityIndicator size="small" color={theme.colors.accent} />
+                  <UiText tone="muted">{translate("mapNavigationRecalculating", language)}</UiText>
+                </View>
+              ) : null}
+
               <Button
-                label={translate("mapViewStore")}
-                onPress={openSelectedStore}
-                fullWidth
-              />
-              <Button
-                label={translate("mapDirections")}
-                onPress={openDirections}
+                label={translate("mapNavigationEnd", language)}
+                onPress={stopNavigation}
                 variant="outline"
                 fullWidth
-                startIcon={<Icon name="navigation" size={18} color={theme.colors.foreground} accessibilityHidden />}
+                startIcon={<Icon name="x" size={18} color={theme.colors.foreground} accessibilityHidden />}
               />
+            </ScrollView>
+          ) : (
+            <View style={styles.storeCard}>
+              <View style={styles.storeHeading}>
+                {selectedStore.logo_url ? (
+                  <Image source={{ uri: selectedStore.logo_url }} style={styles.storeLogo} />
+                ) : (
+                  <View style={[styles.storeLogo, styles.storeLogoFallback, { backgroundColor: theme.colors.accent }]}>
+                    <Icon name="store" size={28} color={theme.colors.accentForeground} accessibilityHidden />
+                  </View>
+                )}
+                <View style={styles.storeCopy}>
+                  <UiText weight="700" style={styles.storeName} numberOfLines={2}>
+                    {selectedStore.name}
+                  </UiText>
+                  {selectedStore.is_verified ? (
+                    <View style={[styles.verifiedBadge, { backgroundColor: theme.colors.successSurface }]}>
+                      <Icon name="check" size={13} color={theme.colors.success} accessibilityHidden />
+                      <UiText tone="success" weight="700" style={styles.badgeText}>
+                        {translate("storeVerified", language)}
+                      </UiText>
+                    </View>
+                  ) : null}
+                </View>
+              </View>
+
+              <View style={[styles.addressCard, { backgroundColor: theme.colors.surfaceSecondary }]}>
+                <View style={[styles.addressIcon, { backgroundColor: theme.colors.surface }]}>
+                  <Icon name="map-pin" size={19} color={theme.colors.accent} accessibilityHidden />
+                </View>
+                <View style={styles.storeCopy}>
+                  <UiText tone="muted" style={styles.routeMetricLabel}>
+                    {translate("storeAddress", language)}
+                  </UiText>
+                  <UiText style={styles.addressText}>
+                    {[selectedStore.commune, selectedStore.address_line].filter(Boolean).join(" · ") || translate("mapAddressUnavailable", language)}
+                  </UiText>
+                </View>
+              </View>
+
+              <View style={styles.actions}>
+                <Button
+                  label={translate("mapViewStore", language)}
+                  onPress={openSelectedStore}
+                  fullWidth
+                />
+                <Button
+                  label={isStartingNavigation
+                    ? translate("mapNavigationStarting", language)
+                    : translate("mapDirections", language)}
+                  onPress={() => void startNavigation()}
+                  disabled={isStartingNavigation}
+                  variant="outline"
+                  fullWidth
+                  startIcon={isStartingNavigation
+                    ? <ActivityIndicator size="small" color={theme.colors.foreground} />
+                    : <Icon name="navigation" size={18} color={theme.colors.foreground} accessibilityHidden />}
+                />
+              </View>
+              {navigationError ? (
+                <UiText tone="danger" style={styles.errorText}>
+                  {translate("mapNavigationError", language)}
+                </UiText>
+              ) : null}
             </View>
-          </>
+          )
         ) : null}
       </BottomSheet>
     </SafeAreaView>
@@ -308,15 +634,37 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.16,
     shadowRadius: 4
   },
+  markerWrap: {
+    width: 48,
+    height: 58,
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "visible"
+  },
+  markerHighlight: {
+    position: "absolute",
+    top: 11,
+    width: 9,
+    height: 4,
+    borderRadius: 3,
+    backgroundColor: "#FFFFFF",
+    opacity: 0.65
+  },
+  storeCard: {
+    gap: designTokens.spacing.lg
+  },
   storeHeading: {
     flexDirection: "row",
     alignItems: "center",
     gap: designTokens.spacing.md
   },
-  storeIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+  storeLogo: {
+    width: 66,
+    height: 66,
+    borderRadius: 20,
+    backgroundColor: "#F2F2F2"
+  },
+  storeLogoFallback: {
     alignItems: "center",
     justifyContent: "center"
   },
@@ -330,7 +678,132 @@ const styles = StyleSheet.create({
   storeLocation: {
     fontSize: designTokens.typography.caption
   },
+  verifiedBadge: {
+    alignSelf: "flex-start",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: designTokens.spacing.sm,
+    paddingVertical: designTokens.spacing.xs,
+    borderRadius: 999
+  },
+  badgeText: {
+    fontSize: designTokens.typography.caption
+  },
+  addressCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: designTokens.spacing.md,
+    padding: designTokens.spacing.md,
+    borderRadius: 16
+  },
+  addressIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 13,
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  addressText: {
+    fontSize: designTokens.typography.body
+  },
   actions: {
     gap: designTokens.spacing.sm
+  },
+  navigationContent: {
+    gap: designTokens.spacing.md,
+    paddingBottom: designTokens.spacing.sm
+  },
+  navigationHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between"
+  },
+  navigationBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 7,
+    borderRadius: 999,
+    paddingHorizontal: designTokens.spacing.md,
+    paddingVertical: designTokens.spacing.sm
+  },
+  liveDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4
+  },
+  closeNavigation: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  navigationDestination: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: designTokens.spacing.md
+  },
+  destinationLogo: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    backgroundColor: "#F2F2F2"
+  },
+  destinationLogoFallback: {
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  routeSummary: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: 18,
+    padding: designTokens.spacing.md
+  },
+  routeMetric: {
+    flex: 1,
+    alignItems: "center",
+    gap: 4
+  },
+  routeMetricValue: {
+    fontSize: designTokens.typography.title
+  },
+  routeMetricLabel: {
+    fontSize: designTokens.typography.caption
+  },
+  metricDivider: {
+    width: StyleSheet.hairlineWidth,
+    height: 34
+  },
+  instructionCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: designTokens.spacing.md,
+    padding: designTokens.spacing.md,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "#D6D9E0",
+    borderRadius: 18
+  },
+  instructionIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 15,
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  instructionCopy: {
+    flex: 1,
+    gap: designTokens.spacing.xs
+  },
+  instructionText: {
+    fontSize: designTokens.typography.subtitle
+  },
+  reroutingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: designTokens.spacing.sm
+  },
+  errorText: {
+    fontSize: designTokens.typography.caption
   }
 });

@@ -1,0 +1,211 @@
+import type { Language } from "@/lib/i18n";
+
+export type RoutePoint = {
+  longitude: number;
+  latitude: number;
+};
+
+export type RouteStep = {
+  name: string;
+  distance: number;
+  duration: number;
+  maneuverType: string;
+  modifier?: string;
+  location: RoutePoint;
+};
+
+export type DrivingRoute = {
+  coordinates: RoutePoint[];
+  steps: RouteStep[];
+  distance: number;
+  duration: number;
+};
+
+type OsrmResponse = {
+  code?: string;
+  routes?: Array<{
+    distance?: number;
+    duration?: number;
+    geometry?: { coordinates?: number[][] };
+    legs?: Array<{
+      steps?: Array<{
+        name?: string;
+        distance?: number;
+        duration?: number;
+        maneuver?: {
+          type?: string;
+          modifier?: string;
+          location?: number[];
+        };
+      }>;
+    }>;
+  }>;
+};
+
+export async function fetchDrivingRoute(
+  origin: RoutePoint,
+  destination: RoutePoint
+): Promise<DrivingRoute> {
+  const coordinates = [
+    `${origin.longitude},${origin.latitude}`,
+    `${destination.longitude},${destination.latitude}`
+  ].join(";");
+  const url = `https://router.project-osrm.org/route/v1/driving/${coordinates}?overview=full&geometries=geojson&steps=true&alternatives=false&annotations=false`;
+  const response = await fetch(url, {
+    headers: { Accept: "application/json" }
+  });
+
+  if (!response.ok) throw new Error("route_service_unavailable");
+  const payload = await response.json() as OsrmResponse;
+  const route = payload.routes?.[0];
+  const rawCoordinates = route?.geometry?.coordinates;
+  if (payload.code !== "Ok" || !route || !rawCoordinates || rawCoordinates.length < 2) {
+    throw new Error("route_not_found");
+  }
+
+  const steps: RouteStep[] = (route.legs?.[0]?.steps ?? []).flatMap((step) => {
+    const location = step.maneuver?.location;
+    if (!location || location.length < 2) return [];
+    return [{
+      name: step.name ?? "",
+      distance: step.distance ?? 0,
+      duration: step.duration ?? 0,
+      maneuverType: step.maneuver?.type ?? "continue",
+      ...(step.maneuver?.modifier ? { modifier: step.maneuver.modifier } : {}),
+      location: {
+        longitude: location[0],
+        latitude: location[1]
+      }
+    }];
+  });
+
+  return {
+    coordinates: rawCoordinates.map(([longitude, latitude]) => ({ longitude, latitude })),
+    steps,
+    distance: route.distance ?? 0,
+    duration: route.duration ?? 0
+  };
+}
+
+export function distanceBetweenCoordinates(first: RoutePoint, second: RoutePoint): number {
+  const radians = (value: number) => value * Math.PI / 180;
+  const latitudeDelta = radians(second.latitude - first.latitude);
+  const longitudeDelta = radians(second.longitude - first.longitude);
+  const firstLatitude = radians(first.latitude);
+  const secondLatitude = radians(second.latitude);
+  const haversine = Math.sin(latitudeDelta / 2) ** 2
+    + Math.cos(firstLatitude) * Math.cos(secondLatitude) * Math.sin(longitudeDelta / 2) ** 2;
+  return 6_371_000 * 2 * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
+}
+
+export function distanceToRouteMeters(position: RoutePoint, route: RoutePoint[]): number {
+  if (route.length === 0) return Number.POSITIVE_INFINITY;
+  const stride = Math.max(1, Math.floor(route.length / 160));
+  let nearest = Number.POSITIVE_INFINITY;
+
+  for (let index = 0; index < route.length; index += stride) {
+    nearest = Math.min(nearest, distanceBetweenCoordinates(position, route[index]));
+  }
+
+  nearest = Math.min(nearest, distanceBetweenCoordinates(position, route[route.length - 1]));
+  return nearest;
+}
+
+export function getActiveStepIndex(
+  steps: RouteStep[],
+  position: RoutePoint,
+  currentIndex: number
+): number {
+  let nextIndex = Math.min(currentIndex, Math.max(0, steps.length - 1));
+  while (nextIndex < steps.length - 1) {
+    const distance = distanceBetweenCoordinates(position, steps[nextIndex].location);
+    if (distance > 28) break;
+    nextIndex += 1;
+  }
+  return nextIndex;
+}
+
+const maneuverLabels: Record<string, Record<string, string>> = {
+  ar: {
+    depart: "ابدأ السير",
+    arrive: "لقد وصلت إلى وجهتك",
+    continue: "واصل السير",
+    turn_left: "انعطف يسارًا",
+    turn_right: "انعطف يمينًا",
+    slight_left: "انعطف قليلًا إلى اليسار",
+    slight_right: "انعطف قليلًا إلى اليمين",
+    sharp_left: "انعطف بشدة إلى اليسار",
+    sharp_right: "انعطف بشدة إلى اليمين",
+    uturn: "استدر للخلف",
+    roundabout: "ادخل الدوار",
+    rotary: "واصل عبر الدوار",
+    merge: "اندمج مع الطريق",
+    fork_left: "اسلك التفرع الأيسر",
+    fork_right: "اسلك التفرع الأيمن",
+    "on ramp": "اسلك مدخل الطريق",
+    "off ramp": "اسلك مخرج الطريق",
+    "end of road_left": "انعطف يسارًا عند نهاية الطريق",
+    "end of road_right": "انعطف يمينًا عند نهاية الطريق"
+  },
+  en: {
+    depart: "Start driving",
+    arrive: "You have arrived",
+    continue: "Continue straight",
+    turn_left: "Turn left",
+    turn_right: "Turn right",
+    slight_left: "Turn slightly left",
+    slight_right: "Turn slightly right",
+    sharp_left: "Turn sharp left",
+    sharp_right: "Turn sharp right",
+    uturn: "Make a U-turn",
+    roundabout: "Enter the roundabout",
+    rotary: "Continue through the roundabout",
+    merge: "Merge onto the road",
+    fork_left: "Keep left at the fork",
+    fork_right: "Keep right at the fork",
+    "on ramp": "Take the ramp",
+    "off ramp": "Take the exit",
+    "end of road_left": "Turn left at the end of the road",
+    "end of road_right": "Turn right at the end of the road"
+  }
+};
+
+export function getManeuverInstruction(step: RouteStep, language: Language): string {
+  const modifier = step.modifier ?? "";
+  let key = step.maneuverType;
+
+  if (key === "turn" || key === "new name" || key === "end of road" || key === "fork") {
+    key = modifier ? `${key}_${modifier.replace(/ /g, "_")}` : "continue";
+  } else if (key === "roundabout turn" || key === "exit roundabout") {
+    key = "roundabout";
+  } else if (key === "use lane") {
+    key = "continue";
+  } else if (key === "on ramp" || key === "off ramp") {
+    // Keep the OSRM maneuver name; both dictionaries contain these labels.
+  }
+
+  const label = maneuverLabels[language][key] ?? maneuverLabels[language].continue;
+  return step.name ? `${label} · ${step.name}` : label;
+}
+
+export function formatDistance(meters: number, language: Language): string {
+  const locale = language === "ar" ? "ar-DZ" : "en-DZ";
+  if (meters < 1_000) {
+    return `${new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }).format(Math.max(0, meters))} ${language === "ar" ? "م" : "m"}`;
+  }
+  return `${new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(meters / 1_000)} ${language === "ar" ? "كم" : "km"}`;
+}
+
+export function formatDuration(seconds: number, language: Language): string {
+  const totalMinutes = Math.max(1, Math.round(seconds / 60));
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if (language === "ar") {
+    if (hours > 0 && minutes > 0) return `${hours} س ${minutes} د`;
+    if (hours > 0) return `${hours} س`;
+    return `${totalMinutes} د`;
+  }
+  if (hours > 0 && minutes > 0) return `${hours} hr ${minutes} min`;
+  if (hours > 0) return `${hours} hr`;
+  return `${totalMinutes} min`;
+}
