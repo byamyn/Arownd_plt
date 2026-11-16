@@ -1,7 +1,8 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { useMemo, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { Linking, Pressable, StyleSheet, View } from "react-native";
+import Svg, { Circle, Path, Rect } from "react-native-svg";
 
 import { CustomerScreen, CustomerSearch, EmptyState, ErrorState, ProductTile, SectionTitle } from "@/components/customer-ui";
 import { FavoriteButton } from "@/components/favorite-button";
@@ -83,6 +84,36 @@ export default function StoreDetailsScreen() {
           </View>
           <FavoriteButton kind="stores" id={storeId} iconOnly />
         </View>
+        {details.instagram_url || details.facebook_url ? (
+          <View style={styles.socialLinks}>
+            {details.instagram_url ? (
+              <Pressable
+                accessibilityRole="link"
+                accessibilityLabel="Instagram"
+                onPress={() => void Linking.openURL(details.instagram_url!)}
+                style={({ pressed }) => [styles.socialButton, styles.instagramButton, pressed && styles.socialButtonPressed]}
+              >
+                <Svg width={21} height={21} viewBox="0 0 24 24" fill="none">
+                  <Rect x={3.25} y={3.25} width={17.5} height={17.5} rx={5.2} stroke="#C13584" strokeWidth={2} />
+                  <Circle cx={12} cy={12} r={4.1} stroke="#C13584" strokeWidth={2} />
+                  <Circle cx={17.7} cy={6.5} r={1.2} fill="#C13584" />
+                </Svg>
+              </Pressable>
+            ) : null}
+            {details.facebook_url ? (
+              <Pressable
+                accessibilityRole="link"
+                accessibilityLabel="Facebook"
+                onPress={() => void Linking.openURL(details.facebook_url!)}
+                style={({ pressed }) => [styles.socialButton, styles.facebookButton, pressed && styles.socialButtonPressed]}
+              >
+                <Svg width={21} height={21} viewBox="0 0 24 24">
+                  <Path d="M14.1 21v-8.2h2.8l.42-3.2H14.1V7.55c0-.93.26-1.56 1.61-1.56h1.72V3.12c-.3-.04-1.33-.12-2.52-.12-2.5 0-4.21 1.53-4.21 4.34V9.6H7.9v3.2h2.8V21h3.4Z" fill="#1877F2" />
+                </Svg>
+              </Pressable>
+            ) : null}
+          </View>
+        ) : null}
         {details.latitude != null && details.longitude != null ? (
           <Button
             label={translate("mapDirections")}
@@ -166,6 +197,11 @@ export default function StoreDetailsScreen() {
 const styles = StyleSheet.create({
   storeHero: { padding: designTokens.spacing.lg, gap: designTokens.spacing.md },
   storeIdentity: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md },
+  socialLinks: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.sm },
+  socialButton: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: "#FFFFFF", borderWidth: StyleSheet.hairlineWidth, borderColor: "#E5E7EB" },
+  instagramButton: { borderColor: "#F2D5E5" },
+  facebookButton: { borderColor: "#D7E6FF" },
+  socialButtonPressed: { opacity: 0.65, transform: [{ scale: 0.96 }] },
   storeInfo: { flex: 1, alignItems: "flex-start", gap: designTokens.spacing.xs },
   storeNameRow: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.xs, maxWidth: "100%" },
   locationRow: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.xs },
