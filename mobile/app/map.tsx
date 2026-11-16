@@ -58,7 +58,7 @@ type NavigationSession = {
   isRerouting: boolean;
 };
 
-function StoreMapMarker({ selected, verified }: { selected: boolean; verified: boolean }) {
+function StoreMapMarker({ selected, verified, isDark }: { selected: boolean; verified: boolean; isDark: boolean }) {
   const scale = useRef(new Animated.Value(selected ? 1.18 : 1)).current;
 
   useEffect(() => {
@@ -77,11 +77,11 @@ function StoreMapMarker({ selected, verified }: { selected: boolean; verified: b
       <Animated.View
         style={[
           styles.markerCircle,
-          selected && styles.markerSelected,
+          selected && (isDark ? styles.markerSelectedDark : styles.markerSelectedLight),
           { transform: [{ scale }] }
         ]}
       >
-        <Icon name="store" size={22} color="#000000" accessibilityHidden />
+        <Icon name="store" size={22} color={isDark ? "#FFFFFF" : "#000000"} accessibilityHidden />
         {verified ? (
           <View style={styles.markerVerified}>
             <Icon name="check" size={9} color="#FFFF00" accessibilityHidden />
@@ -448,6 +448,7 @@ export default function MapScreen() {
               <StoreMapMarker
                 selected={selectedStoreId === store.id}
                 verified={store.is_verified}
+                isDark={isDark}
               />
             </Marker>
           ))}
@@ -696,12 +697,21 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 3
   },
-  markerSelected: {
-    borderWidth: 2,
+  markerSelectedLight: {
+    borderWidth: 1,
     borderColor: "#000000",
-    elevation: 8,
-    shadowOpacity: 0.28,
-    shadowRadius: 6
+    elevation: 7,
+    shadowColor: "#000000",
+    shadowOpacity: 0.24,
+    shadowRadius: 5
+  },
+  markerSelectedDark: {
+    borderWidth: 1,
+    borderColor: "#FFFFFF",
+    elevation: 7,
+    shadowColor: "#FFFFFF",
+    shadowOpacity: 0.18,
+    shadowRadius: 5
   },
   markerVerified: {
     position: "absolute",
