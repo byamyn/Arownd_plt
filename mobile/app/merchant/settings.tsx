@@ -5,6 +5,12 @@ import { Redirect, router } from "expo-router";
 import { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  Camera,
+  Layer,
+  Map as MapLibreMap,
+  RasterSource
+} from "@maplibre/maplibre-react-native";
 
 import { BottomSheet, AppHeader, Button, Card, ErrorState, Heading, Icon, IconButton, Image as UiImage, LoadingState, PressableSurface, Text as UiText, TextField } from "@/components/ui";
 import { fetchMerchantAccess } from "@/lib/merchant";
@@ -14,7 +20,13 @@ import { fetchMyMerchantStoreSettings, updateMyMerchantStoreSettings } from "@/l
 import { MerchantStoreSettingsSchema, type MerchantStoreSettings } from "@/lib/merchant-store-settings-state";
 import { translate, useLanguage } from "@/lib/i18n";
 import { getRegionDisplayName, getRegionLevelDisplayName } from "@/lib/country-regions";
+import { fetchLocalizedMapStyle } from "@/lib/map-style";
 import { designTokens, useAppTheme, type AppTheme } from "@/lib/theme";
+
+const MAP_LIGHT_STYLE = "https://tiles.openfreemap.org/styles/liberty";
+const MAP_DARK_STYLE = "https://tiles.openfreemap.org/styles/dark";
+const EOX_SATELLITE_TILES = "https://e.tiles.maps.eox.at/wmts/1.0.0/s2cloudless_3857/default/GoogleMapsCompatible/${z}/${y}/${x}.jpg";
+const EOX_ATTRIBUTION = "EOxCloudless https://cloudless.eox.at by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016 & 2017)";
 
 export default function MerchantStoreSettingsScreen() {
   const { language } = useLanguage();
@@ -32,7 +44,18 @@ export default function MerchantStoreSettingsScreen() {
     retry: false
   });
   const [form, setForm] = useState<MerchantStoreSettings | null>(null);
+  const [mapPickerOpen, setMapPickerOpen] = useState(false);
+  const [mapDraftPosition, setMapDraftPosition] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [mapCameraRevision, setMapCameraRevision] = useState(0);
   const secondaryOptions = useQuery({ queryKey: ["merchant-regions", form?.region_id], queryFn: () => fetchCheckoutRegions(form?.region_id ?? null), enabled: form?.region_id !== undefined && form?.region_id !== null, staleTime: Infinity });
+  const mapStyleUrl = theme.mode === "dark" ? MAP_DARK_STYLE : MAP_LIGHT_STYLE;
+  const localizedMapStyle = useQuery({
+    queryKey: ["map-style", mapStyleUrl, language],
+    queryFn: () => fetchLocalizedMapStyle(mapStyleUrl, language),
+    enabled: mapPickerOpen,
+    staleTime: 24 * 60 * 60 * 1000,
+    retry: 1
+  });
   const [formDirty, setFormDirty] = useState(false);
   const [formError, setFormError] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, boolean>>({});
@@ -121,6 +144,28 @@ export default function MerchantStoreSettingsScreen() {
       : [...form.opening_hours.closed_days, day];
     update("opening_hours", { ...form.opening_hours, closed_days: closedDays });
   };
+  const openMapPicker = () => {
+    setMapDraftPosition({
+      latitude: form.latitude ?? 28,
+      longitude: form.longitude ?? 2.6
+    });
+    setMapPickerOpen(true);
+  };
+
+  const confirmMapLocation = () => {
+    if (!mapDraftPosition || mutation.isPending) return;
+    setForm((current) => current
+      ? { ...current, latitude: mapDraftPosition.latitude, longitude: mapDraftPosition.longitude }
+      : current);
+    setFormDirty(true);
+    setFormError(false);
+    setFieldErrors({});
+    mutation.reset();
+    setLocationCaptured(true);
+    setLocationError(false);
+    setMapPickerOpen(false);
+  };
+
   const captureStoreLocation = async () => {
     if (locationBusy || mutation.isPending) return;
     setLocationBusy(true);
@@ -143,6 +188,8 @@ export default function MerchantStoreSettingsScreen() {
         return;
       }
 
+      setMapDraftPosition({ latitude, longitude });
+      setMapCameraRevision((current) => current + 1);
       setForm((current) => current ? { ...current, latitude, longitude } : current);
       setFormDirty(true);
       setFormError(false);
@@ -285,15 +332,25 @@ export default function MerchantStoreSettingsScreen() {
                 : translate("merchantStoreMapLocationMissing")}
             </UiText>
             <UiText style={[styles.hint, { color: theme.colors.muted }]}>{translate("merchantStoreMapLocationHint")}</UiText>
-            <Button
-              label={translate("merchantStoreMapLocationAction")}
-              onPress={() => void captureStoreLocation()}
-              loading={locationBusy}
-              disabled={locationBusy || mutation.isPending}
-              variant="outline"
-              size="sm"
-              fullWidth
-            />
+            <View style={styles.mapLocationActions}>
+              <Button
+                label={translate("merchantStoreMapChoose")}
+                onPress={openMapPicker}
+                disabled={mutation.isPending}
+                fullWidth
+                startIcon={<Icon name="map" size={17} color={theme.colors.foreground} accessibilityHidden />}
+              />
+              <Button
+                label={translate("merchantStoreMapLocationAction")}
+                onPress={() => void captureStoreLocation()}
+                loading={locationBusy}
+                disabled={locationBusy || mutation.isPending}
+                variant="outline"
+                size="sm"
+                fullWidth
+                startIcon={<Icon name="locate-fixed" size={17} color={theme.colors.foreground} accessibilityHidden />}
+              />
+            </View>
             {locationError ? <UiText style={[styles.error, { color: theme.mode === "light" ? theme.colors.dangerText : theme.colors.danger }]}>{translate("merchantStoreMapLocationError")}</UiText> : null}
             {locationCaptured ? <UiText style={[styles.success, { color: theme.colors.success }]}>{translate("merchantStoreMapLocationCaptured")}</UiText> : null}
           </View>
@@ -339,6 +396,93 @@ export default function MerchantStoreSettingsScreen() {
       <View style={[styles.footer, { backgroundColor: theme.colors.background, borderTopColor: theme.colors.border }]}>
         <Button label={translate("merchantStoreSettingsSave")} onPress={submit} loading={mutation.isPending} disabled={imageBusy !== null || locationBusy || mutation.isPending} fullWidth />
       </View>
+
+      <BottomSheet visible={mapPickerOpen} onRequestClose={() => setMapPickerOpen(false)} maxHeight="92%">
+        <View style={styles.mapPickerContent}>
+          <View style={styles.modalHeader}>
+            <UiText style={[styles.sectionTitle, { color: theme.colors.foreground }]}>{translate("merchantStoreMapPickerTitle")}</UiText>
+            <PressableSurface
+              accessibilityRole="button"
+              accessibilityLabel={translate("merchantProductCategoryClose")}
+              onPress={() => setMapPickerOpen(false)}
+              hitSlop={10}
+            >
+              <UiText style={[styles.backText, { color: theme.colors.accentMuted }]}>{translate("merchantProductCategoryClose")}</UiText>
+            </PressableSurface>
+          </View>
+          <UiText style={[styles.hint, { color: theme.colors.muted }]}>{translate("merchantStoreMapPickerHint")}</UiText>
+          <View style={[styles.mapPickerContainer, { borderColor: theme.colors.border }]}>
+            <MapLibreMap
+              style={StyleSheet.absoluteFill}
+              mapStyle={localizedMapStyle.data ?? mapStyleUrl}
+              attribution
+              attributionPosition={{ bottom: 6, left: 6 }}
+              logo={false}
+              compass
+              onRegionDidChange={(event) => {
+                const [longitude, latitude] = event.nativeEvent.center;
+                if (Number.isFinite(latitude) && Number.isFinite(longitude)) {
+                  setMapDraftPosition({ latitude, longitude });
+                }
+              }}
+            >
+              <Camera
+                key={mapCameraRevision}
+                initialViewState={{
+                  center: [
+                    mapDraftPosition?.longitude ?? form.longitude ?? 2.6,
+                    mapDraftPosition?.latitude ?? form.latitude ?? 28
+                  ],
+                  zoom: form.latitude !== null && form.longitude !== null ? 16 : 5,
+                  pitch: 0,
+                  bearing: 0
+                }}
+              />
+              <RasterSource
+                id="merchant-store-location-satellite"
+                tiles={[EOX_SATELLITE_TILES]}
+                tileSize={256}
+                minzoom={0}
+                maxzoom={13}
+                attribution={EOX_ATTRIBUTION}
+              >
+                <Layer
+                  id="merchant-store-location-satellite-layer"
+                  type="raster"
+                  source="merchant-store-location-satellite"
+                  afterId="background"
+                  paint={{ "raster-opacity": 1 }}
+                />
+              </RasterSource>
+            </MapLibreMap>
+            <View pointerEvents="none" style={styles.mapPickerCenterMarker}>
+              <Icon name="map-pin" size={38} color={theme.colors.accent} accessibilityHidden />
+            </View>
+            <PressableSurface
+              accessibilityRole="button"
+              accessibilityLabel={translate("merchantStoreMapLocationAction")}
+              onPress={() => void captureStoreLocation()}
+              disabled={locationBusy || mutation.isPending}
+              style={[styles.mapPickerLocateButton, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}
+            >
+              {locationBusy
+                ? <LoadingState label={translate("merchantStoreMapLocateBusy")} />
+                : <Icon name="locate-fixed" size={21} color={theme.colors.foreground} accessibilityHidden />}
+            </PressableSurface>
+          </View>
+          <UiText style={[styles.hint, { color: theme.colors.muted }]}>
+            {mapDraftPosition
+              ? `${mapDraftPosition.latitude.toFixed(5)}, ${mapDraftPosition.longitude.toFixed(5)}`
+              : translate("merchantStoreMapLocationMissing")}
+          </UiText>
+          <Button
+            label={translate("merchantStoreMapConfirm")}
+            onPress={confirmMapLocation}
+            disabled={!mapDraftPosition || mutation.isPending || locationBusy}
+            fullWidth
+          />
+        </View>
+      </BottomSheet>
 
       <BottomSheet visible={regionPickerOpen} onRequestClose={() => setRegionPickerOpen(false)} maxHeight="85%">
         <View style={styles.modalHeader}>
@@ -426,6 +570,11 @@ function createStyles(theme: AppTheme) {
     wilayaList: { maxHeight: 480 },
     wilayaOption: { minHeight: designTokens.dimensions.controlHeight.lg, justifyContent: "center", borderBottomWidth: StyleSheet.hairlineWidth, paddingHorizontal: designTokens.spacing.sm },
     wilayaText: { textAlign: "auto", fontSize: designTokens.typography.body - 1, fontWeight: designTokens.fontWeights.bold },
+    mapLocationActions: { gap: designTokens.spacing.sm },
+    mapPickerContent: { gap: designTokens.spacing.md },
+    mapPickerContainer: { height: 430, borderWidth: StyleSheet.hairlineWidth, borderRadius: designTokens.radius.md, overflow: "hidden", position: "relative" },
+    mapPickerCenterMarker: { position: "absolute", left: "50%", top: "50%", marginLeft: -19, marginTop: -38, alignItems: "center", justifyContent: "center" },
+    mapPickerLocateButton: { position: "absolute", top: 12, end: 12, width: 44, height: 44, borderRadius: 22, borderWidth: StyleSheet.hairlineWidth, alignItems: "center", justifyContent: "center", elevation: 3 },
     field: { gap: designTokens.spacing.xs, flex: 1 },
     label: { fontSize: designTokens.typography.caption, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
     input: { minHeight: designTokens.dimensions.controlHeight.lg, borderWidth: 1, borderRadius: designTokens.radius.sm, paddingHorizontal: designTokens.spacing.md, fontSize: designTokens.typography.body - 1 },
