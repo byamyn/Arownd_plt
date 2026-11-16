@@ -4,9 +4,9 @@ import { designTokens, getAppTheme } from "./theme";
 
 describe("design system theme tokens", () => {
   it("keeps brand and base colors consistent in both modes", () => {
-    expect(designTokens.brand.accent).toBe("#FFF01F");
-    expect(getAppTheme("light").colors.accent).toBe("#FFF01F");
-    expect(getAppTheme("dark").colors.accent).toBe("#FFF01F");
+    expect(designTokens.brand.accent).toBe("#FFFF00");
+    expect(getAppTheme("light").colors.accent).toBe("#FFFF00");
+    expect(getAppTheme("dark").colors.accent).toBe("#FFFF00");
     expect(getAppTheme("light").colors.background).toBe("#FFFFFF");
     expect(getAppTheme("dark").colors.background).toBe("#000000");
   });
