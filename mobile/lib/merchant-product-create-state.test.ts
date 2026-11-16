@@ -43,6 +43,35 @@ describe("validateMerchantProductInput", () => {
     });
   });
 
+  it("does not require or save sizes for unrelated categories", () => {
+    const result = validateMerchantProductInput({
+      ...validInput,
+      category: "phones",
+      sizes: "",
+      colors: "أسود، أبيض"
+    });
+    expect(result?.options).toEqual({ sizes: [], colors: ["أسود", "أبيض"] });
+  });
+
+  it("does not show or save size and color options for food and digital categories", () => {
+    for (const category of ["groceries", "digital-services", "books"]) {
+      const result = validateMerchantProductInput({
+        ...validInput,
+        category,
+        sizes: "",
+        colors: ""
+      });
+      expect(result?.options).toEqual({ sizes: [], colors: [] });
+    }
+  });
+
+  it("keeps sizes and colors for clothing categories", () => {
+    expect(validateMerchantProductInput(validInput)?.options).toEqual({
+      sizes: ["S", "M", "L"],
+      colors: ["أسود", "أبيض"]
+    });
+  });
+
   it("allows zero stock but rejects invalid price, stock, and category", () => {
     expect(validateMerchantProductInput({ ...validInput, stock: "0" })?.stock_quantity).toBe(0);
     expect(validateMerchantProductInput({ ...validInput, price: "0" })).toBeNull();
