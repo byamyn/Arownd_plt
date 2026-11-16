@@ -21,7 +21,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Location from "expo-location";
-import Svg, { Ellipse, Path } from "react-native-svg";
+import { SvgXml } from "react-native-svg";
 
 import { CustomerNavigation } from "@/components/customer-navigation";
 import { BottomSheet, Button, Icon, Text as UiText } from "@/components/ui";
@@ -42,6 +42,7 @@ import {
 import { fetchLocalizedMapStyle } from "@/lib/map-style";
 import { designTokens, useAppTheme } from "@/lib/theme";
 import { VerifiedBadge } from "@/components/ui/identity";
+import { STORE_ICON_XML } from "@/components/store-map-marker-asset";
 
 const MAP_LIGHT_STYLE = "https://tiles.openfreemap.org/styles/liberty";
 const MAP_DARK_STYLE = "https://tiles.openfreemap.org/styles/dark";
@@ -61,19 +62,7 @@ type NavigationSession = {
 function StoreMapMarker() {
   return (
     <View style={styles.markerWrap} pointerEvents="none">
-      <Svg width={48} height={58} viewBox="0 0 48 58">
-        <Ellipse cx="24" cy="53" rx="13" ry="3.5" fill="#111827" opacity="0.25" />
-        <Path d="M7 20 24 8 41 20 24 31Z" fill="#FFF5A6" stroke="#9A6B00" strokeWidth="1" />
-        <Path d="M7 20 24 31 24 49 7 38Z" fill="#FDE72A" stroke="#9A6B00" strokeWidth="1" />
-        <Path d="M24 31 41 20 41 38 24 49Z" fill="#D69B00" stroke="#9A6B00" strokeWidth="1" />
-        <Path d="M7 20 11 13 37 13 41 20 24 31Z" fill="#FFF08A" stroke="#9A6B00" strokeWidth="1" />
-        <Path d="M12 22 18 26 18 32 12 28Z" fill="#FFFFFF" stroke="#B98500" strokeWidth="0.8" />
-        <Path d="M27 34 35 29 35 35 27 40Z" fill="#FFF9D8" stroke="#B98500" strokeWidth="0.8" />
-        <Path d="M16 28 24 33 24 49 16 44Z" fill="#9B6200" opacity="0.9" />
-        <Path d="M19 30 22 32 22 45 19 43Z" fill="#FFF4B0" />
-        <Path d="M7 20 24 31 41 20" fill="none" stroke="#FFFFFF" strokeWidth="1.2" opacity="0.85" />
-      </Svg>
-      <View style={styles.markerHighlight} />
+      <SvgXml xml={STORE_ICON_XML} width={56} height={56} />
     </View>
   );
 }
@@ -658,20 +647,11 @@ const styles = StyleSheet.create({
     shadowRadius: 4
   },
   markerWrap: {
-    width: 48,
+    width: 56,
     height: 58,
     alignItems: "center",
     justifyContent: "center",
     overflow: "visible"
-  },
-  markerHighlight: {
-    position: "absolute",
-    top: 11,
-    width: 9,
-    height: 4,
-    borderRadius: 3,
-    backgroundColor: "#FFFFFF",
-    opacity: 0.65
   },
   storeCard: {
     gap: designTokens.spacing.lg
