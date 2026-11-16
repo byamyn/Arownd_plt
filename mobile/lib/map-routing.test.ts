@@ -7,6 +7,7 @@ import {
   formatDuration,
   getActiveStepIndex,
   getManeuverInstruction,
+  getRemainingRouteMetrics,
   type RouteStep
 } from "./map-routing";
 
@@ -57,6 +58,16 @@ describe("map routing helpers", () => {
       { longitude: 3, latitude: 36 },
       0
     )).toBe(1);
+  });
+
+  it("calculates remaining distance and duration from the active step", () => {
+    const route = {
+      coordinates: [],
+      steps,
+      distance: 500,
+      duration: 100
+    };
+    expect(getRemainingRouteMetrics(route, 1)).toEqual({ distance: 80, duration: 15 });
   });
 
   it("localizes maneuver instructions", () => {

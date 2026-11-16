@@ -25,7 +25,7 @@ import Svg, { Ellipse, Path } from "react-native-svg";
 
 import { CustomerNavigation } from "@/components/customer-navigation";
 import { BottomSheet, Button, Icon, Text as UiText } from "@/components/ui";
-import { fetchMapStores, fetchStoreDetails, fetchStoreOffers, type MapStore } from "@/lib/catalog";
+import { fetchMapStores, fetchStoreDetails, fetchStoreOffers } from "@/lib/catalog";
 import { translate, useLanguage } from "@/lib/i18n";
 import {
   distanceBetweenCoordinates,
@@ -35,6 +35,7 @@ import {
   formatDuration,
   getActiveStepIndex,
   getManeuverInstruction,
+  getRemainingRouteMetrics,
   type DrivingRoute,
   type RoutePoint
 } from "@/lib/map-routing";
@@ -306,6 +307,9 @@ export default function MapScreen() {
   }, [userPosition, navigation, selectedStore]);
 
   const currentStep = navigation?.route.steps[navigation.currentStepIndex] ?? null;
+  const remainingRoute = navigation
+    ? getRemainingRouteMetrics(navigation.route, navigation.currentStepIndex)
+    : null;
   const currentStepDistance = currentStep && userPosition
     ? distanceBetweenCoordinates(userPosition, currentStep.location)
     : null;
@@ -489,7 +493,7 @@ export default function MapScreen() {
               <View style={[styles.routeSummary, { backgroundColor: theme.colors.surfaceSecondary }]}>
                 <View style={styles.routeMetric}>
                   <UiText weight="800" style={styles.routeMetricValue}>
-                    {formatDistance(navigation.route.distance, language)}
+                    {formatDistance(remainingRoute?.distance ?? navigation.route.distance, language)}
                   </UiText>
                   <UiText tone="muted" style={styles.routeMetricLabel}>
                     {translate("mapNavigationDistance", language)}
@@ -498,7 +502,7 @@ export default function MapScreen() {
                 <View style={[styles.metricDivider, { backgroundColor: theme.colors.border }]} />
                 <View style={styles.routeMetric}>
                   <UiText weight="800" style={styles.routeMetricValue}>
-                    {formatDuration(navigation.route.duration, language)}
+                    {formatDuration(remainingRoute?.duration ?? navigation.route.duration, language)}
                   </UiText>
                   <UiText tone="muted" style={styles.routeMetricLabel}>
                     {translate("mapNavigationDuration", language)}

@@ -111,6 +111,21 @@ export function distanceToRouteMeters(position: RoutePoint, route: RoutePoint[])
   return nearest;
 }
 
+export function getRemainingRouteMetrics(
+  route: DrivingRoute,
+  currentStepIndex: number
+): { distance: number; duration: number } {
+  const remainingSteps = route.steps.slice(Math.max(0, currentStepIndex));
+  if (remainingSteps.length === 0) return { distance: 0, duration: 0 };
+  return remainingSteps.reduce(
+    (total, step) => ({
+      distance: total.distance + step.distance,
+      duration: total.duration + step.duration
+    }),
+    { distance: 0, duration: 0 }
+  );
+}
+
 export function getActiveStepIndex(
   steps: RouteStep[],
   position: RoutePoint,
@@ -174,7 +189,9 @@ export function getManeuverInstruction(step: RouteStep, language: Language): str
   const modifier = step.modifier ?? "";
   let key = step.maneuverType;
 
-  if (key === "turn" || key === "new name" || key === "end of road" || key === "fork") {
+  if (key === "turn" && modifier === "uturn") {
+    key = "uturn";
+  } else if (key === "turn" || key === "new name" || key === "end of road" || key === "fork") {
     key = modifier ? `${key}_${modifier.replace(/ /g, "_")}` : "continue";
   } else if (key === "roundabout turn" || key === "exit roundabout") {
     key = "roundabout";
