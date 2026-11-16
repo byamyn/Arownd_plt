@@ -121,7 +121,7 @@ export default function MerchantEntryScreen() {
           <IconButton
             icon={<Icon name="settings" size={20} color={theme.colors.foreground} accessibilityHidden />}
             accessibilityLabel={translate("settingsTitle")}
-            onPress={() => router.push("/settings")}
+            onPress={() => router.push("/merchant/account-settings")}
             variant="surface"
           />
         </View>
@@ -172,12 +172,6 @@ export default function MerchantEntryScreen() {
             }} variant="outline" size="sm" style={{ flex: 1 }} />
             <Button label={translate("merchantBackToProfile")} onPress={() => router.replace("/profile")} variant="ghost" size="sm" style={{ flex: 1 }} />
           </View>
-          <Button
-            label={translate("verificationMerchantTitle")}
-            onPress={() => router.push("/merchant/verification")}
-            variant="outline"
-            fullWidth
-          />
         </Card>
 
         <View style={styles.sectionHeading}>
@@ -268,8 +262,8 @@ export default function MerchantEntryScreen() {
           {[
             { key: "orders", label: translate("merchantManageOrders"), icon: "shopping-bag", path: "/merchant/orders" },
             { key: "products", label: translate("merchantManageProducts"), icon: "package", path: "/merchant/products" },
-            { key: "analytics", label: translate("merchantAnalyticsTitle"), icon: "layout-grid", path: "/merchant/analytics" },
-            { key: "settings", label: translate("merchantStoreSettingsTitle"), icon: "settings", path: "/merchant/settings" }
+            { key: "addProduct", label: translate("merchantAddProductShortcut"), icon: "plus-circle", path: "/merchant/products/new" },
+            { key: "analytics", label: translate("merchantAnalyticsTitle"), icon: "layout-grid", path: "/merchant/analytics" }
           ].map((item, index, items) => (
             <PressableSurface
               key={item.key}
@@ -278,7 +272,7 @@ export default function MerchantEntryScreen() {
               onPress={() => {
                 if (storeId && item.key === "products") void queryClient.prefetchQuery({ queryKey: ["merchant-products", storeId], queryFn: () => fetchMerchantProducts(storeId), staleTime: 30_000 });
                 if (storeId && item.key === "analytics") void queryClient.prefetchQuery({ queryKey: ["merchant-analytics", storeId], queryFn: () => fetchMerchantAnalytics(storeId), staleTime: 30_000 });
-                router.push(item.path as "/merchant/orders" | "/merchant/products" | "/merchant/analytics" | "/merchant/settings");
+                router.push(item.path as "/merchant/orders" | "/merchant/products" | "/merchant/products/new" | "/merchant/analytics");
               }}
               style={[
                 styles.managementRow,
