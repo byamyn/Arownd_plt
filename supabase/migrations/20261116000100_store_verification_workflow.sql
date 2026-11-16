@@ -150,6 +150,7 @@ set search_path = ''
 as $function$
 declare
   changed_request_id uuid;
+  approved_request_id uuid;
 begin
   if new.name is distinct from old.name
      or new.logo_url is distinct from old.logo_url
@@ -171,6 +172,27 @@ begin
         changed_request_id, new.id, auth.uid(), 'profile_changed',
         jsonb_build_object('reason', 'required_store_profile_changed')
       );
+    end if;
+
+    -- A verified store loses its badge when any required identity field changes.
+    -- The owner must submit the updated profile for a fresh review.
+    if old.is_verified then
+      update public.stores set is_verified = false where id = new.id;
+
+      select r.id into approved_request_id
+      from public.store_verification_requests r
+      where r.store_id = new.id and r.status = 'approved'
+      order by r.reviewed_at desc
+      limit 1;
+
+      if approved_request_id is not null then
+        insert into public.store_verification_audit_events (
+          request_id, store_id, actor_id, event_type, details
+        ) values (
+          approved_request_id, new.id, auth.uid(), 'profile_changed',
+          jsonb_build_object('reason', 'approved_profile_changed', 'verification_revoked', true)
+        );
+      end if;
     end if;
   end if;
 
@@ -215,6 +237,9 @@ begin
 
   if not found then
     raise exception 'merchant_store_not_found';
+  end if;
+  if v_store.is_verified then
+    raise exception 'store_already_verified';
   end if;
 
   if nullif(btrim(v_store.name), '') is null
