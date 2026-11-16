@@ -10,7 +10,7 @@ const validInput = {
   name: "قميص قطني",
   price: "2500",
   stock: "12",
-  category: "clothes",
+  category: "fashion",
   brand: "Arownd",
   description: "وصف المنتج",
   sizes: "S, M، L",
@@ -56,15 +56,15 @@ describe("validateMerchantProductInput", () => {
   it("does not require or save sizes for unrelated categories", () => {
     const result = validateMerchantProductInput({
       ...validInput,
-      category: "phones",
+      category: "electronics",
       sizes: "",
       colors: "أسود، أبيض"
     });
     expect(result?.options).toEqual({ sizes: [], colors: ["أسود", "أبيض"] });
   });
 
-  it("does not show or save size and color options for food and digital categories", () => {
-    for (const category of ["groceries", "digital-services", "books"]) {
+  it("does not show or save size and color options for beauty and miscellaneous categories", () => {
+    for (const category of ["beauty", "misc"]) {
       const result = validateMerchantProductInput({
         ...validInput,
         category,
@@ -75,7 +75,7 @@ describe("validateMerchantProductInput", () => {
     }
   });
 
-  it("keeps sizes and colors for clothing categories", () => {
+  it("keeps sizes and colors for the fashion category", () => {
     expect(validateMerchantProductInput(validInput)?.options).toEqual({
       sizes: ["S", "M", "L"],
       colors: ["أسود", "أبيض"]

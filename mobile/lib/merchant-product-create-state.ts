@@ -1,9 +1,5 @@
-const SIZE_CATEGORIES = new Set(["clothes", "shoes", "kids-clothes", "sportswear"]);
-const COLOR_CATEGORIES = new Set([
-  "clothes", "shoes", "kids-clothes", "sportswear", "bags",
-  "phones", "computers", "gadgets", "phone-accessories",
-  "furniture", "decor", "kitchenware", "toys", "sports-gear", "car-accessories"
-]);
+const SIZE_CATEGORIES = new Set(["fashion"]);
+const COLOR_CATEGORIES = new Set(["fashion", "electronics", "home"]);
 
 export function merchantCategorySupportsSizes(category: string): boolean {
   return SIZE_CATEGORIES.has(category.trim());
