@@ -16,30 +16,30 @@ describe("merchant store images", () => {
 
   it("extracts signed URLs and ignores their token query string", () => {
     expect(getStoreImageStoragePath(
-      "https://example.supabase.co/storage/v1/object/sign/store-media/user-1/stores/logo.webp?token=abc.def.ghi",
+      "https://nagzoafkitfsqlcwsdau.supabase.co/storage/v1/object/sign/store-media/user-1/stores/logo.webp?token=abc.def.ghi",
       "user-1"
     )).toBe("user-1/stores/logo.webp");
   });
 
   it("returns only this user's store-media object path", () => {
     expect(getStoreImageStoragePath(
-      "https://example.supabase.co/storage/v1/object/public/store-media/user-1/stores/logo.webp",
+      "https://nagzoafkitfsqlcwsdau.supabase.co/storage/v1/object/public/store-media/user-1/stores/logo.webp",
       "user-1"
     )).toBe("user-1/stores/logo.webp");
     expect(getStoreImageStoragePath(
-      "https://example.supabase.co/storage/v1/object/public/store-media/user-2/stores/logo.webp",
+      "https://nagzoafkitfsqlcwsdau.supabase.co/storage/v1/object/public/store-media/user-2/stores/logo.webp",
       "user-1"
     )).toBeNull();
     expect(getStoreImageStoragePath(
-      "https://example.supabase.co/storage/v1/object/public/product-media/user-1/products/logo.webp",
+      "https://nagzoafkitfsqlcwsdau.supabase.co/storage/v1/object/public/product-media/user-1/products/logo.webp",
       "user-1"
     )).toBeNull();
     expect(getStoreImageStoragePath(
-      "https://example.supabase.co/storage/v1/object/public/store-media/user-1/stores/../logo.webp",
+      "https://nagzoafkitfsqlcwsdau.supabase.co/storage/v1/object/public/store-media/user-1/stores/../logo.webp",
       "user-1"
     )).toBeNull();
     expect(getStoreImageStoragePath(
-      "https://example.supabase.co/storage/v1/object/sign/store-media/user-1/stores/%2e%2e/logo.webp?token=x",
+      "https://nagzoafkitfsqlcwsdau.supabase.co/storage/v1/object/sign/store-media/user-1/stores/%2e%2e/logo.webp?token=x",
       "user-1"
     )).toBeNull();
   });
