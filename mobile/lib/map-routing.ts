@@ -145,7 +145,7 @@ export function getActiveStepIndex(
   return nextIndex;
 }
 
-const maneuverLabels: Record<string, Record<string, string>> = {
+const maneuverLabels: Record<Language, Record<string, string>> = {
   ar: {
     depart: "ابدأ السير",
     arrive: "لقد وصلت إلى وجهتك",
@@ -206,7 +206,8 @@ export function getManeuverInstruction(step: RouteStep, language: Language): str
     // Keep the OSRM maneuver name; both dictionaries contain these labels.
   }
 
-  const label = maneuverLabels[language][key] ?? maneuverLabels[language].continue;
+  const labels = maneuverLabels[language];
+  const label = labels[key] ?? labels.continue ?? (language === "ar" ? "واصل السير" : "Continue straight");
   return step.name ? `${label} · ${step.name}` : label;
 }
 
