@@ -81,7 +81,9 @@ export default function MerchantVerificationScreen() {
                 ? translate("verificationStatusPendingHint")
                 : rejected
                   ? translate("verificationStatusRejectedHint")
-                  : translate("verificationStatusNotSubmittedHint")}
+                  : latestRequest?.status === "draft"
+                    ? translate("verificationStatusNeedsUpdateHint")
+                    : translate("verificationStatusNotSubmittedHint")}
           </UiText>
           {rejected && latestRequest?.review_note ? (
             <View style={[styles.reviewNote, { backgroundColor: theme.colors.surfaceSecondary }]}>
