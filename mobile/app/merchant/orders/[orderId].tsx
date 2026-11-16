@@ -149,7 +149,7 @@ export default function MerchantOrderDetailsScreen() {
   return (
     <SafeAreaView edges={["top", "left", "right"]} style={[styles.safe, { backgroundColor: theme.colors.background }]}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <AppHeader title={translate("merchantOrderDetailTitle")} leading={<Button label={translate("merchantOrderDetailBack")} onPress={() => router.back()} variant="ghost" size="sm" />} />
+        <AppHeader title={translate("merchantOrderDetailTitle")}/>
         <UiText style={[styles.eyebrow, { color: theme.colors.accentMuted }]}>{translate("merchantOrderNumber")} {customerOrder.id.slice(0, 8)}</UiText>
         <UiText style={[styles.subtitle, { color: theme.colors.muted }]}>{new Date(customerOrder.created_at).toLocaleString(language === "ar" ? "ar-DZ" : "en-DZ")}</UiText>
 
@@ -344,9 +344,7 @@ function LoadingScreen({ theme, label }: { theme: AppTheme; label: string }) {
     <SafeAreaView edges={["top", "left", "right"]} style={[stylesForComponents.safe, { backgroundColor: theme.colors.background }]}>
       <View accessible accessibilityLabel={label} style={stylesForComponents.screenContent}>
         <AppHeader
-          title={translate("merchantOrderDetailTitle")}
-          leading={<Button label={translate("merchantOrderDetailBack")} onPress={() => router.back()} variant="ghost" size="sm" />}
-        />
+          title={translate("merchantOrderDetailTitle")}        />
         <View style={stylesForComponents.skeletonList}>
           {[0, 1, 2].map((item) => <OrderCardSkeleton key={item} />)}
         </View>
@@ -360,9 +358,7 @@ function MessageScreen({ theme, title, actionLabel, onAction, busy = false }: { 
     <SafeAreaView edges={["top", "left", "right"]} style={[stylesForComponents.safe, { backgroundColor: theme.colors.background }]}>
       <View style={stylesForComponents.screenContent}>
         <AppHeader
-          title={translate("merchantOrderDetailTitle")}
-          leading={<Button label={translate("merchantOrderDetailBack")} onPress={() => router.back()} variant="ghost" size="sm" />}
-        />
+          title={translate("merchantOrderDetailTitle")}        />
         <ErrorState title={title} retryLabel={actionLabel} busy={busy} onRetry={onAction} />
       </View>
     </SafeAreaView>
