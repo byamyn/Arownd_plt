@@ -398,7 +398,7 @@ export default function MerchantNewProductScreen() {
                 <UiText style={[styles.hint, { color: theme.colors.muted }]}>
                   {translate("merchantProductOptional")}
                 </UiText>
-                <Icon name={showAdditionalDetails ? "chevron-up" : "chevron-down"} size={18} color={theme.colors.muted} accessibilityHidden />
+                <Icon name={showAdditionalDetails ? "arrow-up" : "arrow-down"} size={18} color={theme.colors.muted} accessibilityHidden />
               </View>
             </PressableSurface>
 
