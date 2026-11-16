@@ -69,7 +69,7 @@ describe("design system text contrast", () => {
 
   it("uses mode-specific focus colors", () => {
     expect(getAppTheme("light").colors.focus).toBe("#000000");
-    expect(getAppTheme("dark").colors.focus).toBe("#FFF01F");
+    expect(getAppTheme("dark").colors.focus).toBe("#FFFF00");
   });
 
   it("uses the approved semantic background colors for both modes", () => {
@@ -84,7 +84,7 @@ describe("design system text contrast", () => {
   });
 
   it("uses black text on the approved yellow brand surface", () => {
-    expect(brandColors.primary).toBe("#FFF01F");
+    expect(brandColors.primary).toBe("#FFFF00");
     expect(contrastRatio(brandColors.black, brandColors.primary)).toBeGreaterThanOrEqual(4.5);
   });
 });
