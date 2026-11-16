@@ -10,9 +10,9 @@ import { useAppTheme } from "@/lib/theme";
 import { CART_QUERY_KEY, getCart } from "@/lib/cart";
 
 type NavigationTab = {
-  id: Exclude<CustomerTab, "none"> | "studio";
-  label: "navHome" | "navExplore" | "navMap" | "navCart" | "navAccount" | "navStudio";
-  icon: "home" | "search" | "map" | "shopping-cart" | "user" | "store";
+  id: Exclude<CustomerTab, "none"> | "studio" | "orders" | "products" | "analytics" | "businessSettings";
+  label: "navHome" | "navExplore" | "navMap" | "navCart" | "navAccount" | "navStudio" | "merchantOrdersPageTitle" | "merchantProductsTitle" | "merchantAnalyticsTitle" | "merchantAccountSettingsTitle";
+  icon: "home" | "search" | "map" | "shopping-cart" | "user" | "store" | "file-text" | "package" | "layout-grid" | "settings";
   path: string;
 };
 
@@ -24,12 +24,20 @@ const customerTabs: NavigationTab[] = [
   { id: "profile", label: "navAccount", icon: "user", path: "/profile" }
 ];
 
-const merchantTabs: NavigationTab[] = [
+const merchantEntryTabs: NavigationTab[] = [
   { id: "home", label: "navHome", icon: "home", path: "/home" },
   { id: "explore", label: "navExplore", icon: "search", path: "/explore" },
   { id: "map", label: "navMap", icon: "map", path: "/map" },
   { id: "cart", label: "navCart", icon: "shopping-cart", path: "/cart" },
   { id: "studio", label: "navStudio", icon: "store", path: "/merchant" }
+];
+
+const studioTabs: NavigationTab[] = [
+  { id: "home", label: "navHome", icon: "home", path: "/merchant" },
+  { id: "orders", label: "merchantOrdersPageTitle", icon: "file-text", path: "/merchant/orders" },
+  { id: "products", label: "merchantProductsTitle", icon: "package", path: "/merchant/products" },
+  { id: "analytics", label: "merchantAnalyticsTitle", icon: "layout-grid", path: "/merchant/analytics" },
+  { id: "businessSettings", label: "merchantAccountSettingsTitle", icon: "settings", path: "/merchant/account-settings" }
 ];
 
 export function CustomerNavigation() {
@@ -43,10 +51,26 @@ export function CustomerNavigation() {
     retry: false
   });
   const isMerchant = access.data?.status === "merchant_ready" || access.data?.status === "merchant_setup_required";
+  const isMerchantReady = access.data?.status === "merchant_ready";
   const isMerchantRoute = pathname.startsWith("/merchant");
-  const tabs = isMerchant ? merchantTabs : customerTabs;
-  const activeTab = isMerchantRoute ? "studio" : getCustomerTab(pathname);
-  const selectedTab = isMerchant && (isMerchantRoute || activeTab === "profile") ? "studio" : activeTab;
+  const useStudioNavigation = isMerchantRoute && isMerchantReady;
+  const tabs = useStudioNavigation ? studioTabs : isMerchant ? merchantEntryTabs : customerTabs;
+
+  const studioTab = pathname.startsWith("/merchant/orders")
+    ? "orders"
+    : pathname.startsWith("/merchant/products")
+      ? "products"
+      : pathname.startsWith("/merchant/analytics")
+        ? "analytics"
+        : pathname.startsWith("/merchant/account-settings") || pathname.startsWith("/merchant/settings") || pathname.startsWith("/merchant/verification")
+          ? "businessSettings"
+          : "home";
+  const activeTab = useStudioNavigation
+    ? studioTab
+    : isMerchantRoute
+      ? "studio"
+      : getCustomerTab(pathname);
+  const selectedTab = isMerchant && !isMerchantRoute && activeTab === "profile" ? "studio" : activeTab;
 
   if (access.isPending || !activeTab || (isMerchantRoute && !isMerchant)) return null;
 
