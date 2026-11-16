@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
   productStore: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.xs, minHeight: 18 },
   productName: { minHeight: 40, lineHeight: 20, textAlign: "auto" },
   productPrice: { minHeight: 38, borderTopWidth: StyleSheet.hairlineWidth, paddingTop: designTokens.spacing.xs, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  productAction: { position: "absolute", top: 7, end: 7 }
+  productAction: { position: "absolute", top: 7, end: 7 },
   storeTileRow: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.sm },
   storeTile: { minHeight: 82, borderRadius: designTokens.radius.lg - 1, padding: designTokens.spacing.md - 1, flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md - 1 },
   storeDirectionsButton: { width: 46, height: 46, borderRadius: designTokens.radius.md, borderWidth: 1, alignItems: "center", justifyContent: "center" },
