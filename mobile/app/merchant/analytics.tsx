@@ -57,7 +57,6 @@ export default function MerchantAnalyticsScreen() {
       <RefreshableScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} refreshing={access.isFetching || analytics.isFetching} onRefresh={() => { void Promise.all([access.refetch(), analytics.refetch()]); }}>
         <AppHeader
           title={translate("merchantAnalyticsTitle")}        />
-        <UiText style={[styles.subtitle, { color: theme.colors.muted }]}>{translate("merchantAnalyticsSubtitle")}</UiText>
 
         <Heading level={3}>{translate("merchantAnalyticsOrders")}</Heading>
         <View style={styles.grid}>
@@ -130,9 +129,6 @@ function Message({ theme, label, loading = false, actionLabel, onAction, busy = 
       <View style={styles.message}>
         <AppHeader
           title={translate("merchantAnalyticsTitle")}        />
-        <UiText style={[styles.subtitle, { color: theme.colors.muted }]}>
-          {translate("merchantAnalyticsSubtitle")}
-        </UiText>
         {loading ? (
           <View style={{ width: "100%", gap: designTokens.spacing.md }}>
           <View style={{ flexDirection: "row", flexWrap: "wrap", gap: designTokens.spacing.sm }}>
