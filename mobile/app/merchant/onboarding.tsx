@@ -180,7 +180,6 @@ export default function MerchantOnboardingScreen() {
           showsVerticalScrollIndicator={false}
         >
           <AppHeader title={translate("merchantOnboardingTitle")}/>
-          <UiText style={[styles.subtitle, { color: theme.colors.muted }]}>{translate("merchantOnboardingSubtitle")}</UiText>
 
           <Card contentStyle={styles.section}>
             <UiText style={[styles.sectionTitle, { color: theme.colors.foreground }]}>
@@ -573,9 +572,6 @@ function LoadingScreen({ theme, label }: { theme: AppTheme; label: string }) {
       <View style={stylesForScreen.center}>
         <AppHeader
           title={translate("merchantOnboardingTitle")}        />
-        <UiText style={[stylesForScreen.subtitle, { color: theme.colors.muted }]}>
-          {translate("merchantOnboardingSubtitle")}
-        </UiText>
         <LoadingState label={label} />
       </View>
     </SafeAreaView>
@@ -600,9 +596,6 @@ function MessageScreen({
       <View style={stylesForScreen.center}>
         <AppHeader
           title={translate("merchantOnboardingTitle")}        />
-        <UiText style={[stylesForScreen.subtitle, { color: theme.colors.muted }]}>
-          {translate("merchantOnboardingSubtitle")}
-        </UiText>
         <ErrorState title={title} retryLabel={actionLabel} busy={busy} onRetry={onAction} />
       </View>
     </SafeAreaView>
