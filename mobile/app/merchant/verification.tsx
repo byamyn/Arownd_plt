@@ -52,6 +52,7 @@ export default function MerchantVerificationScreen() {
   const complete = Object.values(requirements).every(Boolean);
   const pending = latestRequest?.status === "pending";
   const approved = latestRequest?.status === "approved" && store.is_verified;
+  const needsReReview = latestRequest?.status === "approved" && !store.is_verified;
   const rejected = latestRequest?.status === "rejected";
 
   return (
@@ -81,7 +82,9 @@ export default function MerchantVerificationScreen() {
                 ? translate("verificationStatusPendingHint")
                 : rejected
                   ? translate("verificationStatusRejectedHint")
-                  : latestRequest?.status === "draft"
+                  : needsReReview
+                    ? translate("verificationStatusNeedsUpdateHint")
+                    : latestRequest?.status === "draft"
                     ? translate("verificationStatusNeedsUpdateHint")
                     : translate("verificationStatusNotSubmittedHint")}
           </UiText>
