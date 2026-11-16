@@ -18,7 +18,7 @@ import { fetchStoreDetails, fetchStoreOffers, formatMarketPrice } from "@/lib/ca
 import { translate, type TranslationKey, useLanguage } from "@/lib/i18n";
 import { designTokens, useAppTheme, type AppTheme } from "@/lib/theme";
 import type { MerchantDashboardOrder } from "@/lib/merchant-dashboard-state";
-import { RefreshableScrollView, Button, Card, ErrorState, Icon, IconButton, Image as UiImage, MetricCardSkeleton, OrderCardSkeleton, MerchantMetricCard, MerchantStatusBadge, PriceDisplay, PressableSurface, Text as UiText } from "@/components/ui";
+import { RefreshableScrollView, Button, Card, ErrorState, Icon, IconButton, Image as UiImage, MetricCardSkeleton, OrderCardSkeleton, MerchantStatusBadge, PriceDisplay, PressableSurface, Text as UiText } from "@/components/ui";
 
 export default function MerchantEntryScreen() {
   useLanguage();
@@ -173,22 +173,6 @@ export default function MerchantEntryScreen() {
             <Button label={translate("merchantBackToProfile")} onPress={() => router.replace("/profile")} variant="ghost" size="sm" style={{ flex: 1 }} />
           </View>
         </Card>
-
-        <View style={styles.sectionHeading}>
-          <UiText style={[styles.sectionTitle, { color: theme.colors.foreground }]}>
-            {translate("merchantOverviewTitle")}
-          </UiText>
-          <UiText style={[styles.sectionHint, { color: theme.colors.muted }]}>
-            {translate("merchantOverviewHint")}
-          </UiText>
-        </View>
-
-        <View style={styles.metricsGrid}>
-          <MerchantMetricCard label={translate("merchantMetricProducts")} value={String(data.productCount)} hint={translate("merchantMetricProductsHint")} style={styles.metricCard} />
-          <MerchantMetricCard label={translate("merchantMetricNeedsAction")} value={String(data.pendingOrderCount)} hint={translate("merchantMetricNeedsActionHint")} valueTone="warning" style={styles.metricCard} />
-          <MerchantMetricCard label={translate("merchantMetricQuoted")} value={String(data.quotedOrderCount)} hint={translate("merchantMetricQuotedHint")} style={styles.metricCard} />
-          <MerchantMetricCard label={translate("merchantMetricOrders")} value={String(data.orders.length)} hint={translate("merchantMetricOrdersHint")} style={styles.metricCard} />
-        </View>
 
         <View style={styles.sectionHeading}>
           <View style={styles.sectionHeadingText}>
@@ -404,8 +388,6 @@ function createStyles(theme: AppTheme) {
     sectionHeadingText: { flex: 1, alignItems: "flex-start", gap: designTokens.spacing.xs },
     sectionTitle: { fontSize: designTokens.typography.subtitle - 1, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
     sectionHint: { fontSize: designTokens.typography.caption - 1, lineHeight: 16, textAlign: "auto" },
-    metricCard: { width: "48%", minHeight: 116, backgroundColor: theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface, borderWidth: theme.mode === "light" ? 0 : 1, borderColor: theme.colors.border, borderRadius: designTokens.radius.md, padding: designTokens.spacing.md, gap: designTokens.spacing.xs },
-    metricsGrid: { flexDirection: "row", flexWrap: "wrap", gap: designTokens.spacing.sm },
     textButton: { minHeight: 40, justifyContent: "center", paddingHorizontal: 3 },
     textButtonLabel: { fontSize: designTokens.typography.caption, fontWeight: designTokens.fontWeights.extrabold },
     ordersCard: { borderWidth: theme.mode === "light" ? 0 : 1, borderRadius: designTokens.radius.md, overflow: "hidden" },
