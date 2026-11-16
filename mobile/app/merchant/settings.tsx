@@ -135,7 +135,7 @@ export default function MerchantStoreSettingsScreen() {
       }
 
       const position = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced
+        accuracy: Location.Accuracy.High
       });
       const { latitude, longitude } = position.coords;
       if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
@@ -195,7 +195,7 @@ export default function MerchantStoreSettingsScreen() {
     }
   };
   const submit = () => {
-    if (imageBusy || mutation.isPending) return;
+    if (imageBusy || locationBusy || mutation.isPending) return;
     if (regionOptions.data?.levels[1]?.is_required && form.secondary_region_id === null) {
       setFieldErrors({ secondary_region_id: true });
       setFormError(true);
@@ -337,7 +337,7 @@ export default function MerchantStoreSettingsScreen() {
       </ScrollView>
 
       <View style={[styles.footer, { backgroundColor: theme.colors.background, borderTopColor: theme.colors.border }]}>
-        <Button label={translate("merchantStoreSettingsSave")} onPress={submit} loading={mutation.isPending} disabled={imageBusy !== null || mutation.isPending} fullWidth />
+        <Button label={translate("merchantStoreSettingsSave")} onPress={submit} loading={mutation.isPending} disabled={imageBusy !== null || locationBusy || mutation.isPending} fullWidth />
       </View>
 
       <BottomSheet visible={regionPickerOpen} onRequestClose={() => setRegionPickerOpen(false)} maxHeight="85%">
