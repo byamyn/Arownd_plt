@@ -435,7 +435,7 @@ export default function MerchantNewProductScreen() {
             ) : null}
 
             {showSizes || showColors ? (
-              <View style={styles.optionsSection}>
+              <View style={styles.field}>
                 <UiText style={[styles.sectionTitle, { color: theme.colors.foreground }]}>
                   {translate("merchantProductOptionsTitle")}
                 </UiText>
