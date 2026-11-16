@@ -166,7 +166,7 @@ export default function MerchantProductsScreen() {
           placeholder={translate("merchantProductsSearchPlaceholder")}
           accessibilityLabel={translate("merchantProductsSearchPlaceholder")}
           returnKeyType="search"
-          style={[styles.searchInput, { color: theme.colors.foreground, backgroundColor: theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface }]}
+          style={[styles.searchInput, { color: theme.colors.foreground, backgroundColor: theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface, borderColor: theme.colors.border }]}
         />
 
         <FilterBar style={styles.filters}>
@@ -434,13 +434,13 @@ function MessageScreen({
 function createStyles(theme: AppTheme) {
   return StyleSheet.create({
     safe: { flex: 1 },
-    content: { padding: designTokens.spacing.lg, paddingBottom: 36, gap: designTokens.spacing.lg },
+    content: { padding: designTokens.spacing.xl, paddingBottom: designTokens.spacing.xxl, gap: designTokens.spacing.lg },
     header: { alignItems: "flex-start", gap: designTokens.spacing.xs },
     eyebrow: { fontSize: designTokens.typography.caption - 1, fontWeight: designTokens.fontWeights.extrabold },
     title: { width: "100%", fontSize: designTokens.typography.display - 4, lineHeight: 33, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
     subtitle: { width: "100%", fontSize: designTokens.typography.caption + 1, lineHeight: 20, textAlign: "auto" },
     summaryGrid: { flexDirection: "row", gap: designTokens.spacing.sm },
-    summaryCard: { flex: 1, minHeight: 75, alignItems: "flex-start", justifyContent: "center" },
+    summaryCard: { flex: 1, minHeight: 88, alignItems: "flex-start", justifyContent: "center", paddingHorizontal: designTokens.spacing.md },
     searchInput: { minHeight: designTokens.dimensions.controlHeight.lg, borderWidth: 1, borderRadius: designTokens.radius.md, paddingHorizontal: designTokens.spacing.lg, textAlign: "auto", fontSize: designTokens.typography.body - 1 },
     filters: { flexDirection: "row", flexWrap: "wrap", gap: designTokens.spacing.sm },
     filterButton: { minHeight: 42, borderWidth: 1, borderRadius: designTokens.radius.pill, paddingHorizontal: 15, justifyContent: "center", alignItems: "center" },
