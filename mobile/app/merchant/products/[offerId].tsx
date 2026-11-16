@@ -25,6 +25,10 @@ import {
   validateProductImageMetadata
 } from "@/lib/merchant-product-images";
 import {
+  merchantCategorySupportsColors,
+  merchantCategorySupportsSizes
+} from "@/lib/merchant-product-create-state";
+import {
   validateMerchantOfferOptions,
   validateMerchantOfferValues,
   validateMerchantProductDetails
@@ -97,6 +101,8 @@ export default function MerchantEditProductScreen() {
   const selectedCategory = selectableCategories.find(
     (category) => category.id === productCategory
   );
+  const showSizes = merchantCategorySupportsSizes(productCategory);
+  const showColors = merchantCategorySupportsColors(productCategory);
 
   useEffect(() => {
     if (!offer) return;
@@ -130,7 +136,7 @@ export default function MerchantEditProductScreen() {
       return;
     }
 
-    const options = validateMerchantOfferOptions(sizes, colors);
+    const options = validateMerchantOfferOptions(showSizes ? sizes : "", showColors ? colors : "");
     if (!options) {
       setNotice(null);
       setWarning(null);
@@ -534,42 +540,48 @@ export default function MerchantEditProductScreen() {
               </UiText>
             </View>
 
-            <View style={styles.optionsSection}>
-              <UiText style={[styles.sectionTitle, { color: theme.colors.foreground }]}>
-                {translate("merchantProductOptionsTitle")}
-              </UiText>
-              <View style={styles.field}>
-                <UiText style={[styles.label, { color: theme.colors.foreground }]}>
-                  {translate("merchantProductSizesLabel")}
+            {showSizes || showColors ? (
+              <View style={styles.optionsSection}>
+                <UiText style={[styles.sectionTitle, { color: theme.colors.foreground }]}>
+                  {translate("merchantProductOptionsTitle")}
                 </UiText>
-                <TextField
-                  value={sizes}
-                  onChangeText={setSizes}
-                  editable={!isBusy}
-                  placeholder={translate("merchantProductOptionsPlaceholder")}
-                  placeholderTextColor={theme.colors.placeholder}
-                  accessibilityLabel={translate("merchantProductSizesLabel")}
-                  style={[styles.input, { color: theme.colors.foreground, backgroundColor: theme.colors.background, borderColor: (theme.colors.inputBorder) }]}
-                />
-              </View>
-              <View style={styles.field}>
-                <UiText style={[styles.label, { color: theme.colors.foreground }]}>
-                  {translate("merchantProductColorsLabel")}
+                {showSizes ? (
+                  <View style={styles.field}>
+                    <UiText style={[styles.label, { color: theme.colors.foreground }]}>
+                      {translate("merchantProductSizesLabel")}
+                    </UiText>
+                    <TextField
+                      value={sizes}
+                      onChangeText={setSizes}
+                      editable={!isBusy}
+                      placeholder={translate("merchantProductOptionsPlaceholder")}
+                      placeholderTextColor={theme.colors.placeholder}
+                      accessibilityLabel={translate("merchantProductSizesLabel")}
+                      style={[styles.input, { color: theme.colors.foreground, backgroundColor: theme.colors.background, borderColor: (theme.colors.inputBorder) }]}
+                    />
+                  </View>
+                ) : null}
+                {showColors ? (
+                  <View style={styles.field}>
+                    <UiText style={[styles.label, { color: theme.colors.foreground }]}>
+                      {translate("merchantProductColorsLabel")}
+                    </UiText>
+                    <TextField
+                      value={colors}
+                      onChangeText={setColors}
+                      editable={!isBusy}
+                      placeholder={translate("merchantProductOptionsPlaceholder")}
+                      placeholderTextColor={theme.colors.placeholder}
+                      accessibilityLabel={translate("merchantProductColorsLabel")}
+                      style={[styles.input, { color: theme.colors.foreground, backgroundColor: theme.colors.background, borderColor: (theme.colors.inputBorder) }]}
+                    />
+                  </View>
+                ) : null}
+                <UiText style={[styles.hint, { color: theme.colors.subtle }]}>
+                  {translate("merchantProductOptionsHint")}
                 </UiText>
-                <TextField
-                  value={colors}
-                  onChangeText={setColors}
-                  editable={!isBusy}
-                  placeholder={translate("merchantProductOptionsPlaceholder")}
-                  placeholderTextColor={theme.colors.placeholder}
-                  accessibilityLabel={translate("merchantProductColorsLabel")}
-                  style={[styles.input, { color: theme.colors.foreground, backgroundColor: theme.colors.background, borderColor: (theme.colors.inputBorder) }]}
-                />
               </View>
-              <UiText style={[styles.hint, { color: theme.colors.subtle }]}>
-                {translate("merchantProductOptionsHint")}
-              </UiText>
-            </View>
+            ) : null}
 
             <Button label={translate("merchantProductEditSave")} onPress={() => void saveOffer()} loading={saving} disabled={isBusy && !saving} fullWidth />
           </Card>
@@ -622,6 +634,8 @@ export default function MerchantEditProductScreen() {
                   accessibilityState={{ selected: productCategory === category.id }}
                   onPress={() => {
                     setProductCategory(category.id);
+                    if (!merchantCategorySupportsSizes(category.id)) setSizes("");
+                    if (!merchantCategorySupportsColors(category.id)) setColors("");
                     setCategoryPickerOpen(false);
                   }}
                   style={[
