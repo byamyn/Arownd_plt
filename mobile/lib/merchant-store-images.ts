@@ -75,14 +75,13 @@ export async function uploadMerchantStoreImage(
   if (!extension) throw new Error("invalid_store_image");
   const response = await fetch(asset.uri);
   if (!response.ok) throw new Error("store_image_read_failed");
-  const body = await response.blob();
-  if (body.size === 0 || body.size > STORE_IMAGE_MAX_BYTES) throw new Error("invalid_store_image_size");
+  const body = await response.arrayBuffer();
+  if (body.byteLength === 0 || body.byteLength > STORE_IMAGE_MAX_BYTES) throw new Error("invalid_store_image_size");
 
   const path = auth.user.id + "/stores/" + kind + "-" + Date.now().toString(36) + "-" +
     Math.random().toString(36).slice(2, 10) + "." + extension;
   const contentType = asset.mimeType?.toLowerCase() ?? (extension === "jpg" ? "image/jpeg" : "image/" + extension);
-  const uploadBody = body.type === contentType ? body : body.slice(0, body.size, contentType);
-  const { error: uploadError } = await client.storage.from("store-media").upload(path, uploadBody, {
+  const { error: uploadError } = await client.storage.from("store-media").upload(path, body, {
     contentType, cacheControl: "3600", upsert: false
   });
   if (uploadError) throw uploadError;
