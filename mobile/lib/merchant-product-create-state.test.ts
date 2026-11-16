@@ -43,7 +43,7 @@ describe("validateMerchantProductInput", () => {
       name: "قميص قطني",
       price: 2500,
       stock_quantity: 12,
-      category: "clothes",
+      category: "fashion",
       brand: "Arownd",
       description: "وصف المنتج",
       options: {
