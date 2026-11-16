@@ -16,6 +16,7 @@ import {
   createMerchantProductOffer
 } from "@/lib/merchant-products";
 import {
+  classifyMerchantProductCreateError,
   merchantCategorySupportsColors,
   merchantCategorySupportsSizes,
   validateMerchantProductInput
@@ -185,12 +186,18 @@ export default function MerchantNewProductScreen() {
       ]);
       router.replace("/merchant/products");
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "";
-      setSubmitError(
-        errorMessage.endsWith("cleanup_required")
-          ? translate("merchantProductCreateCleanupPending")
-          : translate("merchantProductCreateError")
-      );
+      const errorKind = classifyMerchantProductCreateError(error);
+      const messageKey = {
+        cleanup: "merchantProductCreateCleanupPending",
+        permission: "merchantProductCreatePermissionError",
+        category: "merchantProductCreateCategoryError",
+        merchant: "merchantProductCreateMerchantError",
+        input: "merchantProductCreateValidation",
+        data: "merchantProductCreateDataError",
+        network: "merchantProductCreateNetworkError",
+        unknown: "merchantProductCreateError"
+      } as const;
+      setSubmitError(translate(messageKey[errorKind]));
     } finally {
       setSubmitting(false);
     }
