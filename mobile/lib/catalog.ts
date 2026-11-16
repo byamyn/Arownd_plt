@@ -23,6 +23,9 @@ const StoreSummarySchema = z.object({
   whatsapp: z.string().nullable().optional(),
   instagram_url: z.string().nullable().optional(),
   facebook_url: z.string().nullable().optional(),
+  tiktok_url: z.string().nullable().optional(),
+  website_url: z.string().nullable().optional(),
+  country_code: z.string().length(2).nullable().optional(),
   rating: z.preprocess((value: unknown) => value == null ? null : Number(value), z.number().nullable()).optional(),
   is_verified: z.boolean().optional(),
   opening_hours: z.unknown().optional(),
@@ -206,7 +209,7 @@ export async function fetchProductOffers(productId: string): Promise<ProductOffe
 export async function fetchStoreDetails(storeId: string): Promise<StoreDetails | null> {
   const { data, error } = await getSupabaseClient()
     .from("stores")
-    .select("id, name, description, logo_url, cover_url, commune, address_line, phone, whatsapp, instagram_url, facebook_url, rating, is_verified, opening_hours, latitude, longitude")
+    .select("id, name, description, logo_url, cover_url, commune, address_line, phone, whatsapp, instagram_url, facebook_url, tiktok_url, website_url, country_code, rating, is_verified, opening_hours, latitude, longitude")
     .eq("id", storeId)
     .maybeSingle();
 
