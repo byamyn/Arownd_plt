@@ -35,6 +35,7 @@ function getStoreOpenState(openingHours: unknown, countryCode?: string | null): 
   }).formatToParts(new Date());
   const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
   const day = ({ Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 } as Record<string, number>)[values.weekday];
+  if (day === undefined || open === close) return false;
   const now = Number(values.hour) * 60 + Number(values.minute);
   const closedDays = hours.closed_days.filter((value): value is number => Number.isInteger(value));
   if (close > open) return !closedDays.includes(day) && now >= open && now < close;
@@ -109,6 +110,7 @@ export default function StoreDetailsScreen() {
               <UiText style={[styles.storeName, { color: theme.colors.foreground, flexShrink: 1 }]}>{details.name}</UiText>
               {details.is_verified ? <VerifiedBadge size={18} accessibilityLabel={translate("storeVerified")} /> : null}
             </View>
+            {details.description ? <UiText numberOfLines={2} style={[styles.storeDescription, { color: theme.colors.muted }]}>{details.description}</UiText> : null}
             <View style={styles.locationRow}>
               <Icon name="map-pin" size={14} color={theme.colors.muted} accessibilityHidden />
               <UiText numberOfLines={2} style={[styles.metaText, { color: theme.colors.muted }]}>{details.commune || details.address_line || translate("storeNoAddress")}</UiText>
