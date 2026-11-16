@@ -11,7 +11,7 @@ import { fetchProductDetails, fetchProductOffers, fetchStoreDetails, fetchStoreO
 import { fetchBrowsingCurrencyCode } from "@/lib/country-service";
 import { fetchMerchantAccess } from "@/lib/merchant";
 import { fetchMyMerchantStoreSettings, updateMyMerchantStoreSettings } from "@/lib/merchant-store-settings";
-import { MerchantStoreSettingsSchema } from "@/lib/merchant-store-settings-state";
+import { MerchantStoreSettingsSchema, type MerchantStoreSettings } from "@/lib/merchant-store-settings-state";
 import { STORE_IMAGE_MAX_BYTES, uploadMerchantStoreImage, validateStoreImageAsset } from "@/lib/merchant-store-images";
 import { fetchApprovedReviews } from "@/lib/reviews";
 import { translate, useLanguage } from "@/lib/i18n";
@@ -76,13 +76,13 @@ export default function StoreDetailsScreen() {
     retry: false
   });
   const [ownerEditMode, setOwnerEditMode] = useState(false);
-  const [ownerDraft, setOwnerDraft] = useState<{ name: string; description: string } | null>(null);
+  const [ownerDraft, setOwnerDraft] = useState<MerchantStoreSettings | null>(null);
   const [ownerImageBusy, setOwnerImageBusy] = useState<"logo" | "cover" | null>(null);
   const [ownerImageError, setOwnerImageError] = useState(false);
   const ownerSave = useMutation({
     mutationFn: async () => {
       if (!ownerSettings.data || !ownerDraft || !ownerStoreId) throw new Error("merchant_store_settings_missing");
-      const values = MerchantStoreSettingsSchema.parse({ ...ownerSettings.data, name: ownerDraft.name, description: ownerDraft.description });
+      const values = MerchantStoreSettingsSchema.parse(ownerDraft);
       await updateMyMerchantStoreSettings(ownerStoreId, values);
     },
     onSuccess: async () => {
@@ -96,7 +96,7 @@ export default function StoreDetailsScreen() {
     }
   });
   useEffect(() => {
-    if (ownerSettings.data && !ownerEditMode) setOwnerDraft({ name: ownerSettings.data.name, description: ownerSettings.data.description });
+    if (ownerSettings.data && !ownerEditMode) setOwnerDraft(ownerSettings.data);
   }, [ownerSettings.data, ownerEditMode]);
   const [tab, setTab] = useState<StoreTab>("products");
   const [search, setSearch] = useState("");
@@ -257,8 +257,28 @@ export default function StoreDetailsScreen() {
             {ownerEditMode ? (
               <>
                 <UiText style={[styles.ownerEditorTitle, { color: theme.colors.foreground }]}>{translate("merchantStoreInlineEditTitle")}</UiText>
-                <TextField label={translate("merchantStoreSettingsName")} value={ownerDraft?.name ?? details.name} onChangeText={(name) => setOwnerDraft((current) => ({ name, description: current?.description ?? details.description ?? "" }))} editable={!ownerSave.isPending} maxLength={100} />
-                <TextField label={translate("merchantStoreSettingsDescription")} value={ownerDraft?.description ?? details.description ?? ""} onChangeText={(description) => setOwnerDraft((current) => ({ name: current?.name ?? details.name, description }))} editable={!ownerSave.isPending} multiline maxLength={2000} />
+                {ownerSettings.isPending || !ownerDraft ? (
+                  <UiText style={[styles.ownerEditorHint, { color: theme.colors.muted }]}>{translate("merchantLoading")}</UiText>
+                ) : (
+                  <>
+                    <TextField label={translate("merchantStoreSettingsName")} value={ownerDraft.name} onChangeText={(name) => setOwnerDraft((current) => current ? { ...current, name } : current)} editable={!ownerSave.isPending} maxLength={100} />
+                    <TextField label={translate("merchantStoreSettingsDescription")} value={ownerDraft.description} onChangeText={(description) => setOwnerDraft((current) => current ? { ...current, description } : current)} editable={!ownerSave.isPending} multiline maxLength={2000} />
+                    <TextField label={translate("merchantStoreSettingsPhone")} value={ownerDraft.phone} onChangeText={(phone) => setOwnerDraft((current) => current ? { ...current, phone } : current)} editable={!ownerSave.isPending} keyboardType="phone-pad" maxLength={20} />
+                    <TextField label={translate("merchantStoreSettingsWhatsapp")} value={ownerDraft.whatsapp} onChangeText={(whatsapp) => setOwnerDraft((current) => current ? { ...current, whatsapp } : current)} editable={!ownerSave.isPending} keyboardType="phone-pad" maxLength={20} />
+                    <TextField label={translate("merchantStoreSettingsCommune")} value={ownerDraft.commune} onChangeText={(commune) => setOwnerDraft((current) => current ? { ...current, commune } : current)} editable={!ownerSave.isPending} maxLength={80} />
+                    <TextField label={translate("merchantStoreSettingsAddress")} value={ownerDraft.address_line} onChangeText={(address_line) => setOwnerDraft((current) => current ? { ...current, address_line } : current)} editable={!ownerSave.isPending} maxLength={300} />
+                    <UiText style={[styles.ownerEditorTitle, { color: theme.colors.foreground }]}>{translate("merchantStoreHoursTitle")}</UiText>
+                    <View style={styles.ownerImageActions}>
+                      <View style={styles.ownerTimeField}><TextField label={translate("merchantStoreSettingsOpen")} value={ownerDraft.opening_hours.open} onChangeText={(open) => setOwnerDraft((current) => current ? { ...current, opening_hours: { ...current.opening_hours, open } } : current)} editable={!ownerSave.isPending} maxLength={5} placeholder="HH:MM" /></View>
+                      <View style={styles.ownerTimeField}><TextField label={translate("merchantStoreSettingsClose")} value={ownerDraft.opening_hours.close} onChangeText={(close) => setOwnerDraft((current) => current ? { ...current, opening_hours: { ...current.opening_hours, close } } : current)} editable={!ownerSave.isPending} maxLength={5} placeholder="HH:MM" /></View>
+                    </View>
+                    <UiText style={[styles.ownerEditorTitle, { color: theme.colors.foreground }]}>{translate("merchantStoreSocialLinksTitle")}</UiText>
+                    <TextField label="Instagram" value={ownerDraft.instagram_url} onChangeText={(instagram_url) => setOwnerDraft((current) => current ? { ...current, instagram_url } : current)} editable={!ownerSave.isPending} keyboardType="url" autoCapitalize="none" maxLength={300} />
+                    <TextField label="Facebook" value={ownerDraft.facebook_url} onChangeText={(facebook_url) => setOwnerDraft((current) => current ? { ...current, facebook_url } : current)} editable={!ownerSave.isPending} keyboardType="url" autoCapitalize="none" maxLength={300} />
+                    <TextField label="TikTok" value={ownerDraft.tiktok_url} onChangeText={(tiktok_url) => setOwnerDraft((current) => current ? { ...current, tiktok_url } : current)} editable={!ownerSave.isPending} keyboardType="url" autoCapitalize="none" maxLength={300} />
+                    <TextField label={translate("merchantStoreSettingsWebsite")} value={ownerDraft.website_url} onChangeText={(website_url) => setOwnerDraft((current) => current ? { ...current, website_url } : current)} editable={!ownerSave.isPending} keyboardType="url" autoCapitalize="none" maxLength={300} />
+                  </>
+                )}
                 <View style={styles.ownerImageActions}>
                   <Button label={translate("merchantStoreChangeLogo")} variant="outline" size="sm" disabled={ownerImageBusy !== null || ownerSave.isPending} loading={ownerImageBusy === "logo"} onPress={() => void chooseOwnerImage("logo")} />
                   <Button label={translate("merchantStoreChangeCover")} variant="outline" size="sm" disabled={ownerImageBusy !== null || ownerSave.isPending} loading={ownerImageBusy === "cover"} onPress={() => void chooseOwnerImage("cover")} />
@@ -267,12 +287,12 @@ export default function StoreDetailsScreen() {
                 {ownerSave.isError ? <UiText style={[styles.ownerEditorHint, { color: theme.colors.danger }]}>{translate("merchantStoreSettingsSaveError")}</UiText> : null}
                 <View style={styles.ownerImageActions}>
                   <Button label={translate("merchantStoreSettingsSave")} onPress={() => ownerSave.mutate()} loading={ownerSave.isPending} disabled={!ownerDraft || ownerImageBusy !== null || ownerSettings.isPending} />
-                  <Button label={translate("merchantStoreEditCancel")} variant="ghost" disabled={ownerSave.isPending || ownerImageBusy !== null} onPress={() => { setOwnerDraft({ name: details.name, description: details.description ?? "" }); setOwnerEditMode(false); ownerSave.reset(); setOwnerImageError(false); }} />
+                  <Button label={translate("merchantStoreEditCancel")} variant="ghost" disabled={ownerSave.isPending || ownerImageBusy !== null} onPress={() => { setOwnerDraft(ownerSettings.data ?? null); setOwnerEditMode(false); ownerSave.reset(); setOwnerImageError(false); }} />
                 </View>
                 <Button label={translate("merchantStoreSettingsTitle")} variant="ghost" size="sm" onPress={() => router.push("/merchant/settings")} startIcon={<Icon name="settings" size={16} color={theme.colors.muted} accessibilityHidden />} />
               </>
             ) : (
-              <Button label={translate("merchantStoreCustomize")} onPress={() => { setOwnerDraft({ name: details.name, description: details.description ?? "" }); setOwnerEditMode(true); }} variant="primary" fullWidth startIcon={<Icon name="edit" size={18} color={theme.colors.accentForeground} accessibilityHidden />} />
+              <Button label={translate("merchantStoreCustomize")} onPress={() => { setOwnerDraft(ownerSettings.data ?? null); setOwnerEditMode(true); }} variant="primary" fullWidth startIcon={<Icon name="edit" size={18} color={theme.colors.accentForeground} accessibilityHidden />} />
             )}
           </View>
         ) : null}
@@ -353,6 +373,7 @@ const styles = StyleSheet.create({
   ownerEditor: { gap: designTokens.spacing.md, paddingTop: designTokens.spacing.sm, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: "#D1D5DB" },
   ownerEditorTitle: { fontSize: designTokens.typography.subtitle, fontWeight: designTokens.fontWeights.bold, textAlign: "auto" },
   ownerEditorHint: { fontSize: designTokens.typography.caption, textAlign: "auto" },
+  ownerTimeField: { flex: 1, minWidth: 120 },
   ownerImageActions: { flexDirection: "row", flexWrap: "wrap", gap: designTokens.spacing.sm },
   coverImage: { width: "100%", borderRadius: designTokens.radius.lg },
   avatarWrap: { position: "relative" },
