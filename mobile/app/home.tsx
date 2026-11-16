@@ -12,22 +12,20 @@ import {
   SectionTitle
 } from "@/components/customer-ui";
 import { fetchHomeProducts, fetchProductDetails, fetchProductOffers, formatMarketPrice, getPrimaryImage } from "@/lib/catalog";
-import { fetchBrowsingCurrencyCode, fetchMyBrowsingCountryCode } from "@/lib/country-service";
+import { fetchBrowsingCurrencyCode } from "@/lib/country-service";
 import { fetchApprovedReviews } from "@/lib/reviews";
-import { translate, useLanguage } from "@/lib/i18n";
+import { translate } from "@/lib/i18n";
 import { designTokens, useAppTheme } from "@/lib/theme";
 
 export default function CustomerHomeScreen() {
-  const { language } = useLanguage();
   const theme = useAppTheme();
   const queryClient = useQueryClient();
   const browsingCurrency = useQuery({ queryKey: ["browsing-country-currency"], queryFn: fetchBrowsingCurrencyCode, staleTime: 60_000 });
-  const browsingCountry = useQuery({ queryKey: ["browsing-country-code"], queryFn: fetchMyBrowsingCountryCode, staleTime: 60_000 });
   const products = useQuery({ queryKey: ["customer-home-products"], queryFn: fetchHomeProducts, staleTime: 60_000 });
   return (
     <CustomerScreen
-      refreshing={products.isFetching || browsingCountry.isFetching}
-      onRefresh={() => { void Promise.all([products.refetch(), browsingCountry.refetch()]); }}
+      refreshing={products.isFetching}
+      onRefresh={() => { void products.refetch(); }}
     >
       <View style={styles.header}>
         <Logo color={theme.colors.foreground} width={148} />
