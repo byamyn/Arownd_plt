@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Alert, Pressable, StyleSheet, View } from "react-native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { GoogleMaps } from "expo-maps";
 import * as Location from "expo-location";
 
@@ -19,7 +19,6 @@ type UserMapLocation = {
 
 export default function MapScreen() {
   const theme = useAppTheme();
-  const insets = useSafeAreaInsets();
   const [userLocation, setUserLocation] = useState<UserMapLocation | undefined>();
   const [isLocating, setIsLocating] = useState(false);
 
@@ -92,7 +91,7 @@ export default function MapScreen() {
             styles.locationButton,
             {
               top: 12,
-              insetInlineEnd: 16,
+              end: 16,
               backgroundColor: theme.colors.surface,
               borderColor: theme.colors.border,
               opacity: isLocating ? 0.65 : 1
