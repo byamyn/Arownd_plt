@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import * as ImagePicker from "expo-image-picker";
@@ -272,7 +272,7 @@ export default function StoreDetailsScreen() {
                 <Button label={translate("merchantStoreSettingsTitle")} variant="ghost" size="sm" onPress={() => router.push("/merchant/settings")} startIcon={<Icon name="settings" size={16} color={theme.colors.muted} accessibilityHidden />} />
               </>
             ) : (
-              <Button label={translate("merchantStoreCustomize")} onPress={() => { setOwnerDraft({ name: details.name, description: details.description ?? "" }); setOwnerEditMode(true); }} variant="primary" fullWidth startIcon={<Icon name="edit-3" size={18} color={theme.colors.accentForeground} accessibilityHidden />} />
+              <Button label={translate("merchantStoreCustomize")} onPress={() => { setOwnerDraft({ name: details.name, description: details.description ?? "" }); setOwnerEditMode(true); }} variant="primary" fullWidth startIcon={<Icon name="edit" size={18} color={theme.colors.accentForeground} accessibilityHidden />} />
             )}
           </View>
         ) : null}
