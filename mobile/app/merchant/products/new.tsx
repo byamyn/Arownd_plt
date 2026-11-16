@@ -642,7 +642,7 @@ function FormField({
 }: {
   label: string;
   hint?: string;
-  error?: string;
+  error?: string | undefined;
   theme: AppTheme;
   children: ReactNode;
 }) {
