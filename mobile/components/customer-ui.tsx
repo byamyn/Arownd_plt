@@ -12,7 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { translate } from "@/lib/i18n";
 import { VerifiedBadge } from "@/components/ui/identity";
 import { designTokens, useAppTheme } from "@/lib/theme";
-import { Button, Caption, Heading, Icon, Image as UiImage, PriceDisplay, ProductCard, PressableSurface, RatingStars, RefreshableScrollView, SearchField, Text as UiText } from "@/components/ui";
+import { Button, Caption, Heading, Icon, Image as UiImage, PriceDisplay, PressableSurface, RatingStars, RefreshableScrollView, SearchField, Text as UiText } from "@/components/ui";
 export { EmptyState, ErrorState, LoadingState } from "@/components/ui";
 
 export function CustomerScreen({ children, footer, showNavigation = true, onRefresh, refreshing = false, contentStyle, scrollRef }: { children: ReactNode; footer?: ReactNode; showNavigation?: boolean; onRefresh?: (() => void) | undefined; refreshing?: boolean; contentStyle?: StyleProp<ViewStyle>; scrollRef?: Ref<ComponentRef<typeof ScrollView>> | undefined }) {
