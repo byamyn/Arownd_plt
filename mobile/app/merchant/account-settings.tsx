@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
   safe: { flex: 1 },
   content: {
     padding: designTokens.spacing.lg,
-    paddingBottom: designTokens.spacing.xxxl,
+    paddingBottom: designTokens.spacing.xxl,
     gap: designTokens.spacing.md
   },
   subtitle: {
