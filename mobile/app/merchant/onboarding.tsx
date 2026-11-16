@@ -179,7 +179,7 @@ export default function MerchantOnboardingScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <AppHeader title={translate("merchantOnboardingTitle")} leading={<Button label={translate("merchantOnboardingBack")} onPress={() => router.back()} variant="ghost" size="sm" />} />
+          <AppHeader title={translate("merchantOnboardingTitle")}/>
           <UiText style={[styles.subtitle, { color: theme.colors.muted }]}>{translate("merchantOnboardingSubtitle")}</UiText>
 
           <Card contentStyle={styles.section}>
@@ -572,9 +572,7 @@ function LoadingScreen({ theme, label }: { theme: AppTheme; label: string }) {
     <SafeAreaView edges={["top", "left", "right"]} style={[stylesForScreen.safe, { backgroundColor: theme.colors.background }]}>
       <View style={stylesForScreen.center}>
         <AppHeader
-          title={translate("merchantOnboardingTitle")}
-          leading={<Button label={translate("merchantOnboardingBack")} onPress={() => router.back()} variant="ghost" size="sm" />}
-        />
+          title={translate("merchantOnboardingTitle")}        />
         <UiText style={[stylesForScreen.subtitle, { color: theme.colors.muted }]}>
           {translate("merchantOnboardingSubtitle")}
         </UiText>
@@ -601,9 +599,7 @@ function MessageScreen({
     <SafeAreaView edges={["top", "left", "right"]} style={[stylesForScreen.safe, { backgroundColor: theme.colors.background }]}>
       <View style={stylesForScreen.center}>
         <AppHeader
-          title={translate("merchantOnboardingTitle")}
-          leading={<Button label={translate("merchantOnboardingBack")} onPress={() => router.back()} variant="ghost" size="sm" />}
-        />
+          title={translate("merchantOnboardingTitle")}        />
         <UiText style={[stylesForScreen.subtitle, { color: theme.colors.muted }]}>
           {translate("merchantOnboardingSubtitle")}
         </UiText>
