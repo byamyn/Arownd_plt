@@ -1,10 +1,16 @@
 import { useMemo, useState } from "react";
-import { useImage } from "expo-image";
+import {
+  Camera,
+  GeoJSONSource,
+  Layer,
+  Map as MapLibreMap,
+  RasterSource,
+  UserLocation
+} from "@maplibre/maplibre-react-native";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { Alert, Linking, Pressable, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { GoogleMaps } from "expo-maps";
 import * as Location from "expo-location";
 
 import { CustomerNavigation } from "@/components/customer-navigation";
@@ -13,29 +19,25 @@ import { fetchMapStores, fetchStoreDetails, fetchStoreOffers } from "@/lib/catal
 import { translate } from "@/lib/i18n";
 import { designTokens, useAppTheme } from "@/lib/theme";
 
-const STORE_MARKER_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><circle cx="24" cy="24" r="21" fill="#FDE72A" stroke="#FFFFFF" stroke-width="3"/><path d="M12 20.5 14.5 14h19l2.5 6.5v2a3 3 0 0 1-5.5 1.6A3 3 0 0 1 25 24a3 3 0 0 1-5.5 0A3 3 0 0 1 14 22.5v-2ZM15 26h18v9H15z" fill="#171717"/><path d="M21 29h6v6h-6z" fill="#FDE72A"/></svg>`;
+const MAP_LIGHT_STYLE = "https://tiles.openfreemap.org/styles/liberty";
+const MAP_DARK_STYLE = "https://tiles.openfreemap.org/styles/dark";
+const EOX_SATELLITE_TILES = "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless_3857/default/g/${z}/${y}/${x}.jpg";
+const EOX_ATTRIBUTION =
+  "EOxCloudless https://cloudless.eox.at by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016)";
 
-type GoogleMapPlace = {
-  name: string;
-  coordinates: { latitude: number; longitude: number };
-};
-
-type UserMapLocation = {
-  coordinates: {
-    latitude: number;
-    longitude: number;
-  };
-  followUserLocation: boolean;
+type CameraTarget = {
+  longitude: number;
+  latitude: number;
 };
 
 export default function MapScreen() {
   const theme = useAppTheme();
   const queryClient = useQueryClient();
-  const storeMarkerIcon = useImage(`data:image/svg+xml,${encodeURIComponent(STORE_MARKER_SVG)}`, { maxWidth: 48, maxHeight: 48 });
-  const [userLocation, setUserLocation] = useState<UserMapLocation | undefined>();
+  const isDark = theme.mode === "dark";
+  const [cameraTarget, setCameraTarget] = useState<CameraTarget | null>(null);
+  const [hasLocationPermission, setHasLocationPermission] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
   const [selectedStoreId, setSelectedStoreId] = useState<string | null>(null);
-  const [selectedPlace, setSelectedPlace] = useState<GoogleMapPlace | null>(null);
 
   const stores = useQuery({
     queryKey: ["map-stores"],
@@ -43,20 +45,21 @@ export default function MapScreen() {
     staleTime: 60_000
   });
 
-  const markers = useMemo(
-    () => (stores.data ?? []).map((store) => ({
+  const storeFeatures = useMemo(() => ({
+    type: "FeatureCollection" as const,
+    features: (stores.data ?? []).map((store) => ({
+      type: "Feature" as const,
       id: store.id,
-      title: store.name,
-      ...(store.commune ? { snippet: store.commune } : {}),
-      coordinates: {
-        latitude: store.latitude,
-        longitude: store.longitude
+      properties: {
+        storeId: store.id,
+        name: store.name
       },
-      showCallout: false,
-      ...(storeMarkerIcon ? { icon: storeMarkerIcon, anchor: { x: 0.5, y: 0.5 } } : {})
-    })),
-    [stores.data, storeMarkerIcon]
-  );
+      geometry: {
+        type: "Point" as const,
+        coordinates: [store.longitude, store.latitude] as [number, number]
+      }
+    }))
+  }), [stores.data]);
 
   const selectedStore = stores.data?.find((store) => store.id === selectedStoreId) ?? null;
 
@@ -78,12 +81,10 @@ export default function MapScreen() {
         accuracy: Location.Accuracy.Balanced
       });
 
-      setUserLocation({
-        coordinates: {
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude
-        },
-        followUserLocation: true
+      setHasLocationPermission(true);
+      setCameraTarget({
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude
       });
     } catch {
       Alert.alert(translate("mapLocationPermissionTitle"), translate("mapLocationError"));
@@ -95,6 +96,7 @@ export default function MapScreen() {
   const openSelectedStore = () => {
     if (!selectedStore) return;
     const storeId = selectedStore.id;
+
     void queryClient.prefetchQuery({
       queryKey: ["customer-store", storeId],
       queryFn: () => fetchStoreDetails(storeId),
@@ -105,65 +107,124 @@ export default function MapScreen() {
       queryFn: () => fetchStoreOffers(storeId),
       staleTime: 30_000
     });
+
     setSelectedStoreId(null);
     router.push({ pathname: "/store/[storeId]", params: { storeId } });
   };
 
-  const openDirectionsTo = (coordinates: { latitude: number; longitude: number }) => {
-    const destination = `${coordinates.latitude},${coordinates.longitude}`;
-    void Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${destination}`).catch(() => {
+  const openDirections = () => {
+    if (!selectedStore) return;
+    const destination = selectedStore.latitude + "," + selectedStore.longitude;
+    void Linking.openURL("https://www.google.com/maps/dir/?api=1&destination=" + destination).catch(() => {
       Alert.alert(translate("mapDirectionsError"));
     });
   };
 
-  const openDirections = () => {
-    if (!selectedStore) return;
-    openDirectionsTo({ latitude: selectedStore.latitude, longitude: selectedStore.longitude });
-  };
-
-  const openPlaceDirections = () => {
-    if (!selectedPlace) return;
-    openDirectionsTo(selectedPlace.coordinates);
-  };
-
   return (
-    <SafeAreaView style={[styles.screen, { backgroundColor: theme.colors.background }]} edges={["top", "left", "right"]}>
+    <SafeAreaView
+      style={[styles.screen, { backgroundColor: theme.colors.background }]}
+      edges={["top", "left", "right"]}
+    >
       <View style={styles.mapContainer}>
-        <GoogleMaps.View
+        <MapLibreMap
           style={StyleSheet.absoluteFill}
-          cameraPosition={{
-            coordinates: { latitude: 28.0, longitude: 2.6 },
-            zoom: 4.5
+          mapStyle={isDark ? MAP_DARK_STYLE : MAP_LIGHT_STYLE}
+          attribution
+          attributionPosition={{ bottom: 8, left: 8 }}
+          logo={false}
+          compass={false}
+          light={{
+            position: [1.5, 90, 80],
+            color: "#FFFFFF",
+            intensity: isDark ? 0.35 : 0.75
           }}
-          colorScheme={theme.mode === "dark" ? GoogleMaps.MapColorScheme.DARK : GoogleMaps.MapColorScheme.LIGHT}
-          properties={{
-            mapType: GoogleMaps.MapType.SATELLITE,
-            isBuildingEnabled: true,
-            isMyLocationEnabled: false
-          }}
-          uiSettings={{
-            compassEnabled: false,
-            mapToolbarEnabled: false,
-            myLocationButtonEnabled: false,
-            rotationGesturesEnabled: true,
-            scrollGesturesEnabled: true,
-            tiltGesturesEnabled: true,
-            zoomControlsEnabled: false,
-            zoomGesturesEnabled: true
-          }}
-          markers={markers}
-          onMarkerClick={(marker) => {
-            setSelectedPlace(null);
-            setSelectedStoreId(marker.id ?? null);
-          }}
-          onPOIClick={(place) => {
-            const { latitude, longitude } = place.coordinates;
-            if (typeof latitude !== "number" || typeof longitude !== "number") return;
-            setSelectedStoreId(null);
-            setSelectedPlace({ name: place.name, coordinates: { latitude, longitude } });
-          }}
-          {...(userLocation ? { userLocation } : {})}
-        />
+        >
+          <Camera
+            {...(cameraTarget
+              ? {
+                  center: [cameraTarget.longitude, cameraTarget.latitude] as [number, number],
+                  zoom: 16,
+                  pitch: 48,
+                  duration: 900
+                }
+              : {
+                  initialViewState: {
+                    center: [2.6, 28.0] as [number, number],
+                    zoom: 4.5,
+                    pitch: 0,
+                    bearing: 0
+                  }
+                })}
+          />
+
+          <RasterSource
+            id="arownd-eox-satellite"
+            tiles={[EOX_SATELLITE_TILES]}
+            tileSize={256}
+            minzoom={0}
+            maxzoom={14}
+            attribution={EOX_ATTRIBUTION}
+          >
+            <Layer
+              id="arownd-satellite-imagery"
+              type="raster"
+              source="arownd-eox-satellite"
+              afterId="background"
+              paint={{ "raster-opacity": 1 }}
+            />
+          </RasterSource>
+
+          {isDark ? (
+            <Layer
+              id="arownd-dark-3d-buildings"
+              type="fill-extrusion"
+              source="openmaptiles"
+              source-layer="building"
+              minzoom={14}
+              afterId="building"
+              paint={{
+                "fill-extrusion-base": ["coalesce", ["get", "render_min_height"], 0],
+                "fill-extrusion-height": ["coalesce", ["get", "render_height"], 8],
+                "fill-extrusion-color": "#555B66",
+                "fill-extrusion-opacity": 0.9
+              }}
+            />
+          ) : null}
+
+          <GeoJSONSource
+            id="arownd-store-markers"
+            data={storeFeatures}
+            onPress={(event) => {
+              const storeId = event.nativeEvent.features?.[0]?.properties?.storeId;
+              if (typeof storeId === "string") setSelectedStoreId(storeId);
+            }}
+          >
+            <Layer
+              id="arownd-store-marker-circles"
+              type="circle"
+              paint={{
+                "circle-color": "#FDE72A",
+                "circle-radius": 14,
+                "circle-stroke-color": "#FFFFFF",
+                "circle-stroke-width": 2.5
+              }}
+            />
+            <Layer
+              id="arownd-store-marker-labels"
+              type="symbol"
+              layout={{
+                "text-field": "A",
+                "text-font": ["Noto Sans Regular"],
+                "text-size": 12,
+                "text-allow-overlap": true,
+                "text-ignore-placement": true
+              }}
+              paint={{ "text-color": "#171717" }}
+            />
+          </GeoJSONSource>
+
+          {hasLocationPermission ? <UserLocation animated accuracy /> : null}
+        </MapLibreMap>
 
         <Pressable
           accessibilityRole="button"
@@ -188,11 +249,8 @@ export default function MapScreen() {
       <CustomerNavigation />
 
       <BottomSheet
-        visible={Boolean(selectedStore || selectedPlace)}
-        onRequestClose={() => {
-          setSelectedStoreId(null);
-          setSelectedPlace(null);
-        }}
+        visible={Boolean(selectedStore)}
+        onRequestClose={() => setSelectedStoreId(null)}
       >
         {selectedStore ? (
           <>
@@ -218,26 +276,6 @@ export default function MapScreen() {
                 label={translate("mapDirections")}
                 onPress={openDirections}
                 variant="outline"
-                fullWidth
-                startIcon={<Icon name="navigation" size={18} color={theme.colors.foreground} accessibilityHidden />}
-              />
-            </View>
-          </>
-        ) : selectedPlace ? (
-          <>
-            <View style={styles.storeHeading}>
-              <View style={[styles.storeIcon, { backgroundColor: theme.colors.surfaceSecondary }]}>
-                <Icon name="map-pin" size={22} color={theme.colors.foreground} accessibilityHidden />
-              </View>
-              <View style={styles.storeCopy}>
-                <UiText weight="700" style={styles.storeName}>{selectedPlace.name}</UiText>
-                <UiText tone="muted" style={styles.storeLocation}>{translate("mapGooglePlaceLabel")}</UiText>
-              </View>
-            </View>
-            <View style={styles.actions}>
-              <Button
-                label={translate("mapDirections")}
-                onPress={openPlaceDirections}
                 fullWidth
                 startIcon={<Icon name="navigation" size={18} color={theme.colors.foreground} accessibilityHidden />}
               />

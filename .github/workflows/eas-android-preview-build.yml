@@ -28,7 +28,6 @@ jobs:
       EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
       EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
       EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
-      GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
       GH_TOKEN: ${{ github.token }}
       RELEASE_TAG: android-latest
     steps:
@@ -49,7 +48,6 @@ jobs:
           test -n "$EXPO_TOKEN" || { echo "::error::Missing GitHub Actions secret EXPO_TOKEN"; exit 1; }
           test -n "$EXPO_PUBLIC_SUPABASE_URL" || { echo "::error::Missing GitHub Actions secret EXPO_PUBLIC_SUPABASE_URL"; exit 1; }
           test -n "$EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY" || { echo "::error::Missing GitHub Actions secret EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY"; exit 1; }
-          test -n "$GOOGLE_MAPS_API_KEY" || { echo "::error::Missing GitHub Actions secret GOOGLE_MAPS_API_KEY"; exit 1; }
 
       - name: Install locked mobile dependencies
         run: npm ci --legacy-peer-deps --no-audit --no-fund
