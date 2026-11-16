@@ -42,8 +42,11 @@ function getStoreOpenState(openingHours: unknown, countryCode?: string | null): 
     timeZone, weekday: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23"
   }).formatToParts(new Date());
   const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
-  const day = ({ Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 } as Record<string, number>)[values.weekday];
-  if (day === undefined || open === close) return false;
+  const weekday = values.weekday;
+  if (!weekday || open === close) return false;
+  const dayByWeekday: Record<string, number> = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+  const day = dayByWeekday[weekday];
+  if (day === undefined) return false;
   const now = Number(values.hour) * 60 + Number(values.minute);
   const closedDays = hours.closed_days.filter((value): value is number => Number.isInteger(value));
   if (close > open) return !closedDays.includes(day) && now >= open && now < close;
