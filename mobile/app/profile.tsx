@@ -27,6 +27,7 @@ import { fetchMyOrders } from "@/lib/orders";
 import { getProfileDisplayName } from "@/lib/profile-state";
 import { fetchMyReviews } from "@/lib/reviews";
 import { getSupabaseClient } from "@/lib/supabase";
+import { fetchStoreVerificationReviewerAccess } from "@/lib/store-verification";
 
 export default function ProfileScreen() {
   useLanguage();
@@ -96,6 +97,12 @@ export default function ProfileScreen() {
     queryKey: ["my-delivery-profile"],
     queryFn: fetchMyDeliveryProfile,
     enabled: Boolean(user.data)
+  });
+  const verificationReviewer = useQuery({
+    queryKey: ["store-verification-reviewer"],
+    queryFn: fetchStoreVerificationReviewerAccess,
+    enabled: Boolean(user.data),
+    retry: false
   });
   const orders = useQuery({
     queryKey: ["my-orders"],
@@ -247,6 +254,18 @@ export default function ProfileScreen() {
                 <Icon name="chevron-left" size={18} color={theme.colors.subtle} />
               </Card>
             </PressableSurface>
+            {verificationReviewer.data === true ? (
+              <PressableSurface accessibilityRole="button" accessibilityLabel={translate("verificationModerationTitle")} onPress={() => router.push("/moderation/store-verifications")} style={styles.accountLinkOuter}>
+                <Card contentStyle={styles.accountLinkCard}>
+                  <View style={[styles.accountLinkIcon, { backgroundColor: theme.colors.surfaceSecondary }]}><Icon name="badge-check" size={20} color={theme.colors.accent} /></View>
+                  <View style={styles.accountLinkText}>
+                    <UiText weight="700">{translate("verificationModerationTitle")}</UiText>
+                    <Caption>{translate("verificationModerationSubtitle")}</Caption>
+                  </View>
+                  <Icon name="chevron-left" size={18} color={theme.colors.subtle} />
+                </Card>
+              </PressableSurface>
+            ) : null}
           </View>
 
           <View style={styles.stats}>
