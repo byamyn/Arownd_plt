@@ -2,13 +2,14 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { ScrollView, StyleSheet, View } from "react-native";
 
-import { Caption, Icon, IconButton, Image as UiImage, PriceDisplay, PressableSurface, ProductCardSkeleton, Text as UiText } from "@/components/ui";
+import { Icon, IconButton, ProductCardSkeleton } from "@/components/ui";
 import Logo from "@/components/logo";
 import {
   CustomerScreen,
   EmptyState,
   ErrorState,
-  SectionTitle
+  SectionTitle,
+  ProductTile
 } from "@/components/customer-ui";
 import { fetchHomeProducts, fetchProductDetails, fetchProductOffers, formatMarketPrice, getPrimaryImage } from "@/lib/catalog";
 import { fetchBrowsingCurrencyCode } from "@/lib/country-service";
@@ -55,7 +56,7 @@ export default function CustomerHomeScreen() {
             contentContainerStyle={styles.productRail}
           >
             {products.data.map((item) => (
-              <HomeProductCard
+              <ProductTile
                 key={item.id}
                 name={item.product.name}
                 store={item.store.name}
@@ -67,62 +68,13 @@ export default function CustomerHomeScreen() {
                   void queryClient.prefetchQuery({ queryKey: ["approved-reviews", "product", item.product.id], queryFn: () => fetchApprovedReviews("product", item.product.id), staleTime: 60_000 });
                   router.push({ pathname: "/product/[productId]", params: { productId: item.product.id } });
                 }}
+                style={{ width: 172, flexGrow: 0, flexShrink: 0 }}
               />
             ))}
           </ScrollView>
         )}
       </View>
     </CustomerScreen>
-  );
-}
-
-function HomeProductCard({
-  name,
-  store,
-  price,
-  imageUrl,
-  onPress
-}: {
-  name: string;
-  store: string;
-  price: string;
-  imageUrl: string | null;
-  onPress: () => void;
-}) {
-  const theme = useAppTheme();
-
-  return (
-    <PressableSurface
-      onPress={onPress}
-      accessibilityLabel={`${name}، ${store}، ${price}`}
-      style={[
-        styles.homeProductCard,
-        {
-          backgroundColor: theme.colors.surface,
-          borderColor: theme.colors.border,
-          borderWidth: theme.mode === "light" ? StyleSheet.hairlineWidth : 1
-        }
-      ]}
-    >
-      <View style={[styles.homeProductImage, { backgroundColor: theme.colors.surfaceMuted }]}>
-        {imageUrl ? (
-          <UiImage uri={imageUrl} accessibilityLabel={name} aspectRatio={1} style={StyleSheet.absoluteFill} />
-        ) : (
-          <Icon name="image" size={34} color={theme.colors.subtle} accessibilityHidden />
-        )}
-      </View>
-      <View style={styles.homeProductContent}>
-        <View style={styles.homeProductStore}>
-          <Icon name="store" size={13} color={theme.colors.muted} accessibilityHidden />
-          <Caption numberOfLines={1}>{store}</Caption>
-        </View>
-        <UiText numberOfLines={2} weight="700" style={styles.homeProductName}>{name}</UiText>
-        <View style={[styles.homeProductPrice, { borderTopColor: theme.colors.border }]}>
-          <PriceDisplay value={price} />
-          <Icon name="arrow-left" size={15} color={theme.colors.accent} accessibilityHidden />
-        </View>
-      </View>
-    </PressableSurface>
   );
 }
 
@@ -146,46 +98,5 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center"
   },
-  productRail: {
-    flexDirection: "row",
-    gap: designTokens.spacing.md
-  },
-  homeProductCard: {
-    width: 172,
-    borderRadius: designTokens.radius.lg,
-    padding: designTokens.spacing.sm,
-    gap: designTokens.spacing.sm,
-    overflow: "hidden"
-  },
-  homeProductImage: {
-    height: 144,
-    borderRadius: designTokens.radius.md,
-    overflow: "hidden",
-    alignItems: "center",
-    justifyContent: "center"
-  },
-  homeProductContent: {
-    gap: designTokens.spacing.sm,
-    alignItems: "stretch",
-    paddingHorizontal: 2
-  },
-  homeProductStore: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: designTokens.spacing.xs,
-    minHeight: 18
-  },
-  homeProductName: {
-    minHeight: 40,
-    lineHeight: 20,
-    textAlign: "auto"
-  },
-  homeProductPrice: {
-    minHeight: 38,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    paddingTop: designTokens.spacing.xs,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between"
-  }
+  productRail: { flexDirection: "row", gap: designTokens.spacing.md }
 });
