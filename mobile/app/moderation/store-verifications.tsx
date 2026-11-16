@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Redirect } from "expo-router";
+import { router } from "expo-router";
 import { useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -175,7 +175,7 @@ function ScreenMessage({ theme, label, loading, retryLabel, onRetry }: {
         {loading ? <LoadingState label={label} /> : retryLabel && onRetry ? (
           <ErrorState title={label} retryLabel={retryLabel} onRetry={onRetry} />
         ) : <UiText style={{ color: theme.colors.foreground }}>{label}</UiText>}
-        <Button label={translate("merchantBackToProfile")} onPress={() => {}} variant="ghost" disabled />
+        <Button label={translate("merchantBackToProfile")} onPress={() => router.replace("/profile")} variant="ghost" />
       </View>
     </SafeAreaView>
   );
