@@ -57,7 +57,9 @@ export const MerchantStoreSettingsSchema = z.object({
     closed_days: z.array(z.number().int().min(0).max(6)).max(7).refine((days) => new Set(days).size === days.length)
   }),
   instagram_url: z.string().trim().max(300).refine(isHttpsUrl),
-  facebook_url: z.string().trim().max(300).refine(isHttpsUrl)
+  facebook_url: z.string().trim().max(300).refine(isHttpsUrl),
+  tiktok_url: z.string().trim().max(300).refine(isHttpsUrl),
+  website_url: z.string().trim().max(300).refine(isHttpsUrl)
 }).superRefine((values, context) => {
   if ((values.latitude === null) !== (values.longitude === null)) {
     context.addIssue({
