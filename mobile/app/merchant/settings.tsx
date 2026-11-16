@@ -544,11 +544,10 @@ function Message({ theme, label, loading = false, actionLabel, onAction, busy = 
       <View style={styles.message}>
         <AppHeader
           title={translate("merchantStoreSettingsTitle")}        />
-        {loading ? (
-          <LoadingState label={label} />
-        ) : actionLabel && onAction ? (
+        {loading ? <LoadingState label={label} /> : null}
+        {!loading && actionLabel && onAction ? (
           <ErrorState title={label} retryLabel={actionLabel} busy={busy} onRetry={onAction} />
-        )}
+        ) : null}
       </View>
     </SafeAreaView>
   );
