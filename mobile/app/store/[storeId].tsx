@@ -418,7 +418,7 @@ const styles = StyleSheet.create({
   ownerEditorHint: { fontSize: designTokens.typography.caption, textAlign: "auto" },
   ownerTimeField: { flex: 1, minWidth: 120 },
   ownerDays: { flexDirection: "row", flexWrap: "wrap", gap: designTokens.spacing.xs },
-  ownerDayChip: { borderWidth: 1, borderRadius: designTokens.radius.full, paddingHorizontal: designTokens.spacing.md, paddingVertical: designTokens.spacing.sm },
+  ownerDayChip: { borderWidth: 1, borderRadius: designTokens.radius.pill, paddingHorizontal: designTokens.spacing.md, paddingVertical: designTokens.spacing.sm },
   ownerImageActions: { flexDirection: "row", flexWrap: "wrap", gap: designTokens.spacing.sm },
   coverImage: { width: "100%", borderRadius: designTokens.radius.lg },
   avatarWrap: { position: "relative" },
