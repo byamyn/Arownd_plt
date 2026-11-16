@@ -280,9 +280,7 @@ export default function MerchantStoreSettingsScreen() {
     <SafeAreaView edges={["top", "left", "right", "bottom"]} style={[styles.safe, { backgroundColor: theme.colors.background }]}>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <AppHeader
-          title={translate("merchantStoreSettingsTitle")}
-          leading={<IconButton accessibilityLabel={translate("back")} onPress={() => router.back()} icon={<Icon name={language === "ar" ? "chevron-right" : "chevron-left"} color={theme.colors.foreground} size={20} />} />}
-        />
+          title={translate("merchantStoreSettingsTitle")}        />
         <UiText style={[styles.subtitle, { color: theme.colors.muted }]}>{translate("merchantStoreSettingsSubtitle")}</UiText>
 
         <Card contentStyle={styles.sectionCard}>
@@ -546,9 +544,7 @@ function Message({ theme, label, loading = false, actionLabel, onAction, busy = 
     <SafeAreaView edges={["top", "left", "right"]} style={[styles.safe, { backgroundColor: theme.colors.background }]}>
       <View style={styles.message}>
         <AppHeader
-          title={translate("merchantStoreSettingsTitle")}
-          leading={<Button label={translate("back")} onPress={() => router.back()} variant="ghost" size="sm" />}
-        />
+          title={translate("merchantStoreSettingsTitle")}        />
         <UiText style={[styles.subtitle, { color: theme.colors.muted }]}>
           {translate("merchantStoreSettingsSubtitle")}
         </UiText>
