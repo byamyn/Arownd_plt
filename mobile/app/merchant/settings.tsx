@@ -79,7 +79,11 @@ export default function MerchantStoreSettingsScreen() {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["merchant-dashboard", storeId] }),
         queryClient.invalidateQueries({ queryKey: ["map-stores"] }),
-        queryClient.invalidateQueries({ queryKey: ["my-store-verification", storeId] })
+        queryClient.invalidateQueries({ queryKey: ["my-store-verification", storeId] }),
+        queryClient.invalidateQueries({ queryKey: ["customer-featured-stores"] }),
+        queryClient.invalidateQueries({ queryKey: ["customer-stores-by-region"] }),
+        queryClient.invalidateQueries({ queryKey: ["customer-store", storeId] }),
+        queryClient.invalidateQueries({ queryKey: ["customer-store-offers"] })
       ]);
     },
     onError: () => setFormError(true)
@@ -236,7 +240,15 @@ export default function MerchantStoreSettingsScreen() {
       );
       setImageSaved(true);
       setImageCleanupPending(uploaded.cleanupPending);
-      await queryClient.invalidateQueries({ queryKey: ["my-store-verification", storeId] });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["my-store-verification", storeId] }),
+        queryClient.invalidateQueries({ queryKey: ["merchant-dashboard", storeId] }),
+        queryClient.invalidateQueries({ queryKey: ["map-stores"] }),
+        queryClient.invalidateQueries({ queryKey: ["customer-featured-stores"] }),
+        queryClient.invalidateQueries({ queryKey: ["customer-stores-by-region"] }),
+        queryClient.invalidateQueries({ queryKey: ["customer-store", storeId] }),
+        queryClient.invalidateQueries({ queryKey: ["customer-store-offers"] })
+      ]);
     } catch {
       setImageError(true);
     } finally {
