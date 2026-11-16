@@ -425,6 +425,7 @@ commit;
 -- insert into public.store_verification_reviewers (user_id)
 -- values ('<AUTH_USER_UUID>')
 -- on conflict (user_id) do update set is_active = true;
+
      or coalesce(v_store.opening_hours ->> 'close', '') !~ '^([01][0-9]|2[0-3]):[0-5][0-9]
     raise exception 'store_verification_profile_incomplete';
   end if;
@@ -599,7 +600,8 @@ commit;
 -- migration has been reviewed and explicitly approved:
 -- insert into public.store_verification_reviewers (user_id)
 -- values ('<AUTH_USER_UUID>')
--- on conflict (user_id) do update set is_active = true; then
+-- on conflict (user_id) do update set is_active = true;
+ then
     raise exception 'store_verification_profile_incomplete';
   end if;
 
