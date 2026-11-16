@@ -159,14 +159,14 @@ function Message({ theme, label, loading = false, actionLabel, onAction, busy = 
 function createStyles(theme: AppTheme) {
   return StyleSheet.create({
     safe: { flex: 1 },
-    content: { padding: designTokens.spacing.xl, paddingBottom: 36, gap: designTokens.spacing.lg },
+    content: { padding: designTokens.spacing.xl, paddingBottom: designTokens.spacing.xxl, gap: designTokens.spacing.xl },
     subtitle: { fontSize: designTokens.typography.caption + 1, lineHeight: 20, textAlign: "auto" },
     grid: { flexDirection: "row", flexWrap: "wrap", gap: designTokens.spacing.sm },
     inventoryGrid: { flexDirection: "row", flexWrap: "wrap", gap: designTokens.spacing.sm },
-    metricCard: { width: "48%", flexGrow: 1, minHeight: 96 },
+    metricCard: { width: "48%", flexGrow: 1, minHeight: 104, justifyContent: "center" },
     inventoryWideCard: { width: "100%", flex: 0, flexGrow: 0, alignSelf: "stretch", minHeight: 96 },
     revenueMetrics: { flexDirection: "row", alignItems: "stretch", gap: designTokens.spacing.md },
-    revenueMetric: { flex: 1, minWidth: 0, padding: designTokens.spacing.sm, gap: designTokens.spacing.xs },
+    revenueMetric: { flex: 1, minWidth: 0, minHeight: 94, padding: designTokens.spacing.md, gap: designTokens.spacing.xs, justifyContent: "center" },
     metricDivider: { width: StyleSheet.hairlineWidth, alignSelf: "stretch" },
     chartCard: { gap: designTokens.spacing.md },
     dayRow: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.sm },
