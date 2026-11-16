@@ -11,14 +11,15 @@ import { CART_QUERY_KEY, getCart } from "@/lib/cart";
 
 type NavigationTab = {
   id: Exclude<CustomerTab, "none"> | "studio";
-  label: "navHome" | "navExplore" | "navCart" | "navAccount" | "navStudio";
-  icon: "home" | "search" | "shopping-cart" | "user" | "store";
+  label: "navHome" | "navExplore" | "navMap" | "navCart" | "navAccount" | "navStudio";
+  icon: "home" | "search" | "map" | "shopping-cart" | "user" | "store";
   path: string;
 };
 
 const customerTabs: NavigationTab[] = [
   { id: "home", label: "navHome", icon: "home", path: "/home" },
   { id: "explore", label: "navExplore", icon: "search", path: "/explore" },
+  { id: "map", label: "navMap", icon: "map", path: "/map" },
   { id: "cart", label: "navCart", icon: "shopping-cart", path: "/cart" },
   { id: "profile", label: "navAccount", icon: "user", path: "/profile" }
 ];
