@@ -47,7 +47,17 @@ const VerificationQueueItemSchema = z.object({
     opening_hours: z.object({
       open: z.string(),
       close: z.string()
-    }).passthrough()
+    }).passthrough(),
+    region: z.object({
+      name_ar: z.string(),
+      name_fr: z.string().nullable(),
+      name_en: z.string().nullable()
+    }).nullable(),
+    secondary_region: z.object({
+      name_ar: z.string(),
+      name_fr: z.string().nullable(),
+      name_en: z.string().nullable()
+    }).nullable()
   }).passthrough()
 }).passthrough();
 
@@ -122,7 +132,7 @@ export async function fetchStoreVerificationReviewerAccess(): Promise<boolean> {
 export async function fetchStoreVerificationQueue(): Promise<StoreVerificationQueueItem[]> {
   const { data, error } = await getSupabaseClient()
     .from("store_verification_requests")
-    .select("id, store_id, status, submitted_at, profile_snapshot, store:stores!inner(id, name, logo_url, phone, region_id, secondary_region_id, commune, address_line, opening_hours)")
+    .select("id, store_id, status, submitted_at, profile_snapshot, store:stores!inner(id, name, logo_url, phone, region_id, secondary_region_id, commune, address_line, opening_hours, region:country_regions!stores_country_region_fkey(name_ar, name_fr, name_en), secondary_region:country_regions!stores_country_secondary_region_fkey(name_ar, name_fr, name_en))")
     .eq("status", "pending")
     .order("submitted_at", { ascending: true })
     .limit(100);
