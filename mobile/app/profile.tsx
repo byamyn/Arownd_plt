@@ -257,7 +257,7 @@ export default function ProfileScreen() {
             {verificationReviewer.data === true ? (
               <PressableSurface accessibilityRole="button" accessibilityLabel={translate("verificationModerationTitle")} onPress={() => router.push("/moderation/store-verifications")} style={styles.accountLinkOuter}>
                 <Card contentStyle={styles.accountLinkCard}>
-                  <View style={[styles.accountLinkIcon, { backgroundColor: theme.colors.surfaceSecondary }]}><Icon name="badge-check" size={20} color={theme.colors.accent} /></View>
+                  <View style={[styles.accountLinkIcon, { backgroundColor: theme.colors.surfaceSecondary }]}><Icon name="circle-check" size={20} color={theme.colors.accent} /></View>
                   <View style={styles.accountLinkText}>
                     <UiText weight="700">{translate("verificationModerationTitle")}</UiText>
                     <Caption>{translate("verificationModerationSubtitle")}</Caption>
