@@ -80,7 +80,7 @@ export function SectionTitle({ title, subtitle, action, onAction }: {
   );
 }
 
-export function ProductTile({ name, store, price, imageUrl, onPress, style, action }: {
+export function ProductTile({ name, store, price, imageUrl, onPress, style, action, appearance = "default", showStore = true }: {
   name: string;
   store: string;
   price: string;
@@ -88,6 +88,8 @@ export function ProductTile({ name, store, price, imageUrl, onPress, style, acti
   onPress?: () => void;
   style?: StyleProp<ViewStyle>;
   action?: ReactNode;
+  appearance?: "default" | "plain";
+  showStore?: boolean;
 }) {
   const theme = useAppTheme();
   return (
@@ -96,12 +98,14 @@ export function ProductTile({ name, store, price, imageUrl, onPress, style, acti
       disabled={!onPress}
       accessibilityLabel={`${name}، ${store}، ${price}`}
       style={[
-        styles.productTile,
-        {
-          backgroundColor: theme.colors.surface,
-          borderColor: theme.colors.border,
-          borderWidth: theme.mode === "light" ? StyleSheet.hairlineWidth : 1
-        },
+        appearance === "plain" ? styles.productTilePlain : styles.productTile,
+        appearance === "plain"
+          ? undefined
+          : {
+              backgroundColor: theme.colors.surface,
+              borderColor: theme.colors.border,
+              borderWidth: theme.mode === "light" ? StyleSheet.hairlineWidth : 1
+            },
         style
       ]}
     >
@@ -110,12 +114,14 @@ export function ProductTile({ name, store, price, imageUrl, onPress, style, acti
         {action ? <View style={styles.productAction}>{action}</View> : null}
       </View>
       <View style={styles.productContent}>
-        <View style={styles.productStore}>
-          <Icon name="store" size={13} color={theme.colors.muted} accessibilityHidden />
-          <Caption numberOfLines={1}>{store}</Caption>
-        </View>
-        <UiText numberOfLines={2} weight="700" style={styles.productName}>{name}</UiText>
-        <View style={[styles.productPrice, { borderTopColor: theme.colors.border }]}>
+        {showStore ? (
+          <View style={styles.productStore}>
+            <Icon name="store" size={13} color={theme.colors.muted} accessibilityHidden />
+            <Caption numberOfLines={1}>{store}</Caption>
+          </View>
+        ) : null}
+        <UiText numberOfLines={2} weight="700" style={appearance === "plain" ? styles.productNamePlain : styles.productName}>{name}</UiText>
+        <View style={[appearance === "plain" ? styles.productPricePlain : styles.productPrice, { borderTopColor: theme.colors.border }]}>
           <PriceDisplay value={price} />
           <Icon name="chevron-left" size={17} color={theme.colors.muted} accessibilityHidden />
         </View>
@@ -176,7 +182,10 @@ const styles = StyleSheet.create({
   sectionCopy: { flex: 1, gap: designTokens.spacing.xs, alignItems: "flex-start" },
   sectionAction: { fontSize: designTokens.typography.caption + 1, fontWeight: "700" },
   productTile: { width: 172, borderRadius: designTokens.radius.lg, padding: designTokens.spacing.sm, gap: designTokens.spacing.sm, overflow: "hidden" },
+  productTilePlain: { width: "48%", borderRadius: 0, padding: 0, gap: designTokens.spacing.sm, overflow: "hidden", backgroundColor: "transparent" },
   productContent: { gap: designTokens.spacing.sm, alignItems: "stretch", paddingHorizontal: 2 },
+  productNamePlain: { lineHeight: 20, textAlign: "auto" },
+  productPricePlain: { minHeight: 0, borderTopWidth: 0, paddingTop: 0, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   productImage: { height: 144, borderRadius: designTokens.radius.md, overflow: "hidden", alignItems: "center", justifyContent: "center" },
   productStore: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.xs, minHeight: 18 },
   productName: { minHeight: 40, lineHeight: 20, textAlign: "auto" },
