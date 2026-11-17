@@ -128,6 +128,7 @@ export type RefreshableScrollViewProps = PropsWithChildren<{
   style?: ScrollViewProps["style"];
   keyboardShouldPersistTaps?: ScrollViewProps["keyboardShouldPersistTaps"];
   showsVerticalScrollIndicator?: boolean;
+  stickyHeaderIndices?: number[];
 }>;
 
 export function RefreshableScrollView({
@@ -138,7 +139,8 @@ export function RefreshableScrollView({
   style,
   keyboardShouldPersistTaps = "handled",
   showsVerticalScrollIndicator = false,
-  scrollRef
+  scrollRef,
+  stickyHeaderIndices
 }: RefreshableScrollViewProps) {
   const theme = useAppTheme();
   const indicatorColor = theme.mode === "light" ? theme.colors.foreground : theme.colors.accent;
@@ -146,6 +148,7 @@ export function RefreshableScrollView({
   return (
     <ScrollView
       ref={scrollRef}
+      stickyHeaderIndices={stickyHeaderIndices}
       style={style}
       contentContainerStyle={contentContainerStyle}
       keyboardShouldPersistTaps={keyboardShouldPersistTaps}
