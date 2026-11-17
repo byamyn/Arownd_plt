@@ -399,7 +399,7 @@ export default function SettingsScreen() {
           style={[styles.languageOption, language === "en" && { backgroundColor: theme.colors.accent }]}
         >
           <UiText weight={language === "en" ? "700" : "500"} style={language === "en" ? { color: theme.colors.accentForeground } : undefined}>{translate("settingsLanguageEnglish")}</UiText>
-          {language === "en" ? <Icon name="circle-check" size={19} color={theme.mode === "light" ? theme.colors.accentForeground : theme.colors.accentMuted} /> : null}
+          {language === "en" ? <Icon name="circle-check" size={19} color={theme.colors.accentForeground} /> : null}
         </PressableSurface>
         {languageError ? <UiText tone="danger">{translate("settingsLanguageSaveError")}</UiText> : null}
       </BottomSheet>
