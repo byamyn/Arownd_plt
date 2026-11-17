@@ -81,14 +81,14 @@ export function ProgressBar({
       accessibilityValue={{ min: 0, max, now: Math.min(max, Math.max(0, value)) }}
       style={[{ height: 8, overflow: "hidden", borderRadius: theme.radius.pill, backgroundColor: theme.colors.border }, style]}
     >
-      <View style={{ width: `${progress * 100}%`, height: "100%", borderRadius: theme.radius.pill, backgroundColor: theme.colors.accentMuted }} />
+      <View style={{ width: `${progress * 100}%`, height: "100%", borderRadius: theme.radius.pill, backgroundColor: theme.colors.accent }} />
     </View>
   );
 }
 
 export function Spinner({ size = "small", color }: { size?: "small" | "large"; color?: string }) {
   const theme = useAppTheme();
-  return <ActivityIndicator size={size} color={color ?? theme.colors.accentMuted} />;
+  return <ActivityIndicator size={size} color={color ?? theme.colors.accent} />;
 }
 
 export function Skeleton({
