@@ -102,10 +102,10 @@ export function CustomerNavigation() {
                     borderRadius: theme.radius.pill,
                     alignItems: "center",
                     justifyContent: "center",
-                    backgroundColor: theme.colors.danger
+                    backgroundColor: theme.colors.accent
                   }}
                 >
-                  <UiText style={{ color: theme.colors.surface, fontSize: 9, fontWeight: theme.fontWeights.extrabold, fontVariant: ["tabular-nums"] }}>
+                  <UiText style={{ color: theme.colors.accentForeground, fontSize: 9, fontWeight: theme.fontWeights.extrabold, fontVariant: ["tabular-nums"] }}>
                     {cartCount > 99 ? "99+" : cartCount}
                   </UiText>
                 </View>
