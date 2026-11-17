@@ -173,7 +173,7 @@ export function AuthCaptchaHost() {
 
           {loading ? (
             <View style={[styles.stateOverlay, { backgroundColor: theme.colors.surface }]}>
-              <ActivityIndicator size="large" color={theme.colors.accent} />
+              <ActivityIndicator size="large" color={theme.colors.accentOnSurface} />
               <Text style={[styles.stateText, { color: theme.colors.foreground }]}>
                 {translate("captchaLoading")}
               </Text>
