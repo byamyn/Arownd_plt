@@ -55,7 +55,7 @@ function AccountTypeOption({
       </View>
 
       <View style={styles.copy}>
-        <UiText weight={designTokens.fontWeights.extrabold} style={styles.optionTitle}>
+        <UiText weight={designTokens.fontWeights.extrabold} style={[styles.optionTitle, selected && { color: theme.colors.accentForeground }]}>
           {title}
         </UiText>
         <UiText tone="muted" style={[styles.optionDescription, selected && { color: theme.colors.accentForeground }]}>
