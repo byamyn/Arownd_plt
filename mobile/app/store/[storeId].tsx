@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { useMemo, useState } from "react";
-import { Linking, Pressable, Share, StyleSheet, View } from "react-native";
+import { Alert, Linking, Pressable, Share, StyleSheet, View } from "react-native";
 
 import { CustomerScreen, CustomerSearch, EmptyState, ErrorState, ProductTile } from "@/components/customer-ui";
 import { FavoriteButton } from "@/components/favorite-button";
@@ -161,7 +161,17 @@ export default function StoreDetailsScreen() {
           <View style={styles.storeInfo}>
             <View style={styles.storeNameRow}>
               <UiText style={[styles.storeName, { color: theme.colors.foreground, flexShrink: 1 }]}>{details.name}</UiText>
-              {details.is_verified ? <VerifiedBadge size={18} accessibilityLabel={translate("storeVerified")} /> : null}
+              {details.is_verified ? (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={translate("storeVerified")}
+                  accessibilityHint={translate("storeVerifiedInfoHint")}
+                  hitSlop={8}
+                  onPress={() => Alert.alert(translate("storeVerified"), translate("storeVerifiedInfo"))}
+                >
+                  <VerifiedBadge size={18} accessibilityLabel={translate("storeVerified")} />
+                </Pressable>
+              ) : null}
             </View>
             <View style={styles.inlineEditable}>
               <UiText numberOfLines={descriptionExpanded ? undefined : 2} style={[styles.storeDescription, { color: theme.colors.muted }]}>{details.description || ""}</UiText>
