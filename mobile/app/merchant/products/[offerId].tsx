@@ -640,7 +640,7 @@ export default function MerchantEditProductScreen() {
                   style={[
                     styles.categoryOption,
                     {
-                      backgroundColor: productCategory === category.id ? theme.colors.surfaceMuted : theme.colors.background,
+                      backgroundColor: productCategory === category.id ? theme.colors.accent : theme.colors.background,
                       borderColor: productCategory === category.id ? theme.colors.accent : theme.colors.border
                     }
                   ]}
