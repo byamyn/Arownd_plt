@@ -351,8 +351,6 @@ export default function ProfileScreen() {
             </Card>
           ) : null}
 
-          {merchantAccess.data?.status === "merchant_ready" && merchantAccess.data.store?.id ? (
-
           {orders.isError || favorites.isError || reviews.isError ? (
             <ErrorState
               title={translate("profileStatsLoadError")}
@@ -363,6 +361,13 @@ export default function ProfileScreen() {
           ) : null}
         </>
       )}
+      <BottomSheet
+        visible={accountSheet !== null}
+        onRequestClose={() => setAccountSheet(null)}
+        maxHeight="92%"
+      >
+        {accountSheet ? <ProfileAccountSheet section={accountSheet} onClose={() => setAccountSheet(null)} /> : null}
+      </BottomSheet>
       <BottomSheet
         visible={avatarActionsOpen}
         onRequestClose={() => setAvatarActionsOpen(false)}
