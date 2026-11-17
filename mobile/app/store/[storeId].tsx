@@ -1,9 +1,9 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Alert, Linking, Pressable, Share, StyleSheet, View } from "react-native";
 
-import { CustomerScreen, CustomerSearch, EmptyState, ErrorState, ProductTile } from "@/components/customer-ui";
+import { CustomerScreen, EmptyState, ErrorState, ProductTile } from "@/components/customer-ui";
 import { FavoriteButton } from "@/components/favorite-button";
 import { fetchProductDetails, fetchProductOffers, fetchStoreDetails, fetchStoreOffers, formatMarketPrice, getPrimaryImage } from "@/lib/catalog";
 import { fetchBrowsingCurrencyCode } from "@/lib/country-service";
@@ -90,7 +90,6 @@ export default function StoreDetailsScreen() {
     merchantAccess.data.store?.id === storeId ? storeId : null;
   const [tab, setTab] = useState<StoreTab>("products");
   const [descriptionExpanded, setDescriptionExpanded] = useState(false);
-  const [search, setSearch] = useState("");
   const store = useQuery({
     queryKey: ["customer-store", storeId],
     queryFn: () => fetchStoreDetails(storeId),
@@ -101,12 +100,6 @@ export default function StoreDetailsScreen() {
     queryFn: () => fetchStoreOffers(storeId),
     enabled: Boolean(storeId) && tab === "products"
   });
-
-  const filteredOffers = useMemo(() => {
-    const term = search.trim().toLocaleLowerCase();
-    if (!term) return offers.data ?? [];
-    return (offers.data ?? []).filter((item) => item.product.name.toLocaleLowerCase().includes(term));
-  }, [offers.data, search]);
 
   if (!storeId) return <CustomerScreen><EmptyState title={translate("detailNotFound")} /></CustomerScreen>;
 
@@ -132,7 +125,7 @@ export default function StoreDetailsScreen() {
   return (
     <CustomerScreen
       contentStyle={styles.storeScreenContent}
-      stickyHeaderIndices={tab === "products" && !offers.isPending && !offers.isError && (offers.data?.length ?? 0) > 0 ? [0, 2, 3] : [0, 2]}
+      stickyHeaderIndices={[0, 2]}
       refreshing={store.isFetching || (tab === "products" && offers.isFetching)}
       onRefresh={() => { void store.refetch(); if (tab === "products") void offers.refetch(); }}
     >
@@ -219,12 +212,6 @@ export default function StoreDetailsScreen() {
         style={[styles.tabs, { backgroundColor: theme.colors.background }]}
       />
 
-      {tab === "products" && !offers.isPending && !offers.isError && (offers.data?.length ?? 0) > 0 ? (
-        <View style={[styles.stickySearch, { backgroundColor: theme.colors.background }]}>
-          <CustomerSearch value={search} onChangeText={setSearch} placeholder={translate("homeSearchPlaceholder")} />
-        </View>
-      ) : null}
-
       {tab === "products" ? (
         offers.isPending ? (
           <View style={styles.productGrid}>
@@ -236,11 +223,8 @@ export default function StoreDetailsScreen() {
           <EmptyState icon="package" title={translate("storeNoProducts")} hint={translate("storeNoDescription")} />
         ) : (
           <View style={styles.productsSection}>
-            {filteredOffers.length === 0 ? (
-              <EmptyState icon="search" title={translate("exploreNoResults")} hint={translate("exploreNoResultsHint")} />
-            ) : (
-              <View style={styles.productGrid}>
-                {filteredOffers.map((item) => (
+            <View style={styles.productGrid}>
+                {offers.data.map((item) => (
                   <ProductTile
                     key={item.id}
                     appearance="plain"
@@ -258,8 +242,7 @@ export default function StoreDetailsScreen() {
                     }}
                   />
                 ))}
-              </View>
-            )}
+            </View>
           </View>
         )
       ) : tab === "about" ? (
@@ -336,7 +319,6 @@ const styles = StyleSheet.create({
   metaText: { fontSize: designTokens.typography.caption + 1, textAlign: "auto", flexShrink: 1 },
   storeDescription: { fontSize: designTokens.typography.body - 1, lineHeight: 21, textAlign: "auto" },
   tabs: { width: "100%", backgroundColor: "#FFFFFF", zIndex: 9 },
-  stickySearch: { paddingHorizontal: designTokens.spacing.lg, paddingTop: designTokens.spacing.sm, paddingBottom: designTokens.spacing.sm, zIndex: 8 },
   productsSection: { paddingHorizontal: designTokens.spacing.lg, paddingTop: designTokens.spacing.md, gap: designTokens.spacing.md },
   productGrid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", rowGap: designTokens.spacing.lg },
   productTile: { width: "48%", flexGrow: 0, flexShrink: 0 },
