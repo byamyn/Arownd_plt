@@ -141,9 +141,13 @@ export default function StoreDetailsScreen() {
 
       <View style={styles.coverWrap}>
         {details.cover_url ? (
-          <UiImage uri={details.cover_url} accessibilityLabel={translate("merchantStoreCover")} aspectRatio={16 / 9} style={styles.coverImage} />
+          <UiImage uri={details.cover_url} accessibilityLabel={translate("merchantStoreCover")} aspectRatio={16 / 9} resizeMode="cover" style={styles.coverImage} />
         ) : (
-          <View style={[styles.coverImage, { backgroundColor: theme.colors.surfaceMuted }]} />
+          <View style={[styles.coverImage, styles.defaultCover, { backgroundColor: theme.colors.surfaceMuted }]}>
+            <Icon name="image" size={28} color={theme.colors.muted} accessibilityHidden />
+            <UiText style={[styles.defaultCoverTitle, { color: theme.colors.foreground }]}>{translate("storeDefaultCover")}</UiText>
+            <UiText style={[styles.defaultCoverHint, { color: theme.colors.muted }]}>{translate("storeDefaultCoverHint")}</UiText>
+          </View>
         )}
       </View>
       <View style={styles.storeHero}>
@@ -296,6 +300,9 @@ const styles = StyleSheet.create({
   ownerDayChip: { borderWidth: 1, borderRadius: designTokens.radius.pill, paddingHorizontal: designTokens.spacing.md, paddingVertical: designTokens.spacing.sm },
   ownerImageActions: { flexDirection: "row", flexWrap: "wrap", gap: designTokens.spacing.sm },
   coverImage: { width: "100%", height: 136, borderRadius: 0 },
+  defaultCover: { alignItems: "center", justifyContent: "center", gap: designTokens.spacing.xs, paddingHorizontal: designTokens.spacing.lg },
+  defaultCoverTitle: { fontSize: designTokens.typography.body, fontWeight: designTokens.fontWeights.bold },
+  defaultCoverHint: { fontSize: designTokens.typography.caption, textAlign: "center" },
   coverWrap: { position: "relative", width: "100%", alignSelf: "stretch" },
   imageEditButton: { position: "absolute", right: designTokens.spacing.md, bottom: designTokens.spacing.md, width: 36, height: 36, borderRadius: designTokens.radius.pill, backgroundColor: "#FFFFFF", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "#E5E7EB" },
   logoEditButton: { position: "absolute", right: -3, top: -3, width: 26, height: 26, borderRadius: designTokens.radius.pill, backgroundColor: "#FFFFFF", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "#E5E7EB", zIndex: 2 },
