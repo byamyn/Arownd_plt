@@ -187,16 +187,15 @@ export default function ProductDetailsScreen() {
               </View>
               <View style={styles.storeCopy}>
                 <UiText weight="700" numberOfLines={1}>{selectedOffer.store.name}</UiText>
-                <UiText tone="muted" style={styles.reviewCount}>{translate("productBrand")}</UiText>
-              </View>
+               </View>
             </View>
             <Pressable
               accessibilityRole="button"
               onPress={() => router.push({ pathname: "/store/[storeId]", params: { storeId: selectedOffer.store.id } })}
               style={styles.storeVisit}
+              accessibilityLabel={translate("productSelectedOffer") + ": " + selectedOffer.store.name}
             >
-              <UiText weight="700" tone="default">{translate("productSelectedOffer")}</UiText>
-              <Icon name="chevron-left" size={16} color={theme.colors.muted} />
+              <Icon name="chevron-left" size={18} color={theme.colors.muted} />
             </Pressable>
           </View>
           {variants.colors.length > 0 ? (
