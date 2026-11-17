@@ -85,7 +85,7 @@ export default function MerchantAccountSettingsScreen() {
               ]}
             >
               <View style={[styles.icon, { backgroundColor: theme.colors.surfaceSecondary }]}>
-                <Icon name={item.icon} size={20} color={theme.colors.accent} accessibilityHidden />
+                <Icon name={item.icon} size={20} color={theme.colors.accentOnSurface} accessibilityHidden />
               </View>
               <View style={styles.copy}>
                 <UiText weight="700">{item.title}</UiText>
