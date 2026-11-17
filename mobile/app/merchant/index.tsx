@@ -160,7 +160,7 @@ export default function MerchantEntryScreen() {
               void queryClient.prefetchQuery({ queryKey: ["customer-store-offers", data.store.id], queryFn: () => fetchStoreOffers(data.store.id), staleTime: 30_000 });
               router.push({ pathname: "/store/[storeId]", params: { storeId: data.store.id } });
             }} variant="outline" size="sm" style={{ flex: 1 }} />
-            <Button label={translate("merchantBackToProfile")} onPress={() => router.replace("/profile")} variant="ghost" size="sm" style={{ flex: 1 }} />
+            <Button label={translate("merchantStoreSettingsTitle")} onPress={() => router.push("/merchant/settings")} variant="outline" size="sm" style={{ flex: 1 }} startIcon={<Icon name="settings" size={16} color={theme.colors.foreground} accessibilityHidden />} />
           </View>
         </Card>
 
