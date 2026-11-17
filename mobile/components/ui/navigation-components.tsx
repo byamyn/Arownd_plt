@@ -170,7 +170,7 @@ function NavigationTab({
       <UiText
         numberOfLines={1}
         style={{
-          color: selected ? theme.colors.accentForeground : theme.colors.muted,
+          color: selected ? theme.colors.foreground : theme.colors.muted,
           fontSize: theme.typography.caption,
           fontWeight: theme.fontWeights.medium,
           flexShrink: 1
