@@ -32,6 +32,7 @@ export type AppTheme = {
     focus: string;
     accent: string;
     accentForeground: string;
+    accentOnSurface: string;
     accentMuted: string;
     danger: string;
     dangerText: string;
@@ -92,6 +93,7 @@ export function getAppTheme(mode: "light" | "dark"): AppTheme {
       focus: palette.focus,
       accent: brandColors.primary,
       accentForeground: brandColors.black,
+      accentOnSurface: mode === "dark" ? brandColors.primary : brandColors.black,
       accentMuted: semanticPalette.accentMuted,
       danger: semanticPalette.danger,
       dangerText: semanticPalette.dangerText,
