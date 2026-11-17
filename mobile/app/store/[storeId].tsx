@@ -132,7 +132,7 @@ export default function StoreDetailsScreen() {
   return (
     <CustomerScreen
       contentStyle={styles.storeScreenContent}
-      stickyHeaderIndices={[0, 2]}
+      stickyHeaderIndices={tab === "products" && !offers.isPending && !offers.isError && (offers.data?.length ?? 0) > 0 ? [0, 2, 3] : [0, 2]}
       refreshing={store.isFetching || (tab === "products" && offers.isFetching)}
       onRefresh={() => { void store.refetch(); if (tab === "products") void offers.refetch(); }}
     >
@@ -186,14 +186,12 @@ export default function StoreDetailsScreen() {
             <UiText style={[styles.nextOpeningText, { color: theme.colors.muted }]}>{translate("storeAcceptingOrdersWhileClosed")}</UiText>
           </View>
         ) : null}
-        {details.latitude != null && details.longitude != null || details.phone ? (
+        {details.latitude != null && details.longitude != null || details.phone || isStoreOwner ? (
           <View style={styles.storeActionsRow}>
+            {details.phone ? <View style={styles.storeActionItem}><Button label={translate("storeCall")} onPress={() => { void Linking.openURL(`tel:${details.phone!.replace(/[^\\d+]/g, "")}`); }} variant="outline" size="md" fullWidth startIcon={<Icon name="phone" size={16} color={theme.colors.foreground} accessibilityHidden />} /></View> : null}
             {details.latitude != null && details.longitude != null ? <View style={styles.storeActionItem}><Button label={translate("mapDirections")} onPress={() => router.push({ pathname: "/map", params: { storeId, directions: "1" } })} variant="outline" size="md" fullWidth startIcon={<Icon name="navigation" size={16} color={theme.colors.foreground} accessibilityHidden />} /></View> : null}
-            {details.phone ? <View style={styles.storeActionItem}><Button label={translate("storeCall")} onPress={() => { void Linking.openURL(`tel:${details.phone!.replace(/[^\d+]/g, "")}`); }} variant="outline" size="md" fullWidth startIcon={<Icon name="phone" size={16} color={theme.colors.foreground} accessibilityHidden />} /></View> : null}
+            {isStoreOwner ? <IconButton accessibilityLabel={translate("merchantStoreSettingsTitle")} onPress={() => router.push("/merchant/settings")} icon={<Icon name="settings" size={19} color={theme.colors.foreground} accessibilityHidden />} variant="surface" style={styles.ownerSettingsButton} /> : null}
           </View>
-        ) : null}
-        {isStoreOwner ? (
-          <Button label={translate("merchantStoreSettingsTitle")} onPress={() => router.push("/merchant/settings")} variant="outline" fullWidth startIcon={<Icon name="settings" size={17} color={theme.colors.foreground} accessibilityHidden />} />
         ) : null}
       </View>
 
@@ -211,6 +209,12 @@ export default function StoreDetailsScreen() {
         style={[styles.tabs, { backgroundColor: theme.colors.background }]}
       />
 
+      {tab === "products" && !offers.isPending && !offers.isError && (offers.data?.length ?? 0) > 0 ? (
+        <View style={[styles.stickySearch, { backgroundColor: theme.colors.background }]}>
+          <CustomerSearch value={search} onChangeText={setSearch} placeholder={translate("homeSearchPlaceholder")} />
+        </View>
+      ) : null}
+
       {tab === "products" ? (
         offers.isPending ? (
           <View style={styles.productGrid}>
@@ -222,7 +226,6 @@ export default function StoreDetailsScreen() {
           <EmptyState icon="package" title={translate("storeNoProducts")} hint={translate("storeNoDescription")} />
         ) : (
           <View style={styles.productsSection}>
-            <CustomerSearch value={search} onChangeText={setSearch} placeholder={translate("homeSearchPlaceholder")} />
             {filteredOffers.length === 0 ? (
               <EmptyState icon="search" title={translate("exploreNoResults")} hint={translate("exploreNoResultsHint")} />
             ) : (
@@ -286,6 +289,7 @@ const styles = StyleSheet.create({
   storeHero: { paddingHorizontal: designTokens.spacing.lg, paddingBottom: designTokens.spacing.lg, gap: designTokens.spacing.md },
   storeActionsRow: { flexDirection: "row", gap: designTokens.spacing.sm },
   storeActionItem: { flex: 1 },
+  ownerSettingsButton: { width: 44, height: designTokens.dimensions.controlHeight.md, borderWidth: 1, borderColor: "#D1D5DB" },
   storeMetaRow: { flexDirection: "row", alignItems: "center", flexWrap: "wrap", columnGap: designTokens.spacing.md, rowGap: designTokens.spacing.xs },
   storeScheduleRow: { gap: designTokens.spacing.xs },
   ownerEditor: { gap: designTokens.spacing.md, paddingTop: designTokens.spacing.sm, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: "#D1D5DB" },
@@ -322,6 +326,7 @@ const styles = StyleSheet.create({
   metaText: { fontSize: designTokens.typography.caption + 1, textAlign: "auto", flexShrink: 1 },
   storeDescription: { fontSize: designTokens.typography.body - 1, lineHeight: 21, textAlign: "auto" },
   tabs: { width: "100%", backgroundColor: "#FFFFFF", zIndex: 9 },
+  stickySearch: { paddingHorizontal: designTokens.spacing.lg, paddingTop: designTokens.spacing.sm, paddingBottom: designTokens.spacing.sm, zIndex: 8 },
   productsSection: { paddingHorizontal: designTokens.spacing.lg, paddingTop: designTokens.spacing.md, gap: designTokens.spacing.md },
   productGrid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", rowGap: designTokens.spacing.lg },
   productTile: { width: "48%", flexGrow: 0, flexShrink: 0 },
