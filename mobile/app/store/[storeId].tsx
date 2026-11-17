@@ -157,7 +157,6 @@ export default function StoreDetailsScreen() {
         <View style={styles.storeIdentity}>
           <View style={styles.avatarWrap}>
             <Avatar name={details.name} imageUri={details.logo_url || undefined} size={76} accessibilityLabel={details.name} />
-            <View style={[styles.statusDot, { backgroundColor: getStoreOpenState(details.opening_hours, details.country_code) ? theme.colors.success : theme.colors.danger, borderColor: theme.colors.surface }]} />
           </View>
           <View style={styles.storeInfo}>
             <View style={styles.storeNameRow}>
@@ -303,20 +302,20 @@ const styles = StyleSheet.create({
   coverWrap: { position: "relative", marginHorizontal: -designTokens.spacing.lg },
   imageEditButton: { position: "absolute", right: designTokens.spacing.md, bottom: designTokens.spacing.md, width: 36, height: 36, borderRadius: designTokens.radius.pill, backgroundColor: "#FFFFFF", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "#E5E7EB" },
   logoEditButton: { position: "absolute", right: -3, top: -3, width: 26, height: 26, borderRadius: designTokens.radius.pill, backgroundColor: "#FFFFFF", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "#E5E7EB", zIndex: 2 },
-  avatarWrap: { position: "relative", marginTop: -34, marginStart: designTokens.spacing.xs },
-  statusDot: { position: "absolute", right: 1, bottom: 2, width: 15, height: 15, borderRadius: 8, borderWidth: 2 },
+  avatarWrap: { position: "relative", alignSelf: "flex-start", marginTop: -38, marginBottom: designTokens.spacing.xs },
+
   statusLabel: { fontSize: designTokens.typography.caption, fontWeight: designTokens.fontWeights.semibold },
   storeStatusBadge: { flexDirection: "row", alignItems: "center", alignSelf: "flex-start", gap: 6, paddingHorizontal: 9, paddingVertical: 5, borderRadius: designTokens.radius.pill },
   storeStatusDot: { width: 7, height: 7, borderRadius: 4 },
   nextOpeningText: { fontSize: designTokens.typography.caption, lineHeight: 18 },
-  storeIdentity: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md, marginTop: -2 },
+  storeIdentity: { flexDirection: "column", alignItems: "stretch", gap: designTokens.spacing.xs, marginTop: 0 },
   socialLinks: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.sm },
   socialButton: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: "#FFFFFF", borderWidth: StyleSheet.hairlineWidth, borderColor: "#E5E7EB" },
   instagramButton: { borderColor: "#F2D5E5" },
   facebookButton: { borderColor: "#D7E6FF" },
   whatsappButton: { borderColor: "#CDEFD9" },
   socialButtonPressed: { opacity: 0.65, transform: [{ scale: 0.96 }] },
-  storeInfo: { flex: 1, alignItems: "flex-start", gap: designTokens.spacing.xs, paddingTop: designTokens.spacing.xs },
+  storeInfo: { width: "100%", alignItems: "flex-start", gap: designTokens.spacing.xs, paddingTop: 0 },
   storeNameRow: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.xs, maxWidth: "100%" },
   locationRow: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.xs },
   storeName: { fontSize: designTokens.typography.title - 2, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
