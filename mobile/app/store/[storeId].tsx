@@ -1,7 +1,6 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
-import * as ImagePicker from "expo-image-picker";
+import { useMemo, useState } from "react";
 import { Linking, Pressable, Share, StyleSheet, View } from "react-native";
 import Svg, { Circle, Path, Rect } from "react-native-svg";
 
@@ -9,17 +8,13 @@ import { CustomerScreen, CustomerSearch, EmptyState, ErrorState, ProductTile } f
 import { FavoriteButton } from "@/components/favorite-button";
 import { fetchProductDetails, fetchProductOffers, fetchStoreDetails, fetchStoreOffers, formatMarketPrice, getPrimaryImage } from "@/lib/catalog";
 import { fetchBrowsingCurrencyCode } from "@/lib/country-service";
-import { fetchMerchantAccess } from "@/lib/merchant";
-import { fetchMyMerchantStoreSettings, updateMyMerchantStoreSettings } from "@/lib/merchant-store-settings";
-import { MerchantStoreSettingsSchema, type MerchantStoreSettings } from "@/lib/merchant-store-settings-state";
-import { STORE_IMAGE_MAX_BYTES, uploadMerchantStoreImage, validateStoreImageAsset } from "@/lib/merchant-store-images";
 import { fetchApprovedReviews } from "@/lib/reviews";
 import { translate, useLanguage } from "@/lib/i18n";
 import { ReviewPanel } from "@/components/review-panel";
 import { ContentReportAction } from "@/components/content-report-action";
 import { designTokens, useAppTheme } from "@/lib/theme";
 import { VerifiedBadge } from "@/components/ui/identity";
-import { AppHeader, Avatar, Button, Card, Icon, IconButton, Image as UiImage, RatingStars, SegmentedControl, StoreCardSkeleton, ProductCardSkeleton, Text as UiText, TextField } from "@/components/ui";
+import { AppHeader, Avatar, Button, Card, Icon, IconButton, Image as UiImage, RatingStars, SegmentedControl, StoreCardSkeleton, ProductCardSkeleton, Text as UiText } from "@/components/ui";
 
 type StoreTab = "products" | "about" | "reviews";
 
@@ -88,43 +83,10 @@ export default function StoreDetailsScreen() {
   useLanguage();
   const { storeId } = useLocalSearchParams<{ storeId: string }>();
   const theme = useAppTheme();
-  const queryClient = useQueryClient();
   const browsingCurrency = useQuery({ queryKey: ["browsing-country-currency"], queryFn: fetchBrowsingCurrencyCode, staleTime: 60_000 });
   const merchantAccess = useQuery({ queryKey: ["merchant-access"], queryFn: fetchMerchantAccess, retry: false, staleTime: 30_000 });
   const ownerStoreId = merchantAccess.data?.status === "merchant_ready" &&
     merchantAccess.data.store?.id === storeId ? storeId : null;
-  const ownerSettings = useQuery({
-    queryKey: ["merchant-store-settings", ownerStoreId],
-    queryFn: () => fetchMyMerchantStoreSettings(ownerStoreId ?? ""),
-    enabled: Boolean(ownerStoreId),
-    retry: false
-  });
-  const [ownerEditMode, setOwnerEditMode] = useState(false);
-  const [ownerDraft, setOwnerDraft] = useState<MerchantStoreSettings | null>(null);
-  const [ownerImageBusy, setOwnerImageBusy] = useState<"logo" | "cover" | null>(null);
-  const [ownerImageError, setOwnerImageError] = useState(false);
-  const [ownerImageSaved, setOwnerImageSaved] = useState(false);
-  const [ownerInlineField, setOwnerInlineField] = useState<"name" | "description" | null>(null);
-  const ownerSave = useMutation({
-    mutationFn: async () => {
-      if (!ownerSettings.data || !ownerDraft || !ownerStoreId) throw new Error("merchant_store_settings_missing");
-      const values = MerchantStoreSettingsSchema.parse(ownerDraft);
-      await updateMyMerchantStoreSettings(ownerStoreId, values);
-    },
-    onSuccess: async () => {
-      setOwnerEditMode(false);
-      setOwnerInlineField(null);
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["customer-store", storeId] }),
-        queryClient.invalidateQueries({ queryKey: ["merchant-store-settings", ownerStoreId] }),
-        queryClient.invalidateQueries({ queryKey: ["merchant-dashboard", ownerStoreId] }),
-        queryClient.invalidateQueries({ queryKey: ["map-stores"] })
-      ]);
-    }
-  });
-  useEffect(() => {
-    if (ownerSettings.data && (!ownerEditMode || !ownerDraft)) setOwnerDraft(ownerSettings.data);
-  }, [ownerSettings.data, ownerEditMode, ownerDraft]);
   const [tab, setTab] = useState<StoreTab>("products");
   const [descriptionExpanded, setDescriptionExpanded] = useState(false);
   const [search, setSearch] = useState("");
@@ -166,41 +128,6 @@ export default function StoreDetailsScreen() {
     "merchantWeekdaySaturday"
   ] as const;
   const isStoreOwner = ownerStoreId === details.id;
-  const chooseOwnerImage = async (kind: "logo" | "cover") => {
-    if (!ownerStoreId || ownerImageBusy || ownerSave.isPending) return;
-    setOwnerImageBusy(kind);
-    setOwnerImageError(false);
-    setOwnerImageSaved(false);
-    try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ["images"], allowsMultipleSelection: false, selectionLimit: 1, quality: 0.85
-      });
-      if (result.canceled) return;
-      const asset = result.assets[0];
-      if (!asset || (asset.fileSize != null && asset.fileSize > STORE_IMAGE_MAX_BYTES) || !validateStoreImageAsset(asset)) {
-        setOwnerImageError(true);
-        return;
-      }
-      const uploaded = await uploadMerchantStoreImage(ownerStoreId, asset, kind);
-      const imageField = kind === "logo" ? "logo_url" : "cover_url";
-      setOwnerDraft((current) => current ? { ...current, [imageField]: uploaded.url } : current);
-      queryClient.setQueryData<MerchantStoreSettings>(
-        ["merchant-store-settings", ownerStoreId],
-        (current) => current ? { ...current, [imageField]: uploaded.url } : current
-      );
-      setOwnerImageSaved(true);
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["customer-store", storeId] }),
-        queryClient.invalidateQueries({ queryKey: ["merchant-store-settings", ownerStoreId] }),
-        queryClient.invalidateQueries({ queryKey: ["merchant-dashboard", ownerStoreId] }),
-        queryClient.invalidateQueries({ queryKey: ["map-stores"] })
-      ]);
-    } catch {
-      setOwnerImageError(true);
-    } finally {
-      setOwnerImageBusy(null);
-    }
-  };
   return (
     <CustomerScreen
       stickyHeaderIndices={[0, 2]}
@@ -219,25 +146,15 @@ export default function StoreDetailsScreen() {
 
       <Card contentStyle={styles.storeHero}>
         <View style={styles.coverWrap}>
-          {(isStoreOwner && ownerDraft?.cover_url) || details.cover_url ? (
-            <UiImage uri={((isStoreOwner && ownerDraft?.cover_url) || details.cover_url) ?? undefined} accessibilityLabel={translate("merchantStoreCover")} aspectRatio={16 / 9} style={styles.coverImage} />
+          {details.cover_url ? (
+            <UiImage uri={details.cover_url} accessibilityLabel={translate("merchantStoreCover")} aspectRatio={16 / 9} style={styles.coverImage} />
           ) : (
             <View style={[styles.coverImage, { backgroundColor: theme.colors.surfaceMuted }]} />
           )}
-          {isStoreOwner ? (
-            <Pressable accessibilityRole="button" accessibilityLabel={translate("merchantStoreChangeCover")} onPress={() => void chooseOwnerImage("cover")} style={styles.imageEditButton}>
-              <Icon name="settings" size={17} color={theme.colors.foreground} accessibilityHidden />
-            </Pressable>
-          ) : null}
         </View>
         <View style={styles.storeIdentity}>
           <View style={styles.avatarWrap}>
-            <Avatar name={(isStoreOwner && ownerDraft?.name) || details.name} imageUri={(isStoreOwner && ownerDraft?.logo_url) || details.logo_url || undefined} size={76} accessibilityLabel={details.name} />
-            {isStoreOwner ? (
-              <Pressable accessibilityRole="button" accessibilityLabel={translate("merchantStoreChangeLogo")} onPress={() => void chooseOwnerImage("logo")} style={styles.logoEditButton}>
-                <Icon name="camera" size={13} color={theme.colors.foreground} accessibilityHidden />
-              </Pressable>
-            ) : null}
+            <Avatar name={details.name} imageUri={details.logo_url || undefined} size={76} accessibilityLabel={details.name} />
             <View style={[styles.statusDot, { backgroundColor: getStoreOpenState(details.opening_hours, details.country_code) ? "#16A34A" : "#DC2626", borderColor: theme.colors.surface }]} />
           </View>
           <View style={styles.storeInfo}>
