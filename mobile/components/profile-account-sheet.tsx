@@ -19,6 +19,8 @@ import { designTokens, useAppTheme } from "@/lib/theme";
 
 export type ProfileAccountSection = "delivery" | "addresses" | "invite";
 
+type DeliveryPickerItem = { id: number | string; name: string };
+
 export function ProfileAccountSheet({ section, onClose }: { section: ProfileAccountSection; onClose: () => void }) {
   const title = section === "delivery" ? translate("deliveryProfileTitle") : section === "addresses" ? translate("addressesTitle") : translate("inviteTitle");
   return (
@@ -89,19 +91,23 @@ function DeliveryContent() {
   if (profile.isPending || regions.isPending) return <LoadingState label={translate("stateLoading")} />;
   if (profile.isError || regions.isError) return <ErrorState title={translate("deliveryProfileLoadError")} retryLabel={translate("retry")} busy={profile.isFetching || regions.isFetching} onRetry={() => { void profile.refetch(); void regions.refetch(); }} />;
   if (picker) {
-    const items = picker === "region" ? regions.data.regions : picker === "secondary" ? (secondary.data?.regions ?? []) : (communes.data ?? []).map((name) => ({ id: name, name, name_ar: name }));
+    const items: DeliveryPickerItem[] = picker === "region"
+      ? regions.data.regions.map((item) => ({ id: item.id, name: getRegionDisplayName(item, language) }))
+      : picker === "secondary"
+        ? (secondary.data?.regions ?? []).map((item) => ({ id: item.id, name: getRegionDisplayName(item, language) }))
+        : (communes.data ?? []).map((name) => ({ id: name, name }));
     const label = picker === "region" ? getRegionLevelDisplayName(regions.data.selectedLevel, language) : picker === "secondary" ? (secondary.data ? getRegionLevelDisplayName(secondary.data.selectedLevel, language) : "") : translate("checkoutChooseCommune");
     return <View style={{ flex: 1, minHeight: 240, gap: designTokens.spacing.sm }}>
       <Button label={translate("back")} variant="ghost" onPress={() => setPicker(null)} />
       <Heading level={3}>{label}</Heading>
       <ScrollView keyboardShouldPersistTaps="handled">
-        {items.map((item: any) => <PressableSurface key={String(item.id)} onPress={() => {
+        {items.map((item) => <PressableSurface key={String(item.id)} onPress={() => {
           if (picker === "region") { setRegionId(Number(item.id)); setSecondaryRegionId(null); setCommune(""); }
           else if (picker === "secondary") setSecondaryRegionId(Number(item.id));
-          else setCommune(String(item.name ?? item.id));
+          else setCommune(item.name);
           setPicker(null);
         }} style={{ paddingVertical: 13, borderBottomWidth: 1, borderBottomColor: theme.colors.border }}>
-          <UiText>{picker === "commune" ? String(item.name ?? item.id) : getRegionDisplayName(item, language)}</UiText>
+          <UiText>{item.name}</UiText>
         </PressableSurface>)}
       </ScrollView>
     </View>;
