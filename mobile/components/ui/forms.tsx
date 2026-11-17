@@ -179,7 +179,7 @@ export function RadioGroup({
               { minHeight: theme.dimensions.controlHeight.md, flexDirection: "row", alignItems: "center", gap: designTokens.spacing.sm, opacity: option.disabled ? 0.45 : pressed ? 0.75 : 1 }
             ]}
           >
-            <View style={{ width: theme.dimensions.iconSize.md, height: theme.dimensions.iconSize.md, borderRadius: theme.radius.pill, borderWidth: selected ? 6 : 1.5, borderColor: selected ? theme.colors.accent : theme.colors.muted }} />
+            <View style={{ width: theme.dimensions.iconSize.md, height: theme.dimensions.iconSize.md, borderRadius: theme.radius.pill, borderWidth: selected ? 2 : 1.5, borderColor: selected ? theme.colors.foreground : theme.colors.muted, backgroundColor: selected ? theme.colors.accent : "transparent" }} />
             <UiText style={{ color: theme.colors.foreground, fontSize: theme.typography.body, flex: 1, textAlign: "auto" }}>{option.label}</UiText>
           </Pressable>
         );
@@ -407,7 +407,7 @@ export function Radio({
   const theme = useAppTheme();
   return (
     <Pressable accessibilityRole="radio" accessibilityLabel={label} accessibilityState={{ checked: selected, disabled }} disabled={disabled} onPress={onPress} style={({ pressed }) => [{ minHeight: theme.dimensions.controlHeight.md, flexDirection: "row", alignItems: "center", gap: designTokens.spacing.sm, opacity: disabled ? 0.45 : pressed ? 0.75 : 1 }]}>
-      <View style={{ width: 22, height: 22, borderRadius: theme.radius.pill, borderWidth: selected ? 6 : 1.5, borderColor: selected ? theme.colors.accent : theme.colors.muted }} />
+      <View style={{ width: 22, height: 22, borderRadius: theme.radius.pill, borderWidth: selected ? 2 : 1.5, borderColor: selected ? theme.colors.foreground : theme.colors.muted, backgroundColor: selected ? theme.colors.accent : "transparent" }} />
       <UiText style={{ color: theme.colors.foreground, fontSize: theme.typography.body, textAlign: "auto" }}>{label}</UiText>
     </Pressable>
   );
