@@ -161,12 +161,12 @@ export default function ProductDetailsScreen() {
       <View ref={imageAnchorRef} collapsable={false}>
         {imageUrl ? <ProductImageGallery images={galleryImages} selectedIndex={Math.min(selectedImageIndex, Math.max(0, galleryImages.length - 1))} accessibilityLabel={productDetails.name} onSelect={setSelectedImageIndex} imageStyle={styles.heroImage} /> : <View style={[styles.heroImage, { backgroundColor: theme.colors.surfaceMuted }]}><Icon name="image" size={42} color={theme.colors.subtle} accessibilityHidden /></View>}
       </View>
-      <Card contentStyle={styles.infoCard}>
+      <View style={styles.infoSection}>
         <UiText weight="700" style={styles.productName}>{productDetails.name}</UiText>
         {selectedOffer ? <PriceDisplay value={browsingCurrency.data ? formatMarketPrice(selectedOffer.price, browsingCurrency.data) : "—"} style={styles.priceDisplay} /> : null}
         <View style={styles.ratingRow}>
           <View style={styles.ratingInfo}>
-            <RatingStars value={reviewAverage} size={16} showValue />
+            <RatingStars value={reviewAverage} size={15} showValue />
             <UiText tone="muted" style={styles.reviewCount}>{reviewCount} · {translate("reviewsTitle")}</UiText>
           </View>
           <FavoriteButton kind="products" id={productId} iconOnly />
@@ -176,77 +176,75 @@ export default function ProductDetailsScreen() {
           {productDetails.category ? <UiText tone="muted" style={styles.metaText}>{translate("productCategory")}: {getLocalizedProductCategoryLabel(productDetails.category, language)}</UiText> : null}
         </View>
         {productDetails.description?.trim() ? <UiText tone="muted" style={styles.description}>{productDetails.description.trim()}</UiText> : null}
-      </Card>
+      </View>
 
       {selectedOffer ? (
-        <Card style={styles.purchaseCardSurface} contentStyle={styles.purchaseCard}>
+        <View style={styles.purchaseOptions}>
+          <View style={styles.storeRow}>
+            <View style={styles.storeIdentity}>
+              <View style={[styles.storeIcon, { backgroundColor: theme.colors.surfaceMuted }]}>
+                <Icon name="store" size={18} color={theme.colors.foreground} />
+              </View>
+              <View style={styles.storeCopy}>
+                <UiText weight="700" numberOfLines={1}>{selectedOffer.store.name}</UiText>
+                <UiText tone="muted" style={styles.reviewCount}>{translate("productSelectedOffer")}</UiText>
+              </View>
+            </View>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => router.push({ pathname: "/store/[storeId]", params: { storeId: selectedOffer.store.id } })}
+              style={styles.storeVisit}
+            >
+              <UiText weight="700" tone="default">{translate("storeVisit")}</UiText>
+              <Icon name="chevron-left" size={16} color={theme.colors.muted} />
+            </Pressable>
+          </View>
           {variants.colors.length > 0 ? (
             <View style={styles.optionGroup}>
               <UiText style={styles.optionLabel}>{translate("productColorOption")}</UiText>
-              <ProductVariantSelector
-                options={variants.colors.map((value) => ({ value, label: value }))}
-                value={selectedColor}
-                onChange={setColor}
-                accessibilityLabel={translate("productColorOption")}
-                display="chips"
-              />
+              <ProductVariantSelector options={variants.colors.map((value) => ({ value, label: value }))} value={selectedColor} onChange={setColor} accessibilityLabel={translate("productColorOption")} display="chips" />
             </View>
           ) : null}
           {variants.sizes.length > 0 ? (
             <View style={styles.optionGroup}>
               <UiText style={styles.optionLabel}>{translate("productSizeOption")}</UiText>
-              <ProductVariantSelector
-                options={variants.sizes.map((value) => ({ value, label: value }))}
-                value={selectedSize}
-                onChange={setSize}
-                accessibilityLabel={translate("productSizeOption")}
-                display="chips"
-              />
+              <ProductVariantSelector options={variants.sizes.map((value) => ({ value, label: value }))} value={selectedSize} onChange={setSize} accessibilityLabel={translate("productSizeOption")} display="chips" />
             </View>
           ) : null}
           <View style={styles.quantityRow}>
             <UiText weight="700" style={styles.optionLabel}>{translate("productQuantity")}</UiText>
-            <ProductQuantitySelector
-              value={quantity}
-              max={Math.max(1, Math.min(10, selectedOffer.stock_quantity))}
-              onChange={setQuantity}
-              decreaseLabel={translate("cartDecrease")}
-              increaseLabel={translate("cartIncrease")}
-              disabled={!selectedOffer.is_available || selectedOffer.stock_quantity <= 0}
-            />
+            <ProductQuantitySelector value={quantity} max={Math.max(1, Math.min(10, selectedOffer.stock_quantity))} onChange={setQuantity} decreaseLabel={translate("cartDecrease")} increaseLabel={translate("cartIncrease")} disabled={!selectedOffer.is_available || selectedOffer.stock_quantity <= 0} />
           </View>
-        </Card>
-      ) : null}
-
-      {selectedOffer ? (
-        <Button
-          label={translate("productSelectedOffer") + ": " + selectedOffer.store.name}
-          onPress={() => router.push({ pathname: "/store/[storeId]", params: { storeId: selectedOffer.store.id } })}
-          fullWidth
-        />
+        </View>
       ) : null}
       <ContentReportAction targetType="product" targetId={productId} />
             <ReviewPanel targetType="product" targetId={productId} />
           </ScrollView>
           {selectedOffer ? (
             <View style={[styles.purchaseFooter, { backgroundColor: theme.colors.background, borderTopColor: theme.colors.border }]}>
-              <Button
-                label={addMutation.isPending ? translate("productAddingToCart") : addMutation.isSuccess ? translate("productAddedToCart") : translate("productAddToCart")}
-                onPress={() => addMutation.mutate({
-                  offerId: selectedOffer.id,
-                  productId: selectedOffer.product_id,
-                  name: product.data?.name ?? selectedOffer.product.name,
-                  price: selectedOffer.price,
-                  quantity,
-                  options: {
-                    ...(selectedColor ? { color: selectedColor } : {}),
-                    ...(selectedSize ? { size: selectedSize } : {})
-                  }
-                })}
-                loading={addMutation.isPending}
-                disabled={!canAdd}
-                fullWidth
-              />
+              <View style={styles.footerTotal}>
+                <UiText tone="muted" style={styles.reviewCount}>{translate("cartTotal")}</UiText>
+                <PriceDisplay value={browsingCurrency.data ? formatMarketPrice(selectedOffer.price * quantity, browsingCurrency.data) : "—"} />
+              </View>
+              <View style={styles.footerAction}>
+                <Button
+                  label={addMutation.isPending ? translate("productAddingToCart") : addMutation.isSuccess ? translate("productAddedToCart") : translate("productAddToCart")}
+                  onPress={() => addMutation.mutate({
+                    offerId: selectedOffer.id,
+                    productId: selectedOffer.product_id,
+                    name: product.data?.name ?? selectedOffer.product.name,
+                    price: selectedOffer.price,
+                    quantity,
+                    options: {
+                      ...(selectedColor ? { color: selectedColor } : {}),
+                      ...(selectedSize ? { size: selectedSize } : {})
+                    }
+                  })}
+                  loading={addMutation.isPending}
+                  disabled={!canAdd}
+                  fullWidth
+                />
+              </View>
               {addMutation.isError ? <UiText tone="danger" style={styles.mutationError}>{translate("genericError")}</UiText> : null}
             </View>
           ) : null}
@@ -262,9 +260,9 @@ const styles = StyleSheet.create({
   sheetHandle: { alignSelf: "center", width: 38, height: 4, borderRadius: 2, marginBottom: designTokens.spacing.xs },
   sheetHeader: { minHeight: 42, paddingHorizontal: designTokens.spacing.xl, alignItems: "flex-start", justifyContent: "center" },
   sheetScroll: { flex: 1 },
-  sheetContent: { gap: designTokens.spacing.md, paddingHorizontal: designTokens.spacing.xl, paddingTop: designTokens.spacing.sm, paddingBottom: designTokens.spacing.xl },
-  heroImage: { height: 260, borderRadius: designTokens.radius.lg, overflow: "hidden", alignItems: "center", justifyContent: "center" },
-  infoCard: { borderRadius: designTokens.radius.md, padding: designTokens.spacing.md, gap: designTokens.spacing.sm },
+  sheetContent: { gap: designTokens.spacing.md, paddingHorizontal: designTokens.spacing.xl, paddingTop: designTokens.spacing.xs, paddingBottom: designTokens.spacing.xl },
+  heroImage: { height: 224, borderRadius: designTokens.radius.lg, overflow: "hidden", alignItems: "center", justifyContent: "center" },
+  infoSection: { gap: designTokens.spacing.xs, paddingVertical: designTokens.spacing.xs },
   productName: { fontSize: designTokens.typography.title - 2, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
   priceDisplay: { justifyContent: "flex-end" },
   ratingRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: designTokens.spacing.md },
@@ -280,11 +278,18 @@ const styles = StyleSheet.create({
   offerInfo: { flex: 1, alignItems: "flex-start", gap: designTokens.spacing.xs },
   offerStore: { fontSize: designTokens.typography.body, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
   offerPriceDisplay: { justifyContent: "flex-start" },
-  purchaseCardSurface: { borderRadius: designTokens.radius.md },
-  purchaseCard: { padding: designTokens.spacing.md, gap: designTokens.spacing.sm },
+  purchaseOptions: { gap: designTokens.spacing.md, paddingVertical: designTokens.spacing.xs },
+  storeRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: designTokens.spacing.sm, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: "rgba(127,127,127,0.22)", marginBottom: designTokens.spacing.xs },
+  storeIdentity: { flex: 1, flexDirection: "row", alignItems: "center", gap: designTokens.spacing.sm },
+  storeIcon: { width: 38, height: 38, borderRadius: designTokens.radius.md, alignItems: "center", justifyContent: "center" },
+  storeCopy: { flex: 1, gap: 2 },
+  storeVisit: { flexDirection: "row", alignItems: "center", gap: 2, paddingVertical: designTokens.spacing.sm, paddingStart: designTokens.spacing.sm },
   optionGroup: { gap: designTokens.spacing.sm },
   optionLabel: { fontSize: designTokens.typography.caption + 1, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
   quantityRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   mutationError: { fontSize: designTokens.typography.caption, textAlign: "auto" },
-  purchaseFooter: { gap: designTokens.spacing.xs },
+  purchaseFooter: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md, paddingHorizontal: designTokens.spacing.xl, paddingTop: designTokens.spacing.sm, paddingBottom: designTokens.spacing.sm, borderTopWidth: StyleSheet.hairlineWidth },
+  footerTotal: { flex: 1, gap: 2 },
+  footerAction: { flex: 1.35 },
+
 });
