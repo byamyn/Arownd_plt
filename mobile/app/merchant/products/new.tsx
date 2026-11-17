@@ -615,19 +615,19 @@ function CategoryOption({
         styles.categoryOption,
         ...(nested ? [styles.categoryOptionChild] : []),
         {
-          borderColor: selected ? theme.colors.accentMuted : theme.colors.border,
+          borderColor: selected ? theme.colors.accent : theme.colors.border,
           backgroundColor: selected ? theme.colors.surfaceMuted : theme.colors.background
         }
       ]}
     >
       <View style={styles.categoryOptionContent}>
         <UiText style={styles.categoryEmojiSmall}>{category.emoji}</UiText>
-        <UiText style={[styles.categoryLabel, { color: selected && theme.mode === "dark" ? theme.colors.accentMuted : theme.colors.foreground }]}>
+        <UiText style={[styles.categoryLabel, { color: selected ? theme.colors.accentForeground : theme.colors.foreground }]}>
           {getLocalizedMerchantCategoryLabel(category.id, category.label, language)}
         </UiText>
       </View>
       {selected ? (
-        <Icon name="check" color={theme.colors.accentMuted} size={18} accessibilityHidden />
+        <Icon name="check" color={theme.colors.accentForeground} size={18} accessibilityHidden />
       ) : null}
     </PressableSurface>
   );
