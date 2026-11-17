@@ -303,10 +303,12 @@ export default function MerchantStoreSettingsScreen() {
         <View style={styles.storeEditorHero}>
           <View style={styles.editorCoverWrap}>
             {form.cover_url ? (
-              <UiImage uri={form.cover_url} accessibilityLabel={translate("merchantStoreCover")} aspectRatio={16 / 9} style={styles.editorCoverImage} />
+              <UiImage uri={form.cover_url} accessibilityLabel={translate("merchantStoreCover")} aspectRatio={16 / 9} resizeMode="cover" style={styles.editorCoverImage} />
             ) : (
-              <View style={[styles.editorCoverImage, styles.imagePlaceholder, { backgroundColor: theme.colors.surfaceMuted }]}>
-                <Icon name="image" color={theme.colors.muted} size={32} accessibilityHidden />
+              <View style={[styles.editorCoverImage, styles.imagePlaceholder, styles.defaultCover, { backgroundColor: theme.colors.surfaceMuted }]}>
+                <Icon name="image" color={theme.colors.muted} size={28} accessibilityHidden />
+                <UiText style={[styles.defaultCoverTitle, { color: theme.colors.foreground }]}>{translate("storeDefaultCover")}</UiText>
+                <UiText style={[styles.defaultCoverHint, { color: theme.colors.muted }]}>{translate("storeDefaultCoverHint")}</UiText>
               </View>
             )}
             <PressableSurface
@@ -610,6 +612,9 @@ function createStyles(theme: AppTheme) {
     storeEditorHero: { backgroundColor: theme.colors.surface, borderRadius: designTokens.radius.lg, borderWidth: StyleSheet.hairlineWidth, borderColor: theme.colors.border, overflow: "hidden", gap: designTokens.spacing.md, paddingBottom: designTokens.spacing.lg },
     editorCoverWrap: { height: 174, position: "relative", overflow: "hidden" },
     editorCoverImage: { width: "100%", height: 174 },
+    defaultCover: { alignItems: "center", justifyContent: "center", gap: designTokens.spacing.xs, paddingHorizontal: designTokens.spacing.lg },
+    defaultCoverTitle: { fontSize: designTokens.typography.body, fontWeight: designTokens.fontWeights.bold },
+    defaultCoverHint: { fontSize: designTokens.typography.caption, textAlign: "center" },
     editorImageAction: { position: "absolute", bottom: 12, end: 12, width: 40, height: 40, borderRadius: 20, borderWidth: StyleSheet.hairlineWidth, alignItems: "center", justifyContent: "center" },
     editorIdentity: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md, paddingHorizontal: designTokens.spacing.lg, marginTop: -2 },
     editorLogoWrap: { width: 76, height: 76, position: "relative" },
