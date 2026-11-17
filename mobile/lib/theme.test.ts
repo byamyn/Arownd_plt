@@ -16,6 +16,8 @@ describe("design system theme tokens", () => {
     const dark = getAppTheme("dark");
 
     expect(light.colors.foreground).toBe("#000000");
+    expect(light.colors.accentOnSurface).toBe("#000000");
+    expect(dark.colors.accentOnSurface).toBe("#FFFF00");
     expect(light.colors.surface).toBe("#FFFFFF");
     expect(dark.colors.foreground).toBe("#FFFFFF");
     expect(dark.colors.surface).toBe("#141414");
