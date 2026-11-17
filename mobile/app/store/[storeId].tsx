@@ -253,11 +253,13 @@ export default function StoreDetailsScreen() {
                 <TextField label={translate("merchantStoreSettingsDescription")} value={ownerDraft?.description ?? details.description ?? ""} onChangeText={(description) => setOwnerDraft((current) => current ? { ...current, description } : current)} multiline maxLength={2000} />
               </View>
             ) : (
-              <Pressable disabled={!isStoreOwner} onPress={() => setOwnerInlineField("description")} style={styles.inlineEditable}>
-                <UiText numberOfLines={descriptionExpanded ? undefined : 2} style={[styles.storeDescription, { color: theme.colors.muted }]}>{(isStoreOwner && ownerDraft?.description) || details.description || (isStoreOwner ? translate("merchantStoreInlineAddDescription") : "")}</UiText>
+              <View style={styles.inlineEditable}>
+                <Pressable disabled={!isStoreOwner} onPress={() => setOwnerInlineField("description")} style={{ flex: 1 }}>
+                  <UiText numberOfLines={descriptionExpanded ? undefined : 2} style={[styles.storeDescription, { color: theme.colors.muted }]}>{(isStoreOwner && ownerDraft?.description) || details.description || (isStoreOwner ? translate("merchantStoreInlineAddDescription") : "")}</UiText>
+                </Pressable>
                 {(details.description?.length ?? 0) > 90 ? <Pressable onPress={() => setDescriptionExpanded((value) => !value)}><UiText style={{ color: theme.colors.accentMuted, fontSize: designTokens.typography.caption, fontWeight: designTokens.fontWeights.semibold }}>{translate(descriptionExpanded ? "storeShowLess" : "storeShowMore")}</UiText></Pressable> : null}
                 {isStoreOwner ? <Icon name="pencil" size={14} color={theme.colors.muted} accessibilityHidden /> : null}
-              </Pressable>
+              </View>
             )}
             <View style={styles.locationRow}>
               <Icon name="map-pin" size={14} color={theme.colors.muted} accessibilityHidden />
@@ -268,7 +270,7 @@ export default function StoreDetailsScreen() {
               <View style={[styles.storeStatusDot, { backgroundColor: getStoreOpenState(details.opening_hours, details.country_code) ? theme.colors.success : theme.colors.danger }]} />
               <UiText style={[styles.statusLabel, { color: getStoreOpenState(details.opening_hours, details.country_code) ? theme.colors.success : theme.colors.danger }]}>{translate(getStoreOpenState(details.opening_hours, details.country_code) ? "storeOpen" : "storeClosed")}</UiText>
             </View>
-            {!getStoreOpenState(details.opening_hours, details.country_code) ? (() => { const next = getNextOpening(details.opening_hours, details.country_code); return next ? <UiText style={[styles.nextOpeningText, { color: theme.colors.muted }]}>{translate("storeNextOpening")} {translate(["merchantWeekdaySunday", "merchantWeekdayMonday", "merchantWeekdayTuesday", "merchantWeekdayWednesday", "merchantWeekdayThursday", "merchantWeekdayFriday", "merchantWeekdaySaturday"][next.weekday])} · {next.time}</UiText> : null; })() : null}
+            {!getStoreOpenState(details.opening_hours, details.country_code) ? (() => { const next = getNextOpening(details.opening_hours, details.country_code); return next ? <UiText style={[styles.nextOpeningText, { color: theme.colors.muted }]}>{translate("storeNextOpening")} {translate((["merchantWeekdaySunday", "merchantWeekdayMonday", "merchantWeekdayTuesday", "merchantWeekdayWednesday", "merchantWeekdayThursday", "merchantWeekdayFriday", "merchantWeekdaySaturday"] as const)[next.weekday])} · {next.time}</UiText> : null; })() : null}
             {!getStoreOpenState(details.opening_hours, details.country_code) ? <UiText style={[styles.nextOpeningText, { color: theme.colors.muted }]}>{translate("storeAcceptingOrdersWhileClosed")}</UiText> : null}
           </View>
         </View>
