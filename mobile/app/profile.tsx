@@ -25,6 +25,7 @@ import { getFavorites } from "@/lib/favorites";
 import { translate, useLanguage } from "@/lib/i18n";
 import { fetchMyOrders } from "@/lib/orders";
 import { getProfileDisplayName } from "@/lib/profile-state";
+import { fetchMerchantAccess } from "@/lib/merchant";
 import { fetchMyReviews } from "@/lib/reviews";
 import { getSupabaseClient } from "@/lib/supabase";
 import { fetchStoreVerificationReviewerAccess } from "@/lib/store-verification";
@@ -101,6 +102,12 @@ export default function ProfileScreen() {
   const verificationReviewer = useQuery({
     queryKey: ["store-verification-reviewer"],
     queryFn: fetchStoreVerificationReviewerAccess,
+    enabled: Boolean(user.data),
+    retry: false
+  });
+  const merchantAccess = useQuery({
+    queryKey: ["merchant-access"],
+    queryFn: fetchMerchantAccess,
     enabled: Boolean(user.data),
     retry: false
   });
@@ -222,6 +229,26 @@ export default function ProfileScreen() {
               </View>
             ) : null}
           </Card>
+
+          {merchantAccess.data?.status === "merchant_ready" && merchantAccess.data.store?.id ? (
+            <Card contentStyle={styles.accountLinksCard}>
+              <PressableSurface
+                accessibilityRole="button"
+                accessibilityLabel={translate("profileSwitchToStore")}
+                onPress={() => router.push("/merchant")}
+                style={styles.accountLinkRow}
+              >
+                <View style={[styles.accountLinkIcon, { backgroundColor: theme.colors.surfaceSecondary }]}>
+                  <Icon name="store" size={20} color={theme.colors.accent} />
+                </View>
+                <View style={styles.accountLinkText}>
+                  <UiText weight="700">{translate("merchantMyStore")}</UiText>
+                  <Caption>{translate("profileSwitchToStoreHint")}</Caption>
+                </View>
+                <Icon name="chevron-left" size={18} color={theme.colors.subtle} />
+              </PressableSurface>
+            </Card>
+          ) : null}
 
           <Card contentStyle={styles.accountLinksCard}>
             <PressableSurface accessibilityRole="button" accessibilityLabel={translate("profileEditDetails")} onPress={() => router.push("/delivery-profile")} style={styles.accountLinkRow}>
