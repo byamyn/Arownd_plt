@@ -365,7 +365,8 @@ export default function ProfileScreen() {
       <BottomSheet
         visible={accountSheet !== null}
         onRequestClose={() => setAccountSheet(null)}
-        maxHeight="92%"
+        height="68%"
+        maxHeight="94%"
       >
         {accountSheet ? <ProfileAccountSheet section={accountSheet} onClose={() => setAccountSheet(null)} /> : null}
       </BottomSheet>
