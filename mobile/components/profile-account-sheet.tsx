@@ -3,7 +3,7 @@ import { Share, ScrollView, View } from "react-native";
 import * as Linking from "expo-linking";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { BottomSheet, Button, Card, Caption, FormLabel, Heading, Icon, PressableSurface, SegmentedControl, StatusBadge, Text as UiText, TextField } from "@/components/ui";
+import { Button, Card, Caption, FormLabel, Heading, Icon, PressableSurface, SegmentedControl, StatusBadge, Text as UiText, TextField } from "@/components/ui";
 import { ErrorState, LoadingState } from "@/components/customer-ui";
 import { fetchCheckoutRegions } from "@/lib/checkout";
 import { fetchDeliveryProfileCommunes, fetchMyDeliveryProfile, saveMyDeliveryProfile } from "@/lib/delivery-profile";
@@ -78,7 +78,7 @@ function DeliveryContent() {
     catch { setError(translate("deliveryProfilePhoneError")); return; }
     const candidate: DeliveryProfileInput = { full_name: fullName.trim(), phone: normalizedPhone, region_id: regionId ?? 0, secondary_region_id: secondaryRegionId, commune: commune.trim() };
     const parsed = DeliveryProfileSchema.safeParse(candidate);
-    if (!parsed.success) { setError(translate("deliveryProfileValidation")); return; }
+    if (!parsed.success) { setError(translate("deliveryProfileNameError")); return; }
     setError(null);
     mutation.mutate(parsed.data);
   };
@@ -225,6 +225,7 @@ function AddressesContent() {
 
 function InviteContent() {
   const { language } = useLanguage();
+  const theme = useAppTheme();
   const invite = useQuery({ queryKey: ["my-invite-overview"], queryFn: fetchMyInviteOverview, retry: false });
   const link = useMemo(() => invite.data ? Linking.createURL(`invite/${invite.data.code}`, { scheme: "com.arownd.app" }) : "", [invite.data]);
   const share = async (message: string) => { try { await Share.share({ message }); } catch { /* Native share may be unavailable. */ } };
@@ -255,7 +256,7 @@ function InviteContent() {
       return <View key={item.id} style={{ minHeight: 56, flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md, borderBottomWidth: 1, borderBottomColor: "rgba(128,128,128,0.2)" }}>
         <View style={{ width: 38, height: 38, borderRadius: 19, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(128,128,128,0.12)" }}><UiText weight="700">{getProfileInitial(name)}</UiText></View>
         <View style={{ flex: 1 }}><UiText weight="600">{name}</UiText><Caption>{formatDate(item.createdAt)}</Caption></View>
-        <Icon name="circle-check" size={18} color={useAppTheme().colors.success} />
+        <Icon name="circle-check" size={18} color={theme.colors.success} />
       </View>;
     })}
   </ScrollView>;
