@@ -1667,7 +1667,7 @@ export const messages = {
     merchantRetry: "Try again",
     merchantLoadError: "Could not verify your business account.",
     merchantStatusPersonalTitle: "Personal account",
-    merchantStatusPersonalHint: "This account does not currently have merchant permissions. Store setup must be completed through the server before using the merchant workspace.",
+    merchantStatusPersonalHint: "This account does not currently have merchant permissions. Store setup must be completed through the server before using Arownd Studio.",
     merchantStatusSetupTitle: "Store setup is incomplete",
     merchantStatusSetupHint: "A merchant role was found, but no owned store is linked to this account. Management tools remain unavailable until setup is complete and verified.",
     merchantStatusReadyTitle: "Merchant account verified",
