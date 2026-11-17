@@ -87,4 +87,27 @@ describe("design system text contrast", () => {
     expect(brandColors.primary).toBe("#FFFF00");
     expect(contrastRatio(brandColors.black, brandColors.primary)).toBeGreaterThanOrEqual(4.5);
   });
+
+  it("uses the approved monochrome light and dark surfaces", () => {
+    expect(themeColors.light.background).toBe("#FFFFFF");
+    expect(themeColors.light.foreground).toBe("#000000");
+    expect(themeColors.light.surfaceSecondary).toBe("#F5F5F5");
+    expect(themeColors.light.surfaceTertiary).toBe("#EEEEEE");
+    expect(themeColors.light.border).toBe("#E5E5E5");
+
+    expect(themeColors.dark.background).toBe("#000000");
+    expect(themeColors.dark.foreground).toBe("#FFFFFF");
+    expect(themeColors.dark.surface).toBe("#141414");
+    expect(themeColors.dark.surfaceTertiary).toBe("#1E1E1E");
+    expect(themeColors.dark.border).toBe("#2E2E2E");
+  });
+
+  it("uses the single brand yellow and black text over primary surfaces", () => {
+    expect(brandColors.primary).toBe("#FFFF00");
+    for (const mode of ["light", "dark"] as const) {
+      const theme = getAppTheme(mode);
+      expect(theme.colors.accent).toBe("#FFFF00");
+      expect(theme.colors.accentForeground).toBe("#000000");
+    }
+  });
 });
