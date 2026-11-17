@@ -10,8 +10,8 @@ import { useAppTheme } from "@/lib/theme";
 import { CART_QUERY_KEY, getCart } from "@/lib/cart";
 
 type NavigationTab = {
-  id: Exclude<CustomerTab, "none"> | "studio" | "orders" | "products" | "analytics" | "businessSettings";
-  label: "navHome" | "navExplore" | "navMap" | "navCart" | "navAccount" | "navStudio" | "merchantOrdersPageTitle" | "merchantProductsTitle" | "merchantAnalyticsTitle" | "merchantAccountSettingsTitle" | "merchantStoreSettingsTitle";
+  id: Exclude<CustomerTab, "none"> | "orders" | "products" | "analytics" | "businessSettings";
+  label: "navHome" | "navExplore" | "navMap" | "navCart" | "navAccount" | "merchantOrdersPageTitle" | "merchantProductsTitle" | "merchantAnalyticsTitle" | "merchantAccountSettingsTitle" | "merchantStoreSettingsTitle";
   icon: "home" | "search" | "map" | "shopping-cart" | "user" | "store" | "file-text" | "package" | "layout-grid" | "settings";
   path: string;
 };
@@ -22,14 +22,6 @@ const customerTabs: NavigationTab[] = [
   { id: "map", label: "navMap", icon: "map", path: "/map" },
   { id: "cart", label: "navCart", icon: "shopping-cart", path: "/cart" },
   { id: "profile", label: "navAccount", icon: "user", path: "/profile" }
-];
-
-const merchantEntryTabs: NavigationTab[] = [
-  { id: "home", label: "navHome", icon: "home", path: "/home" },
-  { id: "explore", label: "navExplore", icon: "search", path: "/explore" },
-  { id: "map", label: "navMap", icon: "map", path: "/map" },
-  { id: "cart", label: "navCart", icon: "shopping-cart", path: "/cart" },
-  { id: "studio", label: "navStudio", icon: "store", path: "/merchant" }
 ];
 
 const studioTabs: NavigationTab[] = [
@@ -49,11 +41,10 @@ export function CustomerNavigation() {
     queryFn: fetchMerchantAccess,
     retry: false
   });
-  const isMerchant = access.data?.status === "merchant_ready" || access.data?.status === "merchant_setup_required";
   const isMerchantReady = access.data?.status === "merchant_ready";
   const isMerchantRoute = pathname.startsWith("/merchant");
   const useStudioNavigation = isMerchantRoute && isMerchantReady;
-  const tabs = useStudioNavigation ? studioTabs : isMerchant ? merchantEntryTabs : customerTabs;
+  const tabs = useStudioNavigation ? studioTabs : customerTabs;
 
   const studioTab = pathname.startsWith("/merchant/orders")
     ? "orders"
@@ -67,11 +58,11 @@ export function CustomerNavigation() {
   const activeTab = useStudioNavigation
     ? studioTab
     : isMerchantRoute
-      ? "studio"
+      ? null
       : getCustomerTab(pathname);
-  const selectedTab = isMerchant && !isMerchantRoute && activeTab === "profile" ? "studio" : activeTab;
+  const selectedTab = activeTab;
 
-  if (access.isPending || !activeTab || (isMerchantRoute && !isMerchant)) return null;
+  if (access.isPending || !activeTab) return null;
 
   return (
     <BottomNavigation
