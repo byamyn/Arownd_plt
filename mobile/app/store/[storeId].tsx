@@ -125,7 +125,7 @@ export default function StoreDetailsScreen() {
   return (
     <CustomerScreen
       contentStyle={styles.storeScreenContent}
-      stickyHeaderIndices={[0, 2]}
+      stickyHeaderIndices={[0, 3]}
       refreshing={store.isFetching || (tab === "products" && offers.isFetching)}
       onRefresh={() => { void store.refetch(); if (tab === "products") void offers.refetch(); }}
     >
@@ -139,14 +139,14 @@ export default function StoreDetailsScreen() {
         style={[styles.stickyStoreHeader, { backgroundColor: theme.colors.background }]}
       />
 
+      <View style={styles.coverWrap}>
+        {details.cover_url ? (
+          <UiImage uri={details.cover_url} accessibilityLabel={translate("merchantStoreCover")} aspectRatio={16 / 9} style={styles.coverImage} />
+        ) : (
+          <View style={[styles.coverImage, { backgroundColor: theme.colors.surfaceMuted }]} />
+        )}
+      </View>
       <View style={styles.storeHero}>
-        <View style={styles.coverWrap}>
-          {details.cover_url ? (
-            <UiImage uri={details.cover_url} accessibilityLabel={translate("merchantStoreCover")} aspectRatio={16 / 9} style={styles.coverImage} />
-          ) : (
-            <View style={[styles.coverImage, { backgroundColor: theme.colors.surfaceMuted }]} />
-          )}
-        </View>
         <View style={styles.storeIdentity}>
           <View style={styles.avatarWrap}>
             <Avatar name={details.name} imageUri={details.logo_url || undefined} size={76} accessibilityLabel={details.name} />
@@ -296,7 +296,7 @@ const styles = StyleSheet.create({
   ownerDayChip: { borderWidth: 1, borderRadius: designTokens.radius.pill, paddingHorizontal: designTokens.spacing.md, paddingVertical: designTokens.spacing.sm },
   ownerImageActions: { flexDirection: "row", flexWrap: "wrap", gap: designTokens.spacing.sm },
   coverImage: { width: "100%", height: 136, borderRadius: 0 },
-  coverWrap: { position: "relative", alignSelf: "stretch", marginLeft: -designTokens.spacing.lg, marginRight: -designTokens.spacing.lg },
+  coverWrap: { position: "relative", width: "100%", alignSelf: "stretch" },
   imageEditButton: { position: "absolute", right: designTokens.spacing.md, bottom: designTokens.spacing.md, width: 36, height: 36, borderRadius: designTokens.radius.pill, backgroundColor: "#FFFFFF", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "#E5E7EB" },
   logoEditButton: { position: "absolute", right: -3, top: -3, width: 26, height: 26, borderRadius: designTokens.radius.pill, backgroundColor: "#FFFFFF", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "#E5E7EB", zIndex: 2 },
   avatarWrap: { position: "relative", alignSelf: "flex-start", marginTop: -44, marginBottom: designTokens.spacing.xs },
