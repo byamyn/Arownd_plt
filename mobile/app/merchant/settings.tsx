@@ -517,7 +517,7 @@ export default function MerchantStoreSettingsScreen() {
               </RasterSource>
             </MapLibreMap>
             <View pointerEvents="none" style={styles.mapPickerCenterMarker}>
-              <Icon name="map-pin" size={38} color={theme.colors.accent} accessibilityHidden />
+              <Icon name="map-pin" size={38} color={theme.colors.accentOnSurface} accessibilityHidden />
             </View>
             <PressableSurface
               accessibilityRole="button"
