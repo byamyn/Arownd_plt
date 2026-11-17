@@ -206,7 +206,7 @@ function RootLayoutContent() {
             <Logo color={theme.colors.foreground} width={160} />
           </View>
           <View style={styles.indicator}>
-            <ActivityIndicator size="large" color={theme.colors.accent} />
+            <ActivityIndicator size="large" color={theme.colors.accentOnSurface} />
           </View>
         </View>
       ) : null}
