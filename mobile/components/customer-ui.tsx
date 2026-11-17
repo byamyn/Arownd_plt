@@ -15,11 +15,11 @@ import { designTokens, useAppTheme } from "@/lib/theme";
 import { Button, Caption, Heading, Icon, Image as UiImage, PriceDisplay, PressableSurface, RatingStars, RefreshableScrollView, SearchField, Text as UiText } from "@/components/ui";
 export { EmptyState, ErrorState, LoadingState } from "@/components/ui";
 
-export function CustomerScreen({ children, footer, showNavigation = true, onRefresh, refreshing = false, contentStyle, scrollRef }: { children: ReactNode; footer?: ReactNode; showNavigation?: boolean; onRefresh?: (() => void) | undefined; refreshing?: boolean; contentStyle?: StyleProp<ViewStyle>; scrollRef?: Ref<ComponentRef<typeof ScrollView>> | undefined }) {
+export function CustomerScreen({ children, footer, showNavigation = true, onRefresh, refreshing = false, contentStyle, scrollRef, stickyHeaderIndices }: { children: ReactNode; footer?: ReactNode; showNavigation?: boolean; onRefresh?: (() => void) | undefined; refreshing?: boolean; contentStyle?: StyleProp<ViewStyle>; scrollRef?: Ref<ComponentRef<typeof ScrollView>> | undefined; stickyHeaderIndices?: number[] }) {
   const theme = useAppTheme();
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.colors.background }]}>
-      <RefreshableScrollView scrollRef={scrollRef} style={styles.scroll} contentContainerStyle={[styles.content, contentStyle]} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} onRefresh={onRefresh} refreshing={refreshing}>
+      <RefreshableScrollView scrollRef={scrollRef} stickyHeaderIndices={stickyHeaderIndices} style={styles.scroll> contentContainerStyle={[styles.content, contentStyle]} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} onRefresh={onRefresh} refreshing={refreshing}>
         {children}
       </RefreshableScrollView>
       {footer ? <View style={[styles.footer, { backgroundColor: theme.colors.background, borderTopColor: theme.colors.border }]}>{footer}</View> : null}
@@ -117,7 +117,7 @@ export function ProductTile({ name, store, price, imageUrl, onPress, style, acti
         <UiText numberOfLines={2} weight="700" style={styles.productName}>{name}</UiText>
         <View style={[styles.productPrice, { borderTopColor: theme.colors.border }]}>
           <PriceDisplay value={price} />
-          <Icon name="arrow-left" size={15} color={theme.colors.accent} accessibilityHidden />
+          <Icon name="chevron-left" size={17} color={theme.colors.muted} accessibilityHidden />
         </View>
       </View>
     </PressableSurface>
