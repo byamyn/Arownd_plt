@@ -223,59 +223,55 @@ export default function ProfileScreen() {
             ) : null}
           </Card>
 
-          <View style={styles.accountLinks}>
-            <PressableSurface accessibilityRole="button" accessibilityLabel={translate("profileEditDetails")} onPress={() => router.push("/delivery-profile")} style={styles.accountLinkOuter}>
-              <Card contentStyle={styles.accountLinkCard}>
-                <View style={[styles.accountLinkIcon, { backgroundColor: theme.colors.surfaceSecondary }]}><Icon name="user" size={20} color={theme.colors.accent} /></View>
-                <View style={styles.accountLinkText}>
-                  <UiText weight="700">{translate("profileEditDetails")}</UiText>
-                  <Caption>{translate("profileEditDetailsHint")}</Caption>
-                </View>
-                <Icon name="chevron-left" size={18} color={theme.colors.subtle} />
-              </Card>
+          <Card contentStyle={styles.accountLinksCard}>
+            <PressableSurface accessibilityRole="button" accessibilityLabel={translate("profileEditDetails")} onPress={() => router.push("/delivery-profile")} style={styles.accountLinkRow}>
+              <View style={[styles.accountLinkIcon, { backgroundColor: theme.colors.surfaceSecondary }]}><Icon name="user" size={20} color={theme.colors.accent} /></View>
+              <View style={styles.accountLinkText}>
+                <UiText weight="700">{translate("profileEditDetails")}</UiText>
+                <Caption>{translate("profileEditDetailsHint")}</Caption>
+              </View>
+              <Icon name="chevron-left" size={18} color={theme.colors.subtle} />
             </PressableSurface>
-            <PressableSurface accessibilityRole="button" accessibilityLabel={translate("profileAddresses")} onPress={() => router.push("/addresses")} style={styles.accountLinkOuter}>
-              <Card contentStyle={styles.accountLinkCard}>
-                <View style={[styles.accountLinkIcon, { backgroundColor: theme.colors.surfaceSecondary }]}><Icon name="map-pin" size={20} color={theme.colors.accent} /></View>
-                <View style={styles.accountLinkText}>
-                  <UiText weight="700">{translate("profileAddresses")}</UiText>
-                  <Caption>{translate("profileAddressesHint")}</Caption>
-                </View>
-                <Icon name="chevron-left" size={18} color={theme.colors.subtle} />
-              </Card>
+            <View style={[styles.accountLinkDivider, { backgroundColor: theme.colors.border }]} />
+            <PressableSurface accessibilityRole="button" accessibilityLabel={translate("profileAddresses")} onPress={() => router.push("/addresses")} style={styles.accountLinkRow}>
+              <View style={[styles.accountLinkIcon, { backgroundColor: theme.colors.surfaceSecondary }]}><Icon name="map-pin" size={20} color={theme.colors.accent} /></View>
+              <View style={styles.accountLinkText}>
+                <UiText weight="700">{translate("profileAddresses")}</UiText>
+                <Caption>{translate("profileAddressesHint")}</Caption>
+              </View>
+              <Icon name="chevron-left" size={18} color={theme.colors.subtle} />
             </PressableSurface>
-            <PressableSurface accessibilityRole="button" accessibilityLabel={translate("profileInvite")} onPress={() => router.push("/invite")} style={styles.accountLinkOuter}>
-              <Card contentStyle={styles.accountLinkCard}>
-                <View style={[styles.accountLinkIcon, { backgroundColor: theme.colors.surfaceSecondary }]}><Icon name="user" size={20} color={theme.colors.accent} /></View>
-                <View style={styles.accountLinkText}>
-                  <UiText weight="700">{translate("profileInvite")}</UiText>
-                  <Caption>{translate("profileInviteHint")}</Caption>
-                </View>
-                <Icon name="chevron-left" size={18} color={theme.colors.subtle} />
-              </Card>
+            <View style={[styles.accountLinkDivider, { backgroundColor: theme.colors.border }]} />
+            <PressableSurface accessibilityRole="button" accessibilityLabel={translate("profileInvite")} onPress={() => router.push("/invite")} style={styles.accountLinkRow}>
+              <View style={[styles.accountLinkIcon, { backgroundColor: theme.colors.surfaceSecondary }]}><Icon name="user-plus" size={20} color={theme.colors.accent} /></View>
+              <View style={styles.accountLinkText}>
+                <UiText weight="700">{translate("profileInvite")}</UiText>
+                <Caption>{translate("profileInviteHint")}</Caption>
+              </View>
+              <Icon name="chevron-left" size={18} color={theme.colors.subtle} />
             </PressableSurface>
             {verificationReviewer.data === true ? (
-              <PressableSurface accessibilityRole="button" accessibilityLabel={translate("verificationModerationTitle")} onPress={() => router.push("/moderation/store-verifications")} style={styles.accountLinkOuter}>
-                <Card contentStyle={styles.accountLinkCard}>
+              <>
+                <View style={[styles.accountLinkDivider, { backgroundColor: theme.colors.border }]} />
+                <PressableSurface accessibilityRole="button" accessibilityLabel={translate("verificationModerationTitle")} onPress={() => router.push("/moderation/store-verifications")} style={styles.accountLinkRow}>
                   <View style={[styles.accountLinkIcon, { backgroundColor: theme.colors.surfaceSecondary }]}><Icon name="circle-check" size={20} color={theme.colors.accent} /></View>
                   <View style={styles.accountLinkText}>
                     <UiText weight="700">{translate("verificationModerationTitle")}</UiText>
                     <Caption>{translate("verificationModerationSubtitle")}</Caption>
                   </View>
                   <Icon name="chevron-left" size={18} color={theme.colors.subtle} />
-                </Card>
-              </PressableSurface>
+                </PressableSurface>
+              </>
             ) : null}
-          </View>
+          </Card>
 
-          <View style={styles.stats}>
+          <Card contentStyle={styles.statsCard}>
             <PressableSurface
               accessibilityRole="button"
               accessibilityLabel={translate("profileOrders")}
               onPress={() => router.push("/orders")}
               style={styles.statCardOuter}
             >
-              <Card contentStyle={styles.statCard}>
               <View style={styles.statHeader}>
                 <View style={[styles.statIcon, { backgroundColor: theme.mode === "dark" ? theme.colors.surfaceSecondary : theme.colors.surfaceMuted }]}>
                   <Icon name="package" size={designTokens.dimensions.iconSize.sm} />
@@ -286,15 +282,14 @@ export default function ProfileScreen() {
                   style={styles.stat}
                 />
               </View>
-              </Card>
             </PressableSurface>
+            <View style={[styles.statsDivider, { backgroundColor: theme.colors.border }]} />
             <PressableSurface
               accessibilityRole="button"
               accessibilityLabel={translate("profileFavorites")}
               onPress={() => router.push("/favorites")}
               style={styles.statCardOuter}
             >
-              <Card contentStyle={styles.statCard}>
               <View style={styles.statHeader}>
                 <View style={[styles.statIcon, { backgroundColor: theme.mode === "dark" ? theme.colors.surfaceSecondary : theme.colors.surfaceMuted }]}>
                   <Icon name="heart" size={designTokens.dimensions.iconSize.sm} />
@@ -305,15 +300,14 @@ export default function ProfileScreen() {
                   style={styles.stat}
                 />
               </View>
-              </Card>
             </PressableSurface>
+            <View style={[styles.statsDivider, { backgroundColor: theme.colors.border }]} />
             <PressableSurface
               accessibilityRole="button"
               accessibilityLabel={translate("myReviewsTitle")}
               onPress={() => router.push("/my-reviews")}
               style={styles.statCardOuter}
             >
-              <Card contentStyle={styles.statCard}>
               <View style={styles.statHeader}>
                 <View style={[styles.statIcon, { backgroundColor: theme.mode === "dark" ? theme.colors.surfaceSecondary : theme.colors.surfaceMuted }]}>
                   <Icon name="star" size={designTokens.dimensions.iconSize.sm} />
@@ -324,9 +318,8 @@ export default function ProfileScreen() {
                   style={styles.stat}
                 />
               </View>
-              </Card>
             </PressableSurface>
-          </View>
+          </Card>
 
           {orders.isError || favorites.isError || reviews.isError ? (
             <ErrorState
@@ -445,10 +438,10 @@ const styles = StyleSheet.create({
   avatarPreviewCard: { padding: designTokens.spacing.lg, gap: designTokens.spacing.md, alignItems: "center" },
   avatarPreviewImage: { width: 220, height: 220, borderRadius: 110, backgroundColor: "transparent" },
   identityRow: { flexDirection: "row" },
-  accountLinks: { gap: designTokens.spacing.sm },
-  accountLinkOuter: { width: "100%" },
-  accountLinkCard: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md, padding: designTokens.spacing.md },
-  accountLinkIcon: { width: 42, height: 42, borderRadius: designTokens.radius.md, alignItems: "center", justifyContent: "center" },
+  accountLinksCard: { padding: 0 },
+  accountLinkRow: { minHeight: 68, flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md, paddingHorizontal: designTokens.spacing.md, paddingVertical: designTokens.spacing.sm },
+  accountLinkDivider: { height: StyleSheet.hairlineWidth, marginStart: 42 + designTokens.spacing.md, marginEnd: designTokens.spacing.md },
+  accountLinkIcon: { width: 38, height: 38, borderRadius: designTokens.radius.md, alignItems: "center", justifyContent: "center" },
   accountLinkText: { flex: 1, minWidth: 0, gap: 2 },
   phoneRow: {
     flexDirection: "row",
@@ -457,10 +450,10 @@ const styles = StyleSheet.create({
     paddingTop: designTokens.spacing.sm,
     borderTopWidth: StyleSheet.hairlineWidth
   },
-  stats: { flexDirection: "row", gap: designTokens.spacing.sm },
-  statCardOuter: { flex: 1, minWidth: 0 },
-  statCard: { padding: designTokens.spacing.md },
-  statHeader: { flexDirection: "column", alignItems: "flex-start", gap: designTokens.spacing.sm },
-  statIcon: { width: 34, height: 34, borderRadius: designTokens.radius.md, alignItems: "center", justifyContent: "center" },
+  statsCard: { flexDirection: "row", alignItems: "stretch", paddingVertical: designTokens.spacing.md, paddingHorizontal: designTokens.spacing.xs },
+  statCardOuter: { flex: 1, minWidth: 0, justifyContent: "center", paddingHorizontal: designTokens.spacing.xs },
+  statsDivider: { width: StyleSheet.hairlineWidth, alignSelf: "stretch" },
+  statHeader: { flexDirection: "column", alignItems: "center", gap: designTokens.spacing.xs },
+  statIcon: { width: 32, height: 32, borderRadius: designTokens.radius.md, alignItems: "center", justifyContent: "center" },
   stat: { width: "100%", minWidth: 0, padding: 0, backgroundColor: "transparent" },
 });
