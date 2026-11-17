@@ -25,6 +25,7 @@ import { resetPasswordSchema } from "@/lib/auth-validation";
 import { getSupabaseClient } from "@/lib/supabase";
 import { unregisterCurrentPushDevice } from "@/lib/push-notifications";
 import { fetchCountries, fetchMyBrowsingCountryCode, updateBrowsingCountryCode, type Country } from "@/lib/country-service";
+import { fetchMerchantAccess } from "@/lib/merchant";
 
 type SettingsSheet = "password" | "appearance" | "language" | "country" | null;
 
@@ -47,6 +48,11 @@ export default function SettingsScreen() {
   const [signOutError, setSignOutError] = useState(false);
   const [signOutConfirmOpen, setSignOutConfirmOpen] = useState(false);
 
+  const merchantAccess = useQuery({
+    queryKey: ["merchant-access"],
+    queryFn: fetchMerchantAccess,
+    retry: false
+  });
   const countries = useQuery({ queryKey: ["available-countries"], queryFn: fetchCountries, enabled: activeSheet === "country" });
   const browsingCountry = useQuery({ queryKey: ["browsing-country"], queryFn: fetchMyBrowsingCountryCode });
   const browsingCountryMutation = useMutation({
@@ -175,6 +181,22 @@ export default function SettingsScreen() {
           />
         </Card>
       </View>
+
+      {merchantAccess.data?.status === "merchant_ready" || merchantAccess.data?.status === "merchant_setup_required" ? (
+        <View style={styles.section}>
+          <Heading level={3}>{translate("businessTitle")}</Heading>
+          <Card contentStyle={styles.sectionContent}>
+            <SettingsRow
+              icon="store"
+              label={translate("navStudio")}
+              onPress={() => router.push("/merchant")}
+              theme={theme}
+              styles={styles}
+              last
+            />
+          </Card>
+        </View>
+      ) : null}
 
       <View style={styles.section}>
         <Heading level={3}>{translate("settingsPrivacyTitle")}</Heading>
