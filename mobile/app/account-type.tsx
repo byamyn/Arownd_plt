@@ -35,8 +35,8 @@ function AccountTypeOption({
       style={[
         styles.option,
         {
-          backgroundColor: selected ? (theme.mode === "light" ? theme.colors.accent : theme.colors.surfaceMuted) : (theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface),
-          borderColor: selected ? (theme.mode === "light" ? theme.colors.accent : theme.colors.accentMuted) : (theme.mode === "light" ? "transparent" : theme.colors.border),
+          backgroundColor: selected ? theme.colors.accent : (theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface),
+          borderColor: selected ? theme.colors.accent : (theme.mode === "light" ? "transparent" : theme.colors.border),
           borderWidth: selected ? 2 : theme.mode === "light" ? 0 : 1
         }
       ]}
@@ -49,7 +49,7 @@ function AccountTypeOption({
       >
         <Icon
           name={icon}
-          color={selected ? theme.colors.accent : theme.colors.muted}
+          color={selected ? theme.colors.accentForeground : theme.colors.muted}
           size={designTokens.dimensions.iconSize.md}
         />
       </View>
@@ -58,14 +58,14 @@ function AccountTypeOption({
         <UiText weight={designTokens.fontWeights.extrabold} style={styles.optionTitle}>
           {title}
         </UiText>
-        <UiText tone="muted" style={[styles.optionDescription, selected && theme.mode === "light" && { color: theme.colors.accentForeground }]}>
+        <UiText tone="muted" style={[styles.optionDescription, selected && { color: theme.colors.accentForeground }]}>
           {description}
         </UiText>
       </View>
 
       <Icon
         name={selected ? "circle-check" : "chevron-left"}
-        color={selected ? theme.colors.accent : theme.colors.muted}
+        color={selected ? theme.colors.accentForeground : theme.colors.muted}
         size={designTokens.dimensions.iconSize.md}
       />
     </PressableSurface>
