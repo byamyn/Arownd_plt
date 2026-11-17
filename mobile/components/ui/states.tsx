@@ -9,7 +9,7 @@ export function LoadingState({ label }: { label: string }) {
   const theme = useAppTheme();
   return (
     <View style={styles.state} accessibilityState={{ busy: true }}>
-      <ActivityIndicator color={theme.colors.accent} />
+      <ActivityIndicator color={theme.colors.accentOnSurface} />
       <UiText style={[styles.stateText, { color: theme.colors.muted }]}>{label}</UiText>
     </View>
   );
