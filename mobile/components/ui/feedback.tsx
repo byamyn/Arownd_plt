@@ -88,7 +88,7 @@ export function ProgressBar({
 
 export function Spinner({ size = "small", color }: { size?: "small" | "large"; color?: string }) {
   const theme = useAppTheme();
-  return <ActivityIndicator size={size} color={color ?? theme.colors.accent} />;
+  return <ActivityIndicator size={size} color={color ?? theme.colors.accentOnSurface} />;
 }
 
 export function Skeleton({
