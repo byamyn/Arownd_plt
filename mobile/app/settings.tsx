@@ -448,7 +448,7 @@ function SettingsRow({
     >
       <View style={styles.linkLabel}>
         <View style={styles.iconBadge}>
-          <Icon name={icon} size={19} color={theme.colors.accent} />
+          <Icon name={icon} size={19} color={theme.colors.accentOnSurface} />
         </View>
         <UiText weight="700">{label}</UiText>
       </View>
