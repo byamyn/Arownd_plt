@@ -230,8 +230,63 @@ export default function ProfileScreen() {
             ) : null}
           </Card>
 
-          {merchantAccess.data?.status === "merchant_ready" && merchantAccess.data.store?.id ? (
-            <Card contentStyle={styles.accountLinksCard}>
+          <Card contentStyle={styles.statsCard}>
+            <PressableSurface
+              accessibilityRole="button"
+              accessibilityLabel={translate("profileOrders")}
+              onPress={() => router.push("/orders")}
+              style={styles.statCardOuter}
+            >
+              <View style={styles.statHeader}>
+                <View style={[styles.statIcon, { backgroundColor: theme.mode === "dark" ? theme.colors.surfaceSecondary : theme.colors.surfaceMuted }]}>
+                  <Icon name="package" size={designTokens.dimensions.iconSize.sm} />
+                </View>
+                <StatCard
+                  label={translate("profileOrders")}
+                  value={orders.isPending ? "…" : orders.isError ? "—" : String(orders.data?.length ?? 0)}
+                  style={styles.stat}
+                />
+              </View>
+            </PressableSurface>
+            <View style={[styles.statsDivider, { backgroundColor: theme.colors.border }]} />
+            <PressableSurface
+              accessibilityRole="button"
+              accessibilityLabel={translate("profileFavorites")}
+              onPress={() => router.push("/favorites")}
+              style={styles.statCardOuter}
+            >
+              <View style={styles.statHeader}>
+                <View style={[styles.statIcon, { backgroundColor: theme.mode === "dark" ? theme.colors.surfaceSecondary : theme.colors.surfaceMuted }]}>
+                  <Icon name="heart" size={designTokens.dimensions.iconSize.sm} />
+                </View>
+                <StatCard
+                  label={translate("profileFavorites")}
+                  value={favorites.isPending ? "…" : favorites.isError ? "—" : String(favoriteCount)}
+                  style={styles.stat}
+                />
+              </View>
+            </PressableSurface>
+            <View style={[styles.statsDivider, { backgroundColor: theme.colors.border }]} />
+            <PressableSurface
+              accessibilityRole="button"
+              accessibilityLabel={translate("myReviewsTitle")}
+              onPress={() => router.push("/my-reviews")}
+              style={styles.statCardOuter}
+            >
+              <View style={styles.statHeader}>
+                <View style={[styles.statIcon, { backgroundColor: theme.mode === "dark" ? theme.colors.surfaceSecondary : theme.colors.surfaceMuted }]}>
+                  <Icon name="star" size={designTokens.dimensions.iconSize.sm} />
+                </View>
+                <StatCard
+                  label={translate("myReviewsTitle")}
+                  value={reviews.isPending ? "…" : reviews.isError ? "—" : String(reviews.data?.length ?? 0)}
+                  style={styles.stat}
+                />
+              </View>
+            </PressableSurface>
+          </Card>
+
+          <Card contentStyle={styles.accountLinksCard}>
               <PressableSurface
                 accessibilityRole="button"
                 accessibilityLabel={translate("profileSwitchToStore")}
@@ -292,61 +347,9 @@ export default function ProfileScreen() {
             ) : null}
           </Card>
 
-          <Card contentStyle={styles.statsCard}>
-            <PressableSurface
-              accessibilityRole="button"
-              accessibilityLabel={translate("profileOrders")}
-              onPress={() => router.push("/orders")}
-              style={styles.statCardOuter}
-            >
-              <View style={styles.statHeader}>
-                <View style={[styles.statIcon, { backgroundColor: theme.mode === "dark" ? theme.colors.surfaceSecondary : theme.colors.surfaceMuted }]}>
-                  <Icon name="package" size={designTokens.dimensions.iconSize.sm} />
-                </View>
-                <StatCard
-                  label={translate("profileOrders")}
-                  value={orders.isPending ? "…" : orders.isError ? "—" : String(orders.data?.length ?? 0)}
-                  style={styles.stat}
-                />
-              </View>
-            </PressableSurface>
-            <View style={[styles.statsDivider, { backgroundColor: theme.colors.border }]} />
-            <PressableSurface
-              accessibilityRole="button"
-              accessibilityLabel={translate("profileFavorites")}
-              onPress={() => router.push("/favorites")}
-              style={styles.statCardOuter}
-            >
-              <View style={styles.statHeader}>
-                <View style={[styles.statIcon, { backgroundColor: theme.mode === "dark" ? theme.colors.surfaceSecondary : theme.colors.surfaceMuted }]}>
-                  <Icon name="heart" size={designTokens.dimensions.iconSize.sm} />
-                </View>
-                <StatCard
-                  label={translate("profileFavorites")}
-                  value={favorites.isPending ? "…" : favorites.isError ? "—" : String(favoriteCount)}
-                  style={styles.stat}
-                />
-              </View>
-            </PressableSurface>
-            <View style={[styles.statsDivider, { backgroundColor: theme.colors.border }]} />
-            <PressableSurface
-              accessibilityRole="button"
-              accessibilityLabel={translate("myReviewsTitle")}
-              onPress={() => router.push("/my-reviews")}
-              style={styles.statCardOuter}
-            >
-              <View style={styles.statHeader}>
-                <View style={[styles.statIcon, { backgroundColor: theme.mode === "dark" ? theme.colors.surfaceSecondary : theme.colors.surfaceMuted }]}>
-                  <Icon name="star" size={designTokens.dimensions.iconSize.sm} />
-                </View>
-                <StatCard
-                  label={translate("myReviewsTitle")}
-                  value={reviews.isPending ? "…" : reviews.isError ? "—" : String(reviews.data?.length ?? 0)}
-                  style={styles.stat}
-                />
-              </View>
-            </PressableSurface>
-          </Card>
+
+
+          {merchantAccess.data?.status === "merchant_ready" && merchantAccess.data.store?.id ? (
 
           {orders.isError || favorites.isError || reviews.isError ? (
             <ErrorState
@@ -466,7 +469,7 @@ const styles = StyleSheet.create({
   avatarPreviewImage: { width: 220, height: 220, borderRadius: 110, backgroundColor: "transparent" },
   identityRow: { flexDirection: "row" },
   accountLinksCard: { padding: 0 },
-  accountLinkRow: { minHeight: 68, flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md, paddingHorizontal: designTokens.spacing.md, paddingVertical: designTokens.spacing.sm },
+  accountLinkRow: { minHeight: 64, flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md, paddingHorizontal: designTokens.spacing.md, paddingVertical: designTokens.spacing.sm },
   accountLinkDivider: { height: StyleSheet.hairlineWidth, marginStart: 42 + designTokens.spacing.md, marginEnd: designTokens.spacing.md },
   accountLinkIcon: { width: 38, height: 38, borderRadius: designTokens.radius.md, alignItems: "center", justifyContent: "center" },
   accountLinkText: { flex: 1, minWidth: 0, gap: 2 },
