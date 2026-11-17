@@ -159,9 +159,9 @@ export default function MerchantProductsScreen() {
 
         <FilterBar style={styles.filters}>
           <FilterChip label={translate("merchantProductsFilterAll")} selected={filter === "all"} onPress={() => setFilter("all")} />
-          <FilterChip label={translate("merchantProductsFilterLow")} selected={filter === "low"} onPress={() => setFilter("low")} leading={<Icon name="triangle-alert" size={14} color={filter === "low" ? (theme.mode === "dark" ? theme.colors.accent : theme.colors.accentForeground) : theme.colors.muted} accessibilityHidden />} />
-          <FilterChip label={translate("merchantProductsFilterOut")} selected={filter === "out"} onPress={() => setFilter("out")} leading={<Icon name="package" size={14} color={filter === "out" ? (theme.mode === "dark" ? theme.colors.accent : theme.colors.accentForeground) : theme.colors.muted} accessibilityHidden />} />
-          <FilterChip label={translate("merchantProductsHidden")} selected={filter === "hidden"} onPress={() => setFilter("hidden")} leading={<Icon name="eye-off" size={14} color={filter === "hidden" ? (theme.mode === "dark" ? theme.colors.accent : theme.colors.accentForeground) : theme.colors.muted} accessibilityHidden />} />
+          <FilterChip label={translate("merchantProductsFilterLow")} selected={filter === "low"} onPress={() => setFilter("low")} leading={<Icon name="triangle-alert" size={14} color={filter === "low" ? theme.colors.accentForeground : theme.colors.muted} accessibilityHidden />} />
+          <FilterChip label={translate("merchantProductsFilterOut")} selected={filter === "out"} onPress={() => setFilter("out")} leading={<Icon name="package" size={14} color={filter === "out" ? theme.colors.accentForeground : theme.colors.muted} accessibilityHidden />} />
+          <FilterChip label={translate("merchantProductsHidden")} selected={filter === "hidden"} onPress={() => setFilter("hidden")} leading={<Icon name="eye-off" size={14} color={filter === "hidden" ? theme.colors.accentForeground : theme.colors.muted} accessibilityHidden />} />
         </FilterBar>
 
         <Button label={translate("merchantProductCreateOpen")} onPress={() => router.push("/merchant/products/new")} fullWidth />
