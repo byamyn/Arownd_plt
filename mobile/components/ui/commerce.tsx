@@ -50,7 +50,7 @@ export function FavoriteButton({
 }) {
   const theme = useAppTheme();
   return (
-    <Pressable accessibilityRole="button" accessibilityLabel={accessibilityLabel} accessibilityState={{ selected, disabled }} disabled={disabled} onPress={() => onChange(!selected)} hitSlop={8} style={({ pressed }) => [{ width: 44, height: 44, borderRadius: theme.radius.pill, alignItems: "center", justifyContent: "center", backgroundColor: selected ? theme.colors.dangerSurface : theme.colors.surface, opacity: disabled ? 0.45 : pressed ? 0.72 : 1 }]}>
+    <Pressable accessibilityRole="button" accessibilityLabel={accessibilityLabel} accessibilityState={{ selected, disabled }} disabled={disabled} onPress={() => onChange(!selected)} hitSlop={8} style={({ pressed }) => [{ width: 44, height: 44, borderRadius: theme.radius.pill, alignItems: "center", justifyContent: "center", backgroundColor: selected ? theme.colors.accent : theme.colors.surface, opacity: disabled ? 0.45 : pressed ? 0.72 : 1 }]}>
       {children}
     </Pressable>
   );
@@ -73,7 +73,7 @@ export function CartButton({
   return (
     <Pressable accessibilityRole="button" accessibilityLabel={label} accessibilityState={{ disabled }} disabled={disabled} onPress={onPress} style={({ pressed }) => [{ minWidth: theme.dimensions.controlHeight.md, minHeight: theme.dimensions.controlHeight.md, alignItems: "center", justifyContent: "center", opacity: disabled ? 0.45 : pressed ? 0.75 : 1 }]}>
       {children}
-      {count !== undefined && count > 0 ? <View style={{ position: "absolute", top: 0, end: 0, minWidth: 18, height: 18, paddingHorizontal: 4, borderRadius: theme.radius.pill, alignItems: "center", justifyContent: "center", backgroundColor: theme.colors.danger }}><UiText style={{ color: theme.colors.surface, fontSize: 10, fontWeight: theme.fontWeights.extrabold }}>{count > 99 ? "99+" : count}</UiText></View> : null}
+      {count !== undefined && count > 0 ? <View style={{ position: "absolute", top: 0, end: 0, minWidth: 18, height: 18, paddingHorizontal: 4, borderRadius: theme.radius.pill, alignItems: "center", justifyContent: "center", backgroundColor: theme.colors.accent }}><UiText style={{ color: theme.colors.accentForeground, fontSize: 10, fontWeight: theme.fontWeights.extrabold }}>{count > 99 ? "99+" : count}</UiText></View> : null}
     </Pressable>
   );
 }
