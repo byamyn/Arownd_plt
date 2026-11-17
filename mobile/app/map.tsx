@@ -569,7 +569,7 @@ export default function MapScreen() {
 
               {navigation.isRerouting ? (
                 <View style={styles.reroutingRow}>
-                  <ActivityIndicator size="small" color={theme.colors.accent} />
+                  <ActivityIndicator size="small" color={theme.colors.accentOnSurface} />
                   <UiText tone="muted">{translate("mapNavigationRecalculating", language)}</UiText>
                 </View>
               ) : null}
@@ -610,7 +610,7 @@ export default function MapScreen() {
 
               <View style={[styles.addressCard, { backgroundColor: theme.colors.surfaceSecondary }]}>
                 <View style={[styles.addressIcon, { backgroundColor: theme.colors.surface }]}>
-                  <Icon name="map-pin" size={19} color={theme.colors.accent} accessibilityHidden />
+                  <Icon name="map-pin" size={19} color={theme.colors.accentOnSurface} accessibilityHidden />
                 </View>
                 <View style={styles.storeCopy}>
                   <UiText tone="muted" style={styles.routeMetricLabel}>
