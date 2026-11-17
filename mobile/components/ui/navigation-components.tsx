@@ -160,7 +160,8 @@ function NavigationTab({
           paddingHorizontal: designTokens.spacing.md,
           borderRadius: theme.radius.pill,
           alignItems: "center",
-          justifyContent: "center"
+          justifyContent: "center",
+          backgroundColor: selected ? theme.colors.accent : "transparent"
         }}
       >
         <Animated.View style={{ transform: [{ scale }] }}>
@@ -170,7 +171,7 @@ function NavigationTab({
       <UiText
         numberOfLines={1}
         style={{
-          color: selected ? theme.colors.accent : theme.colors.muted,
+          color: selected ? theme.colors.accentForeground : theme.colors.muted,
           fontSize: theme.typography.caption,
           fontWeight: theme.fontWeights.medium,
           flexShrink: 1
