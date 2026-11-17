@@ -616,7 +616,7 @@ function CategoryOption({
         ...(nested ? [styles.categoryOptionChild] : []),
         {
           borderColor: selected ? theme.colors.accent : theme.colors.border,
-          backgroundColor: selected ? theme.colors.surfaceMuted : theme.colors.background
+          backgroundColor: selected ? theme.colors.accent : theme.colors.background
         }
       ]}
     >
