@@ -84,6 +84,7 @@ export default function StoreDetailsScreen() {
   useLanguage();
   const { storeId } = useLocalSearchParams<{ storeId: string }>();
   const theme = useAppTheme();
+  const queryClient = useQueryClient();
   const browsingCurrency = useQuery({ queryKey: ["browsing-country-currency"], queryFn: fetchBrowsingCurrencyCode, staleTime: 60_000 });
   const merchantAccess = useQuery({ queryKey: ["merchant-access"], queryFn: fetchMerchantAccess, retry: false, staleTime: 30_000 });
   const ownerStoreId = merchantAccess.data?.status === "merchant_ready" &&
