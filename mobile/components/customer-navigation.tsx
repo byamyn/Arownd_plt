@@ -11,7 +11,7 @@ import { CART_QUERY_KEY, getCart } from "@/lib/cart";
 
 type NavigationTab = {
   id: Exclude<CustomerTab, "none"> | "studio" | "orders" | "products" | "analytics" | "businessSettings";
-  label: "navHome" | "navExplore" | "navMap" | "navCart" | "navAccount" | "navStudio" | "merchantOrdersPageTitle" | "merchantProductsTitle" | "merchantAnalyticsTitle" | "merchantAccountSettingsTitle";
+  label: "navHome" | "navExplore" | "navMap" | "navCart" | "navAccount" | "navStudio" | "merchantOrdersPageTitle" | "merchantProductsTitle" | "merchantAnalyticsTitle" | "merchantAccountSettingsTitle" | "merchantStoreSettingsTitle";
   icon: "home" | "search" | "map" | "shopping-cart" | "user" | "store" | "file-text" | "package" | "layout-grid" | "settings";
   path: string;
 };
@@ -33,10 +33,10 @@ const merchantEntryTabs: NavigationTab[] = [
 ];
 
 const studioTabs: NavigationTab[] = [
-  { id: "home", label: "navHome", icon: "home", path: "/merchant" },
   { id: "orders", label: "merchantOrdersPageTitle", icon: "file-text", path: "/merchant/orders" },
   { id: "products", label: "merchantProductsTitle", icon: "package", path: "/merchant/products" },
   { id: "analytics", label: "merchantAnalyticsTitle", icon: "layout-grid", path: "/merchant/analytics" },
+  { id: "businessSettings", label: "merchantStoreSettingsTitle", icon: "settings", path: "/merchant/settings" },
 ];
 
 export function CustomerNavigation() {
@@ -63,7 +63,7 @@ export function CustomerNavigation() {
         ? "analytics"
         : pathname.startsWith("/merchant/account-settings") || pathname.startsWith("/merchant/settings") || pathname.startsWith("/merchant/verification")
           ? "businessSettings"
-          : "home";
+          : "orders";
   const activeTab = useStudioNavigation
     ? studioTab
     : isMerchantRoute
