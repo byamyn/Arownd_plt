@@ -296,9 +296,9 @@ export default function CheckoutScreen() {
                 <View style={[styles.radio, selectedAddressId === address.id && styles.radioSelected]} />
               </View>
               <UiText style={[styles.fieldHint, selectedAddressId === address.id && { color: theme.colors.accentForeground }]}>{address.phone}</UiText>
-              <UiText style={[styles.fieldHint, selectedAddressId === address.id && theme.mode === "light" && { color: theme.colors.accentForeground }]}>{address.region ? getRegionDisplayName(address.region, language) : ""}{address.secondary_region ? "، " + getRegionDisplayName(address.secondary_region, language) : ""}، {address.commune}</UiText>
-              <UiText style={[styles.fieldHint, selectedAddressId === address.id && theme.mode === "light" && { color: theme.colors.accentForeground }]}>{address.address_line}</UiText>
-              {address.is_default ? <UiText style={[styles.savedDefault, selectedAddressId === address.id && theme.mode === "light" && { color: theme.colors.accentForeground }]}>{translate("addressesDefault")}</UiText> : null}
+              <UiText style={[styles.fieldHint, selectedAddressId === address.id && { color: theme.colors.accentForeground }]}>{address.region ? getRegionDisplayName(address.region, language) : ""}{address.secondary_region ? "، " + getRegionDisplayName(address.secondary_region, language) : ""}، {address.commune}</UiText>
+              <UiText style={[styles.fieldHint, selectedAddressId === address.id && { color: theme.colors.accentForeground }]}>{address.address_line}</UiText>
+              {address.is_default ? <UiText style={[styles.savedDefault, selectedAddressId === address.id && { color: theme.colors.accentForeground }]}>{translate("addressesDefault")}</UiText> : null}
             </PressableSurface>
           ))}
         </View>
