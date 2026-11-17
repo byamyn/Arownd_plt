@@ -1,7 +1,5 @@
 export const brandColors = {
   primary: "#FFFF00",
-  primaryHover: "#F0E100",
-  primaryPressed: "#D9CC00",
   black: "#000000",
   white: "#FFFFFF",
   light: "#F5F5F5"
@@ -33,10 +31,10 @@ export const themeColors = {
     background: "#FFFFFF",
     surface: "#FFFFFF",
     surfaceSecondary: "#F5F5F5",
-    surfaceTertiary: "#E5E5E5",
+    surfaceTertiary: "#EEEEEE",
     foreground: "#000000",
-    foregroundSecondary: "#737373",
-    foregroundMuted: "#6B6B6B",
+    foregroundSecondary: "#5C5C5C",
+    foregroundMuted: "#5C5C5C",
     border: "#E5E5E5",
     input: "#F5F5F5",
     inputBorder: "#8A8A8A",
@@ -44,14 +42,14 @@ export const themeColors = {
   },
   dark: {
     background: "#000000",
-    surface: "#171717",
-    surfaceSecondary: "#262626",
-    surfaceTertiary: "#262626",
+    surface: "#141414",
+    surfaceSecondary: "#141414",
+    surfaceTertiary: "#1E1E1E",
     foreground: "#FFFFFF",
     foregroundSecondary: "#A3A3A3",
     foregroundMuted: "#A3A3A3",
-    border: "#262626",
-    input: "#262626",
+    border: "#2E2E2E",
+    input: "#1E1E1E",
     inputBorder: "#707070",
     focus: "#FFFF00"
   }
@@ -60,8 +58,8 @@ export const themeColors = {
 export const extendedThemeColors = {
   light: {
     surfaceMuted: "#F5F5F5",
-    subtle: "#6B6B6B",
-    accentMuted: "#7A7000",
+    subtle: "#5C5C5C",
+    accentMuted: "#5C5C5C",
     danger: "#DC2626",
     dangerText: "#B91C1C",
     dangerSurface: "#FEE2E2",
@@ -78,13 +76,13 @@ export const extendedThemeColors = {
     infoText: "#1D4ED8",
     infoSurface: "#DBEAFE",
     infoBorder: "#DBEAFE",
-    placeholder: "#6B6B6B",
+    placeholder: "#5C5C5C",
     overlay: "rgba(0,0,0,0.42)"
   },
   dark: {
-    surfaceMuted: "#171717",
+    surfaceMuted: "#1E1E1E",
     subtle: "#A3A3A3",
-    accentMuted: brandColors.primary,
+    accentMuted: "#A3A3A3",
     danger: "#F87171",
     dangerText: "#F87171",
     dangerSurface: "rgba(248,113,113,0.15)",
