@@ -29,6 +29,7 @@ import { fetchMerchantAccess } from "@/lib/merchant";
 import { fetchMyReviews } from "@/lib/reviews";
 import { getSupabaseClient } from "@/lib/supabase";
 import { fetchStoreVerificationReviewerAccess } from "@/lib/store-verification";
+import { ProfileAccountSheet, type ProfileAccountSection } from "@/components/profile-account-sheet";
 
 export default function ProfileScreen() {
   useLanguage();
@@ -36,6 +37,7 @@ export default function ProfileScreen() {
   const queryClient = useQueryClient();
   const [avatarPickerError, setAvatarPickerError] = useState(false);
   const [avatarActionsOpen, setAvatarActionsOpen] = useState(false);
+  const [accountSheet, setAccountSheet] = useState<ProfileAccountSection | null>(null);
   const [selectedAvatar, setSelectedAvatar] = useState<ImagePicker.ImagePickerAsset | null>(null);
   const uploadAvatar = useMutation({
     mutationFn: uploadMyProfileAvatar,
@@ -306,7 +308,7 @@ export default function ProfileScreen() {
           ) : null}
 
           <Card contentStyle={styles.accountLinksCard}>
-            <PressableSurface accessibilityRole="button" accessibilityLabel={translate("profileEditDetails")} onPress={() => router.push("/delivery-profile")} style={styles.accountLinkRow}>
+            <PressableSurface accessibilityRole="button" accessibilityLabel={translate("profileEditDetails")} onPress={() => setAccountSheet("delivery")} style={styles.accountLinkRow}>
               <View style={[styles.accountLinkIcon, { backgroundColor: theme.colors.surfaceSecondary }]}><Icon name="user" size={20} color={theme.colors.accent} /></View>
               <View style={styles.accountLinkText}>
                 <UiText weight="700">{translate("profileEditDetails")}</UiText>
@@ -315,7 +317,7 @@ export default function ProfileScreen() {
               <Icon name="chevron-left" size={18} color={theme.colors.subtle} />
             </PressableSurface>
             <View style={[styles.accountLinkDivider, { backgroundColor: theme.colors.border }]} />
-            <PressableSurface accessibilityRole="button" accessibilityLabel={translate("profileAddresses")} onPress={() => router.push("/addresses")} style={styles.accountLinkRow}>
+            <PressableSurface accessibilityRole="button" accessibilityLabel={translate("profileAddresses")} onPress={() => setAccountSheet("addresses")} style={styles.accountLinkRow}>
               <View style={[styles.accountLinkIcon, { backgroundColor: theme.colors.surfaceSecondary }]}><Icon name="map-pin" size={20} color={theme.colors.accent} /></View>
               <View style={styles.accountLinkText}>
                 <UiText weight="700">{translate("profileAddresses")}</UiText>
@@ -324,7 +326,7 @@ export default function ProfileScreen() {
               <Icon name="chevron-left" size={18} color={theme.colors.subtle} />
             </PressableSurface>
             <View style={[styles.accountLinkDivider, { backgroundColor: theme.colors.border }]} />
-            <PressableSurface accessibilityRole="button" accessibilityLabel={translate("profileInvite")} onPress={() => router.push("/invite")} style={styles.accountLinkRow}>
+            <PressableSurface accessibilityRole="button" accessibilityLabel={translate("profileInvite")} onPress={() => setAccountSheet("invite")} style={styles.accountLinkRow}>
               <View style={[styles.accountLinkIcon, { backgroundColor: theme.colors.surfaceSecondary }]}><Icon name="gift" size={20} color={theme.colors.accent} /></View>
               <View style={styles.accountLinkText}>
                 <UiText weight="700">{translate("profileInvite")}</UiText>
