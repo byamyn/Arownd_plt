@@ -3,8 +3,8 @@ import { router, Stack, useLocalSearchParams } from "expo-router";
 import { useRef, useState, type ComponentRef } from "react";
 import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 
-import { EmptyState, ErrorState, LoadingState } from "@/components/customer-ui";
-import { Button, Card, Icon, IconButton, OfferCard, PriceDisplay, ProductImageGallery, ProductQuantitySelector, ProductVariantSelector, RatingStars, StockBadge, ProductCardSkeleton, Text as UiText } from "@/components/ui";
+import { EmptyState, ErrorState } from "@/components/customer-ui";
+import { Button, Icon, IconButton, PriceDisplay, ProductImageGallery, ProductQuantitySelector, ProductVariantSelector, RatingStars, ProductCardSkeleton, Text as UiText } from "@/components/ui";
 import { FavoriteButton } from "@/components/favorite-button";
 import { chooseBestProductOffer, fetchProductDetails, fetchProductOffers, formatMarketPrice, getOfferVariantOptions } from "@/lib/catalog";
 import { fetchBrowsingCurrencyCode } from "@/lib/country-service";
