@@ -73,12 +73,16 @@ function DeliveryContent() {
   });
   const submit = () => {
     if (!regions.data) return;
+    if (fullName.trim().length < 2 || fullName.trim().length > 120) { setError(translate("deliveryProfileNameError")); return; }
     let normalizedPhone = "";
     try { normalizedPhone = normalizePhoneForCallingCode(phone, regions.data.callingCode); }
     catch { setError(translate("deliveryProfilePhoneError")); return; }
-    const candidate: DeliveryProfileInput = { full_name: fullName.trim(), phone: normalizedPhone, region_id: regionId ?? 0, secondary_region_id: secondaryRegionId, commune: commune.trim() };
+    if (regionId === null) { setError(translate("deliveryProfileRegionError")); return; }
+    if (regions.data.levels[1]?.is_required && secondaryRegionId === null) { setError(translate("deliveryProfileSecondaryRegionError")); return; }
+    if (commune.trim().length < 2 || commune.trim().length > 100) { setError(translate("deliveryProfileCommuneError")); return; }
+    const candidate: DeliveryProfileInput = { full_name: fullName.trim(), phone: normalizedPhone, region_id: regionId, secondary_region_id: secondaryRegionId, commune: commune.trim() };
     const parsed = DeliveryProfileSchema.safeParse(candidate);
-    if (!parsed.success) { setError(translate("deliveryProfileNameError")); return; }
+    if (!parsed.success) { setError(translate("deliveryProfileCommuneError")); return; }
     setError(null);
     mutation.mutate(parsed.data);
   };
