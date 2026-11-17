@@ -81,10 +81,10 @@ function StoreMapMarker({ selected, verified, isDark }: { selected: boolean; ver
           { transform: [{ scale }] }
         ]}
       >
-        <Icon name="store" size={22} color={isDark ? "#FFFFFF" : "#000000"} accessibilityHidden />
+        <Icon name="store" size={22} color="#000000" accessibilityHidden />
         {verified ? (
           <View style={styles.markerVerified}>
-            <Icon name="check" size={9} color="#FFFF00" accessibilityHidden />
+            <Icon name="check" size={9} color={designTokens.brand.accent} accessibilityHidden />
           </View>
         ) : null}
       </Animated.View>
@@ -686,7 +686,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "#FFFF00",
+    backgroundColor: designTokens.brand.accent,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
@@ -722,7 +722,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: "#111111",
     borderWidth: 2,
-    borderColor: "#FFFF00",
+    borderColor: designTokens.brand.accent,
     alignItems: "center",
     justifyContent: "center"
   },
