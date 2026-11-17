@@ -219,19 +219,21 @@ export function BottomSheet({
   visible,
   onRequestClose,
   children,
-  maxHeight = "85%"
+  maxHeight = "85%",
+  height
 }: {
   visible: boolean;
   onRequestClose: () => void;
   children: ReactNode;
   maxHeight?: ViewStyle["maxHeight"];
+  height?: ViewStyle["height"];
 }) {
   const theme = useAppTheme();
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onRequestClose}>
       <View style={{ flex: 1, justifyContent: "flex-end" }}>
         <Pressable accessible={false} onPress={onRequestClose} style={{ position: "absolute", top: 0, bottom: 0, start: 0, end: 0, backgroundColor: theme.colors.overlay }} />
-        <View accessibilityViewIsModal style={{ maxHeight, padding: designTokens.spacing.lg, paddingBottom: designTokens.spacing.xxl, borderTopLeftRadius: theme.radius.xl, borderTopRightRadius: theme.radius.xl, backgroundColor: theme.colors.surface, gap: designTokens.spacing.md }}>
+        <View accessibilityViewIsModal style={{ height, maxHeight, padding: designTokens.spacing.lg, paddingBottom: designTokens.spacing.xxl, borderTopLeftRadius: theme.radius.xl, borderTopRightRadius: theme.radius.xl, backgroundColor: theme.colors.surface, gap: designTokens.spacing.md }}>
           <View style={{ width: theme.dimensions.avatarSize.md, height: 4, borderRadius: theme.radius.pill, backgroundColor: theme.colors.border, alignSelf: "center" }} />
           {children}
         </View>
