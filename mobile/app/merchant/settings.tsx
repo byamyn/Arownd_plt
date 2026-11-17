@@ -432,8 +432,8 @@ export default function MerchantStoreSettingsScreen() {
             <View style={styles.days}>
               {weekdays.map((day) => {
                 const selected = form.opening_hours.closed_days.includes(day.value);
-                return <PressableSurface key={day.value} accessibilityRole="button" accessibilityLabel={translate(day.key)} accessibilityState={{ selected }} onPress={() => toggleClosedDay(day.value)} disabled={mutation.isPending} style={[styles.dayChip, { borderColor: selected ? theme.colors.accent : theme.colors.border, backgroundColor: selected ? (theme.mode === "light" ? theme.colors.accent : theme.colors.surfaceSecondary) : theme.colors.background }]}>
-                  <UiText style={[styles.dayChipText, { color: selected ? (theme.mode === "light" ? theme.colors.accentForeground : theme.colors.accentMuted) : theme.colors.foreground }]}>{translate(day.key)}</UiText>
+                return <PressableSurface key={day.value} accessibilityRole="button" accessibilityLabel={translate(day.key)} accessibilityState={{ selected }} onPress={() => toggleClosedDay(day.value)} disabled={mutation.isPending} style={[styles.dayChip, { borderColor: selected ? theme.colors.accent : theme.colors.border, backgroundColor: selected ? theme.colors.accent : theme.colors.background }]}>
+                  <UiText style={[styles.dayChipText, { color: selected ? theme.colors.accentForeground : theme.colors.foreground }]}>{translate(day.key)}</UiText>
                 </PressableSurface>;
               })}
             </View>
@@ -554,8 +554,8 @@ export default function MerchantStoreSettingsScreen() {
         </View>
         <ScrollView style={styles.wilayaList} keyboardShouldPersistTaps="handled">
           {(regionPickerLevel === "primary" ? (regionOptions.data?.regions ?? []) : (secondaryOptions.data?.regions ?? [])).map((region) => (
-            <PressableSurface key={region.id} accessibilityRole="button" accessibilityLabel={getRegionDisplayName(region, language)} accessibilityState={{ selected: regionPickerLevel === "primary" ? region.id === form.region_id : region.id === form.secondary_region_id }} onPress={() => regionPickerLevel === "primary" ? selectRegion(region.id) : selectSecondaryRegion(region.id)} style={[styles.wilayaOption, { borderBottomColor: theme.colors.border, backgroundColor: (regionPickerLevel === "primary" ? region.id === form.region_id : region.id === form.secondary_region_id) ? (theme.mode === "light" ? theme.colors.accent : theme.colors.surfaceMuted) : "transparent" }]}>
-              <UiText style={[styles.wilayaText, { color: theme.colors.foreground }]}>{getRegionDisplayName(region, language)}</UiText>
+            <PressableSurface key={region.id} accessibilityRole="button" accessibilityLabel={getRegionDisplayName(region, language)} accessibilityState={{ selected: regionPickerLevel === "primary" ? region.id === form.region_id : region.id === form.secondary_region_id }} onPress={() => regionPickerLevel === "primary" ? selectRegion(region.id) : selectSecondaryRegion(region.id)} style={[styles.wilayaOption, { borderBottomColor: theme.colors.border, backgroundColor: (regionPickerLevel === "primary" ? region.id === form.region_id : region.id === form.secondary_region_id) ? theme.colors.accent : "transparent" }]}>
+              <UiText style={[styles.wilayaText, { color: (regionPickerLevel === "primary" ? region.id === form.region_id : region.id === form.secondary_region_id) ? theme.colors.accentForeground : theme.colors.foreground }]}>{getRegionDisplayName(region, language)}</UiText>
             </PressableSurface>
           ))}
         </ScrollView>
