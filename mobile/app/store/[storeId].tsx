@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import * as ImagePicker from "expo-image-picker";
-import { Linking, Pressable, StyleSheet, View } from "react-native";
+import { Linking, Pressable, Share, StyleSheet, View } from "react-native";
 import Svg, { Circle, Path, Rect } from "react-native-svg";
 
 import { CustomerScreen, CustomerSearch, EmptyState, ErrorState, ProductTile, SectionTitle } from "@/components/customer-ui";
@@ -19,9 +19,32 @@ import { ReviewPanel } from "@/components/review-panel";
 import { ContentReportAction } from "@/components/content-report-action";
 import { designTokens, useAppTheme } from "@/lib/theme";
 import { VerifiedBadge } from "@/components/ui/identity";
-import { AppHeader, Avatar, Button, Card, Icon, IconButton, Image as UiImage, RatingStars, SegmentedControl, StoreCardSkeleton, ProductCardSkeleton, Text as UiText, TextField } from "@/components/ui";
+import { AppHeader, Avatar, Button, Card, Icon, IconButton, Image as UiImage, SegmentedControl, StoreCardSkeleton, ProductCardSkeleton, Text as UiText, TextField } from "@/components/ui";
 
 type StoreTab = "products" | "about" | "reviews";
+
+function getNextOpening(openingHours: unknown, countryCode?: string | null): { weekday: number; time: string } | null {
+  if (!openingHours || typeof openingHours !== "object") return null;
+  const hours = openingHours as { open?: unknown; closed_days?: unknown };
+  if (typeof hours.open !== "string" || !/^\\d{2}:\\d{2}$/.test(hours.open) || !Array.isArray(hours.closed_days)) return null;
+  const timeZone = countryCode ? STORE_TIME_ZONES[countryCode] : undefined;
+  const parts = new Intl.DateTimeFormat("en-US", { timeZone, weekday: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(new Date());
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  const dayMap: Record<string, number> = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+  const today = dayMap[values.weekday ?? ""];
+  if (today === undefined) return null;
+  const now = Number(values.hour) * 60 + Number(values.minute);
+  const [openHour, openMinute] = hours.open.split(":").map(Number);
+  const openAt = openHour * 60 + openMinute;
+  const closedDays = hours.closed_days.filter((value): value is number => Number.isInteger(value));
+  for (let offset = 0; offset < 8; offset += 1) {
+    const weekday = (today + offset) % 7;
+    if (closedDays.includes(weekday)) continue;
+    if (offset === 0 && now >= openAt) continue;
+    return { weekday, time: hours.open };
+  }
+  return null;
+}
 
 const STORE_TIME_ZONES: Record<string, string> = {
   DZ: "Africa/Algiers",
@@ -102,6 +125,7 @@ export default function StoreDetailsScreen() {
     if (ownerSettings.data && (!ownerEditMode || !ownerDraft)) setOwnerDraft(ownerSettings.data);
   }, [ownerSettings.data, ownerEditMode, ownerDraft]);
   const [tab, setTab] = useState<StoreTab>("products");
+  const [descriptionExpanded, setDescriptionExpanded] = useState(false);
   const [search, setSearch] = useState("");
   const store = useQuery({
     queryKey: ["customer-store", storeId],
@@ -173,18 +197,24 @@ export default function StoreDetailsScreen() {
   };
   return (
     <CustomerScreen
+      stickyHeaderIndices={[0, 2]}
       refreshing={store.isFetching || (tab === "products" && offers.isFetching)}
       onRefresh={() => { void store.refetch(); if (tab === "products") void offers.refetch(); }}
     >
       <AppHeader
-        title=""
+        title={details.name}
         leading={<IconButton accessibilityLabel={translate("back")} onPress={() => router.back()} icon={<Icon name="chevron-right" color={theme.colors.foreground} size={20} />} />}
+        trailing={<>
+          <IconButton accessibilityLabel={translate("storeShare")} onPress={() => { void Share.share({ message: `${translate("storeSharePrefix")} ${details.name}` }); }} icon={<Icon name="share-2" color={theme.colors.foreground} size={19} />} />
+          <FavoriteButton kind="stores" id={storeId} iconOnly />
+        </>}
+        style={styles.stickyStoreHeader}
       />
 
       <Card contentStyle={styles.storeHero}>
         <View style={styles.coverWrap}>
           {(isStoreOwner && ownerDraft?.cover_url) || details.cover_url ? (
-            <UiImage uri={(isStoreOwner && ownerDraft?.cover_url) || details.cover_url} accessibilityLabel={translate("merchantStoreCover")} aspectRatio={16 / 9} style={styles.coverImage} />
+            <UiImage uri={((isStoreOwner && ownerDraft?.cover_url) || details.cover_url) ?? undefined} accessibilityLabel={translate("merchantStoreCover")} aspectRatio={16 / 9} style={styles.coverImage} />
           ) : (
             <View style={[styles.coverImage, { backgroundColor: theme.colors.surfaceMuted }]} />
           )}
@@ -224,7 +254,8 @@ export default function StoreDetailsScreen() {
               </View>
             ) : (
               <Pressable disabled={!isStoreOwner} onPress={() => setOwnerInlineField("description")} style={styles.inlineEditable}>
-                <UiText numberOfLines={2} style={[styles.storeDescription, { color: theme.colors.muted }]}>{(isStoreOwner && ownerDraft?.description) || details.description || (isStoreOwner ? translate("merchantStoreInlineAddDescription") : "")}</UiText>
+                <UiText numberOfLines={descriptionExpanded ? undefined : 2} style={[styles.storeDescription, { color: theme.colors.muted }]}>{(isStoreOwner && ownerDraft?.description) || details.description || (isStoreOwner ? translate("merchantStoreInlineAddDescription") : "")}</UiText>
+                {(details.description?.length ?? 0) > 90 ? <Pressable onPress={() => setDescriptionExpanded((value) => !value)}><UiText style={{ color: theme.colors.accentMuted, fontSize: designTokens.typography.caption, fontWeight: designTokens.fontWeights.semibold }}>{translate(descriptionExpanded ? "storeShowLess" : "storeShowMore")}</UiText></Pressable> : null}
                 {isStoreOwner ? <Icon name="pencil" size={14} color={theme.colors.muted} accessibilityHidden /> : null}
               </Pressable>
             )}
@@ -232,66 +263,20 @@ export default function StoreDetailsScreen() {
               <Icon name="map-pin" size={14} color={theme.colors.muted} accessibilityHidden />
               <UiText numberOfLines={2} style={[styles.metaText, { color: theme.colors.muted }]}>{details.commune || details.address_line || translate("storeNoAddress")}</UiText>
             </View>
-            {details.rating != null ? <RatingStars value={details.rating} showValue /> : null}
-            <UiText style={[styles.statusLabel, { color: getStoreOpenState(details.opening_hours, details.country_code) ? "#16A34A" : "#DC2626" }]}>
-              {translate(getStoreOpenState(details.opening_hours, details.country_code) ? "storeOpen" : "storeClosed")}
-            </UiText>
+            {details.rating != null && details.rating > 0 ? <RatingStars value={details.rating} showValue /> : <UiText style={[styles.nextOpeningText, { color: theme.colors.muted }]}>{translate("storeNoRatingsYet")}</UiText>}
+            <View style={[styles.storeStatusBadge, { backgroundColor: getStoreOpenState(details.opening_hours, details.country_code) ? theme.colors.success + "18" : theme.colors.danger + "14" }]}>
+              <View style={[styles.storeStatusDot, { backgroundColor: getStoreOpenState(details.opening_hours, details.country_code) ? theme.colors.success : theme.colors.danger }]} />
+              <UiText style={[styles.statusLabel, { color: getStoreOpenState(details.opening_hours, details.country_code) ? theme.colors.success : theme.colors.danger }]}>{translate(getStoreOpenState(details.opening_hours, details.country_code) ? "storeOpen" : "storeClosed")}</UiText>
+            </View>
+            {!getStoreOpenState(details.opening_hours, details.country_code) ? (() => { const next = getNextOpening(details.opening_hours, details.country_code); return next ? <UiText style={[styles.nextOpeningText, { color: theme.colors.muted }]}>{translate("storeNextOpening")} {translate(["merchantWeekdaySunday", "merchantWeekdayMonday", "merchantWeekdayTuesday", "merchantWeekdayWednesday", "merchantWeekdayThursday", "merchantWeekdayFriday", "merchantWeekdaySaturday"][next.weekday])} · {next.time}</UiText> : null; })() : null}
+            {!getStoreOpenState(details.opening_hours, details.country_code) ? <UiText style={[styles.nextOpeningText, { color: theme.colors.muted }]}>{translate("storeAcceptingOrdersWhileClosed")}</UiText> : null}
           </View>
-          <FavoriteButton kind="stores" id={storeId} iconOnly />
         </View>
-        {details.whatsapp || details.instagram_url || details.facebook_url || details.tiktok_url || details.website_url ? (
-          <View style={styles.socialLinks}>
-            {details.whatsapp ? (
-              <Pressable accessibilityRole="link" accessibilityLabel="WhatsApp" onPress={() => {
-                const number = details.whatsapp!.replace(/[^\\d]/g, "");
-                void Linking.openURL(`https://wa.me/${number}`);
-              }} style={({ pressed }) => [styles.socialButton, styles.whatsappButton, pressed && styles.socialButtonPressed]}>
-                <Svg width={21} height={21} viewBox="0 0 24 24">
-                  <Path d="M20.1 11.8a8.1 8.1 0 0 1-12 7.1L3 20l1.2-5a8.1 8.1 0 1 1 15.9-3.2Z" stroke="#25D366" strokeWidth={1.8} strokeLinejoin="round" fill="none" />
-                  <Path d="M8.2 7.8c.2-.4.4-.4.7-.4h.5c.2 0 .3.1.4.4l.7 1.6c.1.2.1.4-.1.6l-.5.6c-.2.2-.2.3-.1.5.4.8 1 1.4 1.8 1.8.2.1.4.1.5-.1l.7-.8c.2-.2.4-.2.6-.1l1.5.7c.2.1.3.2.3.4 0 .3-.2 1.1-.7 1.5-.5.4-1 .6-1.6.5-1-.2-2.2-.8-3.3-1.8-1.1-1-1.8-2.2-2-3.2-.2-.8.1-1.6.6-2.2Z" fill="#25D366" />
-                </Svg>
-              </Pressable>
-            ) : null}
-            {details.instagram_url ? (
-              <Pressable accessibilityRole="link" accessibilityLabel="Instagram" onPress={() => void Linking.openURL(details.instagram_url!)} style={({ pressed }) => [styles.socialButton, styles.instagramButton, pressed && styles.socialButtonPressed]}>
-                <Svg width={21} height={21} viewBox="0 0 24 24" fill="none">
-                  <Rect x={3.25} y={3.25} width={17.5} height={17.5} rx={5.2} stroke="#C13584" strokeWidth={2} />
-                  <Circle cx={12} cy={12} r={4.1} stroke="#C13584" strokeWidth={2} />
-                  <Circle cx={17.7} cy={6.5} r={1.2} fill="#C13584" />
-                </Svg>
-              </Pressable>
-            ) : null}
-            {details.facebook_url ? (
-              <Pressable accessibilityRole="link" accessibilityLabel="Facebook" onPress={() => void Linking.openURL(details.facebook_url!)} style={({ pressed }) => [styles.socialButton, styles.facebookButton, pressed && styles.socialButtonPressed]}>
-                <Svg width={21} height={21} viewBox="0 0 24 24">
-                  <Path d="M14.1 21v-8.2h2.8l.42-3.2H14.1V7.55c0-.93.26-1.56 1.61-1.56h1.72V3.12c-.3-.04-1.33-.12-2.52-.12-2.5 0-4.21 1.53-4.21 4.34V9.6H7.9v3.2h2.8V21h3.4Z" fill="#1877F2" />
-                </Svg>
-              </Pressable>
-            ) : null}
-            {details.tiktok_url ? (
-              <Pressable accessibilityRole="link" accessibilityLabel="TikTok" onPress={() => void Linking.openURL(details.tiktok_url!)} style={({ pressed }) => [styles.socialButton, pressed && styles.socialButtonPressed]}>
-                <Svg width={21} height={21} viewBox="0 0 24 24">
-                  <Path d="M15.2 3h-3.1v11.3a2.6 2.6 0 1 1-2.6-2.6c.4 0 .8.1 1.1.2V8.7a6 6 0 1 0 4.6 5.8V8.8a8 8 0 0 0 4.5 1.4V7.1c-2.5-.1-4.3-1.7-4.5-4.1Z" fill="#111111" />
-                  <Path d="M15.2 3h-1.1c.3 2.1 1.9 3.7 4.5 4.1v1.1c.4.1.8.1 1.1.1V7.1c-2.5-.1-4.3-1.7-4.5-4.1Z" fill="#25F4EE" />
-                  <Path d="M10.6 8.7v3.2c-.3-.1-.7-.2-1.1-.2a2.6 2.6 0 0 0-2.6 2.6c0 .3 0 .6.1.8a2.6 2.6 0 0 1 4.1-2.1V8.8c-.2-.1-.4-.1-.5-.1Z" fill="#FE2C55" />
-                </Svg>
-              </Pressable>
-            ) : null}
-            {details.website_url ? (
-              <Pressable accessibilityRole="link" accessibilityLabel={translate("merchantStoreSettingsWebsite")} onPress={() => void Linking.openURL(details.website_url!)} style={({ pressed }) => [styles.socialButton, pressed && styles.socialButtonPressed]}>
-                <Icon name="globe" size={21} color="#2563EB" accessibilityHidden />
-              </Pressable>
-            ) : null}
+        {details.latitude != null && details.longitude != null || details.phone ? (
+          <View style={styles.storeActionsRow}>
+            {details.phone ? <Button label={translate("storeCall")} onPress={() => { void Linking.openURL(`tel:${details.phone!.replace(/[^\\d+]/g, "")}`); }} variant="outline" fullWidth startIcon={<Icon name="phone" size={17} color={theme.colors.foreground} accessibilityHidden />} /> : null}
+            {details.latitude != null && details.longitude != null ? <Button label={translate("mapDirections")} onPress={() => router.push({ pathname: "/map", params: { storeId, directions: "1" } })} variant="outline" fullWidth startIcon={<Icon name="navigation" size={17} color={theme.colors.foreground} accessibilityHidden />} /> : null}
           </View>
-        ) : null}
-        {details.latitude != null && details.longitude != null ? (
-          <Button
-            label={translate("mapDirections")}
-            onPress={() => router.push({ pathname: "/map", params: { storeId, directions: "1" } })}
-            variant="outline"
-            fullWidth
-            startIcon={<Icon name="navigation" size={18} color={theme.colors.foreground} accessibilityHidden />}
-          />
         ) : null}
         {isStoreOwner && ownerInlineField ? (
           <View style={styles.ownerInlineActions}>
@@ -404,7 +389,6 @@ export default function StoreDetailsScreen() {
           <EmptyState icon="package" title={translate("storeNoProducts")} hint={translate("storeNoDescription")} />
         ) : (
           <View style={styles.productsSection}>
-            <SectionTitle title={translate("storeProductsTitle")} />
             <CustomerSearch value={search} onChangeText={setSearch} placeholder={translate("homeSearchPlaceholder")} />
             {filteredOffers.length === 0 ? (
               <EmptyState icon="search" title={translate("exploreNoResults")} hint={translate("exploreNoResultsHint")} />
@@ -439,6 +423,7 @@ export default function StoreDetailsScreen() {
             <UiText style={[styles.description, { color: theme.colors.muted }]}>{[details.address_line, details.commune].filter(Boolean).join("، ") || translate("storeNoAddress")}</UiText>
             {details.phone ? <><UiText style={[styles.fieldTitle, { color: theme.colors.foregroundSecondary }]}>{translate("storePhone")}</UiText><UiText style={[styles.description, { color: theme.colors.muted }]}>{details.phone}</UiText></> : null}
             {details.whatsapp ? <><UiText style={[styles.fieldTitle, { color: theme.colors.foregroundSecondary }]}>{translate("storeWhatsApp")}</UiText><UiText style={[styles.description, { color: theme.colors.muted }]}>{details.whatsapp}</UiText></> : null}
+            {social}
           </Card>
           <ContentReportAction targetType="store" targetId={storeId} />
         </>
@@ -450,7 +435,9 @@ export default function StoreDetailsScreen() {
 }
 
 const styles = StyleSheet.create({
-  storeHero: { padding: designTokens.spacing.lg, gap: designTokens.spacing.md },
+  stickyStoreHeader: { backgroundColor: "#FFFFFF", paddingVertical: designTokens.spacing.xs, zIndex: 10 },
+  storeHero: { padding: designTokens.spacing.md, gap: designTokens.spacing.sm },
+  storeActionsRow: { flexDirection: "row", gap: designTokens.spacing.sm },
   ownerEditor: { gap: designTokens.spacing.md, paddingTop: designTokens.spacing.sm, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: "#D1D5DB" },
   ownerInlineActions: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.sm },
   inlineEditable: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.xs, maxWidth: "100%" },
@@ -461,13 +448,16 @@ const styles = StyleSheet.create({
   ownerDays: { flexDirection: "row", flexWrap: "wrap", gap: designTokens.spacing.xs },
   ownerDayChip: { borderWidth: 1, borderRadius: designTokens.radius.pill, paddingHorizontal: designTokens.spacing.md, paddingVertical: designTokens.spacing.sm },
   ownerImageActions: { flexDirection: "row", flexWrap: "wrap", gap: designTokens.spacing.sm },
-  coverImage: { width: "100%", borderRadius: designTokens.radius.lg },
+  coverImage: { width: "100%", height: 160, borderRadius: designTokens.radius.lg },
   coverWrap: { position: "relative" },
   imageEditButton: { position: "absolute", right: designTokens.spacing.md, bottom: designTokens.spacing.md, width: 36, height: 36, borderRadius: designTokens.radius.pill, backgroundColor: "#FFFFFF", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "#E5E7EB" },
   logoEditButton: { position: "absolute", right: -3, top: -3, width: 26, height: 26, borderRadius: designTokens.radius.pill, backgroundColor: "#FFFFFF", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "#E5E7EB", zIndex: 2 },
-  avatarWrap: { position: "relative" },
+  avatarWrap: { position: "relative", marginTop: -34, marginStart: designTokens.spacing.sm },
   statusDot: { position: "absolute", right: 1, bottom: 2, width: 15, height: 15, borderRadius: 8, borderWidth: 2 },
   statusLabel: { fontSize: designTokens.typography.caption, fontWeight: designTokens.fontWeights.semibold },
+  storeStatusBadge: { flexDirection: "row", alignItems: "center", alignSelf: "flex-start", gap: 6, paddingHorizontal: 9, paddingVertical: 5, borderRadius: designTokens.radius.pill },
+  storeStatusDot: { width: 7, height: 7, borderRadius: 4 },
+  nextOpeningText: { fontSize: designTokens.typography.caption, lineHeight: 18 },
   storeIdentity: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md },
   socialLinks: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.sm },
   socialButton: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: "#FFFFFF", borderWidth: StyleSheet.hairlineWidth, borderColor: "#E5E7EB" },
@@ -481,7 +471,7 @@ const styles = StyleSheet.create({
   storeName: { fontSize: designTokens.typography.title - 2, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
   metaText: { fontSize: designTokens.typography.caption + 1, textAlign: "auto", flexShrink: 1 },
   storeDescription: { fontSize: designTokens.typography.body - 1, lineHeight: 21, textAlign: "auto" },
-  tabs: { width: "100%" },
+  tabs: { width: "100%", backgroundColor: "#FFFFFF", zIndex: 9 },
   productsSection: { gap: designTokens.spacing.md },
   productGrid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", rowGap: designTokens.spacing.lg },
   productTile: { width: "48%" },
