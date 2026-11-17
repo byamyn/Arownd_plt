@@ -11,7 +11,7 @@ import {
   Inter_800ExtraBold
 } from "@expo-google-fonts/inter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ActivityIndicator, Animated, Easing, Platform, StyleSheet, View } from "react-native";
+import { Animated, Easing, Platform, StyleSheet, Text, View } from "react-native";
 import { useEffect, useRef, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -76,6 +76,9 @@ function RootLayoutContent() {
   const { language, isReady: languageReady } = useLanguage();
   const pathname = usePathname();
   const screenScale = useRef(new Animated.Value(1)).current;
+  const splashDotOne = useRef(new Animated.Value(1)).current;
+  const splashDotTwo = useRef(new Animated.Value(1)).current;
+  const splashDotThree = useRef(new Animated.Value(1)).current;
   const previousPathname = useRef(pathname);
   const { isReady: themeReady } = useThemePreference();
   const appReady = (fontsLoaded || Boolean(fontError)) && themeReady && languageReady;
@@ -98,6 +101,22 @@ function RootLayoutContent() {
     animation.start();
     return () => animation.stop();
   }, [pathname, screenScale]);
+
+  useEffect(() => {
+    const createPulse = (value: Animated.Value) => Animated.loop(
+      Animated.sequence([
+        Animated.timing(value, { toValue: 0.2, duration: 260, useNativeDriver: true }),
+        Animated.timing(value, { toValue: 1, duration: 260, useNativeDriver: true })
+      ])
+    );
+    const pulses = Animated.stagger(150, [
+      createPulse(splashDotOne),
+      createPulse(splashDotTwo),
+      createPulse(splashDotThree)
+    ]);
+    pulses.start();
+    return () => pulses.stop();
+  }, [splashDotOne, splashDotTwo, splashDotThree]);
 
   useEffect(() => {
     if (!appReady) return;
@@ -202,11 +221,16 @@ function RootLayoutContent() {
           pointerEvents="auto"
           style={[StyleSheet.absoluteFill, styles.splash, { backgroundColor: theme.colors.background }]}
         >
-          <View style={[styles.logo, { top: insets.top + 32 }]}>
-            <Logo color={theme.colors.foreground} width={160} />
+          <View style={styles.logo}>
+            <Logo color={theme.colors.foreground} width={220} />
           </View>
-          <View style={styles.indicator}>
-            <ActivityIndicator size="large" color={theme.colors.accentOnSurface} />
+          <View style={[styles.splashFooter, { bottom: Math.max(insets.bottom, 12) + 12 }]}>
+            <Text style={[styles.splashCaption, { color: theme.colors.foreground }]}>
+              he's coming
+              <Animated.Text style={{ opacity: splashDotOne }}>.</Animated.Text>
+              <Animated.Text style={{ opacity: splashDotTwo }}>.</Animated.Text>
+              <Animated.Text style={{ opacity: splashDotThree }}>.</Animated.Text>
+            </Text>
           </View>
         </View>
       ) : null}
@@ -223,19 +247,26 @@ const styles = StyleSheet.create({
   },
   splash: {
     alignItems: "center",
-    justifyContent: "flex-start",
+    justifyContent: "center",
     zIndex: 10,
     elevation: 10
   },
   logo: {
     position: "absolute",
-    alignItems: "center"
-  },
-  indicator: {
-    position: "absolute",
     top: "50%",
-    marginTop: -20,
+    alignItems: "center",
+    justifyContent: "center",
+    transform: [{ translateY: -20 }]
+  },
+  splashFooter: {
+    position: "absolute",
     alignItems: "center",
     justifyContent: "center"
+  },
+  splashCaption: {
+    fontSize: 12,
+    lineHeight: 18,
+    letterSpacing: 1.1,
+    fontWeight: "500"
   }
 });
