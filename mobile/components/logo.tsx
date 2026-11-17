@@ -1,20 +1,18 @@
-import Svg, { G, Path, Polygon } from "react-native-svg";
-
-import { brandColors } from "@/lib/design-system";
+import Svg, { Ellipse, G, Path } from "react-native-svg";
 
 type LogoProps = {
-  /** Color used for the D, O, W, A and R letter paths. */
+  /** Theme-aware color for the complete Arownd wordmark. */
   color: string;
   /** Rendered width in React Native layout units. */
   width?: number;
 };
 
-const VIEW_BOX = "151 173 1634 379";
-const ASPECT_RATIO = 1634 / 379;
+const VIEW_BOX = "-8 -8 436 76";
+const ASPECT_RATIO = 436 / 76;
 
 /**
- * Official Arownd wordmark, using the exact vector paths from the brand SVG.
- * The letterforms follow the active theme; the N mark remains brand yellow.
+ * Official adaptive Arownd wordmark.
+ * All letterforms follow the active theme: black in light mode, white in dark mode.
  */
 export default function Logo({ color, width = 160 }: LogoProps) {
   const height = width / ASPECT_RATIO;
@@ -22,13 +20,69 @@ export default function Logo({ color, width = 160 }: LogoProps) {
   return (
     <Svg width={width} height={height} viewBox={VIEW_BOX}>
       <G fill={color}>
-        <Path fillRule="evenodd" d="M 1502.7 307.1 L 1593.7 307.0 C 1620.9 307.0 1658.8 305.1 1684.0 311.5 C 1704.8 316.7 1723.9 327.1 1739.4 341.8 C 1761.4 362.4 1774.2 390.8 1775.1 420.9 C 1775.8 454.1 1762.8 480.1 1740.4 503.6 C 1724.9 518.4 1705.9 529.0 1685.1 534.4 C 1660.4 540.9 1624.5 539.1 1598.1 539.0 L 1502.8 539.0 L 1502.7 307.1z M 1528.8 331.6 L 1610.2 331.6 C 1629.8 331.6 1657.8 330.4 1676.1 334.8 C 1693.9 338.9 1710.2 347.7 1723.3 360.4 C 1740.2 376.7 1750.0 399.0 1750.3 422.5 C 1750.6 448.6 1739.1 468.8 1721.3 487.0 C 1685.0 520.1 1651.4 515.3 1606.3 515.2 L 1528.9 515.1 L 1528.8 331.6z" />
-        <Path fillRule="evenodd" d="M 719.7 307.3 C 784.4 297.2 856.7 341.0 866.7 408.3 C 870.8 436.8 863.4 465.8 846.0 488.8 C 824.4 517.9 792.3 534.8 756.8 540.0 C 722.3 545.0 681.2 536.6 654.0 514.9 C 562.3 442.0 611.4 322.5 719.7 307.3z M 729.6 330.4 C 809.9 326.0 876.6 400.9 825.1 475.8 C 807.9 500.9 777.4 513.9 747.8 517.9 C 716.2 519.1 690.6 514.1 665.6 493.8 C 607.0 446.1 625.9 363.1 694.6 337.8 C 706.9 333.2 716.5 331.6 729.6 330.4z" />
-        <Path d="M 854.6 310.0 L 882.9 310.0 C 892.3 330.1 904.3 352.1 914.7 371.9 C 933.8 407.7 952.4 443.8 970.3 480.1 C 993.1 440.9 1017.5 402.6 1043.5 365.4 C 1067.7 398.4 1096.2 444.7 1118.0 479.7 C 1144.4 424.3 1177.7 366.2 1205.7 310.0 L 1234.2 310.1 C 1227.6 324.8 1218.7 341.7 1211.3 356.4 C 1180.1 416.3 1149.5 476.6 1119.5 537.2 C 1097.9 496.9 1068.2 446.2 1043.3 407.9 C 1017.7 446.5 992.3 497.0 968.5 537.2 C 934.2 460.4 891.2 385.3 854.6 310.0z" />
-        <Path fillRule="evenodd" d="M 329.2 307.2 C 362.3 307.0 390.6 330.8 407.9 356.6 C 445.7 413.0 481.5 475.5 512.1 536.3 L 483.1 536.3 C 472.4 513.6 453.7 481.4 440.8 460.0 C 418.5 422.7 383.8 349.9 343.9 332.8 C 301.1 323.3 256.7 414.7 239.7 445.7 C 222.9 475.8 206.3 506.1 190.0 536.4 L 161.1 536.4 C 172.1 513.0 188.2 483.9 201.3 461.4 C 230.6 411.3 268.0 320.2 329.2 307.2z M 279.1 428.9 L 393.3 428.9 L 406.2 452.6 L 394.2 452.8 L 266.2 452.8 L 279.1 428.9z" />
-        <Path d="M 390.9 307.2 C 392.1 307.2 393.3 307.2 394.4 307.2 L 468.1 307.2 C 488.5 307.2 521.9 307.1 541.0 311.3 C 587.8 321.6 609.6 380.4 573.6 415.6 C 551.6 437.1 529.5 436.1 501.0 436.1 L 501.0 436.0 C 539.5 468.1 577.3 503.8 616.0 536.3 L 578.6 536.3 C 532.5 495.7 487.3 453.9 441.0 413.7 C 483.0 413.1 489.5 415.1 531.5 411.9 C 541.3 411.2 556.7 400.6 561.6 391.4 C 574.9 366.6 558.4 339.9 532.5 333.8 C 516.1 330.9 491.0 332.3 473.4 332.3 C 475.8 332.5 438.3 332.4 400.7 332.2 L 346.0 332.2 L 346.0 318.0 L 330.0 318.0 L 330.0 307.2z M 436.0 413.0 L 441.0 413.7 L 501.0 436.0 L 445.0 436.0 z" />
+        <G>
+          <Path d="M-0.5,60 L25.5,0 L30.5,0 L56.5,60 L55.5,60 L28,6 L0.5,60 Z" />
+          <Path d="M8.50,41.25 L28.00,42.75 L28.00,39.25 L8.50,40.75 Z" />
+          <Path d="M28.00,42.75 L47.50,41.25 L47.50,40.75 L28.00,39.25 Z" />
+        </G>
+
+        <G transform="translate(66,0)">
+          <Path
+            d="M0,2.25 L0,57.75 M0,2.25 H30 C52,2.25 52,31 30,31 H0"
+            fill="none"
+            stroke={color}
+            strokeWidth={4.5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <Path d="M27.31,32.48 L53.55,59.99 L54.45,59.21 L30.69,29.52 Z" />
+        </G>
+
+        <G transform="translate(132,0)">
+          <Ellipse
+            cx={31}
+            cy={30}
+            rx={28.75}
+            ry={27.75}
+            fill="none"
+            stroke={color}
+            strokeWidth={4.5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </G>
+
+        <G transform="translate(206,0)">
+          <G transform="scale(0.45113) translate(-276,-178)">
+            <Path d="M276,179 L324,200 L350,262 L331,312 Z" />
+            <Path d="M349,211 L368,220 L387,211 L368,259 Z" />
+            <Path d="M460,179 L412,200 L386,262 L405,312 Z" />
+          </G>
+        </G>
+
+        <G transform="translate(301,0)">
+          <Path
+            d="M0,2.25 L0,57.75 M50,2.25 L50,57.75"
+            fill="none"
+            stroke={color}
+            strokeWidth={4.5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <Path d="M-0.55,3.00 L48.34,59.01 L51.66,55.99 L0.55,2.00 Z" />
+        </G>
+
+        <G transform="translate(370,0)">
+          <Path
+            d="M0,2.25 L0,57.75 M0,2.25 H22 C58,2.25 58,57.75 22,57.75 H0"
+            fill="none"
+            stroke={color}
+            strokeWidth={4.5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </G>
       </G>
-      <Polygon fill={brandColors.primary} points="1240.0,537.0 1269.3,303.0 1296.7,303.0 1352.9,471.6 1470.4,257.4 1441.5,241.6 1526.0,183.0 1522.1,285.8 1493.2,270.0 1347.1,536.4 1295.0,380.0" />
     </Svg>
   );
 }
