@@ -216,7 +216,7 @@ export function ProductImageGallery({
       {images.length > 1 ? (
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ flexDirection: "row", gap: designTokens.spacing.sm }}>
           {images.map((uri, index) => (
-            <Pressable key={uri + index} accessibilityRole="button" accessibilityLabel={`${accessibilityLabel} ${index + 1}`} accessibilityState={{ selected: index === selectedIndex }} onPress={() => onSelect(index)} style={{ borderRadius: theme.radius.md, borderWidth: index === selectedIndex ? 2 : 1, borderColor: index === selectedIndex ? theme.colors.accentMuted : theme.colors.border, overflow: "hidden" }}>
+            <Pressable key={uri + index} accessibilityRole="button" accessibilityLabel={`${accessibilityLabel} ${index + 1}`} accessibilityState={{ selected: index === selectedIndex }} onPress={() => onSelect(index)} style={{ borderRadius: theme.radius.md, borderWidth: index === selectedIndex ? 2 : 1, borderColor: index === selectedIndex ? theme.colors.accent : theme.colors.border, overflow: "hidden" }}>
               <Image source={{ uri }} resizeMode="cover" style={{ width: 64, height: 64 }} />
             </Pressable>
           ))}
@@ -255,7 +255,7 @@ export function PaymentMethodCard({
 }) {
   const theme = useAppTheme();
   return (
-    <Pressable accessibilityRole="radio" accessibilityLabel={accessibilityLabel} accessibilityState={{ checked: selected }} onPress={onPress} style={[{ minHeight: 64, flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md, padding: designTokens.spacing.md, borderRadius: theme.radius.lg, borderWidth: selected ? 2 : 1, borderColor: selected ? theme.colors.accentMuted : theme.colors.border, backgroundColor: theme.colors.surface }, style]}>
+    <Pressable accessibilityRole="radio" accessibilityLabel={accessibilityLabel} accessibilityState={{ checked: selected }} onPress={onPress} style={[{ minHeight: 64, flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md, padding: designTokens.spacing.md, borderRadius: theme.radius.lg, borderWidth: selected ? 2 : 1, borderColor: selected ? theme.colors.accent : theme.colors.border, backgroundColor: theme.colors.surface }, style]}>
       {children}
     </Pressable>
   );
