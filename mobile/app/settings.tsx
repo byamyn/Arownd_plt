@@ -384,10 +384,10 @@ export default function SettingsScreen() {
             setLanguageError(false);
             void setLanguage("ar").catch(() => setLanguageError(true));
           }}
-          style={[styles.languageOption, language === "ar" && { backgroundColor: theme.mode === "light" ? theme.colors.accent : theme.colors.surfaceSecondary }]}
+          style={[styles.languageOption, language === "ar" && { backgroundColor: theme.colors.accent }]}
         >
-          <UiText weight={language === "ar" ? "700" : "500"}>{translate("settingsLanguageArabic")}</UiText>
-          {language === "ar" ? <Icon name="circle-check" size={19} color={theme.mode === "light" ? theme.colors.accentForeground : theme.colors.accentMuted} /> : null}
+          <UiText weight={language === "ar" ? "700" : "500"} style={language === "ar" ? { color: theme.colors.accentForeground } : undefined}>{translate("settingsLanguageArabic")}</UiText>
+          {language === "ar" ? <Icon name="circle-check" size={19} color={theme.colors.accentForeground} /> : null}
         </PressableSurface>
         <PressableSurface
           accessibilityRole="button"
@@ -396,9 +396,9 @@ export default function SettingsScreen() {
             setLanguageError(false);
             void setLanguage("en").catch(() => setLanguageError(true));
           }}
-          style={[styles.languageOption, language === "en" && { backgroundColor: theme.mode === "light" ? theme.colors.accent : theme.colors.surfaceSecondary }]}
+          style={[styles.languageOption, language === "en" && { backgroundColor: theme.colors.accent }]}
         >
-          <UiText weight={language === "en" ? "700" : "500"}>{translate("settingsLanguageEnglish")}</UiText>
+          <UiText weight={language === "en" ? "700" : "500"} style={language === "en" ? { color: theme.colors.accentForeground } : undefined}>{translate("settingsLanguageEnglish")}</UiText>
           {language === "en" ? <Icon name="circle-check" size={19} color={theme.mode === "light" ? theme.colors.accentForeground : theme.colors.accentMuted} /> : null}
         </PressableSurface>
         {languageError ? <UiText tone="danger">{translate("settingsLanguageSaveError")}</UiText> : null}
