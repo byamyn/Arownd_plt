@@ -288,7 +288,8 @@ export default function ProfileScreen() {
             </PressableSurface>
           </Card>
 
-          <Card contentStyle={styles.accountLinksCard}>
+          {merchantAccess.data?.status === "merchant_ready" && merchantAccess.data.store?.id ? (
+            <Card contentStyle={styles.accountLinksCard}>
               <PressableSurface
                 accessibilityRole="button"
                 accessibilityLabel={translate("profileSwitchToStore")}
