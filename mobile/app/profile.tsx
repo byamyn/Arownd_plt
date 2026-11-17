@@ -297,7 +297,7 @@ export default function ProfileScreen() {
                 style={styles.accountLinkRow}
               >
                 <View style={[styles.accountLinkIcon, { backgroundColor: theme.colors.surfaceSecondary }]}>
-                  <Icon name="store" size={20} color={theme.colors.accent} />
+                  <Icon name="store" size={20} color={theme.colors.accentOnSurface} />
                 </View>
                 <View style={styles.accountLinkText}>
                   <UiText weight="700">{translate("merchantMyStore")}</UiText>
@@ -310,7 +310,7 @@ export default function ProfileScreen() {
 
           <Card contentStyle={styles.accountLinksCard}>
             <PressableSurface accessibilityRole="button" accessibilityLabel={translate("profileEditDetails")} onPress={() => setAccountSheet("delivery")} style={styles.accountLinkRow}>
-              <View style={[styles.accountLinkIcon, { backgroundColor: theme.colors.surfaceSecondary }]}><Icon name="user" size={20} color={theme.colors.accent} /></View>
+              <View style={[styles.accountLinkIcon, { backgroundColor: theme.colors.surfaceSecondary }]}><Icon name="user" size={20} color={theme.colors.accentOnSurface} /></View>
               <View style={styles.accountLinkText}>
                 <UiText weight="700">{translate("profileEditDetails")}</UiText>
                 <Caption>{translate("profileEditDetailsHint")}</Caption>
@@ -319,7 +319,7 @@ export default function ProfileScreen() {
             </PressableSurface>
             <View style={[styles.accountLinkDivider, { backgroundColor: theme.colors.border }]} />
             <PressableSurface accessibilityRole="button" accessibilityLabel={translate("profileAddresses")} onPress={() => setAccountSheet("addresses")} style={styles.accountLinkRow}>
-              <View style={[styles.accountLinkIcon, { backgroundColor: theme.colors.surfaceSecondary }]}><Icon name="map-pin" size={20} color={theme.colors.accent} /></View>
+              <View style={[styles.accountLinkIcon, { backgroundColor: theme.colors.surfaceSecondary }]}><Icon name="map-pin" size={20} color={theme.colors.accentOnSurface} /></View>
               <View style={styles.accountLinkText}>
                 <UiText weight="700">{translate("profileAddresses")}</UiText>
                 <Caption>{translate("profileAddressesHint")}</Caption>
@@ -328,7 +328,7 @@ export default function ProfileScreen() {
             </PressableSurface>
             <View style={[styles.accountLinkDivider, { backgroundColor: theme.colors.border }]} />
             <PressableSurface accessibilityRole="button" accessibilityLabel={translate("profileInvite")} onPress={() => setAccountSheet("invite")} style={styles.accountLinkRow}>
-              <View style={[styles.accountLinkIcon, { backgroundColor: theme.colors.surfaceSecondary }]}><Icon name="gift" size={20} color={theme.colors.accent} /></View>
+              <View style={[styles.accountLinkIcon, { backgroundColor: theme.colors.surfaceSecondary }]}><Icon name="gift" size={20} color={theme.colors.accentOnSurface} /></View>
               <View style={styles.accountLinkText}>
                 <UiText weight="700">{translate("profileInvite")}</UiText>
                 <Caption>{translate("profileInviteHint")}</Caption>
@@ -342,7 +342,7 @@ export default function ProfileScreen() {
           {verificationReviewer.data === true ? (
             <Card contentStyle={styles.accountLinksCard}>
               <PressableSurface accessibilityRole="button" accessibilityLabel={translate("verificationModerationTitle")} onPress={() => router.push("/moderation/store-verifications")} style={styles.accountLinkRow}>
-                <View style={[styles.accountLinkIcon, { backgroundColor: theme.colors.surfaceSecondary }]}><Icon name="circle-check" size={20} color={theme.colors.accent} /></View>
+                <View style={[styles.accountLinkIcon, { backgroundColor: theme.colors.surfaceSecondary }]}><Icon name="circle-check" size={20} color={theme.colors.accentOnSurface} /></View>
                 <View style={styles.accountLinkText}>
                   <UiText weight="700">{translate("verificationModerationTitle")}</UiText>
                   <Caption>{translate("verificationModerationSubtitle")}</Caption>
@@ -379,7 +379,7 @@ export default function ProfileScreen() {
           disabled={uploadAvatar.isPending || removeAvatar.isPending}
           style={[styles.avatarOption, { backgroundColor: theme.colors.surfaceSecondary }]}
         >
-          <Icon name="image" size={21} color={theme.colors.accent} />
+          <Icon name="image" size={21} color={theme.colors.accentOnSurface} />
           <UiText weight="600">{translate("profileAvatarChooseFromGallery")}</UiText>
         </PressableSurface>
         <PressableSurface
@@ -387,7 +387,7 @@ export default function ProfileScreen() {
           disabled={uploadAvatar.isPending || removeAvatar.isPending}
           style={[styles.avatarOption, { backgroundColor: theme.colors.surfaceSecondary }]}
         >
-          <Icon name="camera" size={21} color={theme.colors.accent} />
+          <Icon name="camera" size={21} color={theme.colors.accentOnSurface} />
           <UiText weight="600">{translate("profileAvatarTakePhoto")}</UiText>
         </PressableSurface>
         {profile.data?.avatar_url ? (
