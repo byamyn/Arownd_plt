@@ -332,22 +332,22 @@ export default function ProfileScreen() {
               </View>
               <Icon name="chevron-left" size={18} color={theme.colors.subtle} />
             </PressableSurface>
-            {verificationReviewer.data === true ? (
-              <>
-                <View style={[styles.accountLinkDivider, { backgroundColor: theme.colors.border }]} />
-                <PressableSurface accessibilityRole="button" accessibilityLabel={translate("verificationModerationTitle")} onPress={() => router.push("/moderation/store-verifications")} style={styles.accountLinkRow}>
-                  <View style={[styles.accountLinkIcon, { backgroundColor: theme.colors.surfaceSecondary }]}><Icon name="circle-check" size={20} color={theme.colors.accent} /></View>
-                  <View style={styles.accountLinkText}>
-                    <UiText weight="700">{translate("verificationModerationTitle")}</UiText>
-                    <Caption>{translate("verificationModerationSubtitle")}</Caption>
-                  </View>
-                  <Icon name="chevron-left" size={18} color={theme.colors.subtle} />
-                </PressableSurface>
-              </>
-            ) : null}
           </Card>
 
 
+
+          {verificationReviewer.data === true ? (
+            <Card contentStyle={styles.accountLinksCard}>
+              <PressableSurface accessibilityRole="button" accessibilityLabel={translate("verificationModerationTitle")} onPress={() => router.push("/moderation/store-verifications")} style={styles.accountLinkRow}>
+                <View style={[styles.accountLinkIcon, { backgroundColor: theme.colors.surfaceSecondary }]}><Icon name="circle-check" size={20} color={theme.colors.accent} /></View>
+                <View style={styles.accountLinkText}>
+                  <UiText weight="700">{translate("verificationModerationTitle")}</UiText>
+                  <Caption>{translate("verificationModerationSubtitle")}</Caption>
+                </View>
+                <Icon name="chevron-left" size={18} color={theme.colors.subtle} />
+              </PressableSurface>
+            </Card>
+          ) : null}
 
           {merchantAccess.data?.status === "merchant_ready" && merchantAccess.data.store?.id ? (
 
