@@ -296,10 +296,10 @@ const styles = StyleSheet.create({
   ownerDayChip: { borderWidth: 1, borderRadius: designTokens.radius.pill, paddingHorizontal: designTokens.spacing.md, paddingVertical: designTokens.spacing.sm },
   ownerImageActions: { flexDirection: "row", flexWrap: "wrap", gap: designTokens.spacing.sm },
   coverImage: { width: "100%", height: 136, borderRadius: 0 },
-  coverWrap: { position: "relative", marginHorizontal: -designTokens.spacing.lg },
+  coverWrap: { position: "relative", alignSelf: "stretch", marginLeft: -designTokens.spacing.lg, marginRight: -designTokens.spacing.lg },
   imageEditButton: { position: "absolute", right: designTokens.spacing.md, bottom: designTokens.spacing.md, width: 36, height: 36, borderRadius: designTokens.radius.pill, backgroundColor: "#FFFFFF", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "#E5E7EB" },
   logoEditButton: { position: "absolute", right: -3, top: -3, width: 26, height: 26, borderRadius: designTokens.radius.pill, backgroundColor: "#FFFFFF", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "#E5E7EB", zIndex: 2 },
-  avatarWrap: { position: "relative", alignSelf: "flex-start", marginTop: -38, marginBottom: designTokens.spacing.xs },
+  avatarWrap: { position: "relative", alignSelf: "flex-start", marginTop: -44, marginBottom: designTokens.spacing.xs },
 
   statusLabel: { fontSize: designTokens.typography.caption, fontWeight: designTokens.fontWeights.semibold },
   storeStatusBadge: { flexDirection: "row", alignItems: "center", alignSelf: "flex-start", gap: 6, paddingHorizontal: 9, paddingVertical: 5, borderRadius: designTokens.radius.pill },
