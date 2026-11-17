@@ -194,7 +194,7 @@ function AddressesContent() {
     <Button label={translate("back")} variant="ghost" onPress={() => setEditor(undefined)} disabled={save.isPending} />
     <Heading level={3}>{translate(editor ? "addressesEditTitle" : "addressesAddTitle")}</Heading>
     <FormLabel>{translate("addressesType")}</FormLabel>
-    <SegmentedControl value={label} onChange={(value) => { if (value === "home" || value === "work" || value === "other") setLabel(value); }} options={[{ key: "home", label: translate("addressesHome") }, { key: "work", label: translate("addressesWork") }, { key: "other", label: translate("addressesOther") }]} />
+    <SegmentedControl accessibilityLabel={translate("addressesType")} value={label} onChange={(value) => { if (value === "home" || value === "work" || value === "other") setLabel(value); }} options={[{ key: "home", label: translate("addressesHome") }, { key: "work", label: translate("addressesWork") }, { key: "other", label: translate("addressesOther") }]} />
     <FormLabel>{translate("addressesRecipient")}</FormLabel><TextField value={recipient} onChangeText={setRecipient} />
     <FormLabel>{translate("addressesPhone")}</FormLabel><TextField value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
     <FormLabel>{getRegionLevelDisplayName(regions.data.selectedLevel, language)}</FormLabel>
