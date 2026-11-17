@@ -24,7 +24,7 @@ type DeliveryPickerItem = { id: number | string; name: string };
 export function ProfileAccountSheet({ section, onClose }: { section: ProfileAccountSection; onClose: () => void }) {
   const title = section === "delivery" ? translate("deliveryProfileTitle") : section === "addresses" ? translate("addressesTitle") : translate("inviteTitle");
   return (
-    <View style={{ flex: 1, maxHeight: "88%", minHeight: 220, gap: designTokens.spacing.md }}>
+    <View style={{ flex: 1, maxHeight: "100%", minHeight: 0, gap: designTokens.spacing.md }}>
       <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
         <PressableSurface accessibilityLabel={translate("back")} onPress={onClose} hitSlop={10}>
           <Icon name="x" size={20} />
