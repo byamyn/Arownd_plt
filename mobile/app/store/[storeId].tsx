@@ -5,7 +5,7 @@ import * as ImagePicker from "expo-image-picker";
 import { Linking, Pressable, Share, StyleSheet, View } from "react-native";
 import Svg, { Circle, Path, Rect } from "react-native-svg";
 
-import { CustomerScreen, CustomerSearch, EmptyState, ErrorState, ProductTile, SectionTitle } from "@/components/customer-ui";
+import { CustomerScreen, CustomerSearch, EmptyState, ErrorState, ProductTile } from "@/components/customer-ui";
 import { FavoriteButton } from "@/components/favorite-button";
 import { fetchProductDetails, fetchProductOffers, fetchStoreDetails, fetchStoreOffers, formatMarketPrice, getPrimaryImage } from "@/lib/catalog";
 import { fetchBrowsingCurrencyCode } from "@/lib/country-service";
@@ -26,7 +26,7 @@ type StoreTab = "products" | "about" | "reviews";
 function getNextOpening(openingHours: unknown, countryCode?: string | null): { weekday: number; time: string } | null {
   if (!openingHours || typeof openingHours !== "object") return null;
   const hours = openingHours as { open?: unknown; closed_days?: unknown };
-  if (typeof hours.open !== "string" || !/^\\d{2}:\\d{2}$/.test(hours.open) || !Array.isArray(hours.closed_days)) return null;
+  if (typeof hours.open !== "string" || !/^\d{2}:\d{2}$/.test(hours.open) || !Array.isArray(hours.closed_days)) return null;
   const timeZone = countryCode ? STORE_TIME_ZONES[countryCode] : undefined;
   const parts = new Intl.DateTimeFormat("en-US", { timeZone, weekday: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(new Date());
   const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
@@ -59,7 +59,7 @@ function getStoreOpenState(openingHours: unknown, countryCode?: string | null): 
   const hours = openingHours as { open?: unknown; close?: unknown; closed_days?: unknown };
   if (typeof hours.open !== "string" || typeof hours.close !== "string" || !Array.isArray(hours.closed_days)) return false;
   const parseMinutes = (value: string) => {
-    const match = /^(\\d{2}):(\\d{2})$/.exec(value);
+    const match = /^(\d{2}):(\d{2})$/.exec(value);
     return match ? Number(match[1]) * 60 + Number(match[2]) : null;
   };
   const open = parseMinutes(hours.open);
@@ -208,7 +208,7 @@ export default function StoreDetailsScreen() {
           <IconButton accessibilityLabel={translate("storeShare")} onPress={() => { void Share.share({ message: `${translate("storeSharePrefix")} ${details.name}` }); }} icon={<Icon name="share-2" color={theme.colors.foreground} size={19} />} />
           <FavoriteButton kind="stores" id={storeId} iconOnly />
         </>}
-        style={styles.stickyStoreHeader}
+        style={[styles.stickyStoreHeader, { backgroundColor: theme.colors.background }]}
       />
 
       <Card contentStyle={styles.storeHero}>
@@ -274,7 +274,7 @@ export default function StoreDetailsScreen() {
         </View>
         {details.latitude != null && details.longitude != null || details.phone ? (
           <View style={styles.storeActionsRow}>
-            {details.phone ? <Button label={translate("storeCall")} onPress={() => { void Linking.openURL(`tel:${details.phone!.replace(/[^\\d+]/g, "")}`); }} variant="outline" fullWidth startIcon={<Icon name="phone" size={17} color={theme.colors.foreground} accessibilityHidden />} /> : null}
+            {details.phone ? <Button label={translate("storeCall")} onPress={() => { void Linking.openURL(`tel:${details.phone!.replace(/[^\d+]/g, "")}`); }} variant="outline" fullWidth startIcon={<Icon name="phone" size={17} color={theme.colors.foreground} accessibilityHidden />} /> : null}
             {details.latitude != null && details.longitude != null ? <Button label={translate("mapDirections")} onPress={() => router.push({ pathname: "/map", params: { storeId, directions: "1" } })} variant="outline" fullWidth startIcon={<Icon name="navigation" size={17} color={theme.colors.foreground} accessibilityHidden />} /> : null}
           </View>
         ) : null}
@@ -375,7 +375,7 @@ export default function StoreDetailsScreen() {
         onChange={(value) => {
           if (value === "products" || value === "about" || value === "reviews") setTab(value);
         }}
-        style={styles.tabs}
+        style={[styles.tabs, { backgroundColor: theme.colors.background }]}
       />
 
       {tab === "products" ? (
