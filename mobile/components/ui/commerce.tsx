@@ -177,13 +177,13 @@ export function ProductVariantSelector({
               minHeight: theme.dimensions.controlHeight.md,
               paddingHorizontal: designTokens.spacing.md,
               borderRadius: theme.radius.md,
-              backgroundColor: selected && theme.mode === "light" ? theme.colors.accent : theme.colors.surfaceSecondary,
+              backgroundColor: selected ? theme.colors.accent : theme.colors.surfaceSecondary,
               alignItems: "center",
               justifyContent: "center",
               opacity: option.disabled ? 0.45 : pressed ? 0.75 : 1
             }]}
           >
-            <UiText style={{ color: selected ? (theme.mode === "dark" ? theme.colors.accent : theme.colors.accentForeground) : theme.colors.foreground, fontSize: theme.typography.caption + 1, fontWeight: selected ? theme.fontWeights.bold : theme.fontWeights.medium }}>
+            <UiText style={{ color: selected ? theme.colors.accentForeground : theme.colors.foreground, fontSize: theme.typography.caption + 1, fontWeight: selected ? theme.fontWeights.bold : theme.fontWeights.medium }}>
               {option.label}
             </UiText>
           </Pressable>
