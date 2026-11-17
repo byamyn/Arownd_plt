@@ -19,7 +19,7 @@ import { ReviewPanel } from "@/components/review-panel";
 import { ContentReportAction } from "@/components/content-report-action";
 import { designTokens, useAppTheme } from "@/lib/theme";
 import { VerifiedBadge } from "@/components/ui/identity";
-import { AppHeader, Avatar, Button, Card, Icon, IconButton, Image as UiImage, SegmentedControl, StoreCardSkeleton, ProductCardSkeleton, Text as UiText, TextField } from "@/components/ui";
+import { AppHeader, Avatar, Button, Card, Icon, IconButton, Image as UiImage, RatingStars, SegmentedControl, StoreCardSkeleton, ProductCardSkeleton, Text as UiText, TextField } from "@/components/ui";
 
 type StoreTab = "products" | "about" | "reviews";
 
@@ -34,8 +34,9 @@ function getNextOpening(openingHours: unknown, countryCode?: string | null): { w
   const today = dayMap[values.weekday ?? ""];
   if (today === undefined) return null;
   const now = Number(values.hour) * 60 + Number(values.minute);
-  const [openHour, openMinute] = hours.open.split(":").map(Number);
-  const openAt = openHour * 60 + openMinute;
+  const openingMatch = /^(\\d{2}):(\\d{2})$/.exec(hours.open);
+  if (!openingMatch) return null;
+  const openAt = Number(openingMatch[1]) * 60 + Number(openingMatch[2]);
   const closedDays = hours.closed_days.filter((value): value is number => Number.isInteger(value));
   for (let offset = 0; offset < 8; offset += 1) {
     const weekday = (today + offset) % 7;
@@ -159,6 +160,11 @@ export default function StoreDetailsScreen() {
   if (!store.data) return <CustomerScreen><EmptyState title={translate("detailNotFound")} hint={translate("storeNoDescription")} /></CustomerScreen>;
 
   const details = store.data;
+  const weekdayKeys = [
+    "merchantWeekdaySunday", "merchantWeekdayMonday", "merchantWeekdayTuesday",
+    "merchantWeekdayWednesday", "merchantWeekdayThursday", "merchantWeekdayFriday",
+    "merchantWeekdaySaturday"
+  ] as const;
   const isStoreOwner = ownerStoreId === details.id;
   const chooseOwnerImage = async (kind: "logo" | "cover") => {
     if (!ownerStoreId || ownerImageBusy || ownerSave.isPending) return;
@@ -205,7 +211,7 @@ export default function StoreDetailsScreen() {
         title={details.name}
         leading={<IconButton accessibilityLabel={translate("back")} onPress={() => router.back()} icon={<Icon name="chevron-right" color={theme.colors.foreground} size={20} />} />}
         trailing={<>
-          <IconButton accessibilityLabel={translate("storeShare")} onPress={() => { void Share.share({ message: `${translate("storeSharePrefix")} ${details.name}` }); }} icon={<Icon name="share-2" color={theme.colors.foreground} size={19} />} />
+          <IconButton accessibilityLabel={translate("storeShare")} onPress={() => { void Share.share({ message: `${translate("storeSharePrefix")} ${details.name}` }); }} icon={<Icon name="share" color={theme.colors.foreground} size={19} />} />
           <FavoriteButton kind="stores" id={storeId} iconOnly />
         </>}
         style={[styles.stickyStoreHeader, { backgroundColor: theme.colors.background }]}
@@ -270,7 +276,7 @@ export default function StoreDetailsScreen() {
               <View style={[styles.storeStatusDot, { backgroundColor: getStoreOpenState(details.opening_hours, details.country_code) ? theme.colors.success : theme.colors.danger }]} />
               <UiText style={[styles.statusLabel, { color: getStoreOpenState(details.opening_hours, details.country_code) ? theme.colors.success : theme.colors.danger }]}>{translate(getStoreOpenState(details.opening_hours, details.country_code) ? "storeOpen" : "storeClosed")}</UiText>
             </View>
-            {!getStoreOpenState(details.opening_hours, details.country_code) ? (() => { const next = getNextOpening(details.opening_hours, details.country_code); return next ? <UiText style={[styles.nextOpeningText, { color: theme.colors.muted }]}>{translate("storeNextOpening")} {translate((["merchantWeekdaySunday", "merchantWeekdayMonday", "merchantWeekdayTuesday", "merchantWeekdayWednesday", "merchantWeekdayThursday", "merchantWeekdayFriday", "merchantWeekdaySaturday"] as const)[next.weekday])} · {next.time}</UiText> : null; })() : null}
+            {!getStoreOpenState(details.opening_hours, details.country_code) ? (() => { const next = getNextOpening(details.opening_hours, details.country_code); const weekdayKey = next ? weekdayKeys[next.weekday] : undefined; return next && weekdayKey ? <UiText style={[styles.nextOpeningText, { color: theme.colors.muted }]}>{translate("storeNextOpening")} {translate(weekdayKey)} · {next.time}</UiText> : null; })() : null}
             {!getStoreOpenState(details.opening_hours, details.country_code) ? <UiText style={[styles.nextOpeningText, { color: theme.colors.muted }]}>{translate("storeAcceptingOrdersWhileClosed")}</UiText> : null}
           </View>
         </View>
@@ -425,7 +431,18 @@ export default function StoreDetailsScreen() {
             <UiText style={[styles.description, { color: theme.colors.muted }]}>{[details.address_line, details.commune].filter(Boolean).join("، ") || translate("storeNoAddress")}</UiText>
             {details.phone ? <><UiText style={[styles.fieldTitle, { color: theme.colors.foregroundSecondary }]}>{translate("storePhone")}</UiText><UiText style={[styles.description, { color: theme.colors.muted }]}>{details.phone}</UiText></> : null}
             {details.whatsapp ? <><UiText style={[styles.fieldTitle, { color: theme.colors.foregroundSecondary }]}>{translate("storeWhatsApp")}</UiText><UiText style={[styles.description, { color: theme.colors.muted }]}>{details.whatsapp}</UiText></> : null}
-            {social}
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: designTokens.spacing.md }}>
+              {[
+                { label: "Instagram", url: details.instagram_url },
+                { label: "Facebook", url: details.facebook_url },
+                { label: "TikTok", url: details.tiktok_url },
+                { label: translate("merchantStoreSettingsWebsite"), url: details.website_url }
+              ].filter((item): item is { label: string; url: string } => Boolean(item.url)).map((item) => (
+                <Pressable key={item.label} accessibilityRole="link" onPress={() => { void Linking.openURL(item.url); }}>
+                  <UiText style={{ color: theme.colors.accentMuted, fontWeight: designTokens.fontWeights.semibold }}>{item.label}</UiText>
+                </Pressable>
+              ))}
+            </View>
           </Card>
           <ContentReportAction targetType="store" targetId={storeId} />
         </>
