@@ -300,34 +300,50 @@ export default function MerchantStoreSettingsScreen() {
         <AppHeader
           title={translate("merchantStoreSettingsTitle")}        />
 
-        <Card contentStyle={styles.sectionCard}>
-          <Heading level={3}>{translate("merchantStoreLogo")}</Heading>
-          <View style={styles.brandingRow}>
-            {form.logo_url ? (
-              <UiImage uri={form.logo_url} accessibilityLabel={translate("merchantStoreLogo")} aspectRatio={1} style={styles.logoPreview} />
+        <View style={styles.storeEditorHero}>
+          <View style={styles.editorCoverWrap}>
+            {form.cover_url ? (
+              <UiImage uri={form.cover_url} accessibilityLabel={translate("merchantStoreCover")} aspectRatio={16 / 9} style={styles.editorCoverImage} />
             ) : (
-              <View style={[styles.logoPreview, styles.imagePlaceholder, { backgroundColor: theme.colors.surfaceMuted }]}>
-                <Icon name="store" color={theme.colors.muted} size={28} accessibilityHidden />
+              <View style={[styles.editorCoverImage, styles.imagePlaceholder, { backgroundColor: theme.colors.surfaceMuted }]}>
+                <Icon name="image" color={theme.colors.muted} size={32} accessibilityHidden />
               </View>
             )}
-            <View style={styles.brandingDetails}>
-              <UiText style={[styles.brandingHint, { color: theme.colors.muted }]}>{translate("merchantStoreLogoHint")}</UiText>
-              <Button
-                label={translate("merchantStoreImageUpload")}
+            <PressableSurface
+              accessibilityRole="button"
+              accessibilityLabel={translate("merchantStoreCover")}
+              onPress={() => void chooseStoreImage("cover")}
+              disabled={imageBusy !== null || mutation.isPending}
+              style={[styles.editorImageAction, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}
+            >
+              {imageBusy === "cover" ? <LoadingState label={translate("merchantStoreImageUpload")} /> : <Icon name="camera" color={theme.colors.foreground} size={18} accessibilityHidden />}
+            </PressableSurface>
+          </View>
+          <View style={styles.editorIdentity}>
+            <View style={styles.editorLogoWrap}>
+              {form.logo_url ? (
+                <UiImage uri={form.logo_url} accessibilityLabel={translate("merchantStoreLogo")} aspectRatio={1} style={styles.editorLogo} />
+              ) : (
+                <View style={[styles.editorLogo, styles.imagePlaceholder, { backgroundColor: theme.colors.surfaceMuted }]}>
+                  <Icon name="store" color={theme.colors.muted} size={28} accessibilityHidden />
+                </View>
+              )}
+              <PressableSurface
+                accessibilityRole="button"
+                accessibilityLabel={translate("merchantStoreLogo")}
                 onPress={() => void chooseStoreImage("logo")}
-                loading={imageBusy === "logo"}
                 disabled={imageBusy !== null || mutation.isPending}
-                variant="outline"
-                size="sm"
-              />
+                style={[styles.editorLogoAction, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}
+              >
+                {imageBusy === "logo" ? <LoadingState label={translate("merchantStoreImageUpload")} /> : <Icon name="camera" color={theme.colors.foreground} size={14} accessibilityHidden />}
+              </PressableSurface>
+            </View>
+            <View style={styles.editorIdentityFields}>
+              <Field label={translate("merchantStoreSettingsName")} value={form.name} onChangeText={(value) => update("name", value)} theme={theme} disabled={mutation.isPending} error={fieldErrors.name} />
             </View>
           </View>
-          <View style={styles.coverRow}>
-            {form.cover_url ? <UiImage uri={form.cover_url} accessibilityLabel={translate("merchantStoreCover")} aspectRatio={16 / 9} style={styles.coverPreview} /> : <View style={[styles.coverPreview, styles.imagePlaceholder, { backgroundColor: theme.colors.surfaceMuted }]}><Icon name="image" color={theme.colors.muted} size={28} accessibilityHidden /></View>}
-            <View style={styles.brandingDetails}>
-              <UiText style={[styles.brandingHint, { color: theme.colors.muted }]}>{translate("merchantStoreCover")}</UiText>
-              <Button label={translate("merchantStoreImageUpload")} onPress={() => void chooseStoreImage("cover")} loading={imageBusy === "cover"} disabled={imageBusy !== null || mutation.isPending} variant="outline" size="sm" />
-            </View>
+          <View style={styles.editorDescription}>
+            <Field label={translate("merchantStoreSettingsDescription")} value={form.description} onChangeText={(value) => update("description", value)} theme={theme} hint={translate("merchantStoreSettingsDescriptionHint")} multiline disabled={mutation.isPending} error={fieldErrors.description} />
           </View>
           {fieldErrors.logo_url ? <UiText accessibilityRole="alert" style={[styles.error, { color: theme.colors.danger }]}>{fieldErrors.logo_url}</UiText> : null}
           {fieldErrors.cover_url ? <UiText accessibilityRole="alert" style={[styles.error, { color: theme.colors.danger }]}>{fieldErrors.cover_url}</UiText> : null}
@@ -339,12 +355,10 @@ export default function MerchantStoreSettingsScreen() {
           ) : null}
           {imageSaved ? <UiText style={[styles.success, { color: theme.mode === "light" ? theme.colors.successText : theme.colors.success }]}>{translate("merchantStoreImageSaved")}</UiText> : null}
           {imageCleanupPending ? <UiText style={[styles.error, { color: theme.mode === "light" ? theme.colors.dangerText : theme.colors.danger }]}>{translate("merchantStoreImageCleanupPending")}</UiText> : null}
-        </Card>
+        </View>
 
         <Card contentStyle={styles.sectionCard}>
           <Heading level={3}>{translate("merchantStoreDetailsTitle")}</Heading>
-          <Field label={translate("merchantStoreSettingsName")} value={form.name} onChangeText={(value) => update("name", value)} theme={theme} disabled={mutation.isPending} error={fieldErrors.name} />
-          <Field label={translate("merchantStoreSettingsDescription")} value={form.description} onChangeText={(value) => update("description", value)} theme={theme} hint={translate("merchantStoreSettingsDescriptionHint")} multiline disabled={mutation.isPending} error={fieldErrors.description} />
           <Field label={translate("merchantStoreSettingsPhone")} value={form.phone} onChangeText={(value) => update("phone", value)} theme={theme} hint={translate("merchantStoreSettingsPhoneHint")} disabled={mutation.isPending} error={fieldErrors.phone} />
           <Field label={translate("merchantStoreSettingsWhatsapp")} value={form.whatsapp} onChangeText={(value) => update("whatsapp", value)} theme={theme} hint={translate("merchantStoreSettingsWhatsappHint")} disabled={mutation.isPending} error={fieldErrors.whatsapp} />
         </Card>
@@ -592,7 +606,17 @@ function Message({ theme, label, loading = false, actionLabel, onAction, busy = 
 function createStyles(theme: AppTheme) {
   return StyleSheet.create({
     safe: { flex: 1 },
-    content: { padding: designTokens.spacing.xl, paddingBottom: designTokens.spacing.xxl, gap: designTokens.spacing.lg },
+    content: { paddingHorizontal: designTokens.spacing.lg, paddingTop: designTokens.spacing.md, paddingBottom: designTokens.spacing.xxl, gap: designTokens.spacing.lg },
+    storeEditorHero: { backgroundColor: theme.colors.surface, borderRadius: designTokens.radius.lg, borderWidth: StyleSheet.hairlineWidth, borderColor: theme.colors.border, overflow: "hidden", gap: designTokens.spacing.md, paddingBottom: designTokens.spacing.lg },
+    editorCoverWrap: { height: 174, position: "relative", overflow: "hidden" },
+    editorCoverImage: { width: "100%", height: 174 },
+    editorImageAction: { position: "absolute", bottom: 12, end: 12, width: 40, height: 40, borderRadius: 20, borderWidth: StyleSheet.hairlineWidth, alignItems: "center", justifyContent: "center" },
+    editorIdentity: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md, paddingHorizontal: designTokens.spacing.lg, marginTop: -2 },
+    editorLogoWrap: { width: 76, height: 76, position: "relative" },
+    editorLogo: { width: 76, height: 76, borderRadius: 38, borderWidth: 3, borderColor: theme.colors.surface },
+    editorLogoAction: { position: "absolute", bottom: -2, end: -2, width: 28, height: 28, borderRadius: 14, borderWidth: StyleSheet.hairlineWidth, alignItems: "center", justifyContent: "center" },
+    editorIdentityFields: { flex: 1, justifyContent: "center" },
+    editorDescription: { paddingHorizontal: designTokens.spacing.lg },
     sectionCard: { padding: designTokens.spacing.lg, gap: designTokens.spacing.lg },
     footer: { paddingHorizontal: designTokens.spacing.lg, paddingVertical: designTokens.spacing.md, borderTopWidth: StyleSheet.hairlineWidth },
     backText: { fontSize: designTokens.typography.caption + 1, fontWeight: designTokens.fontWeights.extrabold },
