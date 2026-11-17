@@ -187,7 +187,7 @@ export default function ProductDetailsScreen() {
               </View>
               <View style={styles.storeCopy}>
                 <UiText weight="700" numberOfLines={1}>{selectedOffer.store.name}</UiText>
-                <UiText tone="muted" style={styles.reviewCount}>{translate("productSelectedOffer")}</UiText>
+                <UiText tone="muted" style={styles.reviewCount}>{translate("productBrand")}</UiText>
               </View>
             </View>
             <Pressable
@@ -195,7 +195,7 @@ export default function ProductDetailsScreen() {
               onPress={() => router.push({ pathname: "/store/[storeId]", params: { storeId: selectedOffer.store.id } })}
               style={styles.storeVisit}
             >
-              <UiText weight="700" tone="default">{translate("storeVisit")}</UiText>
+              <UiText weight="700" tone="default">{translate("productSelectedOffer")}</UiText>
               <Icon name="chevron-left" size={16} color={theme.colors.muted} />
             </Pressable>
           </View>
@@ -223,7 +223,7 @@ export default function ProductDetailsScreen() {
           {selectedOffer ? (
             <View style={[styles.purchaseFooter, { backgroundColor: theme.colors.background, borderTopColor: theme.colors.border }]}>
               <View style={styles.footerTotal}>
-                <UiText tone="muted" style={styles.reviewCount}>{translate("cartTotal")}</UiText>
+                <UiText tone="muted" style={styles.reviewCount}>{translate("cartSubtotal")}</UiText>
                 <PriceDisplay value={browsingCurrency.data ? formatMarketPrice(selectedOffer.price * quantity, browsingCurrency.data) : "—"} />
               </View>
               <View style={styles.footerAction}>
