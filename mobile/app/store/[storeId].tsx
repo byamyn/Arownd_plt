@@ -226,7 +226,7 @@ export default function StoreDetailsScreen() {
           )}
           {isStoreOwner ? (
             <Pressable accessibilityRole="button" accessibilityLabel={translate("merchantStoreChangeCover")} onPress={() => void chooseOwnerImage("cover")} style={styles.imageEditButton}>
-              <Icon name="camera" size={17} color={theme.colors.foreground} accessibilityHidden />
+              <Icon name="settings" size={17} color={theme.colors.foreground} accessibilityHidden />
             </Pressable>
           ) : null}
         </View>
@@ -242,31 +242,13 @@ export default function StoreDetailsScreen() {
           </View>
           <View style={styles.storeInfo}>
             <View style={styles.storeNameRow}>
-              {isStoreOwner && ownerInlineField === "name" ? (
-                <View style={styles.inlineField}>
-                  <TextField label={translate("merchantStoreSettingsName")} value={ownerDraft?.name ?? details.name} onChangeText={(name) => setOwnerDraft((current) => current ? { ...current, name } : current)} maxLength={100} />
-                </View>
-              ) : (
-                <Pressable disabled={!isStoreOwner || ownerSettings.isPending || !ownerDraft} onPress={() => setOwnerInlineField("name")} style={styles.inlineEditable}>
-                  <UiText style={[styles.storeName, { color: theme.colors.foreground, flexShrink: 1 }]}>{(isStoreOwner && ownerDraft?.name) || details.name}</UiText>
-                  {isStoreOwner ? <Icon name="pencil" size={14} color={theme.colors.muted} accessibilityHidden /> : null}
-                </Pressable>
-              )}
+              <UiText style={[styles.storeName, { color: theme.colors.foreground, flexShrink: 1 }]}>{details.name}</UiText>
               {details.is_verified ? <VerifiedBadge size={18} accessibilityLabel={translate("storeVerified")} /> : null}
             </View>
-            {isStoreOwner && ownerInlineField === "description" ? (
-              <View style={styles.inlineField}>
-                <TextField label={translate("merchantStoreSettingsDescription")} value={ownerDraft?.description ?? details.description ?? ""} onChangeText={(description) => setOwnerDraft((current) => current ? { ...current, description } : current)} multiline maxLength={2000} />
-              </View>
-            ) : (
-              <View style={styles.inlineEditable}>
-                <Pressable disabled={!isStoreOwner} onPress={() => setOwnerInlineField("description")} style={{ flex: 1 }}>
-                  <UiText numberOfLines={descriptionExpanded ? undefined : 2} style={[styles.storeDescription, { color: theme.colors.muted }]}>{(isStoreOwner && ownerDraft?.description) || details.description || (isStoreOwner ? translate("merchantStoreInlineAddDescription") : "")}</UiText>
-                </Pressable>
-                {(details.description?.length ?? 0) > 90 ? <Pressable onPress={() => setDescriptionExpanded((value) => !value)}><UiText style={{ color: theme.colors.accentMuted, fontSize: designTokens.typography.caption, fontWeight: designTokens.fontWeights.semibold }}>{translate(descriptionExpanded ? "storeShowLess" : "storeShowMore")}</UiText></Pressable> : null}
-                {isStoreOwner ? <Icon name="pencil" size={14} color={theme.colors.muted} accessibilityHidden /> : null}
-              </View>
-            )}
+            <View style={styles.inlineEditable}>
+              <UiText numberOfLines={descriptionExpanded ? undefined : 2} style={[styles.storeDescription, { color: theme.colors.muted }]}>{details.description || ""}</UiText>
+              {(details.description?.length ?? 0) > 90 ? <Pressable onPress={() => setDescriptionExpanded((value) => !value)}><UiText style={{ color: theme.colors.accentMuted, fontSize: designTokens.typography.caption, fontWeight: designTokens.fontWeights.semibold }}>{translate(descriptionExpanded ? "storeShowLess" : "storeShowMore")}</UiText></Pressable> : null}
+            </View>
             <View style={styles.locationRow}>
               <Icon name="map-pin" size={14} color={theme.colors.muted} accessibilityHidden />
               <UiText numberOfLines={2} style={[styles.metaText, { color: theme.colors.muted }]}>{details.commune || details.address_line || translate("storeNoAddress")}</UiText>
@@ -286,89 +268,8 @@ export default function StoreDetailsScreen() {
             {details.latitude != null && details.longitude != null ? <Button label={translate("mapDirections")} onPress={() => router.push({ pathname: "/map", params: { storeId, directions: "1" } })} variant="outline" fullWidth startIcon={<Icon name="navigation" size={17} color={theme.colors.foreground} accessibilityHidden />} /> : null}
           </View>
         ) : null}
-        {isStoreOwner && ownerInlineField ? (
-          <View style={styles.ownerInlineActions}>
-            <Button label={translate("merchantStoreSettingsSave")} size="sm" onPress={() => ownerSave.mutate()} loading={ownerSave.isPending} disabled={!ownerDraft || ownerSave.isPending || ownerSettings.isPending} />
-            <Button label={translate("merchantStoreEditCancel")} size="sm" variant="ghost" disabled={ownerSave.isPending} onPress={() => { setOwnerDraft(ownerSettings.data ?? null); setOwnerInlineField(null); ownerSave.reset(); }} />
-          </View>
-        ) : null}
         {isStoreOwner ? (
-          <View style={styles.ownerEditor}>
-            {ownerEditMode ? (
-              <>
-                <UiText style={[styles.ownerEditorTitle, { color: theme.colors.foreground }]}>{translate("merchantStoreInlineEditTitle")}</UiText>
-                {ownerSettings.isPending || !ownerDraft ? (
-                  <UiText style={[styles.ownerEditorHint, { color: theme.colors.muted }]}>{translate("merchantLoading")}</UiText>
-                ) : (
-                  <>
-                    <TextField label={translate("merchantStoreSettingsName")} value={ownerDraft.name} onChangeText={(name) => setOwnerDraft((current) => current ? { ...current, name } : current)} editable={!ownerSave.isPending} maxLength={100} />
-                    <TextField label={translate("merchantStoreSettingsDescription")} value={ownerDraft.description} onChangeText={(description) => setOwnerDraft((current) => current ? { ...current, description } : current)} editable={!ownerSave.isPending} multiline maxLength={2000} />
-                    <TextField label={translate("merchantStoreSettingsPhone")} value={ownerDraft.phone} onChangeText={(phone) => setOwnerDraft((current) => current ? { ...current, phone } : current)} editable={!ownerSave.isPending} keyboardType="phone-pad" maxLength={20} />
-                    <TextField label={translate("merchantStoreSettingsWhatsapp")} value={ownerDraft.whatsapp} onChangeText={(whatsapp) => setOwnerDraft((current) => current ? { ...current, whatsapp } : current)} editable={!ownerSave.isPending} keyboardType="phone-pad" maxLength={20} />
-                    <TextField label={translate("merchantStoreSettingsCommune")} value={ownerDraft.commune} onChangeText={(commune) => setOwnerDraft((current) => current ? { ...current, commune } : current)} editable={!ownerSave.isPending} maxLength={80} />
-                    <TextField label={translate("merchantStoreSettingsAddress")} value={ownerDraft.address_line} onChangeText={(address_line) => setOwnerDraft((current) => current ? { ...current, address_line } : current)} editable={!ownerSave.isPending} maxLength={300} />
-                    <UiText style={[styles.ownerEditorTitle, { color: theme.colors.foreground }]}>{translate("merchantStoreHoursTitle")}</UiText>
-                    <View style={styles.ownerImageActions}>
-                      <View style={styles.ownerTimeField}><TextField label={translate("merchantStoreSettingsOpen")} value={ownerDraft.opening_hours.open} onChangeText={(open) => setOwnerDraft((current) => current ? { ...current, opening_hours: { ...current.opening_hours, open } } : current)} editable={!ownerSave.isPending} maxLength={5} placeholder="HH:MM" /></View>
-                      <View style={styles.ownerTimeField}><TextField label={translate("merchantStoreSettingsClose")} value={ownerDraft.opening_hours.close} onChangeText={(close) => setOwnerDraft((current) => current ? { ...current, opening_hours: { ...current.opening_hours, close } } : current)} editable={!ownerSave.isPending} maxLength={5} placeholder="HH:MM" /></View>
-                    </View>
-                    <UiText style={[styles.ownerEditorHint, { color: theme.colors.muted }]}>{translate("merchantStoreSettingsClosedDaysHint")}</UiText>
-                    <View style={styles.ownerDays}>
-                      {([
-                        { value: 6, key: "merchantWeekdaySaturday" },
-                        { value: 0, key: "merchantWeekdaySunday" },
-                        { value: 1, key: "merchantWeekdayMonday" },
-                        { value: 2, key: "merchantWeekdayTuesday" },
-                        { value: 3, key: "merchantWeekdayWednesday" },
-                        { value: 4, key: "merchantWeekdayThursday" },
-                        { value: 5, key: "merchantWeekdayFriday" }
-                      ] as const).map((day) => {
-                        const selected = ownerDraft.opening_hours.closed_days.includes(day.value);
-                        return (
-                          <Pressable
-                            key={day.value}
-                            accessibilityRole="button"
-                            accessibilityState={{ selected }}
-                            onPress={() => setOwnerDraft((current) => current ? {
-                              ...current,
-                              opening_hours: {
-                                ...current.opening_hours,
-                                closed_days: selected
-                                  ? current.opening_hours.closed_days.filter((value) => value !== day.value)
-                                  : [...current.opening_hours.closed_days, day.value]
-                              }
-                            } : current)}
-                            style={[styles.ownerDayChip, { backgroundColor: selected ? theme.colors.accent : theme.colors.surfaceMuted, borderColor: selected ? theme.colors.accent : theme.colors.border }]}
-                          >
-                            <UiText style={{ color: selected ? theme.colors.accentForeground : theme.colors.foreground, fontSize: designTokens.typography.caption }}>{translate(day.key)}</UiText>
-                          </Pressable>
-                        );
-                      })}
-                    </View>
-                    <UiText style={[styles.ownerEditorTitle, { color: theme.colors.foreground }]}>{translate("merchantStoreSocialTitle")}</UiText>
-                    <TextField label="Instagram" value={ownerDraft.instagram_url} onChangeText={(instagram_url) => setOwnerDraft((current) => current ? { ...current, instagram_url } : current)} editable={!ownerSave.isPending} keyboardType="url" autoCapitalize="none" maxLength={300} />
-                    <TextField label="Facebook" value={ownerDraft.facebook_url} onChangeText={(facebook_url) => setOwnerDraft((current) => current ? { ...current, facebook_url } : current)} editable={!ownerSave.isPending} keyboardType="url" autoCapitalize="none" maxLength={300} />
-                    <TextField label="TikTok" value={ownerDraft.tiktok_url} onChangeText={(tiktok_url) => setOwnerDraft((current) => current ? { ...current, tiktok_url } : current)} editable={!ownerSave.isPending} keyboardType="url" autoCapitalize="none" maxLength={300} />
-                    <TextField label={translate("merchantStoreSettingsWebsite")} value={ownerDraft.website_url} onChangeText={(website_url) => setOwnerDraft((current) => current ? { ...current, website_url } : current)} editable={!ownerSave.isPending} keyboardType="url" autoCapitalize="none" maxLength={300} />
-                  </>
-                )}
-                {ownerImageSaved ? <UiText style={[styles.ownerEditorHint, { color: theme.colors.success }]}>{translate("merchantStoreImageSaved")}</UiText> : null}
-                <View style={styles.ownerImageActions}>
-                  <Button label={translate("merchantStoreChangeLogo")} variant="outline" size="sm" disabled={ownerImageBusy !== null || ownerSave.isPending} loading={ownerImageBusy === "logo"} onPress={() => void chooseOwnerImage("logo")} />
-                  <Button label={translate("merchantStoreChangeCover")} variant="outline" size="sm" disabled={ownerImageBusy !== null || ownerSave.isPending} loading={ownerImageBusy === "cover"} onPress={() => void chooseOwnerImage("cover")} />
-                </View>
-                {ownerImageError ? <UiText style={[styles.ownerEditorHint, { color: theme.colors.danger }]}>{translate("merchantStoreImageUploadError")}</UiText> : null}
-                {ownerSave.isError ? <UiText style={[styles.ownerEditorHint, { color: theme.colors.danger }]}>{translate("merchantStoreSettingsSaveError")}</UiText> : null}
-                <View style={styles.ownerImageActions}>
-                  <Button label={translate("merchantStoreSettingsSave")} onPress={() => ownerSave.mutate()} loading={ownerSave.isPending} disabled={!ownerDraft || ownerImageBusy !== null || ownerSettings.isPending} />
-                  <Button label={translate("merchantStoreEditCancel")} variant="ghost" disabled={ownerSave.isPending || ownerImageBusy !== null} onPress={() => { setOwnerDraft(ownerSettings.data ?? null); setOwnerEditMode(false); ownerSave.reset(); setOwnerImageError(false); }} />
-                </View>
-                <Button label={translate("merchantStoreSettingsTitle")} variant="ghost" size="sm" onPress={() => router.push("/merchant/settings")} startIcon={<Icon name="settings" size={16} color={theme.colors.muted} accessibilityHidden />} />
-              </>
-            ) : (
-              <Button label={translate("merchantStoreCustomize")} onPress={() => { setOwnerDraft(ownerSettings.data ?? null); setOwnerEditMode(true); }} disabled={ownerSettings.isPending || ownerSettings.isError} variant="primary" fullWidth startIcon={<Icon name="palette" size={18} color={theme.colors.accentForeground} accessibilityHidden />} />
-            )}
-          </View>
+          <Button label={translate("merchantStoreSettingsTitle")} onPress={() => router.push("/merchant/settings")} variant="outline" fullWidth startIcon={<Icon name="settings" size={17} color={theme.colors.foreground} accessibilityHidden />} />
         ) : null}
       </Card>
 
