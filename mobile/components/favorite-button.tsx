@@ -59,8 +59,8 @@ export function FavoriteButton({ kind, id, iconOnly = false }: { kind: FavoriteK
         minHeight: 44,
         minWidth: 112,
         borderRadius: 13,
-        backgroundColor: active ? theme.colors.successSurface : theme.colors.surface,
-        borderColor: active ? theme.colors.accentMuted : theme.colors.border
+        backgroundColor: active ? theme.colors.accent : theme.colors.surface,
+        borderColor: active ? theme.colors.accent : theme.colors.border
       }}
     />
   );
