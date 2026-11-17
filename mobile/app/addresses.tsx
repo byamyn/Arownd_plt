@@ -275,7 +275,7 @@ export default function AddressesScreen() {
             setCommune("");
             setRegionPickerOpen(false);
           }} style={[styles.pickerOption, regionId === item.id && styles.pickerOptionSelected]}>
-            <UiText>{getRegionDisplayName(item, language)}</UiText>
+            <UiText style={regionId === item.id ? { color: theme.colors.accentForeground } : undefined}>{getRegionDisplayName(item, language)}</UiText>
           </PressableSurface>)}
         </ScrollView>
         <Button label={translate("back")} onPress={() => setRegionPickerOpen(false)} variant="ghost" fullWidth />
@@ -456,7 +456,7 @@ function createStyles(theme: AppTheme) {
       borderBottomColor: theme.colors.border
     },
     pickerOptionSelected: {
-      backgroundColor: theme.mode === "light" ? theme.colors.accent : theme.colors.surfaceMuted
+      backgroundColor: theme.colors.accent
     }
   });
 }
