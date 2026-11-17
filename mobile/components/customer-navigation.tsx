@@ -10,9 +10,9 @@ import { useAppTheme } from "@/lib/theme";
 import { CART_QUERY_KEY, getCart } from "@/lib/cart";
 
 type NavigationTab = {
-  id: Exclude<CustomerTab, "none"> | "orders" | "products" | "analytics" | "businessSettings";
-  label: "navHome" | "navExplore" | "navMap" | "navCart" | "navAccount" | "merchantOrdersPageTitle" | "merchantProductsTitle" | "merchantAnalyticsTitle" | "merchantAccountSettingsTitle" | "merchantStoreSettingsTitle";
-  icon: "home" | "search" | "map" | "shopping-cart" | "user" | "store" | "file-text" | "package" | "layout-grid" | "settings";
+  id: Exclude<CustomerTab, "none"> | "orders" | "products" | "analytics" | "store";
+  label: "navHome" | "navExplore" | "navMap" | "navCart" | "navAccount" | "merchantOrdersPageTitle" | "merchantProductsTitle" | "merchantAnalyticsTitle" | "merchantMyStore";
+  icon: "home" | "search" | "map" | "shopping-cart" | "user" | "store" | "file-text" | "package" | "layout-grid";
   path: string;
 };
 
@@ -22,13 +22,6 @@ const customerTabs: NavigationTab[] = [
   { id: "map", label: "navMap", icon: "map", path: "/map" },
   { id: "cart", label: "navCart", icon: "shopping-cart", path: "/cart" },
   { id: "profile", label: "navAccount", icon: "user", path: "/profile" }
-];
-
-const studioTabs: NavigationTab[] = [
-  { id: "orders", label: "merchantOrdersPageTitle", icon: "file-text", path: "/merchant/orders" },
-  { id: "products", label: "merchantProductsTitle", icon: "package", path: "/merchant/products" },
-  { id: "analytics", label: "merchantAnalyticsTitle", icon: "layout-grid", path: "/merchant/analytics" },
-  { id: "businessSettings", label: "merchantStoreSettingsTitle", icon: "settings", path: "/merchant/settings" },
 ];
 
 export function CustomerNavigation() {
@@ -43,21 +36,31 @@ export function CustomerNavigation() {
   });
   const isMerchantReady = access.data?.status === "merchant_ready";
   const isMerchantRoute = pathname.startsWith("/merchant");
-  const useStudioNavigation = isMerchantRoute && isMerchantReady;
+  const ownedStoreId = access.data?.store?.id;
+  const isOwnStoreRoute = Boolean(ownedStoreId && pathname === `/store/${ownedStoreId}`);
+  const useStudioNavigation = (isMerchantRoute || isOwnStoreRoute) && isMerchantReady;
+  const studioTabs: NavigationTab[] = [
+    { id: "orders", label: "merchantOrdersPageTitle", icon: "file-text", path: "/merchant/orders" },
+    { id: "products", label: "merchantProductsTitle", icon: "package", path: "/merchant/products" },
+    { id: "analytics", label: "merchantAnalyticsTitle", icon: "layout-grid", path: "/merchant/analytics" },
+    ...(ownedStoreId ? [{ id: "store" as const, label: "merchantMyStore" as const, icon: "store" as const, path: `/store/${ownedStoreId}` }] : [])
+  ];
   const tabs = useStudioNavigation ? studioTabs : customerTabs;
 
-  const studioTab = pathname.startsWith("/merchant/orders")
-    ? "orders"
-    : pathname.startsWith("/merchant/products")
-      ? "products"
-      : pathname.startsWith("/merchant/analytics")
-        ? "analytics"
-        : pathname.startsWith("/merchant/account-settings") || pathname.startsWith("/merchant/settings") || pathname.startsWith("/merchant/verification")
-          ? "businessSettings"
-          : "orders";
+  const studioTab: NavigationTab["id"] | null = isOwnStoreRoute
+    ? "store"
+    : pathname.startsWith("/merchant/orders")
+      ? "orders"
+      : pathname.startsWith("/merchant/products")
+        ? "products"
+        : pathname.startsWith("/merchant/analytics")
+          ? "analytics"
+          : pathname.startsWith("/merchant/settings") || pathname.startsWith("/merchant/account-settings") || pathname.startsWith("/merchant/verification")
+            ? null
+            : "orders";
   const activeTab = useStudioNavigation
     ? studioTab
-    : isMerchantRoute
+    : isMerchantRoute || isOwnStoreRoute
       ? null
       : getCustomerTab(pathname);
   const selectedTab = activeTab;
