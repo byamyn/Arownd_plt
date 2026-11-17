@@ -292,10 +292,10 @@ export default function CheckoutScreen() {
               style={[styles.savedAddress, selectedAddressId === address.id && styles.savedAddressSelected]}
             >
               <View style={styles.savedAddressTop}>
-                <UiText style={[styles.savedAddressName, selectedAddressId === address.id && theme.mode === "dark" && { color: theme.colors.accentMuted }]}>{address.recipient_name}</UiText>
+                <UiText style={[styles.savedAddressName, selectedAddressId === address.id && { color: theme.colors.accentForeground }]}>{address.recipient_name}</UiText>
                 <View style={[styles.radio, selectedAddressId === address.id && styles.radioSelected]} />
               </View>
-              <UiText style={[styles.fieldHint, selectedAddressId === address.id && theme.mode === "light" && { color: theme.colors.accentForeground }]}>{address.phone}</UiText>
+              <UiText style={[styles.fieldHint, selectedAddressId === address.id && { color: theme.colors.accentForeground }]}>{address.phone}</UiText>
               <UiText style={[styles.fieldHint, selectedAddressId === address.id && theme.mode === "light" && { color: theme.colors.accentForeground }]}>{address.region ? getRegionDisplayName(address.region, language) : ""}{address.secondary_region ? "، " + getRegionDisplayName(address.secondary_region, language) : ""}، {address.commune}</UiText>
               <UiText style={[styles.fieldHint, selectedAddressId === address.id && theme.mode === "light" && { color: theme.colors.accentForeground }]}>{address.address_line}</UiText>
               {address.is_default ? <UiText style={[styles.savedDefault, selectedAddressId === address.id && theme.mode === "light" && { color: theme.colors.accentForeground }]}>{translate("addressesDefault")}</UiText> : null}
@@ -314,7 +314,7 @@ export default function CheckoutScreen() {
           style={[styles.deliveryOption, deliveryType === "home" && styles.deliverySelected]}
         >
           <UiText style={[styles.deliveryTitle, deliveryType === "home" && styles.deliveryTextSelected]}>{translate("checkoutHomeDelivery")}</UiText>
-          <UiText style={[styles.deliveryHint, deliveryType === "home" && theme.mode === "light" && { color: theme.colors.accentForeground }]}>{translate("checkoutHomeDeliveryHint")}</UiText>
+          <UiText style={[styles.deliveryHint, deliveryType === "home" && { color: theme.colors.accentForeground }]}>{translate("checkoutHomeDeliveryHint")}</UiText>
         </PressableSurface>
         <PressableSurface
           accessibilityRole="radio"
@@ -324,7 +324,7 @@ export default function CheckoutScreen() {
           style={[styles.deliveryOption, deliveryType === "desk" && styles.deliverySelected]}
         >
           <UiText style={[styles.deliveryTitle, deliveryType === "desk" && styles.deliveryTextSelected]}>{translate("checkoutStorePickup")}</UiText>
-          <UiText style={[styles.deliveryHint, deliveryType === "desk" && theme.mode === "light" && { color: theme.colors.accentForeground }]}>{translate("checkoutStorePickupHint")}</UiText>
+          <UiText style={[styles.deliveryHint, deliveryType === "desk" && { color: theme.colors.accentForeground }]}>{translate("checkoutStorePickupHint")}</UiText>
         </PressableSurface>
       </View>
 
@@ -445,17 +445,17 @@ function createStyles(theme: AppTheme) { return StyleSheet.create({
   savedAddresses: { gap: designTokens.spacing.sm },
   savedHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   savedAddress: { borderWidth: theme.mode === "light" ? 0 : 1, borderColor: theme.colors.border, backgroundColor: theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface, borderRadius: designTokens.radius.sm, padding: designTokens.spacing.md, gap: designTokens.spacing.xs },
-  savedAddressSelected: { borderColor: theme.mode === "light" ? theme.colors.accent : theme.colors.accentMuted, backgroundColor: theme.mode === "light" ? theme.colors.accent : theme.colors.surfaceSecondary },
+  savedAddressSelected: { borderColor: theme.colors.accent, backgroundColor: theme.colors.accent },
   savedAddressTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   savedAddressName: { color: theme.colors.foreground, fontSize: designTokens.typography.caption + 1, fontWeight: designTokens.fontWeights.extrabold },
   savedDefault: { color: theme.colors.accentMuted, fontSize: designTokens.typography.caption - 1, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
   radio: { width: 17, height: 17, borderRadius: 9, borderWidth: 1.5, borderColor: theme.colors.muted },
-  radioSelected: { borderWidth: 5, borderColor: theme.mode === "light" ? theme.colors.accentForeground : theme.colors.accentMuted },
+  radioSelected: { borderWidth: 5, borderColor: theme.colors.accentForeground },
   deliveryOptions: { flexDirection: "row", gap: designTokens.spacing.sm },
   deliveryOption: { flex: 1, minHeight: 92, borderWidth: theme.mode === "light" ? 0 : 1, borderColor: theme.colors.border, backgroundColor: theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface, borderRadius: designTokens.radius.md, padding: designTokens.spacing.md, gap: designTokens.spacing.sm },
-  deliverySelected: { borderColor: theme.mode === "light" ? theme.colors.accent : theme.colors.accentMuted, backgroundColor: theme.mode === "light" ? theme.colors.accent : theme.colors.surfaceSecondary },
+  deliverySelected: { borderColor: theme.colors.accent, backgroundColor: theme.colors.accent },
   deliveryTitle: { color: theme.colors.foreground, fontSize: designTokens.typography.body - 1, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
-  deliveryTextSelected: { color: theme.mode === "light" ? theme.colors.accentForeground : theme.colors.accentMuted },
+  deliveryTextSelected: { color: theme.colors.accentForeground },
   deliveryHint: { color: theme.colors.muted, fontSize: designTokens.typography.caption - 1, lineHeight: 15, textAlign: "auto" },
   summaryRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: designTokens.spacing.md, paddingVertical: designTokens.spacing.sm, borderBottomWidth: 1, borderBottomColor: theme.colors.border },
   summaryInfo: { flex: 1, alignItems: "flex-start", gap: designTokens.spacing.xs },
