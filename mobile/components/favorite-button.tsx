@@ -35,10 +35,10 @@ export function FavoriteButton({ kind, id, iconOnly = false }: { kind: FavoriteK
         disabled={disabled}
         variant="surface"
         size={44}
-        icon={<Icon name="heart" size={20} color={active ? theme.colors.danger : theme.colors.muted} fill={active ? theme.colors.danger : "none"} accessibilityHidden />}
+        icon={<Icon name="heart" size={20} color={active ? theme.colors.accentForeground : theme.colors.muted} fill={active ? theme.colors.accentForeground : "none"} accessibilityHidden />}
         style={{
-          backgroundColor: active ? theme.colors.successSurface : theme.colors.surface,
-          borderColor: active ? theme.colors.accentMuted : theme.colors.border
+          backgroundColor: active ? theme.colors.accent : theme.colors.surface,
+          borderColor: active ? theme.colors.accent : theme.colors.border
         }}
       />
     );
@@ -52,9 +52,9 @@ export function FavoriteButton({ kind, id, iconOnly = false }: { kind: FavoriteK
       size="sm"
       disabled={disabled}
       startIcon={
-        <Icon name="heart" size={19} color={active ? theme.colors.danger : theme.colors.muted} accessibilityHidden />
+        <Icon name="heart" size={19} color={active ? theme.colors.accentForeground : theme.colors.muted} accessibilityHidden />
       }
-      textStyle={{ color: active ? theme.colors.accentMuted : theme.colors.foreground, fontSize: 11 }}
+      textStyle={{ color: active ? theme.colors.accentForeground : theme.colors.foreground, fontSize: 11 }}
       style={{
         minHeight: 44,
         minWidth: 112,
