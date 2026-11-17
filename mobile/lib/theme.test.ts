@@ -18,8 +18,8 @@ describe("design system theme tokens", () => {
     expect(light.colors.foreground).toBe("#000000");
     expect(light.colors.surface).toBe("#FFFFFF");
     expect(dark.colors.foreground).toBe("#FFFFFF");
-    expect(dark.colors.surface).toBe("#171717");
-    expect(light.colors.foregroundSecondary).toBe("#737373");
+    expect(dark.colors.surface).toBe("#141414");
+    expect(light.colors.foregroundSecondary).toBe("#5C5C5C");
     expect(dark.colors.foregroundSecondary).toBe("#A3A3A3");
     expect(light.colors.inputBorder).toBe("#8A8A8A");
     expect(dark.colors.inputBorder).toBe("#707070");
