@@ -2,7 +2,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { useMemo, useState } from "react";
 import { Linking, Pressable, Share, StyleSheet, View } from "react-native";
-import Svg, { Circle, Path, Rect } from "react-native-svg";
 
 import { CustomerScreen, CustomerSearch, EmptyState, ErrorState, ProductTile } from "@/components/customer-ui";
 import { FavoriteButton } from "@/components/favorite-button";
