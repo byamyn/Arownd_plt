@@ -206,7 +206,7 @@ export default function NotificationsScreen() {
             <UiText weight="800">{copy.title}</UiText>
             {orderCode ? <Caption>{translate("ordersCode")}: {orderCode}</Caption> : null}
             {body ? <UiText tone="muted">{body}</UiText> : null}
-            {!item.read ? <View style={[styles.unreadDot, { backgroundColor: theme.colors.accentMuted }]} /> : null}
+            {!item.read ? <View style={[styles.unreadDot, { backgroundColor: theme.colors.accent }]} /> : null}
           </NotificationCard>
         );
       })}
