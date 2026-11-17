@@ -15,7 +15,7 @@ import { ReviewPanel } from "@/components/review-panel";
 import { ContentReportAction } from "@/components/content-report-action";
 import { designTokens, useAppTheme } from "@/lib/theme";
 import { VerifiedBadge } from "@/components/ui/identity";
-import { AppHeader, Avatar, Button, Card, Icon, IconButton, Image as UiImage, RatingStars, SegmentedControl, StoreCardSkeleton, ProductCardSkeleton, Text as UiText } from "@/components/ui";
+import { AppHeader, Avatar, Button, Icon, IconButton, Image as UiImage, RatingStars, SegmentedControl, StoreCardSkeleton, ProductCardSkeleton, Text as UiText } from "@/components/ui";
 
 type StoreTab = "products" | "about" | "reviews";
 
@@ -146,7 +146,7 @@ export default function StoreDetailsScreen() {
         style={[styles.stickyStoreHeader, { backgroundColor: theme.colors.background }]}
       />
 
-      <Card contentStyle={styles.storeHero}>
+      <View style={styles.storeHero}>
         <View style={styles.coverWrap}>
           {details.cover_url ? (
             <UiImage uri={details.cover_url} accessibilityLabel={translate("merchantStoreCover")} aspectRatio={16 / 9} style={styles.coverImage} />
@@ -190,7 +190,7 @@ export default function StoreDetailsScreen() {
         {isStoreOwner ? (
           <Button label={translate("merchantStoreSettingsTitle")} onPress={() => router.push("/merchant/settings")} variant="outline" fullWidth startIcon={<Icon name="settings" size={17} color={theme.colors.foreground} accessibilityHidden />} />
         ) : null}
-      </Card>
+      </View>
 
       <SegmentedControl
         accessibilityLabel={translate("storeAboutTitle")}
@@ -244,7 +244,7 @@ export default function StoreDetailsScreen() {
         )
       ) : tab === "about" ? (
         <>
-          <Card contentStyle={styles.aboutCard}>
+          <View style={styles.aboutCard}>
             <UiText style={[styles.aboutTitle, { color: theme.colors.foreground }]}>{translate("storeAboutTitle")}</UiText>
             <UiText style={[styles.description, { color: theme.colors.muted }]}>{details.description || translate("storeNoDescription")}</UiText>
             <UiText style={[styles.fieldTitle, { color: theme.colors.foregroundSecondary }]}>{translate("storeAddress")}</UiText>
@@ -263,7 +263,7 @@ export default function StoreDetailsScreen() {
                 </Pressable>
               ))}
             </View>
-          </Card>
+          </View>
           <ContentReportAction targetType="store" targetId={storeId} />
         </>
       ) : (
@@ -275,7 +275,7 @@ export default function StoreDetailsScreen() {
 
 const styles = StyleSheet.create({
   stickyStoreHeader: { backgroundColor: "#FFFFFF", paddingVertical: designTokens.spacing.xs, zIndex: 10 },
-  storeHero: { padding: designTokens.spacing.md, gap: designTokens.spacing.sm },
+  storeHero: { paddingHorizontal: designTokens.spacing.md, paddingBottom: designTokens.spacing.md, gap: designTokens.spacing.md },
   storeActionsRow: { flexDirection: "row", gap: designTokens.spacing.sm },
   ownerEditor: { gap: designTokens.spacing.md, paddingTop: designTokens.spacing.sm, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: "#D1D5DB" },
   ownerInlineActions: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.sm },
@@ -315,7 +315,7 @@ const styles = StyleSheet.create({
   productGrid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", rowGap: designTokens.spacing.lg },
   productTile: { width: "48%" },
   productSkeleton: { width: "48%", flex: 0 },
-  aboutCard: { padding: designTokens.spacing.lg, gap: designTokens.spacing.md },
+  aboutCard: { paddingVertical: designTokens.spacing.md, gap: designTokens.spacing.md },
   aboutTitle: { fontSize: designTokens.typography.subtitle + 1, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
   fieldTitle: { fontSize: designTokens.typography.caption + 1, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
   description: { fontSize: designTokens.typography.body - 1, lineHeight: 22, textAlign: "auto" }
