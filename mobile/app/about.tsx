@@ -14,7 +14,7 @@ export default function AboutScreen() {
 
   return (
     <CustomerScreen showNavigation={false}>
-      <AppHeader/ title={translate("aboutTitle")} />
+      <AppHeader title={translate("aboutTitle")} />
 
       <View style={styles.brandBlock}>
         <Logo color={theme.colors.foreground} width={220} />
