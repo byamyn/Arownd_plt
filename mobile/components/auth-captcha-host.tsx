@@ -40,6 +40,7 @@ export function AuthCaptchaHost() {
   const cachedTokenRef = useRef<{ value: string; createdAt: number } | null>(null);
   const widgetReadyRef = useRef(false);
   const tokenIssuedRef = useRef(false);
+  const challengeRequiredRef = useRef(false);
   const [html, setHtml] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [interactive, setInteractive] = useState(false);
@@ -103,6 +104,8 @@ export function AuthCaptchaHost() {
       return Promise.reject(new Error("AUTH_CAPTCHA_LOAD_FAILED"));
     }
 
+    if (challengeRequiredRef.current) setInteractive(true);
+
     return new Promise<string>((resolve, reject) => {
       const timeout = setTimeout(() => {
         settlePending(new Error("AUTH_CAPTCHA_TIMEOUT"));
@@ -139,6 +142,7 @@ export function AuthCaptchaHost() {
     }
 
     if (message.type === "interactive") {
+      challengeRequiredRef.current = message.active;
       setInteractive(message.active);
       return;
     }
@@ -160,9 +164,7 @@ export function AuthCaptchaHost() {
   const closeChallenge = useCallback(() => {
     setInteractive(false);
     settlePending(new Error("AUTH_CAPTCHA_CANCELLED"));
-    tokenIssuedRef.current = false;
-    resetWidget();
-  }, [resetWidget, settlePending]);
+  }, [settlePending]);
 
   const handleNavigation = useCallback((navigation: WebViewNavigation) => {
     if (navigation.url === "about:blank") return true;
