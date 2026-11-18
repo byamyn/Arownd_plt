@@ -2,8 +2,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { ScrollView, StyleSheet, View } from "react-native";
 
-import { Icon, IconButton, ProductCardSkeleton } from "@/components/ui";
-import Logo from "@/components/logo";
+import { ProductCardSkeleton } from "@/components/ui";
+import { CustomerMainHeader } from "@/components/customer-main-header";
 import {
   CustomerScreen,
   EmptyState,
@@ -27,17 +27,7 @@ export default function CustomerHomeScreen() {
       refreshing={products.isFetching}
       onRefresh={() => { void products.refetch(); }}
     >
-      <View style={styles.header}>
-        <Logo color={theme.colors.foreground} width={148} />
-        <View style={styles.headerActions}>
-          <IconButton
-            accessibilityLabel={translate("notificationsTitle")}
-            onPress={() => router.push("/notifications")}
-            icon={<Icon name="bell" size={21} color={theme.colors.foreground} accessibilityHidden />}
-            style={[styles.headerIconButton, { backgroundColor: theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface, borderWidth: theme.mode === "light" ? 0 : 1, borderColor: theme.colors.border }]}
-          />
-        </View>
-      </View>
+      <CustomerMainHeader />
 
       <View>
         <SectionTitle title={translate("homeNewArrivals")} />
