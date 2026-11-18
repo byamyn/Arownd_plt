@@ -530,17 +530,7 @@ export default function MerchantNewProductScreen() {
         ) : null}
       </MediaViewer>
 
-      <BottomSheet visible={categoryPickerOpen} onRequestClose={() => setCategoryPickerOpen(false)} maxHeight="85%">
-            <View style={styles.modalHeader}>
-              <UiText style={[styles.modalTitle, { color: theme.colors.foreground }]}>
-                {translate("merchantProductChooseCategory")}
-              </UiText>
-              <PressableSurface accessibilityLabel={translate("merchantProductCategoryClose")} onPress={() => setCategoryPickerOpen(false)} hitSlop={10}>
-                <UiText style={[styles.modalClose, { color: theme.colors.accentMuted }]}>
-                  {translate("merchantProductCategoryClose")}
-                </UiText>
-              </PressableSurface>
-            </View>
+      <BottomSheet visible={categoryPickerOpen} onRequestClose={() => setCategoryPickerOpen(false)} title={translate("merchantProductChooseCategory")} maxHeight="85%">
             <ScrollView contentContainerStyle={styles.categoryList}>
               {categoryGroups.map((group) => (
                 <View key={group.parent.id} style={styles.categoryGroup}>
