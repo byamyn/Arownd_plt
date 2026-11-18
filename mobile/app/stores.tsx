@@ -46,7 +46,7 @@ export default function StoresScreen() {
     >
       <AppHeader
         title={title}
-        leading={<IconButton accessibilityLabel={translate("back")} onPress={handleBack} icon={<Icon name="chevron-right" color={theme.colors.foreground} size={20} />} /> }
+        onBack={handleBack}
       />
       {selectedRegionId === null ? (
         <>
