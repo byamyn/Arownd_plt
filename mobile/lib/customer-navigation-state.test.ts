@@ -7,7 +7,7 @@ describe("getCustomerTab", () => {
     expect(getCustomerTab("/home")).toBe("home");
     expect(getCustomerTab("/explore")).toBe("explore");
     expect(getCustomerTab("/map")).toBe("map");
-    expect(getCustomerTab("/cart")).toBe("cart");
+    expect(getCustomerTab("/cart")).toBe("none");
     expect(getCustomerTab("/stores")).toBe("none");
     expect(getCustomerTab("/favorites")).toBe("none");
   });
