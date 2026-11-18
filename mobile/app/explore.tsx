@@ -11,7 +11,7 @@ import { fetchApprovedReviews } from "@/lib/reviews";
 import { translate, useLanguage } from "@/lib/i18n";
 import { getLocalizedProductCategoryLabel } from "@/lib/locale-data";
 import { designTokens, useAppTheme } from "@/lib/theme";
-import { CategorySelectorTile, Icon, IconButton, ProductCardSkeleton, SearchField, Text as UiText } from "@/components/ui";
+import { CategorySelectorTile, ProductCardSkeleton, SearchField, Text as UiText } from "@/components/ui";
 
 const categories = [
   { id: "fashion", icon: "shirt" },
