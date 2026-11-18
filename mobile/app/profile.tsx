@@ -135,7 +135,7 @@ export default function ProfileScreen() {
   if (user.isError) {
     return (
       <CustomerScreen refreshing={user.isFetching} onRefresh={() => { void user.refetch(); }}>
-        <AppHeader title={translate("profileTitle")} />
+        <CustomerMainHeader variant="settings" />
         <ErrorState
           title={translate("profileLoadError")}
           retryLabel={translate("retry")}
@@ -148,7 +148,7 @@ export default function ProfileScreen() {
   if (!user.data) {
     return (
       <CustomerScreen>
-        <AppHeader title={translate("profileTitle")} />
+        <CustomerMainHeader variant="settings" />
         <Caption>{translate("profileSubtitle")}</Caption>
         <Caption>{translate("profileLoginHint")}</Caption>
         <Button label={translate("profileLogin")} onPress={() => router.push("/login")} fullWidth />
@@ -158,7 +158,7 @@ export default function ProfileScreen() {
   if (profile.isError) {
     return (
       <CustomerScreen refreshing={profile.isFetching} onRefresh={() => { void profile.refetch(); }}>
-        <AppHeader title={translate("profileTitle")} />
+        <CustomerMainHeader variant="settings" />
         <ErrorState
           title={translate("profileLoadError")}
           retryLabel={translate("retry")}
