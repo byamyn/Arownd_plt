@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Animated, Easing, PanResponder, StyleSheet, View } from "react-native";
 
 import { CustomerScreen, CustomerHeading, EmptyState, ErrorState, ProductTile, SectionTitle } from "@/components/customer-ui";
+import { CustomerMainHeader } from "@/components/customer-main-header";
 import { fetchHomeProducts, fetchProductDetails, fetchProductOffers, formatMarketPrice, getPrimaryImage, searchCatalogProducts } from "@/lib/catalog";
 import { fetchBrowsingCurrencyCode } from "@/lib/country-service";
 import { fetchApprovedReviews } from "@/lib/reviews";
@@ -154,33 +155,7 @@ export default function ExploreScreen() {
       onRefresh={hasActiveFilter ? () => { void products.refetch(); } : undefined}
     >
       <View style={styles.topSection}>
-        <View style={styles.header}>
-          <View style={styles.search}>
-            <SearchField
-              value={query}
-              onChangeText={setQuery}
-              placeholder={translate("homeSearchPlaceholder")}
-              accessibilityLabel={translate("homeSearchPlaceholder")}
-              style={{
-                backgroundColor: "transparent",
-                borderRadius: theme.radius.pill
-              }}
-            />
-          </View>
-          <IconButton
-            accessibilityLabel={translate("notificationsTitle")}
-            onPress={() => router.push("/notifications")}
-            icon={<Icon name="bell" size={21} color={theme.colors.foreground} accessibilityHidden />}
-            style={{
-              width: designTokens.dimensions.controlHeight.md,
-              height: designTokens.dimensions.controlHeight.md,
-              borderRadius: theme.radius.pill,
-              backgroundColor: theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface,
-              borderWidth: theme.mode === "light" ? 0 : 1,
-              borderColor: theme.colors.border
-            }}
-          />
-        </View>
+        <CustomerMainHeader />
         <CustomerHeading
           title={translate("exploreTitle")}
           subtitle={translate("exploreSubtitle")}
@@ -246,8 +221,7 @@ export default function ExploreScreen() {
 
 const styles = StyleSheet.create({
   topSection: { gap: designTokens.spacing.md },
-  header: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md },
-  search: { flex: 1 },
+
   categoryViewport: { overflow: "hidden" },
   categoryTrack: { flexDirection: "row", alignItems: "center", direction: "ltr" },
   categoryGroup: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.sm, paddingRight: designTokens.spacing.sm, flexShrink: 0, direction: "ltr" },
