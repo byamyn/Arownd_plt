@@ -12,12 +12,14 @@ export function AppHeader({
   leading,
   trailing,
   showBackButton = true,
+  onBack,
   style
 }: {
   title: string;
   leading?: ReactNode;
   trailing?: ReactNode;
   showBackButton?: boolean;
+  onBack?: () => void;
   style?: StyleProp<ViewStyle>;
 }) {
   const theme = useAppTheme();
@@ -30,7 +32,7 @@ export function AppHeader({
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={translate("back")}
-          onPress={() => router.back()}
+          onPress={onBack ?? (() => router.back())}
           hitSlop={8}
           style={({ pressed }) => [styles.backButton, { opacity: pressed ? 0.65 : 1 }]}
         >
