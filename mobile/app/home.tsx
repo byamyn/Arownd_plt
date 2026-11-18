@@ -74,7 +74,7 @@ function HomeProductCard({ item, width, price, onShowMore }: {
               <Pressable
                 key={image.id ?? image.image_url}
                 accessibilityRole="button"
-                accessibilityLabel={`${translate("productImage")} ${index + 1}`}
+                accessibilityLabel={`${item.product.name} ${index + 1}`}
                 accessibilityState={{ selected: selectedImageIndex === index }}
                 onPress={() => setSelectedImageIndex(index)}
                 hitSlop={7}
@@ -125,6 +125,7 @@ function HomeProductCard({ item, width, price, onShowMore }: {
 }
 
 export default function CustomerHomeScreen() {
+  const theme = useAppTheme();
   const { width: screenWidth } = useWindowDimensions();
   const cardWidth = Math.max(240, screenWidth - designTokens.spacing.xl * 2);
   const [selectedProduct, setSelectedProduct] = useState<HomeProduct | null>(null);
@@ -179,11 +180,11 @@ export default function CustomerHomeScreen() {
       >
         {selectedProduct ? (
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.detailsContent}>
-            <View style={[styles.detailsImage, { backgroundColor: themeSurfaceMuted() }]}>
+            <View style={[styles.detailsImage, { backgroundColor: theme.colors.surfaceMuted }]}>
               {getPrimaryImage(selectedProduct) ? (
                 <UiImage uri={getPrimaryImage(selectedProduct)!} accessibilityLabel={selectedProduct.product.name} aspectRatio={1} style={StyleSheet.absoluteFill} />
               ) : (
-                <Icon name="image" size={36} color="#888888" accessibilityHidden />
+                <Icon name="image" size={36} color={theme.colors.subtle} accessibilityHidden />
               )}
             </View>
             <UiText weight="700" style={styles.detailsName}>{selectedProduct.product.name}</UiText>
@@ -209,9 +210,6 @@ export default function CustomerHomeScreen() {
   );
 }
 
-function themeSurfaceMuted() {
-  return "#F1F1F1";
-}
 
 const styles = StyleSheet.create({
   productRail: {
@@ -378,7 +376,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#F1F1F1"
+    backgroundColor: "transparent"
   },
   detailsStoreLogoImage: {
     width: 44,
