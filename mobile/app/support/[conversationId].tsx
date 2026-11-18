@@ -6,7 +6,7 @@ import { Controller, useForm } from "react-hook-form";
 import { KeyboardAvoidingView, Platform, StyleSheet, TextInput, View } from "react-native";
 
 import { CustomerScreen, EmptyState, ErrorState, LoadingState } from "@/components/customer-ui";
-import { Caption, Heading, Icon, PressableSurface, Text as UiText } from "@/components/ui";
+import { AppHeader, Caption, Heading, Icon, PressableSurface, Text as UiText } from "@/components/ui";
 import { fetchSupportConversation, fetchSupportMessages, sendSupportMessage, supportMessageInputSchema, type SupportMessageInput } from "@/lib/support";
 import { getSupabaseClient } from "@/lib/supabase";
 import { translate, useLanguage } from "@/lib/i18n";
@@ -81,17 +81,17 @@ export default function SupportConversationScreen() {
   });
 
   if (auth.isPending || conversation.isPending || messages.isPending) {
-    return <CustomerScreen showNavigation={false}><SupportHeader title={translate("supportConversationTitle")} theme={theme} styles={styles} /><LoadingState label={translate("stateLoading")} /></CustomerScreen>;
+    return <CustomerScreen showNavigation={false}><SupportHeader title={translate("supportConversationTitle")} /><LoadingState label={translate("stateLoading")} /></CustomerScreen>;
   }
   if (auth.isError || conversation.isError || messages.isError) {
     return <CustomerScreen showNavigation={false}>
-      <SupportHeader title={translate("supportConversationTitle")} theme={theme} styles={styles} />
+      <SupportHeader title={translate("supportConversationTitle")} />
       <ErrorState title={translate("supportLoadError")} retryLabel={translate("retry")} onRetry={() => { void conversation.refetch(); void messages.refetch(); }} busy={conversation.isFetching || messages.isFetching} />
     </CustomerScreen>;
   }
   if (!auth.data || !conversation.data) {
     return <CustomerScreen showNavigation={false}>
-      <SupportHeader title={translate("supportConversationTitle")} theme={theme} styles={styles} />
+      <SupportHeader title={translate("supportConversationTitle")} />
       <EmptyState icon="message-circle" title={translate("supportNotFound")} hint={translate("supportNotFoundHint")} />
     </CustomerScreen>;
   }
@@ -147,7 +147,7 @@ export default function SupportConversationScreen() {
         </View>
       ) : undefined}
     >
-      <SupportHeader title={translate("supportConversationTitle")} theme={theme} styles={styles} />
+      <SupportHeader title={translate("supportConversationTitle")} />
       <View style={styles.heading}>
         <UiText weight="800">{conversation.data.subject}</UiText>
         <Caption>{closed ? translate("supportStatusClosed") : translate("supportStatusOpen")}</Caption>
@@ -191,22 +191,6 @@ function createStyles(theme: ReturnType<typeof useAppTheme>) {
 }
 
 
-function SupportHeader({ title, theme, styles }: {
-  title: string;
-  theme: ReturnType<typeof useAppTheme>;
-  styles: ReturnType<typeof createStyles>;
-}) {
-  return (
-    <View style={styles.headerRow}>
-      <Heading level={2} style={styles.headerTitle}>{title}</Heading>
-      <PressableSurface
-        accessibilityRole="button"
-        accessibilityLabel={translate("back")}
-        onPress={() => router.back()}
-        style={styles.backButton}
-      >
-        <Icon name="chevron-right" size={22} color={theme.colors.foreground} />
-      </PressableSurface>
-    </View>
-  );
+function SupportHeader({ title }: { title: string }) {
+  return <AppHeader title={title} />;
 }
