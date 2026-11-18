@@ -156,6 +156,18 @@ export default function ExploreScreen() {
     >
       <View style={styles.topSection}>
         <CustomerMainHeader />
+        <View style={styles.search}>
+          <SearchField
+            value={query}
+            onChangeText={setQuery}
+            placeholder={translate("homeSearchPlaceholder")}
+            accessibilityLabel={translate("homeSearchPlaceholder")}
+            style={{
+              backgroundColor: "transparent",
+              borderRadius: theme.radius.pill
+            }}
+          />
+        </View>
         <CustomerHeading
           title={translate("exploreTitle")}
           subtitle={translate("exploreSubtitle")}
@@ -221,6 +233,7 @@ export default function ExploreScreen() {
 
 const styles = StyleSheet.create({
   topSection: { gap: designTokens.spacing.md },
+  search: { width: "100%" },
 
   categoryViewport: { overflow: "hidden" },
   categoryTrack: { flexDirection: "row", alignItems: "center", direction: "ltr" },
