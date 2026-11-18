@@ -620,10 +620,7 @@ export default function MerchantEditProductScreen() {
         ) : null}
       </MediaViewer>
 
-      <BottomSheet visible={categoryPickerOpen} onRequestClose={() => setCategoryPickerOpen(false)} maxHeight="85%">
-            <UiText style={[styles.confirmTitle, { color: theme.colors.foreground }]}>
-              {translate("merchantProductCategoryPickerTitle")}
-            </UiText>
+      <BottomSheet visible={categoryPickerOpen} onRequestClose={() => setCategoryPickerOpen(false)} title={translate("merchantProductCategoryPickerTitle")} maxHeight="85%">
             <ScrollView style={styles.categoryList} showsVerticalScrollIndicator={false}>
               {selectableCategories.map((category) => (
                 <PressableSurface
@@ -656,16 +653,6 @@ export default function MerchantEditProductScreen() {
                 </UiText>
               ) : null}
             </ScrollView>
-            <PressableSurface
-              accessibilityRole="button"
-              accessibilityLabel={translate("merchantProductCategoryClose")}
-              onPress={() => setCategoryPickerOpen(false)}
-              style={[styles.cancelButton, { borderColor: (theme.colors.inputBorder) }]}
-            >
-              <UiText style={[styles.cancelText, { color: theme.colors.foreground }]}>
-                {translate("merchantProductCategoryClose")}
-              </UiText>
-            </PressableSurface>
 
       </BottomSheet>
 
