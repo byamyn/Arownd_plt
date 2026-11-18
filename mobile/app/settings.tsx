@@ -236,8 +236,7 @@ export default function SettingsScreen() {
       />
       {signOutError ? <UiText tone="danger">{translate("settingsSignOutError")}</UiText> : null}
 
-      <BottomSheet visible={activeSheet === "password"} onRequestClose={closeSheet}>
-        <Heading level={3}>{translate("settingsPasswordChangeTitle")}</Heading>
+      <BottomSheet visible={activeSheet === "password"} onRequestClose={closeSheet} title={translate("settingsPasswordChangeTitle")}>
         <Caption>{translate("settingsPasswordHint")}</Caption>
         <TextField
           value={currentPassword}
@@ -308,8 +307,7 @@ export default function SettingsScreen() {
         />
       </BottomSheet>
 
-      <BottomSheet visible={activeSheet === "country"} onRequestClose={closeSheet}>
-        <Heading level={3}>{translate("settingsBrowsingCountry")}</Heading>
+      <BottomSheet visible={activeSheet === "country"} onRequestClose={closeSheet} title={translate("settingsBrowsingCountry")}>
         <Caption>{translate("settingsBrowsingCountryHint")}</Caption>
         <Caption>{translate("settingsBrowsingCountryImpact")}</Caption>
         {countries.isPending || browsingCountry.isPending ? <Caption>{translate("stateLoading")}</Caption> : countries.isError || browsingCountry.isError ? <UiText tone="danger">{translate("settingsCountryLoadError")}</UiText> : (
@@ -346,8 +344,7 @@ export default function SettingsScreen() {
         {browsingCountryMutation.isPending ? <Caption>{translate("stateLoading")}</Caption> : null}
       </BottomSheet>
 
-      <BottomSheet visible={activeSheet === "appearance"} onRequestClose={closeSheet}>
-        <Heading level={3}>{translate("settingsAppearanceTitle")}</Heading>
+      <BottomSheet visible={activeSheet === "appearance"} onRequestClose={closeSheet} title={translate("settingsAppearanceTitle")}>
         <Caption>{translate("settingsAppearanceHint")}</Caption>
         <SegmentedControl
           accessibilityLabel={translate("settingsAppearanceTitle")}
@@ -366,8 +363,7 @@ export default function SettingsScreen() {
         {appearanceError ? <UiText tone="danger">{translate("settingsAppearanceError")}</UiText> : null}
       </BottomSheet>
 
-      <BottomSheet visible={activeSheet === "language"} onRequestClose={closeSheet}>
-        <Heading level={3}>{translate("settingsLanguageTitle")}</Heading>
+      <BottomSheet visible={activeSheet === "language"} onRequestClose={closeSheet} title={translate("settingsLanguageTitle")}>
         <PressableSurface
           accessibilityRole="button"
           accessibilityState={{ selected: language === "ar" }}
