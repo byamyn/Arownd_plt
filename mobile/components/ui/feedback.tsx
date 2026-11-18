@@ -218,12 +218,14 @@ export function Dialog({
 export function BottomSheet({
   visible,
   onRequestClose,
+  title,
   children,
   maxHeight = "85%",
   height
 }: {
   visible: boolean;
   onRequestClose: () => void;
+  title: string;
   children: ReactNode;
   maxHeight?: ViewStyle["maxHeight"];
   height?: ViewStyle["height"];
@@ -235,6 +237,22 @@ export function BottomSheet({
         <Pressable accessible={false} onPress={onRequestClose} style={{ position: "absolute", top: 0, bottom: 0, start: 0, end: 0, backgroundColor: theme.colors.overlay }} />
         <View accessibilityViewIsModal style={{ height, maxHeight, padding: designTokens.spacing.lg, paddingBottom: designTokens.spacing.xxl, borderTopLeftRadius: theme.radius.xl, borderTopRightRadius: theme.radius.xl, backgroundColor: theme.colors.surface, gap: designTokens.spacing.md }}>
           <View style={{ width: theme.dimensions.avatarSize.md, height: 4, borderRadius: theme.radius.pill, backgroundColor: theme.colors.border, alignSelf: "center" }} />
+          <View style={{ minHeight: 44, flexDirection: "row", alignItems: "center" }}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="إغلاق"
+              onPress={onRequestClose}
+              hitSlop={8}
+              style={{ width: 44, height: 44, alignItems: "center", justifyContent: "center" }}
+            >
+              <Icon name="x" size={20} color={theme.colors.foreground} accessibilityHidden />
+            </Pressable>
+            <View pointerEvents="none" style={{ position: "absolute", start: 52, end: 52, alignItems: "center", justifyContent: "center" }}>
+              <UiText accessibilityRole="header" numberOfLines={1} style={{ color: theme.colors.foreground, fontSize: theme.typography.body, fontWeight: theme.fontWeights.extrabold, textAlign: "center" }}>{title}</UiText>
+            </View>
+            <View style={{ width: 44, height: 44 }} />
+          </View>
+          <View style={{ height: StyleSheet.hairlineWidth, backgroundColor: theme.colors.border }} />
           {children}
         </View>
       </View>
