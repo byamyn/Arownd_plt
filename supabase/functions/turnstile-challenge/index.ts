@@ -112,6 +112,7 @@ Deno.serve((request: Request) => {
         "retry": "auto",
         theme: "light"
       });
+      sendToApp({ type: "ready" });
     }
     window.resetArowndTurnstile = function() {
       if (window.turnstile && arowndWidgetId !== null) {
