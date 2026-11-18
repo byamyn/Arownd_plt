@@ -353,16 +353,17 @@ export default function ProfileScreen() {
       <BottomSheet
         visible={accountSheet !== null}
         onRequestClose={() => setAccountSheet(null)}
+        title={accountSheet === "delivery" ? translate("deliveryProfileTitle") : accountSheet === "addresses" ? translate("addressesTitle") : translate("inviteTitle")}
         height="68%"
         maxHeight="94%"
       >
-        {accountSheet ? <ProfileAccountSheet section={accountSheet} onClose={() => setAccountSheet(null)} /> : null}
+        {accountSheet ? <ProfileAccountSheet section={accountSheet} /> : null}
       </BottomSheet>
       <BottomSheet
         visible={avatarActionsOpen}
         onRequestClose={() => setAvatarActionsOpen(false)}
+        title={translate("profileAvatarOptionsTitle")}
       >
-        <UiText weight="700">{translate("profileAvatarOptionsTitle")}</UiText>
         <PressableSurface
           onPress={() => { void chooseAvatar(); }}
           disabled={uploadAvatar.isPending || removeAvatar.isPending}
