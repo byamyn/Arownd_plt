@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  BackHandler,
   Pressable,
   StyleSheet,
   Text,
@@ -156,6 +157,13 @@ export function AuthCaptchaHost() {
     }
   }, [resetWidget, settlePending]);
 
+  const closeChallenge = useCallback(() => {
+    setInteractive(false);
+    settlePending(new Error("AUTH_CAPTCHA_CANCELLED"));
+    tokenIssuedRef.current = false;
+    resetWidget();
+  }, [resetWidget, settlePending]);
+
   const handleNavigation = useCallback((navigation: WebViewNavigation) => {
     if (navigation.url === "about:blank") return true;
 
@@ -177,6 +185,15 @@ export function AuthCaptchaHost() {
 
   useEffect(() => registerAuthCaptchaHandler(requestCaptcha), [requestCaptcha]);
 
+  useEffect(() => {
+    if (!interactive && !loadError) return;
+    const subscription = BackHandler.addEventListener("hardwareBackPress", () => {
+      closeChallenge();
+      return true;
+    });
+    return () => subscription.remove();
+  }, [closeChallenge, interactive, loadError]);
+
   useEffect(() => () => {
     const pending = pendingRef.current;
     if (pending) {
@@ -185,13 +202,6 @@ export function AuthCaptchaHost() {
       pendingRef.current = null;
     }
   }, []);
-
-  const closeChallenge = () => {
-    setInteractive(false);
-    settlePending(new Error("AUTH_CAPTCHA_CANCELLED"));
-    tokenIssuedRef.current = false;
-    resetWidget();
-  };
 
   return (
     <View
