@@ -3,8 +3,8 @@ import { router } from "expo-router";
 import { StyleSheet, View } from "react-native";
 
 import Logo from "@/components/logo";
-import { CartButton } from "@/components/cart-button";
-import { Icon, IconButton } from "@/components/ui";
+import { Icon, IconButton, Text as UiText } from "@/components/ui";
+import { CART_QUERY_KEY, getCart } from "@/lib/cart";
 import { countUnreadNotifications, fetchMyNotifications } from "@/lib/notifications";
 import { getSupabaseClient } from "@/lib/supabase";
 import { translate } from "@/lib/i18n";
@@ -32,6 +32,8 @@ export function CustomerMainHeader({ variant = "cart" }: CustomerMainHeaderProps
     staleTime: 30_000
   });
   const unreadCount = notifications.data ? countUnreadNotifications(notifications.data) : 0;
+  const cart = useQuery({ queryKey: CART_QUERY_KEY, queryFn: getCart });
+  const cartCount = cart.data?.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
 
   return (
     <View style={styles.header}>
@@ -49,7 +51,21 @@ export function CustomerMainHeader({ variant = "cart" }: CustomerMainHeaderProps
           style={[styles.iconButton, { backgroundColor: theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface, borderWidth: theme.mode === "light" ? 0 : 1, borderColor: theme.colors.border }]}
         />
         {variant === "cart" ? (
-          <CartButton />
+          <IconButton
+            accessibilityLabel={translate("cartTitle") + (cartCount > 0 ? `, ${cartCount}` : "")}
+            onPress={() => router.push("/cart")}
+            icon={(
+              <View>
+                <Icon name="shopping-cart" size={21} color={theme.colors.foreground} accessibilityHidden />
+                {cartCount > 0 ? (
+                  <View style={[styles.countBadge, { backgroundColor: theme.colors.accent }]}>
+                    <UiText style={[styles.countText, { color: theme.colors.accentForeground }]}>{cartCount > 99 ? "99+" : cartCount}</UiText>
+                  </View>
+                ) : null}
+              </View>
+            )}
+            style={[styles.iconButton, { backgroundColor: theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface, borderWidth: theme.mode === "light" ? 0 : 1, borderColor: theme.colors.border }]}
+          />
         ) : (
           <IconButton
             accessibilityLabel={translate("profileSettings")}
@@ -83,6 +99,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center"
   },
+  countBadge: {
+    position: "absolute",
+    top: -7,
+    end: -9,
+    minWidth: 17,
+    height: 17,
+    paddingHorizontal: 3,
+    borderRadius: designTokens.radius.pill,
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  countText: { fontSize: 9, fontWeight: "800" },
   unreadDot: {
     position: "absolute",
     top: -1,
