@@ -1,11 +1,13 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ComponentType, type Ref } from "react";
 import {
   ActivityIndicator,
   BackHandler,
   Pressable,
   StyleSheet,
   Text,
-  View
+  View,
+  type StyleProp,
+  type ViewStyle
 } from "react-native";
 import { WebView, type WebViewNavigation } from "react-native-webview";
 
@@ -24,6 +26,28 @@ type PendingCaptcha = {
   timeout: ReturnType<typeof setTimeout>;
 };
 
+type CaptchaWebViewHandle = {
+  injectJavaScript: (script: string) => void;
+};
+
+type CaptchaWebViewProps = {
+  ref?: Ref<CaptchaWebViewHandle>;
+  source: { html: string; baseUrl?: string };
+  javaScriptEnabled?: boolean;
+  domStorageEnabled?: boolean;
+  thirdPartyCookiesEnabled?: boolean;
+  originWhitelist?: string[];
+  onMessage?: (event: { nativeEvent: { data: string } }) => void;
+  onShouldStartLoadWithRequest?: (navigation: WebViewNavigation) => boolean;
+  onError?: () => void;
+  onHttpError?: (event: { nativeEvent: { statusCode: number } }) => void;
+  onLoadEnd?: () => void;
+  style?: StyleProp<ViewStyle>;
+};
+
+// Isolate the upstream WebView declaration mismatch while retaining typed props.
+const CaptchaWebView = WebView as unknown as ComponentType<CaptchaWebViewProps>;
+
 type CaptchaMessage =
   | { type: "ready" }
   | { type: "token"; token: string }
@@ -35,7 +59,7 @@ export function AuthCaptchaHost() {
   const theme = useAppTheme();
   useLanguage();
 
-  const webViewRef = useRef<WebView>(null);
+  const webViewRef = useRef<CaptchaWebViewHandle>(null);
   const pendingRef = useRef<PendingCaptcha | null>(null);
   const cachedTokenRef = useRef<{ value: string; createdAt: number } | null>(null);
   const widgetReadyRef = useRef(false);
@@ -211,7 +235,7 @@ export function AuthCaptchaHost() {
       style={[StyleSheet.absoluteFill, styles.host]}
     >
       {html ? (
-        <WebView
+        <CaptchaWebView
           ref={webViewRef}
           source={{ html, baseUrl: CHALLENGE_URL }}
           javaScriptEnabled
@@ -225,7 +249,7 @@ export function AuthCaptchaHost() {
             setLoadError(true);
             settlePending(new Error("AUTH_CAPTCHA_LOAD_FAILED"));
           }}
-          onHttpError={(event) => {
+          onHttpError={(event: { nativeEvent: { statusCode: number } }) => {
             if (event.nativeEvent.statusCode >= 400) {
               setLoading(false);
               setLoadError(true);
@@ -233,14 +257,14 @@ export function AuthCaptchaHost() {
             }
           }}
           onLoadEnd={() => setLoading(false)}
-          style={[styles.webView, { opacity: interactive ? 1 : 0.001 }]}
+          style={[StyleSheet.absoluteFill, styles.webView, { opacity: interactive ? 1 : 0.001 }]}
         />
       ) : null}
 
       {interactive || loadError ? (
         <View
           pointerEvents="box-none"
-          style={[styles.nativeOverlay, { backgroundColor: loadError ? theme.colors.background : "transparent" }]}
+          style={[StyleSheet.absoluteFill, styles.nativeOverlay, { backgroundColor: loadError ? theme.colors.background : "transparent" }]}
         >
           <View style={styles.header}>
             <View style={styles.headerText}>
@@ -295,11 +319,9 @@ const styles = StyleSheet.create({
     elevation: 1000
   },
   webView: {
-    ...StyleSheet.absoluteFillObject,
     backgroundColor: "transparent"
   },
   nativeOverlay: {
-    ...StyleSheet.absoluteFillObject,
     paddingTop: 24,
     zIndex: 2
   },
