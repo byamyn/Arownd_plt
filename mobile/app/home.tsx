@@ -234,13 +234,14 @@ const styles = StyleSheet.create({
   imageOverlayHeader: {
     position: "absolute",
     top: designTokens.spacing.md,
-    start: designTokens.spacing.md,
-    end: designTokens.spacing.md,
-    flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "space-between"
+    left: designTokens.spacing.md,
+    right: designTokens.spacing.md,
+    height: 50
   },
   storeBadge: {
+    position: "absolute",
+    top: 0,
+    left: 0,
     maxWidth: "72%",
     minHeight: 34,
     justifyContent: "center",
@@ -254,6 +255,9 @@ const styles = StyleSheet.create({
     fontWeight: "700"
   },
   storeLogo: {
+    position: "absolute",
+    top: 0,
+    right: 0,
     width: 50,
     height: 50,
     borderRadius: 25,
