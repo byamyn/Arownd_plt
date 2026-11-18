@@ -10,10 +10,7 @@ function htmlResponse(body: string, status = 200): Response {
     "Content-Security-Policy": "default-src 'none'; script-src https://challenges.cloudflare.com 'unsafe-inline'; frame-src https://challenges.cloudflare.com; connect-src https://challenges.cloudflare.com; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
   });
   headers.set("Content-Type", "text/html; charset=utf-8");
-  return new Response(
-    new Blob([body], { type: "text/html;charset=utf-8" }),
-    { status, headers }
-  );
+  return new Response(new Blob([body], { type: "text/html;charset=utf-8" }), { status, headers });
 }
 
 function messagePage(title: string, message: string): string {
@@ -43,8 +40,7 @@ Deno.serve((request: Request) => {
   }
 
   const requestUrl = new URL(request.url);
-  const returnUrl = requestUrl.searchParams.get("return_url");
-  if (returnUrl !== RETURN_URL) {
+  if (requestUrl.searchParams.get("return_url") !== RETURN_URL) {
     return htmlResponse(messagePage(
       "طلب غير صالح",
       "تعذر بدء عملية التحقق. ارجع إلى التطبيق وحاول مرة أخرى."
@@ -67,32 +63,61 @@ Deno.serve((request: Request) => {
   <meta name="color-scheme" content="light">
   <title>التحقق الأمني - Arownd</title>
   <style>
-    body{margin:0;min-height:100vh;display:grid;place-items:center;background:#f7f7f5;color:#171717;font-family:Arial,sans-serif;padding:24px;box-sizing:border-box}
+    html,body{margin:0;min-height:100%;background:#f7f7f5;color:#171717;font-family:Arial,sans-serif}
+    body{min-height:100vh;display:grid;place-items:center;padding:24px;box-sizing:border-box}
     main{width:min(100%,440px);padding:28px;border:1px solid #e5e5e5;border-radius:18px;background:#fff;text-align:center;box-sizing:border-box}
     h1{font-size:21px;margin:0 0 10px}p{font-size:15px;line-height:1.7;color:#555;margin:0 0 22px}
     #turnstile-widget{display:flex;justify-content:center;min-height:66px}
     #status{margin-top:16px;min-height:24px;font-size:14px;color:#666}
   </style>
   <script>
+    var arowndWidgetId = null;
+    function sendToApp(message) {
+      if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+        window.ReactNativeWebView.postMessage(JSON.stringify(message));
+      }
+    }
     function onTurnstileLoaded() {
       if (!window.turnstile) {
-        document.getElementById("status").textContent = "تعذر تحميل التحقق. أعد المحاولة.";
+        sendToApp({ type: "error", code: "TURNSTILE_UNAVAILABLE" });
         return;
       }
-      window.turnstile.render("#turnstile-widget", {
+      arowndWidgetId = window.turnstile.render("#turnstile-widget", {
         sitekey: "${siteKey}",
+        execution: "render",
+        appearance: "interaction-only",
         callback: function(token) {
-          window.location.replace("${RETURN_URL}?token=" + encodeURIComponent(token));
+          sendToApp({ type: "token", token: token });
+        },
+        "before-interactive-callback": function() {
+          sendToApp({ type: "interactive", active: true });
+        },
+        "after-interactive-callback": function() {
+          sendToApp({ type: "interactive", active: false });
         },
         "expired-callback": function() {
-          document.getElementById("status").textContent = "انتهت صلاحية التحقق. أعد المحاولة.";
+          sendToApp({ type: "expired" });
         },
-        "error-callback": function() {
-          document.getElementById("status").textContent = "تعذر إكمال التحقق. تحقق من اتصال الإنترنت.";
+        "timeout-callback": function() {
+          sendToApp({ type: "expired" });
         },
+        "error-callback": function(code) {
+          sendToApp({ type: "error", code: String(code || "TURNSTILE_ERROR") });
+        },
+        "unsupported-callback": function() {
+          sendToApp({ type: "error", code: "TURNSTILE_UNSUPPORTED" });
+        },
+        "refresh-expired": "auto",
+        "refresh-timeout": "auto",
+        "retry": "auto",
         theme: "light"
       });
     }
+    window.resetArowndTurnstile = function() {
+      if (window.turnstile && arowndWidgetId !== null) {
+        window.turnstile.reset(arowndWidgetId);
+      }
+    };
   </script>
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoaded&render=explicit" async defer></script>
 </head>
