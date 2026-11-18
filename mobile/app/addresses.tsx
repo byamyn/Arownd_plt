@@ -155,7 +155,7 @@ export default function AddressesScreen() {
       <CustomerScreen>
         <AppHeader
           title={translate("addressesTitle")}
-          leading={<IconButton accessibilityLabel={translate("back")} onPress={() => router.back()} icon={<Icon name="chevron-right" size={20} />} />}
+          leading={<IconButton accessibilityLabel={translate("back")} onPress={() => router.back()} icon={<Icon name="arrow-right" size={20} />} />}
         />
         <ErrorState
           title={translate("addressesLoadError")}
@@ -171,7 +171,7 @@ export default function AddressesScreen() {
     <CustomerScreen>
       <AppHeader
         title={translate("addressesTitle")}
-        leading={<IconButton accessibilityLabel={translate("back")} onPress={() => router.back()} icon={<Icon name="chevron-right" size={20} />} />}
+        leading={<IconButton accessibilityLabel={translate("back")} onPress={() => router.back()} icon={<Icon name="arrow-right" size={20} />} />}
       />
 
       <Caption>{translate("addressesSubtitle")}</Caption>
