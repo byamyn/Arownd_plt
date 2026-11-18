@@ -10,7 +10,6 @@ import {
   AppHeader,
   BottomSheet,
   Button,
-  Icon,
   Caption,
   Card,
   ConfirmDialog,
