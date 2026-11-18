@@ -24,6 +24,7 @@ type PendingCaptcha = {
 };
 
 type CaptchaMessage =
+  | { type: "ready" }
   | { type: "token"; token: string }
   | { type: "interactive"; active: boolean }
   | { type: "expired" }
@@ -36,6 +37,8 @@ export function AuthCaptchaHost() {
   const webViewRef = useRef<WebView>(null);
   const pendingRef = useRef<PendingCaptcha | null>(null);
   const cachedTokenRef = useRef<{ value: string; createdAt: number } | null>(null);
+  const widgetReadyRef = useRef(false);
+  const tokenIssuedRef = useRef(false);
   const [html, setHtml] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [interactive, setInteractive] = useState(false);
@@ -87,7 +90,6 @@ export function AuthCaptchaHost() {
     const cached = cachedTokenRef.current;
     if (cached && Date.now() - cached.createdAt < TOKEN_MAX_AGE_MS) {
       cachedTokenRef.current = null;
-      resetWidget();
       return Promise.resolve(cached.value);
     }
     cachedTokenRef.current = null;
@@ -105,6 +107,10 @@ export function AuthCaptchaHost() {
         settlePending(new Error("AUTH_CAPTCHA_TIMEOUT"));
       }, CAPTCHA_TIMEOUT_MS);
       pendingRef.current = { resolve, reject, timeout };
+      if (widgetReadyRef.current && tokenIssuedRef.current) {
+        tokenIssuedRef.current = false;
+        resetWidget();
+      }
     });
   }, [loadError, resetWidget, settlePending]);
 
@@ -116,12 +122,17 @@ export function AuthCaptchaHost() {
       return;
     }
 
+    if (message.type === "ready") {
+      widgetReadyRef.current = true;
+      return;
+    }
+
     if (message.type === "token" && typeof message.token === "string" && message.token.length > 0) {
       setInteractive(false);
       setLoadError(false);
+      tokenIssuedRef.current = true;
       if (pendingRef.current) {
         settlePending(undefined, message.token);
-        resetWidget();
       } else cachedTokenRef.current = { value: message.token, createdAt: Date.now() };
       return;
     }
@@ -133,6 +144,7 @@ export function AuthCaptchaHost() {
 
     if (message.type === "expired") {
       cachedTokenRef.current = null;
+      tokenIssuedRef.current = false;
       return;
     }
 
@@ -177,6 +189,7 @@ export function AuthCaptchaHost() {
   const closeChallenge = () => {
     setInteractive(false);
     settlePending(new Error("AUTH_CAPTCHA_CANCELLED"));
+    tokenIssuedRef.current = false;
     resetWidget();
   };
 
