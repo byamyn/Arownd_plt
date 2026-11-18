@@ -119,8 +119,10 @@ export function AuthCaptchaHost() {
     if (message.type === "token" && typeof message.token === "string" && message.token.length > 0) {
       setInteractive(false);
       setLoadError(false);
-      if (pendingRef.current) settlePending(undefined, message.token);
-      else cachedTokenRef.current = { value: message.token, createdAt: Date.now() };
+      if (pendingRef.current) {
+        settlePending(undefined, message.token);
+        resetWidget();
+      } else cachedTokenRef.current = { value: message.token, createdAt: Date.now() };
       return;
     }
 
@@ -137,9 +139,10 @@ export function AuthCaptchaHost() {
     if (message.type === "error") {
       cachedTokenRef.current = null;
       setInteractive(false);
+      setLoadError(true);
       settlePending(new Error("AUTH_CAPTCHA_CHALLENGE_FAILED"));
     }
-  }, [settlePending]);
+  }, [resetWidget, settlePending]);
 
   const handleNavigation = useCallback((navigation: WebViewNavigation) => {
     if (navigation.url === "about:blank") return true;
@@ -210,7 +213,10 @@ export function AuthCaptchaHost() {
       ) : null}
 
       {interactive || loadError ? (
-        <View style={[styles.nativeOverlay, { backgroundColor: theme.colors.background }]}>
+        <View
+          pointerEvents="box-none"
+          style={[styles.nativeOverlay, { backgroundColor: loadError ? theme.colors.background : "transparent" }]}
+        >
           <View style={styles.header}>
             <View style={styles.headerText}>
               <Text style={[styles.title, { color: theme.colors.foreground }]}>
