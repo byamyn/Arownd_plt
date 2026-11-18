@@ -9,6 +9,7 @@ import {
 } from "react-native";
 
 import { designTokens, useAppTheme } from "@/lib/theme";
+import { translate } from "@/lib/i18n";
 import { Icon } from "./icon";
 import { Text as UiText } from "./typography";
 
@@ -240,7 +241,7 @@ export function BottomSheet({
           <View style={{ minHeight: 44, flexDirection: "row", alignItems: "center" }}>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="إغلاق"
+              accessibilityLabel={translate("merchantModalClose")}
               onPress={onRequestClose}
               hitSlop={8}
               style={{ width: 44, height: 44, alignItems: "center", justifyContent: "center" }}
@@ -252,7 +253,7 @@ export function BottomSheet({
             </View>
             <View style={{ width: 44, height: 44 }} />
           </View>
-          <View style={{ height: StyleSheet.hairlineWidth, backgroundColor: theme.colors.border }} />
+          <View style={{ height: 1, backgroundColor: theme.colors.border }} />
           {children}
         </View>
       </View>
