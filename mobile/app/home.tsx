@@ -127,7 +127,7 @@ function HomeProductCard({ item, width, price, onShowMore }: {
 export default function CustomerHomeScreen() {
   const theme = useAppTheme();
   const { width: screenWidth } = useWindowDimensions();
-  const cardWidth = Math.max(240, screenWidth - designTokens.spacing.xl * 2);
+  const cardWidth = screenWidth - designTokens.spacing.xl * 2;
   const [selectedProduct, setSelectedProduct] = useState<HomeProduct | null>(null);
   const browsingCurrency = useQuery({ queryKey: ["browsing-country-currency"], queryFn: fetchBrowsingCurrencyCode, staleTime: 60_000 });
   const products = useQuery({ queryKey: ["customer-home-products"], queryFn: fetchHomeProducts, staleTime: 60_000 });
