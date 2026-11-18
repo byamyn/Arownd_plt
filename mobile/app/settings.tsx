@@ -7,6 +7,7 @@ import { designTokens, useAppTheme, type AppTheme } from "@/lib/theme";
 import { isThemeMode, useThemePreference } from "@/lib/design-system";
 import { CustomerScreen } from "@/components/customer-ui";
 import {
+  AppHeader,
   BottomSheet,
   Button,
   Caption,
@@ -128,17 +129,7 @@ export default function SettingsScreen() {
 
   return (
     <CustomerScreen showNavigation={false} contentStyle={styles.screenContent}>
-      <View style={styles.headerRow}>
-        <Heading level={2} style={styles.headerTitle}>{translate("settingsTitle")}</Heading>
-        <PressableSurface
-          accessibilityRole="button"
-          accessibilityLabel={translate("back")}
-          onPress={() => router.back()}
-          style={styles.backButton}
-        >
-          <Icon name="chevron-right" size={22} color={theme.colors.foreground} />
-        </PressableSurface>
-      </View>
+      <AppHeader title={translate("settingsTitle")} />
       <Caption>{translate("settingsSubtitle")}</Caption>
 
       <View style={styles.section}>
