@@ -4,7 +4,7 @@ import { useState } from "react";
 import { StyleSheet, TextInput, View } from "react-native";
 
 import { CustomerScreen } from "@/components/customer-ui";
-import { Button, Caption, Heading, Icon, PressableSurface, Text as UiText, TextField } from "@/components/ui";
+import { AppHeader, Button, Caption, Heading, Icon, PressableSurface, Text as UiText, TextField } from "@/components/ui";
 import { createSupportConversation, supportConversationInputSchema } from "@/lib/support";
 import { translate } from "@/lib/i18n";
 import { designTokens, useAppTheme } from "@/lib/theme";
@@ -44,12 +44,7 @@ export default function NewSupportConversationScreen() {
         />
       }
     >
-      <View style={styles.header}>
-        <PressableSurface accessibilityRole="button" accessibilityLabel={translate("back")} onPress={() => router.back()} style={styles.backButton}>
-          <Icon name="chevron-right" size={22} color={theme.colors.foreground} />
-        </PressableSurface>
-        <Heading level={2} style={styles.title}>{translate("supportNewMessage")}</Heading>
-      </View>
+      <AppHeader title={translate("supportNewMessage")} />
       <Caption>{translate("supportContactHint")}</Caption>
       <TextField
         value={subject}
