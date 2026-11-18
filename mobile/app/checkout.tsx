@@ -160,7 +160,7 @@ export default function CheckoutScreen() {
   if (createdOrderId) {
     return <CustomerScreen>
       <Card style={[styles.successPanel, { backgroundColor: theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface }]} contentStyle={styles.successContent}>
-        <UiText style={styles.successMark}>✓</UiText>
+        <View style={styles.successMark}><Icon name="handshake" size={34} color={theme.colors.accentForeground} /></View>
         <AppHeader title={translate("checkoutSuccessTitle")} />
         <UiText style={styles.hint}>{translate("checkoutSuccessMessage")}</UiText>
         <UiText style={styles.orderLabel}>{translate("checkoutOrderNumber")}</UiText>
