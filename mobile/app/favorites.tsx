@@ -81,7 +81,7 @@ export default function FavoritesScreen() {
 
   if (favorites.isPending) {
     return <CustomerScreen>
-      <AppHeader title={translate("favoritesTitle")} leading={<IconButton accessibilityLabel={translate("back")} onPress={() => router.back()} icon={<Icon name="arrow-right" size={20} />} />} />
+      <AppHeader title={translate("favoritesTitle")} leading={<IconButton accessibilityLabel={translate("back")} onPress={() => router.back()} icon={<Icon name="arrow-right" size={20} />} variant="ghost" />} />
       <View style={styles.productGrid}>
         {[0, 1, 2, 3].map((item) => <ProductCardSkeleton key={item} style={styles.productItem} />)}
       </View>
@@ -105,7 +105,7 @@ export default function FavoritesScreen() {
     >
       <AppHeader
         title={translate("favoritesTitle")}
-        leading={<IconButton accessibilityLabel={translate("back")} onPress={() => router.back()} icon={<Icon name="arrow-right" size={20} />} />}
+        leading={<IconButton accessibilityLabel={translate("back")} onPress={() => router.back()} icon={<Icon name="arrow-right" size={20} />} variant="ghost" />}
       />
       <Caption>{translate("favoritesSubtitle")}</Caption>
       <SegmentedControl
