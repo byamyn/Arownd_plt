@@ -1,6 +1,9 @@
 import type { ReactNode } from "react";
 import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
 import { Text as UiText } from "./typography";
+import { Icon } from "./icon";
+import { router } from "expo-router";
+import { translate, useLanguage } from "@/lib/i18n";
 
 import { designTokens, useAppTheme } from "@/lib/theme";
 
@@ -8,18 +11,32 @@ export function AppHeader({
   title,
   leading,
   trailing,
+  showBackButton = true,
   style
 }: {
   title: string;
   leading?: ReactNode;
   trailing?: ReactNode;
+  showBackButton?: boolean;
   style?: StyleProp<ViewStyle>;
 }) {
   const theme = useAppTheme();
+  const { language } = useLanguage();
+  const shouldShowBackButton = showBackButton || Boolean(leading);
 
   return (
     <View style={[styles.header, { gap: theme.spacing.md }, style]}>
-      {leading ? <View style={styles.slot}>{leading}</View> : null}
+      {shouldShowBackButton ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={translate("back")}
+          onPress={() => router.back()}
+          hitSlop={8}
+          style={({ pressed }) => [styles.backButton, { opacity: pressed ? 0.65 : 1 }]}
+        >
+          <Icon name={language === "ar" ? "arrow-right" : "arrow-left"} size={20} color={theme.colors.foreground} />
+        </Pressable>
+      ) : null}
       <UiText
         accessibilityRole="header"
         numberOfLines={1}
@@ -102,6 +119,12 @@ export function SegmentedControl({
 }
 
 const styles = StyleSheet.create({
+  backButton: {
+    width: 44,
+    height: 44,
+    alignItems: "center",
+    justifyContent: "center"
+  },
   header: {
     minHeight: designTokens.dimensions.controlHeight.lg,
     flexDirection: "row",
