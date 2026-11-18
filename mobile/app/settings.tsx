@@ -143,7 +143,7 @@ export default function SettingsScreen() {
             styles={styles}
           />
           <SettingsRow
-            icon="palette"
+            icon={theme.mode === "dark" ? "sun" : "moon"}
             label={translate("settingsAppearanceHint")}
             onPress={() => openSheet("appearance")}
             theme={theme}
