@@ -40,19 +40,34 @@ jobs:
           cache-dependency-path: mobile/package-lock.json
 
       - name: Install locked Expo mobile dependencies
+        id: install
         run: npm ci --legacy-peer-deps --no-audit --no-fund
 
       - name: Audit dependencies for high and critical vulnerabilities
+        id: security_audit
         run: npm run audit
+        continue-on-error: true
 
+      # Run each quality check independently so one failure does not hide the others.
       - name: TypeScript
+        if: always() && steps.install.outcome == 'success'
         run: npm run typecheck
 
       - name: ESLint
+        if: always() && steps.install.outcome == 'success'
         run: npm run lint
 
       - name: Vitest
+        if: always() && steps.install.outcome == 'success'
         run: npm test
 
       - name: Expo Doctor
+        if: always() && steps.install.outcome == 'success'
         run: npm run doctor
+
+      # Keep the workflow red when the audit reports vulnerabilities, after all checks ran.
+      - name: Fail workflow when security audit found vulnerabilities
+        if: always() && steps.security_audit.outcome == 'failure'
+        run: |
+          echo "::error::Dependency audit found high or critical vulnerabilities. Review the audit output above."
+          exit 1
