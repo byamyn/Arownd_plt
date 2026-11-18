@@ -156,7 +156,7 @@ export default function OrderDetailsScreen() {
   const formatOrderMoney = (amount: number) => formatMarketPrice(amount, order.currency_code);
 
   return <CustomerScreen refreshing={auth.isFetching || (Boolean(auth.data) && query.isFetching)} onRefresh={() => { void auth.refetch().then((result) => { if (result.isSuccess && result.data) void query.refetch(); }); }}>
-    <AppHeader title={translate("orderDetailsTitle")} leading={<IconButton accessibilityLabel={translate("back")} onPress={() => router.back()} icon={<Icon name="chevron-right" size={22} color={theme.colors.foreground} />} />} />
+    <AppHeader title={translate("orderDetailsTitle")} leading={<IconButton accessibilityLabel={translate("back")} onPress={() => router.back()} icon={<Icon name="arrow-right" size={22} color={theme.colors.foreground} />} />} />
     <UiText style={{ color: theme.colors.muted, fontSize: designTokens.typography.caption + 1, textAlign: "auto" }}>{translate("ordersCode") + ": " + orderCode}</UiText>
 
     <View style={[styles.panel, { backgroundColor: theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface }]}>
