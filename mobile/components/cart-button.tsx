@@ -16,7 +16,7 @@ export function CartButton() {
       count={count}
       onPress={() => router.push("/cart")}
     >
-      <Icon name="shopping-cart" size={22} color={theme.colors.foreground} accessibilityHidden />
+      <Icon name="shopping-bag" size={22} color={theme.colors.foreground} accessibilityHidden />
     </UiCartButton>
   );
 }

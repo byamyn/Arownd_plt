@@ -97,9 +97,9 @@ export function AuthField({ label, error, style, ...props }: FieldProps) {
   );
 }
 
-type ActionButtonProps = { label: string; onPress: () => void; loading?: boolean; disabled?: boolean };
+type ActionButtonProps = { label: string; onPress: () => void; loading?: boolean; disabled?: boolean; startIcon?: ReactNode };
 
-export function ActionButton({ label, onPress, loading = false, disabled = false }: ActionButtonProps) {
+export function ActionButton({ label, onPress, loading = false, disabled = false, startIcon }: ActionButtonProps) {
   return (
     <Button
       label={label}
@@ -108,6 +108,7 @@ export function ActionButton({ label, onPress, loading = false, disabled = false
       disabled={disabled}
       fullWidth
       size="lg"
+      startIcon={startIcon}
     />
   );
 }

@@ -23,7 +23,7 @@ import { readCartOptions } from "@/lib/cart-state";
 import { translate, type TranslationKey, useLanguage } from "@/lib/i18n";
 import { designTokens, useAppTheme, type AppTheme } from "@/lib/theme";
 import { getRegionDisplayName } from "@/lib/country-regions";
-import { Alert, AppHeader, Button, ConfirmDialog, ErrorState, MerchantOrderCard, MerchantStatusBadge, PriceDisplay, OrderCardSkeleton, Text as UiText, TextField, TrackingTimeline } from "@/components/ui";
+import { Alert, AppHeader, Button, ConfirmDialog, ErrorState, Icon, MerchantOrderCard, MerchantStatusBadge, PriceDisplay, OrderCardSkeleton, Text as UiText, TextField, TrackingTimeline } from "@/components/ui";
 
 type ConfirmAction = "reject" | "collect" | null;
 
@@ -150,6 +150,15 @@ export default function MerchantOrderDetailsScreen() {
     <SafeAreaView edges={["top", "left", "right"]} style={[styles.safe, { backgroundColor: theme.colors.background }]}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <AppHeader title={translate("merchantOrderDetailTitle")}/>
+
+        {order.status === "delivered" ? (
+          <MerchantOrderCard>
+            <View style={styles.sectionHeading}>
+              <Icon name="handshake" size={24} color={theme.colors.success} />
+              <UiText style={[styles.sectionTitle, { color: theme.colors.foreground }]}>{translate("merchantTrackingDelivered")}</UiText>
+            </View>
+          </MerchantOrderCard>
+        ) : null}
 
         <MerchantOrderCard>
           <View style={styles.summaryRow}>

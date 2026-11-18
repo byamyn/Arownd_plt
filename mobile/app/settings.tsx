@@ -143,7 +143,7 @@ export default function SettingsScreen() {
             styles={styles}
           />
           <SettingsRow
-            icon="palette"
+            icon={theme.mode === "dark" ? "sun" : "moon"}
             label={translate("settingsAppearanceHint")}
             onPress={() => openSheet("appearance")}
             theme={theme}
@@ -231,6 +231,7 @@ export default function SettingsScreen() {
         }}
         disabled={signOutMutation.isPending}
         variant="danger"
+        startIcon={<Icon name="log-out" size={18} />}
         fullWidth
         style={styles.signOutButton}
       />

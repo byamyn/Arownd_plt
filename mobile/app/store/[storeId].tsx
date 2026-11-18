@@ -133,7 +133,7 @@ export default function StoreDetailsScreen() {
         title=""
         leading={<IconButton accessibilityLabel={translate("back")} onPress={() => router.back()} icon={<Icon name="arrow-right" color={theme.colors.foreground} size={20} />} variant="ghost" />}
         trailing={<>
-          <IconButton accessibilityLabel={translate("storeShare")} onPress={() => { void Share.share({ message: `${translate("storeSharePrefix")} ${details.name}` }); }} icon={<Icon name="share" color={theme.colors.foreground} size={19} />} />
+          <IconButton accessibilityLabel={translate("storeShare")} onPress={() => { void Share.share({ message: `${translate("storeSharePrefix")} ${details.name}` }); }} icon={<Icon name="send" color={theme.colors.foreground} size={19} />} />
           <FavoriteButton kind="stores" id={storeId} iconOnly />
         </>}
         style={[styles.stickyStoreHeader, { backgroundColor: theme.colors.background }]}

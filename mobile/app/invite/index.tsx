@@ -102,7 +102,7 @@ export default function InviteScreen() {
               label={translate("inviteShareCode")}
               variant="outline"
               fullWidth
-              startIcon={<Icon name="share" size={17} />}
+              startIcon={<Icon name="send" size={17} />}
               onPress={() => {
                 void share(`${translate("inviteShareCodeMessage")}\n${formatInviteCode(invite.data.code)}\n${inviteLink}`);
               }}
