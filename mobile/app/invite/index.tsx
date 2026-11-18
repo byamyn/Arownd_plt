@@ -66,9 +66,10 @@ export default function InviteScreen() {
         title={translate("inviteTitle")}
         leading={
           <IconButton
-            icon={<Icon name="chevron-right" size={20} />}
+            icon={<Icon name="arrow-right" size={20} />}
             accessibilityLabel={translate("back")}
             onPress={() => router.back()}
+            variant="ghost"
           />
         }
       />
