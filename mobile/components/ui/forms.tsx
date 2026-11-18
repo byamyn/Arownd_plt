@@ -259,7 +259,7 @@ export function Select({
         </UiText>
         <Icon name="chevron-down" size={18} color={theme.colors.muted} accessibilityHidden />
       </Pressable>
-      <BottomSheet visible={open} onRequestClose={() => setOpen(false)} maxHeight="70%">
+      <BottomSheet visible={open} onRequestClose={() => setOpen(false)} title={accessibilityLabel} maxHeight="70%">
         <ScrollView>
           {options.map((option) => (
             <Pressable
