@@ -53,8 +53,7 @@ export function ContentReportAction({
         size={compact ? "sm" : "md"}
         onPress={() => setVisible(true)}
       />
-      <BottomSheet visible={visible} onRequestClose={close}>
-        <UiText weight="800">{translate("contentReportTitle")}</UiText>
+      <BottomSheet visible={visible} onRequestClose={close} title={translate("contentReportTitle")}>
         <Caption>{translate("contentReportHint")}</Caption>
         <View style={styles.reasons}>
           {REASONS.map((item) => (
@@ -86,7 +85,6 @@ export function ContentReportAction({
           disabled={report.isPending || report.isSuccess}
           fullWidth
         />
-        <Button label={translate("back")} variant="ghost" onPress={close} disabled={report.isPending} fullWidth />
       </BottomSheet>
     </>
   );
