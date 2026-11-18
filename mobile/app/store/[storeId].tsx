@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { Alert, Linking, Pressable, Share, StyleSheet, View } from "react-native";
+import { Alert, Linking, Pressable, Share, StyleSheet, useWindowDimensions, View } from "react-native";
 
 import { CustomerScreen, EmptyState, ErrorState, ProductTile } from "@/components/customer-ui";
 import { FavoriteButton } from "@/components/favorite-button";
@@ -83,6 +83,7 @@ export default function StoreDetailsScreen() {
   useLanguage();
   const { storeId } = useLocalSearchParams<{ storeId: string }>();
   const theme = useAppTheme();
+  const { width: screenWidth } = useWindowDimensions();
   const queryClient = useQueryClient();
   const browsingCurrency = useQuery({ queryKey: ["browsing-country-currency"], queryFn: fetchBrowsingCurrencyCode, staleTime: 60_000 });
   const merchantAccess = useQuery({ queryKey: ["merchant-access"], queryFn: fetchMerchantAccess, retry: false, staleTime: 30_000 });
@@ -139,11 +140,11 @@ export default function StoreDetailsScreen() {
         style={[styles.stickyStoreHeader, { backgroundColor: theme.colors.background }]}
       />
 
-      <View style={styles.coverWrap}>
+      <View style={[styles.coverWrap, { width: screenWidth, alignSelf: "center" }]}>
         {details.cover_url ? (
-          <UiImage uri={details.cover_url} accessibilityLabel={translate("merchantStoreCover")} aspectRatio={16 / 9} resizeMode="cover" style={styles.coverImage} />
+          <UiImage uri={details.cover_url} accessibilityLabel={translate("merchantStoreCover")} resizeMode="cover" style={[styles.coverImage, { width: screenWidth, height: 136 }]} />
         ) : (
-          <View style={[styles.coverImage, styles.defaultCover, { backgroundColor: theme.colors.surfaceMuted }]}>
+          <View style={[styles.coverImage, { width: screenWidth, height: 136 }, styles.defaultCover, { backgroundColor: theme.colors.surfaceMuted }]}>
             <Icon name="image" size={28} color={theme.colors.muted} accessibilityHidden />
             <UiText style={[styles.defaultCoverTitle, { color: theme.colors.foreground }]}>{translate("storeDefaultCover")}</UiText>
             <UiText style={[styles.defaultCoverHint, { color: theme.colors.muted }]}>{translate("storeDefaultCoverHint")}</UiText>
