@@ -388,22 +388,7 @@ export default function MerchantOnboardingScreen() {
         </ScrollView>
       </KeyboardAvoidingView>
 
-      <BottomSheet visible={regionPickerOpen} onRequestClose={() => setRegionPickerOpen(false)} maxHeight="85%">
-            <View style={styles.modalHeader}>
-              <UiText style={[styles.sectionTitle, { color: theme.colors.foreground }]}>
-                {regionPickerLevel === "primary" ? (regionOptions.data ? getRegionLevelDisplayName(regionOptions.data.selectedLevel, language) : "") : (secondaryOptions.data ? getRegionLevelDisplayName(secondaryOptions.data.selectedLevel, language) : "")}
-              </UiText>
-              <PressableSurface
-                accessibilityRole="button"
-                accessibilityLabel={translate("merchantModalClose")}
-                onPress={() => setRegionPickerOpen(false)}
-                style={styles.modalClose}
-              >
-                <UiText style={[styles.backText, { color: theme.colors.accentMuted }]}>
-                  {translate("merchantModalClose")}
-                </UiText>
-              </PressableSurface>
-            </View>
+      <BottomSheet visible={regionPickerOpen} onRequestClose={() => setRegionPickerOpen(false)} title={regionPickerLevel === "primary" ? (regionOptions.data ? getRegionLevelDisplayName(regionOptions.data.selectedLevel, language) : "") : (secondaryOptions.data ? getRegionLevelDisplayName(secondaryOptions.data.selectedLevel, language) : "")} maxHeight="85%">
             <ScrollView keyboardShouldPersistTaps="handled">
               {(regionPickerLevel === "primary" ? (regionOptions.data?.regions ?? []) : (secondaryOptions.data?.regions ?? [])).map((region) => (
                 <PressableSurface key={region.id} onPress={() => {
