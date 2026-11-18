@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 
 import { CustomerScreen, ErrorState, LoadingState } from "@/components/customer-ui";
-import { Button, Caption, Heading, Icon, PressableSurface, Text as UiText } from "@/components/ui";
+import { AppHeader, Button, Caption, Heading, Icon, PressableSurface, Text as UiText } from "@/components/ui";
 import { fetchMySupportConversations } from "@/lib/support";
 import { getSupabaseClient } from "@/lib/supabase";
 import { translate, useLanguage } from "@/lib/i18n";
@@ -60,19 +60,19 @@ export default function SupportScreen() {
 
   if (auth.isPending || (auth.data && conversations.isPending)) {
     return <CustomerScreen showNavigation={false}>
-      <SupportHeader title={translate("supportTitle")} theme={theme} styles={styles} />
+      <SupportHeader title={translate("supportTitle")} />
       <LoadingState label={translate("stateLoading")} />
     </CustomerScreen>;
   }
   if (auth.isError || conversations.isError) {
     return <CustomerScreen showNavigation={false}>
-      <SupportHeader title={translate("supportTitle")} theme={theme} styles={styles} />
+      <SupportHeader title={translate("supportTitle")} />
       <ErrorState title={translate("supportLoadError")} retryLabel={translate("retry")} onRetry={() => { void auth.refetch(); void conversations.refetch(); }} busy={auth.isFetching || conversations.isFetching} />
     </CustomerScreen>;
   }
   if (!auth.data) {
     return <CustomerScreen showNavigation={false}>
-      <SupportHeader title={translate("supportTitle")} theme={theme} styles={styles} />
+      <SupportHeader title={translate("supportTitle")} />
       <Caption>{translate("supportLoginHint")}</Caption>
       <Button label={translate("login")} onPress={() => router.push("/login")} fullWidth />
     </CustomerScreen>;
@@ -80,7 +80,7 @@ export default function SupportScreen() {
 
   return (
     <CustomerScreen showNavigation={false} onRefresh={() => { void conversations.refetch(); }} refreshing={conversations.isFetching}>
-      <SupportHeader title={translate("supportTitle")} theme={theme} styles={styles} />
+      <SupportHeader title={translate("supportTitle")} />
       <View style={styles.hero}>
         <View style={styles.heroMark}><Icon name="message-circle" size={28} color={theme.colors.foreground} /></View>
         <Heading level={2}>{translate("supportHeadline")}</Heading>
@@ -190,22 +190,6 @@ function createStyles(theme: ReturnType<typeof useAppTheme>) {
 }
 
 
-function SupportHeader({ title, theme, styles }: {
-  title: string;
-  theme: ReturnType<typeof useAppTheme>;
-  styles: ReturnType<typeof createStyles>;
-}) {
-  return (
-    <View style={styles.headerRow}>
-      <Heading level={2} style={styles.headerTitle}>{title}</Heading>
-      <PressableSurface
-        accessibilityRole="button"
-        accessibilityLabel={translate("back")}
-        onPress={() => router.back()}
-        style={styles.backButton}
-      >
-        <Icon name="chevron-right" size={22} color={theme.colors.foreground} />
-      </PressableSurface>
-    </View>
-  );
+function SupportHeader({ title }: { title: string }) {
+  return <AppHeader title={title} />;
 }
