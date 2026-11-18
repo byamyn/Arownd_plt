@@ -318,7 +318,7 @@ export default function MerchantStoreSettingsScreen() {
               disabled={imageBusy !== null || mutation.isPending}
               style={[styles.editorImageAction, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}
             >
-              <Icon name="camera" color={theme.colors.foreground} size={18} accessibilityHidden />
+              <Icon name="cloud-upload" color={theme.colors.foreground} size={18} accessibilityHidden />
             </PressableSurface>
           </View>
           <View style={styles.editorIdentity}>
@@ -337,7 +337,7 @@ export default function MerchantStoreSettingsScreen() {
                 disabled={imageBusy !== null || mutation.isPending}
                 style={[styles.editorLogoAction, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}
               >
-                <Icon name="camera" color={theme.colors.foreground} size={14} accessibilityHidden />
+                <Icon name="cloud-upload" color={theme.colors.foreground} size={14} accessibilityHidden />
               </PressableSurface>
             </View>
             <View style={styles.editorIdentityFields}>
