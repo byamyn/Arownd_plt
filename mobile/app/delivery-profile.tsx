@@ -101,7 +101,7 @@ export default function DeliveryProfileScreen() {
   }
   if (profile.isError || regionOptions.isError) {
     return <CustomerScreen>
-      <AppHeader title={translate("deliveryProfileTitle")} leading={<IconButton accessibilityLabel={translate("back")} onPress={() => router.back()} icon={<Icon name="arrow-right" size={20} />} />} />
+      <AppHeader title={translate("deliveryProfileTitle")} leading={<IconButton accessibilityLabel={translate("back")} onPress={() => router.back()} icon={<Icon name="arrow-right" size={20} />} variant="ghost" />} />
       <ErrorState title={translate("deliveryProfileLoadError")} retryLabel={translate("retry")} busy={profile.isFetching || regionOptions.isFetching} onRetry={() => { void profile.refetch(); void regionOptions.refetch(); }} />
     </CustomerScreen>;
   }
@@ -186,7 +186,7 @@ export default function DeliveryProfileScreen() {
     {mutation.isSuccess ? <View accessibilityRole="alert" style={styles.snackbar}><Icon name="circle-check" size={18} color={theme.colors.success} /><UiText tone="success" weight="700">{translate("deliveryProfileSaved")}</UiText></View> : null}
     <Button label={translate("deliveryProfileSave")} onPress={submit} loading={mutation.isPending} disabled={!hasChanges || mutation.isPending} fullWidth />
   </View>}>
-    <AppHeader title={translate("deliveryProfileTitle")} leading={<IconButton accessibilityLabel={translate("back")} onPress={() => router.back()} icon={<Icon name="arrow-right" size={20} />} />} />
+    <AppHeader title={translate("deliveryProfileTitle")} leading={<IconButton accessibilityLabel={translate("back")} onPress={() => router.back()} icon={<Icon name="arrow-right" size={20} />} variant="ghost" />} />
     <Caption>{translate("deliveryProfileSubtitle")}</Caption>
     <Card style={styles.panel} contentStyle={{ gap: designTokens.spacing.md, padding: designTokens.spacing.lg }}>
       <View ref={(node) => { fieldRefs.current.full_name = node; }}>
