@@ -56,7 +56,7 @@ export function CustomerMainHeader({ variant = "cart" }: CustomerMainHeaderProps
             onPress={() => router.push("/cart")}
             icon={(
               <View>
-                <Icon name="shopping-cart" size={21} color={theme.colors.foreground} accessibilityHidden />
+                <Icon name="shopping-bag" size={21} color={theme.colors.foreground} accessibilityHidden />
                 {cartCount > 0 ? (
                   <View style={[styles.countBadge, { backgroundColor: theme.colors.accent }]}>
                     <UiText style={[styles.countText, { color: theme.colors.accentForeground }]}>{cartCount > 99 ? "99+" : cartCount}</UiText>
