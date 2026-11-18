@@ -10,6 +10,7 @@ import {
   AppHeader,
   BottomSheet,
   Button,
+  Icon,
   Caption,
   Card,
   ConfirmDialog,
@@ -231,6 +232,7 @@ export default function SettingsScreen() {
         }}
         disabled={signOutMutation.isPending}
         variant="danger"
+        startIcon={<Icon name="log-out" size={18} />}
         fullWidth
         style={styles.signOutButton}
       />
