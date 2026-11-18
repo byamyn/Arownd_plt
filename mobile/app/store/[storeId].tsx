@@ -281,7 +281,7 @@ export default function StoreDetailsScreen() {
 }
 
 const styles = StyleSheet.create({
-  storeScreenContent: { width: "100%", alignSelf: "stretch", paddingHorizontal: 0, paddingTop: 0, paddingBottom: designTokens.spacing.xxl, gap: 0 },
+  storeScreenContent: { width: "100%", alignSelf: "stretch", alignItems: "stretch", paddingHorizontal: 0, paddingTop: 0, paddingBottom: designTokens.spacing.xxl, gap: 0 },
   stickyStoreHeader: { backgroundColor: "#FFFFFF", paddingHorizontal: designTokens.spacing.lg, paddingVertical: designTokens.spacing.xs, zIndex: 10 },
   storeHero: { paddingHorizontal: designTokens.spacing.lg, paddingBottom: designTokens.spacing.lg, gap: designTokens.spacing.md },
   storeActionsRow: { flexDirection: "row", gap: designTokens.spacing.sm },
