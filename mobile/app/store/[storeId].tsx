@@ -281,7 +281,7 @@ export default function StoreDetailsScreen() {
 }
 
 const styles = StyleSheet.create({
-  storeScreenContent: { paddingHorizontal: 0, paddingTop: 0, paddingBottom: designTokens.spacing.xxl, gap: 0 },
+  storeScreenContent: { width: "100%", alignSelf: "stretch", paddingHorizontal: 0, paddingTop: 0, paddingBottom: designTokens.spacing.xxl, gap: 0 },
   stickyStoreHeader: { backgroundColor: "#FFFFFF", paddingHorizontal: designTokens.spacing.lg, paddingVertical: designTokens.spacing.xs, zIndex: 10 },
   storeHero: { paddingHorizontal: designTokens.spacing.lg, paddingBottom: designTokens.spacing.lg, gap: designTokens.spacing.md },
   storeActionsRow: { flexDirection: "row", gap: designTokens.spacing.sm },
@@ -299,11 +299,11 @@ const styles = StyleSheet.create({
   ownerDays: { flexDirection: "row", flexWrap: "wrap", gap: designTokens.spacing.xs },
   ownerDayChip: { borderWidth: 1, borderRadius: designTokens.radius.pill, paddingHorizontal: designTokens.spacing.md, paddingVertical: designTokens.spacing.sm },
   ownerImageActions: { flexDirection: "row", flexWrap: "wrap", gap: designTokens.spacing.sm },
-  coverImage: { width: "100%", height: 136, borderRadius: 0 },
+  coverImage: { width: "100%", height: 136, alignSelf: "stretch", borderRadius: 0 },
   defaultCover: { alignItems: "center", justifyContent: "center", gap: designTokens.spacing.xs, paddingHorizontal: designTokens.spacing.lg },
   defaultCoverTitle: { fontSize: designTokens.typography.body, fontWeight: designTokens.fontWeights.bold },
   defaultCoverHint: { fontSize: designTokens.typography.caption, textAlign: "center" },
-  coverWrap: { position: "relative", width: "100%", alignSelf: "stretch" },
+  coverWrap: { position: "relative", width: "100%", alignSelf: "stretch", flexShrink: 0 },
   imageEditButton: { position: "absolute", right: designTokens.spacing.md, bottom: designTokens.spacing.md, width: 36, height: 36, borderRadius: designTokens.radius.pill, backgroundColor: "#FFFFFF", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "#E5E7EB" },
   logoEditButton: { position: "absolute", right: -3, top: -3, width: 26, height: 26, borderRadius: designTokens.radius.pill, backgroundColor: "#FFFFFF", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "#E5E7EB", zIndex: 2 },
   avatarWrap: { position: "relative", alignSelf: "flex-start", marginTop: -44, marginBottom: designTokens.spacing.xs },
