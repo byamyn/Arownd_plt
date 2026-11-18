@@ -13,7 +13,7 @@ export function LegalDocumentScreen({ document }: { document: "privacy" | "terms
 
   return (
     <CustomerScreen showNavigation={false} contentStyle={styles.content}>
-      <AppHeader/ title={content.title} />
+      <AppHeader title={content.title} />
       <Caption>{content.updatedAt}</Caption>
       {content.sections.map((section) => (
         <View key={section.title} style={styles.section}>
