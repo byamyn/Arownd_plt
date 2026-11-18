@@ -222,9 +222,8 @@ export default function AddressesScreen() {
         </SwipeToDelete>
       ))}
 
-      <BottomSheet visible={editor !== null} onRequestClose={() => setEditor(null)} maxHeight="92%">
+      <BottomSheet visible={editor !== null} onRequestClose={() => setEditor(null)} title={translate(editor?.address ? "addressesEditTitle" : "addressesAddTitle")} maxHeight="92%">
             <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.formContent}>
-              <Heading level={3}>{translate(editor?.address ? "addressesEditTitle" : "addressesAddTitle")}</Heading>
 
               <FormLabel>{translate("addressesType")}</FormLabel>
               <SegmentedControl
@@ -266,8 +265,7 @@ export default function AddressesScreen() {
             </ScrollView>
       </BottomSheet>
 
-      <BottomSheet visible={regionPickerOpen} onRequestClose={() => setRegionPickerOpen(false)} maxHeight="78%">
-        <Heading level={3}>{regionOptions.data ? getRegionLevelDisplayName(regionOptions.data.selectedLevel, language) : ""}</Heading>
+      <BottomSheet visible={regionPickerOpen} onRequestClose={() => setRegionPickerOpen(false)} title={regionOptions.data ? getRegionLevelDisplayName(regionOptions.data.selectedLevel, language) : ""} maxHeight="78%">
         <ScrollView>
           {(regionOptions.data?.regions ?? []).map((item) => <PressableSurface key={item.id} onPress={() => {
             setRegionId(item.id);
@@ -278,11 +276,9 @@ export default function AddressesScreen() {
             <UiText style={regionId === item.id ? { color: theme.colors.accentForeground } : undefined}>{getRegionDisplayName(item, language)}</UiText>
           </PressableSurface>)}
         </ScrollView>
-        <Button label={translate("back")} onPress={() => setRegionPickerOpen(false)} variant="ghost" fullWidth />
       </BottomSheet>
 
-      <BottomSheet visible={secondaryPickerOpen} onRequestClose={() => setSecondaryPickerOpen(false)} maxHeight="78%">
-        <Heading level={3}>{secondaryOptions.data ? getRegionLevelDisplayName(secondaryOptions.data.selectedLevel, language) : ""}</Heading>
+      <BottomSheet visible={secondaryPickerOpen} onRequestClose={() => setSecondaryPickerOpen(false)} title={secondaryOptions.data ? getRegionLevelDisplayName(secondaryOptions.data.selectedLevel, language) : ""} maxHeight="78%">
         {secondaryOptions.isPending ? <LoadingState label={translate("stateLoading")} /> : null}
         {secondaryOptions.isError ? <UiText tone="danger">{translate("checkoutDairaLoadError")}</UiText> : null}
         <ScrollView>
@@ -290,7 +286,6 @@ export default function AddressesScreen() {
             <UiText>{getRegionDisplayName(item, language)}</UiText>
           </PressableSurface>)}
         </ScrollView>
-        <Button label={translate("back")} onPress={() => setSecondaryPickerOpen(false)} variant="ghost" fullWidth />
       </BottomSheet>
 
       <ConfirmDialog
