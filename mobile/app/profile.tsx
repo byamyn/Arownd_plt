@@ -5,16 +5,15 @@ import { router } from "expo-router";
 import { Image as NativeImage, Modal, StyleSheet, View } from "react-native";
 
 import { designTokens, useAppTheme } from "@/lib/theme";
+import { CustomerMainHeader } from "@/components/customer-main-header";
 import { CustomerScreen, ErrorState, LoadingState } from "@/components/customer-ui";
 import {
-  AppHeader,
   BottomSheet,
   Button,
   Caption,
   Card,
   Text as UiText,
   Icon,
-  IconButton,
   IdentityRow,
   PressableSurface,
   StatCard
@@ -131,7 +130,7 @@ export default function ProfileScreen() {
   });
 
   if (user.isPending) {
-    return <CustomerScreen><AppHeader title={translate("profileTitle")} /><LoadingState label={translate("stateLoading")} /></CustomerScreen>;
+    return <CustomerScreen><CustomerMainHeader variant="settings" /><LoadingState label={translate("stateLoading")} /></CustomerScreen>;
   }
   if (user.isError) {
     return (
@@ -182,18 +181,7 @@ export default function ProfileScreen() {
         });
       }}
     >
-      <AppHeader
-        title={translate("profileTitle")}
-        leading={
-          <View style={styles.headerActions}>
-            <IconButton
-              icon={<Icon name="settings" size={20} />}
-              accessibilityLabel={translate("profileSettings")}
-              onPress={() => router.push("/settings")}
-            />
-          </View>
-        }
-      />
+      <CustomerMainHeader variant="settings" />
       <Caption>{translate("profileSubtitle")}</Caption>
 
       {profile.isPending ? (
@@ -467,7 +455,6 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  headerActions: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.sm },
   identityCard: { padding: designTokens.spacing.lg, gap: designTokens.spacing.md },
   avatarIdentityWrap: { position: "relative" },
   avatarActionTrigger: { position: "absolute", start: 0, top: 0, width: 64, height: 64, alignItems: "flex-end", justifyContent: "flex-end" },
