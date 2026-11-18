@@ -159,7 +159,7 @@ export function AuthCaptchaHost() {
       setLoadError(true);
       settlePending(new Error("AUTH_CAPTCHA_CHALLENGE_FAILED"));
     }
-  }, [resetWidget, settlePending]);
+  }, [settlePending]);
 
   const closeChallenge = useCallback(() => {
     setInteractive(false);
