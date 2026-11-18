@@ -1,10 +1,9 @@
 import Constants from "expo-constants";
-import { router } from "expo-router";
 import { StyleSheet, View } from "react-native";
 
 import Logo from "@/components/logo";
 import { CustomerScreen } from "@/components/customer-ui";
-import { AppHeader, Caption, Heading, Icon, PressableSurface, Text as UiText } from "@/components/ui";
+import { AppHeader, Caption, Heading, Text as UiText } from "@/components/ui";
 import { designTokens, useAppTheme } from "@/lib/theme";
 import { translate } from "@/lib/i18n";
 
@@ -15,16 +14,7 @@ export default function AboutScreen() {
 
   return (
     <CustomerScreen showNavigation={false}>
-      <PressableSurface
-        accessibilityRole="button"
-        accessibilityLabel={translate("back")}
-        onPress={() => router.back()}
-        style={styles.backButton}
-      >
-        <Icon name="chevron-right" size={22} color={theme.colors.foreground} />
-      </PressableSurface>
-
-      <AppHeader title={translate("aboutTitle")} />
+      <AppHeader/ title={translate("aboutTitle")} />
 
       <View style={styles.brandBlock}>
         <Logo color={theme.colors.foreground} width={220} />
@@ -52,14 +42,6 @@ export default function AboutScreen() {
 
 function createStyles(theme: ReturnType<typeof useAppTheme>) {
   return StyleSheet.create({
-    backButton: {
-      width: 44,
-      height: 44,
-      alignItems: "center",
-      justifyContent: "center",
-      alignSelf: "flex-start",
-      borderRadius: designTokens.radius.md
-    },
     brandBlock: {
       alignItems: "flex-start",
       gap: designTokens.spacing.lg,
