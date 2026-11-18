@@ -24,6 +24,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import * as Location from "expo-location";
 
 import { CustomerNavigation } from "@/components/customer-navigation";
+import { CustomerMainHeader } from "@/components/customer-main-header";
 import { BottomSheet, Button, Icon, Text as UiText } from "@/components/ui";
 import { fetchMapStores, fetchStoreDetails, fetchStoreOffers } from "@/lib/catalog";
 import { translate, useLanguage } from "@/lib/i18n";
@@ -352,6 +353,9 @@ export default function MapScreen() {
       edges={["top", "left", "right"]}
     >
       <View style={styles.mapContainer}>
+        <View style={styles.mainHeaderOverlay}>
+          <CustomerMainHeader />
+        </View>
         <MapLibreMap
           style={StyleSheet.absoluteFill}
           mapStyle={localizedStyle.data ?? styleUrl}
@@ -465,7 +469,7 @@ export default function MapScreen() {
           style={[
             styles.locationButton,
             {
-              top: 12,
+              top: 76,
               end: 16,
               backgroundColor: theme.colors.surface,
               borderColor: theme.colors.border,
@@ -660,6 +664,13 @@ const styles = StyleSheet.create({
   },
   mapContainer: {
     flex: 1
+  },
+  mainHeaderOverlay: {
+    position: "absolute",
+    top: 8,
+    start: 16,
+    end: 16,
+    zIndex: 5
   },
   locationButton: {
     position: "absolute",
