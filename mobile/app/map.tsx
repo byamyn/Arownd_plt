@@ -491,6 +491,7 @@ export default function MapScreen() {
           setSelectedStoreId(null);
           if (navigation) stopNavigation();
         }}
+        title={selectedStore?.name ?? ""}
         maxHeight="88%"
       >
         {selectedStore ? (
