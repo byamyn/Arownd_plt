@@ -113,7 +113,6 @@ export async function fetchOffersByIds(ids: string[], signal?: AbortSignal): Pro
     .in("id", uniqueIds);
   if (signal) request = request.abortSignal(signal);
   const { data, error } = await request;
-  if (signal) request = request.abortSignal(signal);
   if (error) throw error;
   return ProductOfferSchema.array().parse(data as unknown);
 }
