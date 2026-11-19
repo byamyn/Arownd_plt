@@ -128,8 +128,6 @@ export function AuthCaptchaHost() {
       return Promise.reject(new Error("AUTH_CAPTCHA_LOAD_FAILED"));
     }
 
-    if (challengeRequiredRef.current) setInteractive(true);
-
     return new Promise<string>((resolve, reject) => {
       const timeout = setTimeout(() => {
         settlePending(new Error("AUTH_CAPTCHA_TIMEOUT"));
@@ -157,6 +155,7 @@ export function AuthCaptchaHost() {
 
     if (message.type === "token" && typeof message.token === "string" && message.token.length > 0) {
       setInteractive(false);
+      challengeRequiredRef.current = false;
       setLoadError(false);
       tokenIssuedRef.current = true;
       if (pendingRef.current) {
@@ -174,11 +173,14 @@ export function AuthCaptchaHost() {
     if (message.type === "expired") {
       cachedTokenRef.current = null;
       tokenIssuedRef.current = false;
+      challengeRequiredRef.current = false;
+      setInteractive(false);
       return;
     }
 
     if (message.type === "error") {
       cachedTokenRef.current = null;
+      challengeRequiredRef.current = false;
       setInteractive(false);
       setLoadError(true);
       settlePending(new Error("AUTH_CAPTCHA_CHALLENGE_FAILED"));
@@ -186,6 +188,7 @@ export function AuthCaptchaHost() {
   }, [settlePending]);
 
   const closeChallenge = useCallback(() => {
+    challengeRequiredRef.current = false;
     setInteractive(false);
     settlePending(new Error("AUTH_CAPTCHA_CANCELLED"));
   }, [settlePending]);
