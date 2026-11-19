@@ -299,9 +299,9 @@ export default function CustomerHomeScreen() {
 
 const styles = StyleSheet.create({
   feedContent: { paddingHorizontal: 0, paddingTop: 0, paddingBottom: 0, gap: 0 },
-  feedPage: { width: "100%", paddingHorizontal: designTokens.spacing.xl, paddingVertical: designTokens.spacing.md },
+  feedPage: { width: "100%", paddingHorizontal: 0, paddingVertical: 0 },
   feedState: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: designTokens.spacing.xl },
-  productCard: { flex: 1, width: "100%", borderRadius: designTokens.radius.xl, overflow: "hidden" },
+  productCard: { flex: 1, width: "100%", borderRadius: 0, overflow: "hidden" },
   productImage: { flex: 3, minHeight: 0, overflow: "hidden", alignItems: "center", justifyContent: "center" },
   doubleTapHeartOverlay: { position: "absolute", top: "38%", left: 0, right: 0, alignItems: "center", justifyContent: "center" },
   imagePagination: { position: "absolute", bottom: designTokens.spacing.md, alignSelf: "center", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6 },
