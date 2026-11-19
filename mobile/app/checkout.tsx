@@ -65,7 +65,7 @@ export default function CheckoutScreen() {
   const offerIds = cart.data?.map((item) => item.offerId) ?? [];
   const offers = useQuery({
     queryKey: ["customer-cart-offers", offerIds],
-    queryFn: () => fetchOffersByIds(offerIds),
+    queryFn: ({ signal }) => fetchOffersByIds(offerIds, signal),
     enabled: cart.isSuccess && offerIds.length > 0
   });
   const accountCurrency = useQuery({ queryKey: ["account-currency"], queryFn: fetchMyAccountCurrencyCode });
