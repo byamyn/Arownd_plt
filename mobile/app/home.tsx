@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
-import { LayoutChangeEvent, StyleSheet, View } from "react-native";
+import { StyleSheet, View, type LayoutChangeEvent } from "react-native";
 
 import { FavoriteButton } from "@/components/favorite-button";
 import { CustomerMainHeader } from "@/components/customer-main-header";
