@@ -97,7 +97,7 @@ export default function OrdersScreen() {
   });
   const orders = useQuery({
     queryKey: ["customer-orders"],
-    queryFn: fetchMyOrders,
+    queryFn: ({ signal }) => fetchMyOrders(signal),
     enabled: auth.isSuccess && auth.data !== null
   });
 
