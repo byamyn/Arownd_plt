@@ -89,7 +89,7 @@ export default function MerchantProductsScreen() {
   const toggleVisibility = useCallback(async (offerId: string, isMerchantHidden: boolean): Promise<void> => {
     if (!storeId || busyOfferId) return;
 
-    setBusyOfferId(offer.id);
+    setBusyOfferId(offerId);
     setNotice(null);
     setActionError(null);
 
