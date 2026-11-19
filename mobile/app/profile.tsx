@@ -114,7 +114,7 @@ export default function ProfileScreen() {
   });
   const orders = useQuery({
     queryKey: ["my-orders"],
-    queryFn: fetchMyOrders,
+    queryFn: ({ signal }) => fetchMyOrders(signal),
     enabled: Boolean(user.data)
   });
   const favorites = useQuery({
