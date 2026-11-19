@@ -8,8 +8,8 @@ import { Icon, type IconName } from "./icon";
 export function LoadingState({ label }: { label: string }) {
   const theme = useAppTheme();
   return (
-    <View style={styles.state} accessibilityState={{ busy: true }}>
-      <ActivityIndicator color={theme.colors.accentOnSurface} />
+    <View style={styles.loadingState} accessibilityState={{ busy: true }}>
+      <ActivityIndicator size="small" color={theme.colors.accentOnSurface} />
       <UiText style={[styles.stateText, { color: theme.colors.muted }]}>{label}</UiText>
     </View>
   );
@@ -66,6 +66,7 @@ export function ErrorState({
 }
 
 const styles = StyleSheet.create({
+  loadingState: { minHeight: 0, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: designTokens.spacing.sm, paddingVertical: designTokens.spacing.md, paddingHorizontal: designTokens.spacing.sm },
   state: { minHeight: 135, alignItems: "center", justifyContent: "center", gap: designTokens.spacing.md, padding: designTokens.spacing.xl },
   stateText: { fontSize: designTokens.typography.caption + 1, textAlign: "center", lineHeight: designTokens.typography.caption + 7 },
   stateTitle: { fontSize: designTokens.typography.body, fontWeight: designTokens.fontWeights.extrabold, textAlign: "center" },
