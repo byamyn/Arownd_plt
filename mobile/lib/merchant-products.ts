@@ -30,19 +30,20 @@ export type RemoveMerchantProductImageResult = {
   primaryPromotionPending: boolean;
 };
 
-async function assertOwnedStore(storeId: string): Promise<string> {
+async function assertOwnedStore(storeId: string, signal?: AbortSignal): Promise<string> {
   const client = getSupabaseClient();
   const { data: authData, error: authError } = await client.auth.getUser();
 
   if (authError) throw authError;
   if (!authData.user) throw new Error("not_authenticated");
 
-  const { data, error } = await client
+  let request = client
     .from("stores")
     .select("id")
     .eq("id", storeId)
-    .eq("owner_id", authData.user.id)
-    .maybeSingle();
+    .eq("owner_id", authData.user.id);
+  if (signal) request = request.abortSignal(signal);
+  const { data, error } = await request.maybeSingle();
 
   if (error) throw error;
   if (!data) throw new Error("merchant_store_not_found");
@@ -96,14 +97,16 @@ async function uploadProductImage(
   return { path, url: data.publicUrl };
 }
 
-export async function fetchMerchantProducts(storeId: string): Promise<MerchantProductOffer[]> {
-  await assertOwnedStore(storeId);
+export async function fetchMerchantProducts(storeId: string, signal?: AbortSignal): Promise<MerchantProductOffer[]> {
+  await assertOwnedStore(storeId, signal);
 
-  const { data, error } = await getSupabaseClient()
+  let request = getSupabaseClient()
     .from("store_offers")
     .select("id, store_id, product_id, price, stock_quantity, options, is_available, is_merchant_hidden, created_at, product:products!inner(id, name, description, brand, category), images:product_images(id, image_url, is_primary)")
     .eq("store_id", storeId)
     .order("created_at", { ascending: false });
+  if (signal) request = request.abortSignal(signal);
+  const { data, error } = await request;
 
   if (error) throw error;
   return MerchantProductOfferSchema.array().parse(data as unknown);
@@ -111,16 +114,18 @@ export async function fetchMerchantProducts(storeId: string): Promise<MerchantPr
 
 export async function fetchMerchantProductOffer(
   storeId: string,
-  offerId: string
+  offerId: string,
+  signal?: AbortSignal
 ): Promise<MerchantProductOffer> {
-  await assertOwnedStore(storeId);
+  await assertOwnedStore(storeId, signal);
 
-  const { data, error } = await getSupabaseClient()
+  let request = getSupabaseClient()
     .from("store_offers")
     .select("id, store_id, product_id, price, stock_quantity, options, is_available, is_merchant_hidden, created_at, product:products!inner(id, name, description, brand, category), images:product_images(id, image_url, is_primary)")
     .eq("store_id", storeId)
-    .eq("id", offerId)
-    .maybeSingle();
+    .eq("id", offerId);
+  if (signal) request = request.abortSignal(signal);
+  const { data, error } = await request.maybeSingle();
 
   if (error) throw error;
   if (!data) throw new Error("merchant_offer_not_found");
