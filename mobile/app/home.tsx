@@ -251,7 +251,7 @@ export default function CustomerHomeScreen() {
   const queryClient = useQueryClient();
   const theme = useAppTheme();
   const browsingCurrency = useQuery({ queryKey: BROWSING_CURRENCY_QUERY_KEY, queryFn: fetchBrowsingCurrencyCode, staleTime: 60_000 });
-  const products = useQuery({ queryKey: ["customer-home-products"], queryFn: fetchHomeProducts, staleTime: 60_000 });
+  const products = useQuery({ queryKey: ["customer-home-products"], queryFn: ({ signal }) => fetchHomeProducts(signal), staleTime: 60_000 });
 
   useEffect(() => registerHomeReselectHandler(() => {
     feedListRef.current?.scrollToOffset({ offset: 0, animated: true });
