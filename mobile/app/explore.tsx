@@ -6,7 +6,7 @@ import { Animated, Easing, PanResponder, StyleSheet, View } from "react-native";
 import { CustomerFlatList, CustomerHeading, EmptyState, ErrorState, ProductTile, SectionTitle } from "@/components/customer-ui";
 import { CustomerMainHeader } from "@/components/customer-main-header";
 import { fetchHomeProducts, fetchProductDetails, fetchProductOffers, formatMarketPrice, getPrimaryImage, searchCatalogProducts } from "@/lib/catalog";
-import { fetchBrowsingCurrencyCode } from "@/lib/country-service";
+import { BROWSING_CURRENCY_QUERY_KEY, fetchBrowsingCurrencyCode } from "@/lib/country-service";
 import { fetchApprovedReviews } from "@/lib/reviews";
 import { translate, useLanguage } from "@/lib/i18n";
 import { getLocalizedProductCategoryLabel } from "@/lib/locale-data";
@@ -25,7 +25,7 @@ export default function ExploreScreen() {
   const { language } = useLanguage();
   const theme = useAppTheme();
   const queryClient = useQueryClient();
-  const browsingCurrency = useQuery({ queryKey: ["browsing-country-currency"], queryFn: fetchBrowsingCurrencyCode, staleTime: 60_000 });
+  const browsingCurrency = useQuery({ queryKey: BROWSING_CURRENCY_QUERY_KEY, queryFn: fetchBrowsingCurrencyCode, staleTime: 60_000 });
   const params = useLocalSearchParams<{ q?: string; category?: string }>();
   const initialQuery = typeof params.q === "string" ? params.q : "";
   const category = typeof params.category === "string" ? params.category : undefined;

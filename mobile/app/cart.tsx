@@ -20,7 +20,7 @@ import {
   Text as UiText
 } from "@/components/ui";
 import { fetchOffersByIds, formatMarketPrice, formatNumber, getPrimaryImage } from "@/lib/catalog";
-import { fetchBrowsingCurrencyCode } from "@/lib/country-service";
+import { BROWSING_CURRENCY_QUERY_KEY, fetchBrowsingCurrencyCode } from "@/lib/country-service";
 import { CART_QUERY_KEY, getCart, removeFromCart, updateCartQuantity } from "@/lib/cart";
 import { cartLineKey, evaluateCart, normalizeCartOptions, type CartItem as CartLine } from "@/lib/cart-state";
 import { translate, useLanguage } from "@/lib/i18n";
@@ -33,7 +33,7 @@ export default function CartScreen() {
   const queryClient = useQueryClient();
   const cart = useQuery({ queryKey: CART_QUERY_KEY, queryFn: getCart });
   const ids = cart.data?.map((item) => item.offerId) ?? [];
-  const marketCurrency = useQuery({ queryKey: ["browsing-currency"], queryFn: fetchBrowsingCurrencyCode });
+  const marketCurrency = useQuery({ queryKey: BROWSING_CURRENCY_QUERY_KEY, queryFn: fetchBrowsingCurrencyCode, staleTime: 60_000 });
   const formatMarketAmount = (amount: number) => marketCurrency.data ? formatMarketPrice(amount, marketCurrency.data) : "—";
   const offers = useQuery({
     queryKey: ["customer-cart-offers", ids],

@@ -7,7 +7,7 @@ import { EmptyState, ErrorState } from "@/components/customer-ui";
 import { Button, Icon, IconButton, PriceDisplay, ProductImageGallery, ProductQuantitySelector, ProductVariantSelector, RatingStars, ProductCardSkeleton, Text as UiText } from "@/components/ui";
 import { FavoriteButton } from "@/components/favorite-button";
 import { chooseBestProductOffer, fetchProductDetails, fetchProductOffers, formatMarketPrice, getOfferVariantOptions } from "@/lib/catalog";
-import { fetchBrowsingCurrencyCode } from "@/lib/country-service";
+import { BROWSING_CURRENCY_QUERY_KEY, fetchBrowsingCurrencyCode } from "@/lib/country-service";
 import { addToCart, CART_QUERY_KEY } from "@/lib/cart";
 import { emitCartFly } from "@/lib/cart-fly";
 import { fetchApprovedReviews } from "@/lib/reviews";
@@ -31,7 +31,7 @@ export default function ProductDetailsScreen() {
   const imageAnchorRef = useRef<ComponentRef<typeof View>>(null);
   const cartFlyImageRef = useRef<string | null>(null);
   const queryClient = useQueryClient();
-  const browsingCurrency = useQuery({ queryKey: ["browsing-country-currency"], queryFn: fetchBrowsingCurrencyCode, staleTime: 60_000 });
+  const browsingCurrency = useQuery({ queryKey: BROWSING_CURRENCY_QUERY_KEY, queryFn: fetchBrowsingCurrencyCode, staleTime: 60_000 });
   const addMutation = useMutation({
     mutationFn: addToCart,
     onSuccess: (next) => {

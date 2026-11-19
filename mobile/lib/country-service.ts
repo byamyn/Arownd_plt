@@ -6,6 +6,8 @@ import { getSupabaseClient } from "@/lib/supabase";
 const SELECTED_COUNTRY_STORAGE_KEY = "arownd:account-country";
 const BROWSING_COUNTRY_STORAGE_KEY = "arownd:browsing-country";
 
+export const BROWSING_CURRENCY_QUERY_KEY = ["browsing-country-currency"] as const;
+
 const CountrySchema = z.object({
   code: z.string().length(2),
   name_ar: z.string(),

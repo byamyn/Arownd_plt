@@ -13,7 +13,7 @@ import {
 } from "@/components/customer-ui";
 import { Button, Caption, Icon, Image as UiImage, PriceDisplay, Text as UiText, ProductFeedSkeleton } from "@/components/ui";
 import { fetchHomeProducts, fetchProductDetails, fetchProductOffers, formatMarketPrice, getPrimaryImage } from "@/lib/catalog";
-import { fetchBrowsingCurrencyCode } from "@/lib/country-service";
+import { BROWSING_CURRENCY_QUERY_KEY, fetchBrowsingCurrencyCode } from "@/lib/country-service";
 import { fetchApprovedReviews } from "@/lib/reviews";
 import { translate } from "@/lib/i18n";
 import { registerHomeReselectHandler } from "@/lib/customer-navigation-state";
@@ -250,13 +250,13 @@ export default function CustomerHomeScreen() {
   const feedListRef = useRef<FlatList<Awaited<ReturnType<typeof fetchHomeProducts>>[number]>>(null);
   const queryClient = useQueryClient();
   const theme = useAppTheme();
-  const browsingCurrency = useQuery({ queryKey: ["browsing-country-currency"], queryFn: fetchBrowsingCurrencyCode, staleTime: 60_000 });
+  const browsingCurrency = useQuery({ queryKey: BROWSING_CURRENCY_QUERY_KEY, queryFn: fetchBrowsingCurrencyCode, staleTime: 60_000 });
   const products = useQuery({ queryKey: ["customer-home-products"], queryFn: fetchHomeProducts, staleTime: 60_000 });
 
   useEffect(() => registerHomeReselectHandler(() => {
     feedListRef.current?.scrollToOffset({ offset: 0, animated: true });
     void queryClient.invalidateQueries({ queryKey: ["customer-home-products"], exact: true });
-    void queryClient.invalidateQueries({ queryKey: ["browsing-country-currency"], exact: true });
+    void queryClient.invalidateQueries({ queryKey: BROWSING_CURRENCY_QUERY_KEY, exact: true });
     void queryClient.invalidateQueries({ queryKey: ["approved-reviews", "product"] });
   }), [queryClient]);
 
