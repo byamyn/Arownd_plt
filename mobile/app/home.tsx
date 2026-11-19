@@ -27,9 +27,17 @@ function HomeProductCard({ item, price }: {
   const imagePagerRef = useRef<ScrollView>(null);
   const [imageWidth, setImageWidth] = useState(0);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const productFavorite = useFavoriteToggle("products", item.product.id);
+  const productReviews = useQuery({
+    queryKey: ["approved-reviews", "product", item.product.id],
+    queryFn: () => fetchApprovedReviews("product", item.product.id),
+    staleTime: 60_000
+  });
   const primaryImage = getPrimaryImage(item);
   const productImages = [...new Set([primaryImage, ...item.images.map((image) => image.image_url)].filter((uri): uri is string => Boolean(uri)))];
+  const reviewCount = productReviews.data?.length ?? 0;
+  const averageRating = reviewCount > 0
+    ? productReviews.data!.reduce((total, review) => total + review.rating, 0) / reviewCount
+    : null;
   const handleImageScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     if (imageWidth <= 0) return;
     const nextIndex = Math.round(event.nativeEvent.contentOffset.x / imageWidth);
@@ -37,8 +45,8 @@ function HomeProductCard({ item, price }: {
   };
   const handleImageTap = () => {
     const now = Date.now();
-    if (now - lastImageTapAt.current <= 300 && !productFavorite.disabled) {
-      productFavorite.toggle();
+    if (now - lastImageTapAt.current <= 300) {
+      // Double-tap favorite is handled by the dedicated favorite control below.
       lastImageTapAt.current = 0;
       return;
     }
@@ -123,24 +131,18 @@ function HomeProductCard({ item, price }: {
             ))}
           </View>
         ) : null}
-        <View style={styles.favoriteButton}>
-          <FavoriteButton kind="products" id={item.product.id} iconOnly floating />
-        </View>
       </View>
 
       <View style={styles.productInfo}>
         <View style={styles.productInfoColumns}>
-          <View style={styles.productTitleColumn}>
+          <View style={styles.productDetailsColumn}>
             <UiText numberOfLines={2} weight="700" style={styles.productName}>{item.product.name}</UiText>
-            {item.store.rating != null ? (
+            {averageRating !== null ? (
               <View style={styles.storeRating}>
                 <Icon name="star" size={14} color="#E5A000" fill="#E5A000" accessibilityHidden />
-                <Caption>{item.store.rating.toFixed(1)}</Caption>
+                <Caption>{averageRating.toFixed(1)} · {reviewCount} {translate("homeReviewCount")}</Caption>
               </View>
             ) : null}
-          </View>
-
-          <View style={styles.storeColumn}>
             <Pressable
               style={styles.storeIdentity}
               onPress={() => router.push({ pathname: "/store/[storeId]", params: { storeId: item.store.id } })}
@@ -156,12 +158,13 @@ function HomeProductCard({ item, price }: {
                 )}
               </View>
             </Pressable>
+            <PriceDisplay value={price} />
           </View>
-        </View>
 
-        <View style={styles.priceRow}>
-          <Button label={translate("homeBuyNow")} onPress={openDetails} size="sm" style={styles.buyNowButton} />
-          <PriceDisplay value={price} />
+          <View style={styles.productActionsColumn}>
+            <FavoriteButton kind="products" id={item.product.id} iconOnly />
+            <Button label={translate("homeBuyNow")} onPress={openDetails} size="sm" style={styles.buyNowButton} />
+          </View>
         </View>
       </View>
     </View>
@@ -217,21 +220,19 @@ const styles = StyleSheet.create({
   feedState: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: designTokens.spacing.xl },
   productCard: { flex: 1, width: "100%", borderRadius: designTokens.radius.xl, overflow: "hidden" },
   productImage: { flex: 3, minHeight: 0, overflow: "hidden", alignItems: "center", justifyContent: "center" },
-  favoriteButton: { position: "absolute", top: designTokens.spacing.md, start: designTokens.spacing.md },
   imagePagination: { position: "absolute", bottom: designTokens.spacing.md, alignSelf: "center", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6 },
   imagePaginationDot: { width: 6, height: 6, borderRadius: 3 },
   imagePaginationDotActive: { width: 16, backgroundColor: "#FFFFFF", opacity: 1 },
   imagePaginationDotInactive: { backgroundColor: "#888888", opacity: 0.65 },
   productInfo: { flex: 1, minHeight: 0, backgroundColor: "transparent", justifyContent: "space-between", paddingHorizontal: designTokens.spacing.md, paddingVertical: designTokens.spacing.sm, gap: designTokens.spacing.xs },
-  productInfoColumns: { flex: 1, minHeight: 0, flexDirection: "row", justifyContent: "space-between", gap: designTokens.spacing.md },
-  productTitleColumn: { flex: 1, minWidth: 0, alignItems: "flex-start", gap: 3 },
+  productInfoColumns: { flex: 1, minHeight: 0, flexDirection: "row-reverse", justifyContent: "space-between", alignItems: "stretch", gap: designTokens.spacing.md },
+  productDetailsColumn: { flex: 1, minWidth: 0, alignItems: "flex-start", justifyContent: "space-between", gap: 3 },
+  productActionsColumn: { width: 116, alignItems: "center", justifyContent: "space-between", paddingVertical: 1 },
   productName: { lineHeight: 21, textAlign: "auto" },
-  storeColumn: { flex: 1, minWidth: 0, alignItems: "flex-end", gap: designTokens.spacing.xs },
   storeIdentity: { flexDirection: "row", alignItems: "center", justifyContent: "flex-end", gap: designTokens.spacing.xs, maxWidth: "100%" },
   storeTitle: { flexShrink: 1, fontSize: 13, textAlign: "auto" },
   storeAvatar: { width: 38, height: 38, borderRadius: 19, overflow: "hidden", alignItems: "center", justifyContent: "center" },
   storeAvatarImage: { width: 38, height: 38, borderRadius: 19 },
   storeRating: { flexDirection: "row", alignItems: "center", gap: 4 },
-  priceRow: { minHeight: 48, flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: designTokens.spacing.md },
-  buyNowButton: { minHeight: 48, minWidth: 132, paddingHorizontal: designTokens.spacing.lg, borderRadius: designTokens.radius.lg }
+  buyNowButton: { minHeight: 44, minWidth: 112, paddingHorizontal: designTokens.spacing.sm, borderRadius: designTokens.radius.lg }
 });
