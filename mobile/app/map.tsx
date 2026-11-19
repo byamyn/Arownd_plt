@@ -6,7 +6,8 @@ import {
   Map as MapLibreMap,
   Marker,
   RasterSource,
-  UserLocation
+  UserLocation,
+  type MapRef
 } from "@maplibre/maplibre-react-native";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
@@ -26,7 +27,7 @@ import * as Location from "expo-location";
 import { CustomerNavigation } from "@/components/customer-navigation";
 import { CustomerMainHeader } from "@/components/customer-main-header";
 import { BottomSheet, Button, Icon, Text as UiText } from "@/components/ui";
-import { fetchMapStores, fetchStoreDetails, fetchStoreOffers } from "@/lib/catalog";
+import { fetchMapStoresInBounds, fetchStoreDetails, fetchStoreOffers, type MapStoreViewport } from "@/lib/catalog";
 import { translate, useLanguage } from "@/lib/i18n";
 import {
   distanceBetweenCoordinates,
@@ -102,6 +103,8 @@ export default function MapScreen() {
   const styleUrl = isDark ? MAP_DARK_STYLE : MAP_LIGHT_STYLE;
   const [cameraTarget, setCameraTarget] = useState<RoutePoint | null>(null);
   const [mapCenter, setMapCenter] = useState<RoutePoint>({ longitude: 2.6, latitude: 28.0 });
+  const [mapViewport, setMapViewport] = useState<MapStoreViewport | null>(null);
+  const mapRef = useRef<MapRef | null>(null);
   const [hasLocationPermission, setHasLocationPermission] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
   const [userPosition, setUserPosition] = useState<RoutePoint | null>(null);
@@ -122,9 +125,11 @@ export default function MapScreen() {
   selectedStoreIdRef.current = selectedStoreId;
 
   const stores = useQuery({
-    queryKey: ["map-stores"],
-    queryFn: fetchMapStores,
-    staleTime: 60_000
+    queryKey: ["map-stores", mapViewport, requestedStoreId],
+    queryFn: () => fetchMapStoresInBounds(mapViewport!, requestedStoreId ?? null),
+    enabled: mapViewport !== null,
+    staleTime: 30_000,
+    placeholderData: (previousData) => previousData
   });
 
   const localizedStyle = useQuery({
@@ -415,6 +420,7 @@ export default function MapScreen() {
           <CustomerMainHeader />
         </View>
         <MapLibreMap
+          ref={mapRef}
           style={StyleSheet.absoluteFill}
           mapStyle={localizedStyle.data ?? styleUrl}
           attribution
@@ -426,9 +432,29 @@ export default function MapScreen() {
             color: "#FFFFFF",
             intensity: isDark ? 0.35 : 0.75
           }}
+          onDidFinishLoadingMap={() => {
+            void mapRef.current?.getViewState().then((viewState) => {
+              const [west, south, east, north] = viewState.bounds;
+              const [centerLongitude, centerLatitude] = viewState.center;
+              setMapCenter({ longitude: centerLongitude, latitude: centerLatitude });
+              setMapViewport({ west, south, east, north, centerLatitude, centerLongitude });
+            }).catch(() => undefined);
+          }}
           onRegionDidChange={(event) => {
             const [longitude, latitude] = event.nativeEvent.center;
+            const [west, south, east, north] = event.nativeEvent.bounds;
             setMapCenter({ longitude, latitude });
+            if ([west, south, east, north, latitude, longitude].every(Number.isFinite)
+              && south <= north) {
+              setMapViewport({
+                west,
+                south,
+                east,
+                north,
+                centerLatitude: latitude,
+                centerLongitude: longitude
+              });
+            }
           }}
         >
           <Camera
@@ -529,7 +555,7 @@ export default function MapScreen() {
               <UiText weight="600">{translate("mapStoresLoading", language)}</UiText>
             </View>
           </View>
-        ) : stores.isError && !stores.data ? (
+        ) : stores.isError ? (
           <View style={styles.mapStatusContainer}>
             <View style={[styles.mapStatusCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
               <UiText weight="600" style={styles.mapStatusText}>{translate("mapStoresLoadError", language)}</UiText>
