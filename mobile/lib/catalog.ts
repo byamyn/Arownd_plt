@@ -104,13 +104,16 @@ export function getOfferVariantOptions(offer: ProductOffer | null | undefined): 
   return { sizes: toValues(options.sizes), colors: toValues(options.colors) };
 }
 
-export async function fetchOffersByIds(ids: string[]): Promise<ProductOffer[]> {
+export async function fetchOffersByIds(ids: string[], signal?: AbortSignal): Promise<ProductOffer[]> {
   const uniqueIds = [...new Set(ids.filter((id) => id.length > 0))];
   if (uniqueIds.length === 0) return [];
-  const { data, error } = await getSupabaseClient()
+  let request = getSupabaseClient()
     .from("store_offers")
     .select("id, product_id, price, old_price, stock_quantity, is_available, last_confirmed_at, options, product:products!inner(id, name, description, category, brand), store:stores!inner(id, name, logo_url, commune, address_line, rating, is_verified), images:product_images(image_url, is_primary)")
     .in("id", uniqueIds);
+  if (signal) request = request.abortSignal(signal);
+  const { data, error } = await request;
+  if (signal) request = request.abortSignal(signal);
   if (error) throw error;
   return ProductOfferSchema.array().parse(data as unknown);
 }
@@ -188,28 +191,32 @@ export async function fetchMapStoresInBounds(
   return MapStoreSchema.array().parse(data as unknown);
 }
 
-export async function fetchFeaturedStores(): Promise<FeaturedStore[]> {
-  const { data, error } = await getSupabaseClient()
+export async function fetchFeaturedStores(signal?: AbortSignal): Promise<FeaturedStore[]> {
+  let request = getSupabaseClient()
     .from("stores")
     .select("id, name, description, logo_url, commune, rating, is_verified")
     .eq("is_verified", true)
     .order("rating", { ascending: false })
     .limit(6);
+  if (signal) request = request.abortSignal(signal);
+  const { data, error } = await request;
 
   if (error) throw error;
   return FeaturedStoreSchema.array().parse(data as unknown);
 }
 
 
-export async function fetchVerifiedStoresByRegion(countryCode: string, regionId: number): Promise<FeaturedStore[]> {
+export async function fetchVerifiedStoresByRegion(countryCode: string, regionId: number, signal?: AbortSignal): Promise<FeaturedStore[]> {
   if (!/^[A-Z]{2}$/.test(countryCode) || !Number.isInteger(regionId) || regionId <= 0) throw new Error("invalid_store_region");
-  const { data, error } = await getSupabaseClient()
+  let request = getSupabaseClient()
     .from("stores")
     .select("id, name, description, logo_url, commune, rating, is_verified, latitude, longitude")
     .eq("country_code", countryCode)
     .eq("region_id", regionId)
     .eq("is_verified", true)
     .order("rating", { ascending: false });
+  if (signal) request = request.abortSignal(signal);
+  const { data, error } = await request;
   if (error) throw error;
   return FeaturedStoreSchema.array().parse(data as unknown);
 }
@@ -237,41 +244,47 @@ export async function searchCatalogProducts(query: string, category?: string, si
   return HomeProductSchema.array().parse(data as unknown);
 }
 
-export async function fetchProductDetails(productId: string): Promise<ProductSummary | null> {
-  const { data, error } = await getSupabaseClient()
+export async function fetchProductDetails(productId: string, signal?: AbortSignal): Promise<ProductSummary | null> {
+  let request = getSupabaseClient()
     .from("products")
     .select("id, name, description, category, brand")
     .eq("id", productId)
     .maybeSingle();
+  if (signal) request = request.abortSignal(signal);
+  const { data, error } = await request;
 
   if (error) throw error;
   return data ? ProductSummarySchema.parse(data as unknown) : null;
 }
 
-export async function fetchProductOffers(productId: string): Promise<ProductOffer[]> {
-  const { data, error } = await getSupabaseClient()
+export async function fetchProductOffers(productId: string, signal?: AbortSignal): Promise<ProductOffer[]> {
+  let request = getSupabaseClient()
     .from("store_offers")
     .select("id, product_id, price, old_price, stock_quantity, is_available, last_confirmed_at, options, product:products!inner(id, name, description, category, brand), store:stores!inner(id, name, logo_url, commune, address_line, rating, is_verified, phone, whatsapp), images:product_images(image_url, is_primary)")
     .eq("product_id", productId)
     .order("price", { ascending: true });
+  if (signal) request = request.abortSignal(signal);
+  const { data, error } = await request;
 
   if (error) throw error;
   return ProductOfferSchema.array().parse(data as unknown);
 }
 
-export async function fetchStoreDetails(storeId: string): Promise<StoreDetails | null> {
-  const { data, error } = await getSupabaseClient()
+export async function fetchStoreDetails(storeId: string, signal?: AbortSignal): Promise<StoreDetails | null> {
+  let request = getSupabaseClient()
     .from("stores")
     .select("id, name, description, logo_url, cover_url, commune, address_line, phone, whatsapp, instagram_url, facebook_url, tiktok_url, website_url, country_code, rating, is_verified, opening_hours, latitude, longitude")
     .eq("id", storeId)
     .maybeSingle();
+  if (signal) request = request.abortSignal(signal);
+  const { data, error } = await request;
 
   if (error) throw error;
   return data ? StoreSummarySchema.parse(data as unknown) : null;
 }
 
-export async function fetchStoreOffers(storeId: string): Promise<HomeProduct[]> {
-  const { data, error } = await getSupabaseClient()
+export async function fetchStoreOffers(storeId: string, signal?: AbortSignal): Promise<HomeProduct[]> {
+  let request = getSupabaseClient()
     .from("store_offers")
     .select("id, price, stock_quantity, is_available, product:products!inner(id, name, category, brand), store:stores!inner(id, name), images:product_images(image_url, is_primary)")
     .eq("store_id", storeId)
@@ -279,6 +292,8 @@ export async function fetchStoreOffers(storeId: string): Promise<HomeProduct[]> 
     .gt("stock_quantity", 0)
     .order("created_at", { ascending: false })
     .limit(60);
+  if (signal) request = request.abortSignal(signal);
+  const { data, error } = await request;
 
   if (error) throw error;
   return HomeProductSchema.array().parse(data as unknown);
