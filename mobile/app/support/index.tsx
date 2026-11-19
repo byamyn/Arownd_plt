@@ -36,7 +36,7 @@ export default function SupportScreen() {
   });
   const conversations = useQuery({
     queryKey: ["my-support-conversations", auth.data?.id],
-    queryFn: fetchMySupportConversations,
+    queryFn: ({ signal }) => fetchMySupportConversations(signal),
     enabled: auth.isSuccess && Boolean(auth.data)
   });
   const openConversations = (conversations.data ?? []).filter((item) => item.status === "open");
