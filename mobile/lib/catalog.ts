@@ -247,10 +247,9 @@ export async function fetchProductDetails(productId: string, signal?: AbortSigna
   let request = getSupabaseClient()
     .from("products")
     .select("id, name, description, category, brand")
-    .eq("id", productId)
-    .maybeSingle();
+    .eq("id", productId);
   if (signal) request = request.abortSignal(signal);
-  const { data, error } = await request;
+  const { data, error } = await request.maybeSingle();
 
   if (error) throw error;
   return data ? ProductSummarySchema.parse(data as unknown) : null;
@@ -273,10 +272,9 @@ export async function fetchStoreDetails(storeId: string, signal?: AbortSignal): 
   let request = getSupabaseClient()
     .from("stores")
     .select("id, name, description, logo_url, cover_url, commune, address_line, phone, whatsapp, instagram_url, facebook_url, tiktok_url, website_url, country_code, rating, is_verified, opening_hours, latitude, longitude")
-    .eq("id", storeId)
-    .maybeSingle();
+    .eq("id", storeId);
   if (signal) request = request.abortSignal(signal);
-  const { data, error } = await request;
+  const { data, error } = await request.maybeSingle();
 
   if (error) throw error;
   return data ? StoreSummarySchema.parse(data as unknown) : null;
