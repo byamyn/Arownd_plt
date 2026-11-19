@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { StyleSheet, View } from "react-native";
 
-import { CustomerScreen, ErrorState, LoadingState } from "@/components/customer-ui";
+import { PageSkeleton, CustomerScreen, ErrorState, LoadingState } from "@/components/customer-ui";
 import {
   Alert,
   AppHeader,
@@ -49,7 +49,7 @@ export default function CartScreen() {
     }
   });
 
-  if (cart.isPending) return <CustomerScreen><LoadingState label={translate("stateLoading")} /></CustomerScreen>;
+  if (cart.isPending) return <CustomerScreen><AppHeader title={translate("cartTitle")} /><PageSkeleton variant="list" rows={3} /></CustomerScreen>;
   if (cart.isError) return <CustomerScreen refreshing={cart.isFetching} onRefresh={() => { void cart.refetch(); }}><ErrorState title={translate("catalogLoadError")} retryLabel={translate("retry")} busy={cart.isFetching} onRetry={() => void cart.refetch()} /></CustomerScreen>;
   if (cart.data.length === 0) return <CustomerScreen refreshing={cart.isFetching} onRefresh={() => { void cart.refetch(); }}>
     <AppHeader title={translate("cartTitle")} />
