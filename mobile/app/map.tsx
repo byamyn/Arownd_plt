@@ -42,6 +42,7 @@ import {
   type RoutePoint
 } from "@/lib/map-routing";
 import { fetchLocalizedMapStyle } from "@/lib/map-style";
+import { fetchMyBrowsingCountryCode } from "@/lib/country-service";
 import { designTokens, useAppTheme } from "@/lib/theme";
 import { VerifiedBadge } from "@/components/ui/identity";
 
@@ -52,6 +53,15 @@ const EOX_ATTRIBUTION =
   "EOxCloudless https://cloudless.eox.at by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016 & 2017)";
 const OFF_ROUTE_DISTANCE_METERS = 70;
 const REROUTE_COOLDOWN_MS = 15_000;
+
+// Approximate country centers used for the initial browsing-market map view.
+const BROWSING_COUNTRY_CENTERS: Record<string, RoutePoint> = {
+  DZ: { longitude: 2.6, latitude: 28.0 },
+  AE: { longitude: 54.0, latitude: 24.0 },
+  SA: { longitude: 45.0, latitude: 24.0 },
+  MA: { longitude: -7.0, latitude: 31.8 },
+  EG: { longitude: 30.8, latitude: 26.8 }
+};
 
 type NavigationSession = {
   route: DrivingRoute;
@@ -69,6 +79,13 @@ export default function MapScreen() {
   const styleUrl = isDark ? MAP_DARK_STYLE : MAP_LIGHT_STYLE;
   const [cameraTarget, setCameraTarget] = useState<RoutePoint | null>(null);
   const [mapViewport, setMapViewport] = useState<MapStoreViewport | null>(null);
+  const [isMapLoaded, setIsMapLoaded] = useState(false);
+  const hasAppliedBrowsingCountryRef = useRef(false);
+  const browsingCountry = useQuery({
+    queryKey: ["browsing-country"],
+    queryFn: fetchMyBrowsingCountryCode,
+    staleTime: 30 * 60_000
+  });
   const mapRef = useRef<MapRef | null>(null);
   const cameraRef = useRef<CameraRef | null>(null);
   const storeSourceRef = useRef<GeoJSONSourceRef | null>(null);
@@ -107,6 +124,17 @@ export default function MapScreen() {
   });
 
   const selectedStore = stores.data?.find((store) => store.id === selectedStoreId) ?? null;
+
+  useEffect(() => {
+    if (!isMapLoaded || !browsingCountry.data || hasAppliedBrowsingCountryRef.current) return;
+    const center = BROWSING_COUNTRY_CENTERS[browsingCountry.data] ?? BROWSING_COUNTRY_CENTERS.DZ;
+    hasAppliedBrowsingCountryRef.current = true;
+    cameraRef.current?.easeTo({
+      center: [center.longitude, center.latitude],
+      zoom: 4.5,
+      duration: 500
+    });
+  }, [isMapLoaded, browsingCountry.data]);
 
   useEffect(() => {
     if (requestedDirections !== "1" || !requestedStoreId || !stores.data || selectedStoreId) return;
@@ -402,6 +430,7 @@ export default function MapScreen() {
             intensity: isDark ? 0.35 : 0.75
           }}
           onDidFinishLoadingMap={() => {
+            setIsMapLoaded(true);
             void mapRef.current?.getViewState().then((viewState) => {
               const [west, south, east, north] = viewState.bounds;
               const [centerLongitude, centerLatitude] = viewState.center;
