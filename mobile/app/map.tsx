@@ -138,7 +138,10 @@ export default function MapScreen() {
 
   useEffect(() => {
     if (requestedDirections !== "1" || !requestedStoreId || !stores.data || selectedStoreId) return;
-    if (stores.data.some((store) => store.id === requestedStoreId)) setSelectedStoreId(requestedStoreId);
+    if (stores.data.some((store) => store.id === requestedStoreId)) {
+      selectedStoreIdRef.current = requestedStoreId;
+      setSelectedStoreId(requestedStoreId);
+    }
   }, [requestedDirections, requestedStoreId, stores.data, selectedStoreId]);
 
   const visibleStores = useMemo(() => {
@@ -276,6 +279,7 @@ export default function MapScreen() {
     navigationSessionRef.current += 1;
     rerouteRequestRef.current += 1;
     setNavigation(null);
+    selectedStoreIdRef.current = null;
     setSelectedStoreId(null);
     router.push({ pathname: "/store/[storeId]", params: { storeId } });
   };
@@ -501,7 +505,11 @@ export default function MapScreen() {
               id={store.id}
               lngLat={[store.longitude, store.latitude]}
               anchor="center"
-              onPress={() => setSelectedStoreId(store.id)}
+              onPress={() => {
+                if (navigationRef.current) stopNavigation();
+                selectedStoreIdRef.current = store.id;
+                setSelectedStoreId(store.id);
+              }}
             >
               <StoreMapMarker
                 selected={selectedStoreId === store.id}
@@ -542,6 +550,7 @@ export default function MapScreen() {
       <BottomSheet
         visible={Boolean(selectedStore)}
         onRequestClose={() => {
+          selectedStoreIdRef.current = null;
           setSelectedStoreId(null);
           if (navigation) stopNavigation();
         }}
