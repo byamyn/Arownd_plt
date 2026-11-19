@@ -127,7 +127,7 @@ export default function MapScreen() {
 
   useEffect(() => {
     if (!isMapLoaded || !browsingCountry.data || appliedBrowsingCountryRef.current === browsingCountry.data) return;
-    const center = BROWSING_COUNTRY_CENTERS[browsingCountry.data] ?? BROWSING_COUNTRY_CENTERS.DZ;
+    const center = BROWSING_COUNTRY_CENTERS[browsingCountry.data] ?? { longitude: 2.6, latitude: 28.0 };
     appliedBrowsingCountryRef.current = browsingCountry.data;
     cameraRef.current?.easeTo({
       center: [center.longitude, center.latitude],
