@@ -10,7 +10,7 @@ import {
   EmptyState,
   ErrorState,
 } from "@/components/customer-ui";
-import { Button, Caption, Icon, Image as UiImage, PriceDisplay, Text as UiText, ProductCardSkeleton } from "@/components/ui";
+import { Button, Caption, Icon, Image as UiImage, PriceDisplay, Text as UiText, ProductFeedSkeleton } from "@/components/ui";
 import { fetchHomeProducts, fetchProductDetails, fetchProductOffers, formatMarketPrice, getPrimaryImage } from "@/lib/catalog";
 import { fetchBrowsingCurrencyCode } from "@/lib/country-service";
 import { fetchApprovedReviews } from "@/lib/reviews";
@@ -273,7 +273,7 @@ export default function CustomerHomeScreen() {
     >
       {products.isPending ? (
         <View style={[styles.feedPage, { height: feedHeight || 560 }]}>
-          <ProductCardSkeleton style={{ flex: 1 }} />
+          <ProductFeedSkeleton />
         </View>
       ) : products.isError ? (
         <View style={[styles.feedState, { minHeight: feedHeight || 560 }]}>
