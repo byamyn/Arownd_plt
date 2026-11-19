@@ -92,12 +92,12 @@ export default function StoreDetailsScreen() {
   const [descriptionExpanded, setDescriptionExpanded] = useState(false);
   const store = useQuery({
     queryKey: ["customer-store", storeId],
-    queryFn: () => fetchStoreDetails(storeId),
+    queryFn: ({ signal }) => fetchStoreDetails(storeId, signal),
     enabled: Boolean(storeId)
   });
   const offers = useQuery({
     queryKey: ["customer-store-offers", storeId],
-    queryFn: () => fetchStoreOffers(storeId),
+    queryFn: ({ signal }) => fetchStoreOffers(storeId, signal),
     enabled: Boolean(storeId) && tab === "products"
   });
 
