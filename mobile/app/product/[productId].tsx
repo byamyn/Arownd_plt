@@ -47,12 +47,12 @@ export default function ProductDetailsScreen() {
   });
   const product = useQuery({
     queryKey: ["customer-product", productId],
-    queryFn: () => fetchProductDetails(productId),
+    queryFn: ({ signal }) => fetchProductDetails(productId, signal),
     enabled: Boolean(productId)
   });
   const offers = useQuery({
     queryKey: ["customer-product-offers", productId],
-    queryFn: () => fetchProductOffers(productId),
+    queryFn: ({ signal }) => fetchProductOffers(productId, signal),
     enabled: Boolean(productId)
   });
   const reviews = useQuery({
