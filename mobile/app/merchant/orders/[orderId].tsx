@@ -65,7 +65,7 @@ export default function MerchantOrderDetailsScreen() {
   const trackingSteps = trackingEvents.map((event, index) => ({
     key: event.id,
     title: translate(trackingTranslationKeys[event.status]),
-    description: new Date(event.created_at).toLocaleString(language === "ar" ? "ar-DZ" : "en-DZ"),
+    description: new Date(event.created_at).toLocaleString(language === "ar" ? "ar-DZ-u-nu-latn" : "en-DZ-u-nu-latn"),
     status: index === trackingEvents.length - 1 ? "current" as const : "complete" as const
   }));
   const latestTrackingStatus = trackingEvents[trackingEvents.length - 1]?.status
