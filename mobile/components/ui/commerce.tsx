@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { Image, Pressable, ScrollView, View, type ImageStyle, type StyleProp, type ViewStyle } from "react-native";
+import { Image as ExpoImage } from "expo-image";
 import { Text as UiText } from "./typography";
 
 import { designTokens, useAppTheme } from "@/lib/theme";
@@ -230,9 +231,11 @@ export function ProductImageGallery({
         >
           {images.map((uri, index) => (
             <View key={uri + index} style={{ width: containerWidth || "100%" }}>
-              <Image
+              <ExpoImage
                 source={{ uri }}
-                resizeMode="cover"
+                contentFit="cover"
+                cachePolicy="memory-disk"
+                recyclingKey={uri}
                 accessibilityLabel={`${accessibilityLabel} ${index + 1}`}
                 style={[{ width: "100%", aspectRatio: 1, borderRadius: theme.radius.xl, backgroundColor: theme.colors.surfaceMuted }, imageStyle]}
               />
