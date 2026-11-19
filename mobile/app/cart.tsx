@@ -37,7 +37,7 @@ export default function CartScreen() {
   const formatMarketAmount = (amount: number) => marketCurrency.data ? formatMarketPrice(amount, marketCurrency.data) : "—";
   const offers = useQuery({
     queryKey: ["customer-cart-offers", ids],
-    queryFn: () => fetchOffersByIds(ids),
+    queryFn: ({ signal }) => fetchOffersByIds(ids, signal),
     enabled: cart.isSuccess && ids.length > 0
   });
   const mutation = useMutation({
