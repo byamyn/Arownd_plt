@@ -6,7 +6,7 @@ import { Image as NativeImage, Modal, StyleSheet, View } from "react-native";
 
 import { designTokens, useAppTheme } from "@/lib/theme";
 import { CustomerMainHeader } from "@/components/customer-main-header";
-import { PageSkeleton, CustomerScreen, ErrorState, LoadingState } from "@/components/customer-ui";
+import { PageSkeleton, CustomerScreen, ErrorState } from "@/components/customer-ui";
 import {
   BottomSheet,
   Button,
