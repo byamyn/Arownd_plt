@@ -121,10 +121,31 @@ export async function fetchHomeProducts(): Promise<HomeProduct[]> {
     .eq("is_available", true)
     .gt("stock_quantity", 0)
     .order("created_at", { ascending: false })
-    .limit(12);
+    .limit(60);
 
   if (error) throw error;
-  return HomeProductSchema.array().parse(data as unknown);
+
+  const products = HomeProductSchema.array().parse(data as unknown);
+  const productsByStore = new Map<string, HomeProduct[]>();
+
+  for (const product of products) {
+    const storeProducts = productsByStore.get(product.store.id) ?? [];
+    storeProducts.push(product);
+    productsByStore.set(product.store.id, storeProducts);
+  }
+
+  const balancedProducts: HomeProduct[] = [];
+  const storeQueues = [...productsByStore.values()];
+
+  while (storeQueues.length > 0) {
+    for (let index = storeQueues.length - 1; index >= 0; index -= 1) {
+      const nextProduct = storeQueues[index].shift();
+      if (nextProduct) balancedProducts.push(nextProduct);
+      if (storeQueues[index].length === 0) storeQueues.splice(index, 1);
+    }
+  }
+
+  return balancedProducts;
 }
 
 export async function fetchMapStores(): Promise<MapStore[]> {
