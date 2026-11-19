@@ -389,8 +389,7 @@ const MerchantOfferCard = memo(function MerchantOfferCard({
       </MediaViewer>
     </Card>
   );
-}
-
+});
 
 function MessageScreen({
   theme,
