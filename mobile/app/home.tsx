@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
-import { Pressable, ScrollView, StyleSheet, View, type LayoutChangeEvent, type NativeScrollEvent, type NativeSyntheticEvent, type ScrollViewInstance } from "react-native";
+import { Animated, PanResponder, Pressable, ScrollView, StyleSheet, View, type LayoutChangeEvent, type NativeScrollEvent, type NativeSyntheticEvent, type ScrollViewInstance } from "react-native";
 
 import { FavoriteButton, useFavoriteToggle } from "@/components/favorite-button";
 import { CustomerMainHeader } from "@/components/customer-main-header";
@@ -28,6 +28,12 @@ function HomeProductCard({ item, price }: {
   const imagePagerRef = useRef<ScrollViewInstance>(null);
   const [imageWidth, setImageWidth] = useState(0);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const imageScale = useRef(new Animated.Value(1)).current;
+  const currentImageScale = useRef(1);
+  const pinchStartDistance = useRef(0);
+  const pinchStartScale = useRef(1);
+  const heartOpacity = useRef(new Animated.Value(0)).current;
+  const heartScale = useRef(new Animated.Value(0.35)).current;
   const productFavorite = useFavoriteToggle("products", item.product.id);
   const productReviews = useQuery({
     queryKey: ["approved-reviews", "product", item.product.id],
@@ -45,15 +51,59 @@ function HomeProductCard({ item, price }: {
     const nextIndex = Math.round(event.nativeEvent.contentOffset.x / imageWidth);
     setActiveImageIndex(Math.max(0, Math.min(nextIndex, productImages.length - 1)));
   };
+  const showDoubleTapHeart = () => {
+    heartOpacity.stopAnimation();
+    heartScale.stopAnimation();
+    heartOpacity.setValue(0);
+    heartScale.setValue(0.35);
+    Animated.parallel([
+      Animated.timing(heartOpacity, { toValue: 1, duration: 90, useNativeDriver: true }),
+      Animated.spring(heartScale, { toValue: 1, friction: 5, tension: 110, useNativeDriver: true })
+    ]).start(() => {
+      Animated.sequence([
+        Animated.delay(280),
+        Animated.parallel([
+          Animated.timing(heartOpacity, { toValue: 0, duration: 220, useNativeDriver: true }),
+          Animated.timing(heartScale, { toValue: 0.82, duration: 220, useNativeDriver: true })
+        ])
+      ]).start();
+    });
+  };
   const handleImageTap = () => {
     const now = Date.now();
     if (now - lastImageTapAt.current <= 300 && !productFavorite.disabled) {
-      productFavorite.toggle();
+      if (!productFavorite.active) productFavorite.toggle();
+      showDoubleTapHeart();
       lastImageTapAt.current = 0;
       return;
     }
     lastImageTapAt.current = now;
   };
+  const pinchResponder = useMemo(() => PanResponder.create({
+    onStartShouldSetPanResponderCapture: (event) => event.nativeEvent.touches.length >= 2,
+    onMoveShouldSetPanResponderCapture: (event) => event.nativeEvent.touches.length >= 2,
+    onPanResponderGrant: (event) => {
+      const [first, second] = event.nativeEvent.touches;
+      if (!first || !second) return;
+      pinchStartDistance.current = Math.hypot(first.pageX - second.pageX, first.pageY - second.pageY);
+      pinchStartScale.current = currentImageScale.current;
+    },
+    onPanResponderMove: (event) => {
+      const [first, second] = event.nativeEvent.touches;
+      if (!first || !second || pinchStartDistance.current <= 0) return;
+      const distance = Math.hypot(first.pageX - second.pageX, first.pageY - second.pageY);
+      const nextScale = Math.max(1, Math.min(3, pinchStartScale.current * distance / pinchStartDistance.current));
+      currentImageScale.current = nextScale;
+      imageScale.setValue(nextScale);
+    },
+    onPanResponderRelease: () => {
+      pinchStartDistance.current = 0;
+    },
+    onPanResponderTerminate: () => {
+      pinchStartDistance.current = 0;
+    },
+    onPanResponderTerminationRequest: () => false
+  }), [imageScale]);
   const selectImage = (index: number) => {
     if (imageWidth > 0) imagePagerRef.current?.scrollTo({ x: index * imageWidth, animated: true });
     setActiveImageIndex(index);
@@ -81,6 +131,7 @@ function HomeProductCard({ item, price }: {
   return (
     <View style={[styles.productCard, { backgroundColor: theme.colors.surface }]}>
       <View
+        {...pinchResponder.panHandlers}
         style={[styles.productImage, { backgroundColor: theme.colors.surfaceMuted }]}
         onLayout={(event) => setImageWidth(event.nativeEvent.layout.width)}
       >
@@ -103,18 +154,35 @@ function HomeProductCard({ item, price }: {
                 accessibilityHint={translate("favoriteAdd")}
                 style={{ width: imageWidth || "100%", height: "100%" }}
               >
-                <UiImage
-                  uri={uri}
-                  accessibilityLabel={item.product.name}
-                  aspectRatio={1}
-                  style={{ width: "100%", height: "100%", borderRadius: 0 }}
-                />
+                <Animated.View
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    transform: [{ scale: imageScale }]
+                  }}
+                >
+                  <UiImage
+                    uri={uri}
+                    accessibilityLabel={item.product.name}
+                    aspectRatio={1}
+                    style={{ width: "100%", height: "100%", borderRadius: 0 }}
+                  />
+                </Animated.View>
               </Pressable>
             ))}
           </ScrollView>
         ) : (
           <Icon name="image" size={42} color={theme.colors.subtle} accessibilityHidden />
         )}
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            styles.doubleTapHeartOverlay,
+            { opacity: heartOpacity, transform: [{ scale: heartScale }] }
+          ]}
+        >
+          <Icon name="heart" size={82} color="#F0646A" fill="#F0646A" accessibilityHidden />
+        </Animated.View>
         {productImages.length > 1 ? (
           <View style={styles.imagePagination} accessibilityLabel={` ${activeImageIndex + 1} / ${productImages.length}`}>
             {productImages.map((uri, index) => (
@@ -235,6 +303,7 @@ const styles = StyleSheet.create({
   feedState: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: designTokens.spacing.xl },
   productCard: { flex: 1, width: "100%", borderRadius: designTokens.radius.xl, overflow: "hidden" },
   productImage: { flex: 3, minHeight: 0, overflow: "hidden", alignItems: "center", justifyContent: "center" },
+  doubleTapHeartOverlay: { position: "absolute", top: "38%", left: 0, right: 0, alignItems: "center", justifyContent: "center" },
   imagePagination: { position: "absolute", bottom: designTokens.spacing.md, alignSelf: "center", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6 },
   imagePaginationDot: { width: 6, height: 6, borderRadius: 3 },
   imagePaginationDotActive: { width: 16, backgroundColor: "#FFFFFF", opacity: 1 },
