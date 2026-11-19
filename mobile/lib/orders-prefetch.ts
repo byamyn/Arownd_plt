@@ -6,6 +6,6 @@ export function prefetchCustomerOrderDetails(queryClient: QueryClient, orderId: 
   if (!orderId) return;
   void queryClient.prefetchQuery({
     queryKey: ["customer-order-details", orderId],
-    queryFn: () => fetchCustomerOrderDetails(orderId)
+    queryFn: ({ signal }) => fetchCustomerOrderDetails(orderId, signal)
   });
 }
