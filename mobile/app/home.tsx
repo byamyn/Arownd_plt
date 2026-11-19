@@ -23,7 +23,6 @@ function HomeProductCard({ item, price }: {
 }) {
   const theme = useAppTheme();
   const queryClient = useQueryClient();
-  const [descriptionHasMore, setDescriptionHasMore] = useState(false);
   const lastImageTapAt = useRef(0);
   const productFavorite = useFavoriteToggle("products", item.product.id);
 
@@ -84,22 +83,6 @@ function HomeProductCard({ item, price }: {
                 <Icon name="star" size={14} color="#E5A000" fill="#E5A000" accessibilityHidden />
                 <Caption>{item.store.rating.toFixed(1)}</Caption>
               </View>
-            ) : null}
-            {item.product.description ? (
-              <View style={styles.descriptionPreview}>
-                <UiText
-                  onTextLayout={(event) => {
-                    const hasMore = event.nativeEvent.lines.length > 2;
-                    setDescriptionHasMore((current) => current === hasMore ? current : hasMore);
-                  }}
-                  style={styles.productDescription}
-                >
-                  {item.product.description}
-                </UiText>
-              </View>
-            ) : null}
-            {descriptionHasMore ? (
-              <Button label={translate("homeShowMore")} onPress={openDetails} variant="ghost" size="sm" style={styles.showMoreButton} />
             ) : null}
           </View>
 
@@ -185,9 +168,6 @@ const styles = StyleSheet.create({
   productInfoColumns: { flex: 1, minHeight: 0, flexDirection: "row", justifyContent: "space-between", gap: designTokens.spacing.md },
   productDescriptionColumn: { flex: 1, minWidth: 0, alignItems: "flex-start", gap: 3 },
   productName: { lineHeight: 21, textAlign: "auto" },
-  descriptionPreview: { maxHeight: 36, overflow: "hidden", alignSelf: "stretch" },
-  productDescription: { fontSize: 12, lineHeight: 18, textAlign: "auto" },
-  showMoreButton: { minHeight: 22, paddingHorizontal: 0, paddingVertical: 0, alignSelf: "flex-start" },
   storeColumn: { flex: 1, minWidth: 0, alignItems: "flex-end", gap: designTokens.spacing.xs },
   storeIdentity: { flexDirection: "row", alignItems: "center", justifyContent: "flex-end", gap: designTokens.spacing.xs, maxWidth: "100%" },
   storeTitle: { flexShrink: 1, fontSize: 13, textAlign: "auto" },
