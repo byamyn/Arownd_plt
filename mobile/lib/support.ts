@@ -36,39 +36,44 @@ export type SupportMessageInput = z.infer<typeof supportMessageInputSchema>;
 export type SupportConversation = z.infer<typeof SupportConversationSchema>;
 export type SupportMessage = z.infer<typeof SupportMessageSchema>;
 
-export async function fetchMySupportConversations(): Promise<SupportConversation[]> {
+export async function fetchMySupportConversations(signal?: AbortSignal): Promise<SupportConversation[]> {
   const client = getSupabaseClient();
   const { data: auth, error: authError } = await client.auth.getUser();
   if (authError) throw authError;
   if (!auth.user) return [];
 
-  const { data, error } = await client
+  let request = client
     .from("support_conversations")
     .select("id, user_id, subject, status, last_message_at, created_at, updated_at")
     .eq("user_id", auth.user.id)
     .order("last_message_at", { ascending: false })
     .limit(50);
+  if (signal) request = request.abortSignal(signal);
+  const { data, error } = await request;
   if (error) throw error;
   return SupportConversationSchema.array().parse(data as unknown);
 }
 
-export async function fetchSupportConversation(id: string): Promise<SupportConversation | null> {
-  const { data, error } = await getSupabaseClient()
+export async function fetchSupportConversation(id: string, signal?: AbortSignal): Promise<SupportConversation | null> {
+  let request = getSupabaseClient()
     .from("support_conversations")
     .select("id, user_id, subject, status, last_message_at, created_at, updated_at")
-    .eq("id", id)
-    .maybeSingle();
+    .eq("id", id);
+  if (signal) request = request.abortSignal(signal);
+  const { data, error } = await request.maybeSingle();
   if (error) throw error;
   return data ? SupportConversationSchema.parse(data as unknown) : null;
 }
 
-export async function fetchSupportMessages(conversationId: string): Promise<SupportMessage[]> {
-  const { data, error } = await getSupabaseClient()
+export async function fetchSupportMessages(conversationId: string, signal?: AbortSignal): Promise<SupportMessage[]> {
+  let request = getSupabaseClient()
     .from("support_messages")
     .select("id, conversation_id, sender_id, sender_role, message, created_at")
     .eq("conversation_id", conversationId)
     .order("created_at", { ascending: true })
     .limit(300);
+  if (signal) request = request.abortSignal(signal);
+  const { data, error } = await request;
   if (error) throw error;
   return SupportMessageSchema.array().parse(data as unknown);
 }
