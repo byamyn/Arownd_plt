@@ -57,7 +57,7 @@ export function FavoriteButton({ kind, id, iconOnly = false }: { kind: FavoriteK
   return (
     <Button
       label={label}
-      onPress={() => mutation.mutate()}
+      onPress={toggle}
       variant="outline"
       size="sm"
       disabled={disabled}
