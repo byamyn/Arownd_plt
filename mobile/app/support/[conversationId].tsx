@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { KeyboardAvoidingView, Platform, StyleSheet, TextInput, View } from "react-native";
 
-import { PageSkeleton, CustomerScreen, EmptyState, ErrorState, LoadingState } from "@/components/customer-ui";
+import { PageSkeleton, CustomerScreen, EmptyState, ErrorState } from "@/components/customer-ui";
 import { AppHeader, Caption, Heading, Icon, PressableSurface, Text as UiText } from "@/components/ui";
 import { fetchSupportConversation, fetchSupportMessages, sendSupportMessage, supportMessageInputSchema, type SupportMessageInput } from "@/lib/support";
 import { getSupabaseClient } from "@/lib/supabase";
