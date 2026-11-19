@@ -237,7 +237,7 @@ export function getPrimaryImage(product: HomeProduct | ProductOffer): string | n
 }
 
 export function formatNumber(value: number): string {
-  return new Intl.NumberFormat(getCurrentLanguage() === "ar" ? "ar-DZ" : "en-DZ", {
+  return new Intl.NumberFormat(getCurrentLanguage() === "ar" ? "ar-DZ-u-nu-latn" : "en-DZ-u-nu-latn", {
     maximumFractionDigits: 2
   }).format(value);
 }
@@ -256,7 +256,7 @@ export function formatMarketPrice(amount: number, currencyCode: string): string 
   if (!region) return `${formatNumber(amount)} ${normalizedCurrency}`;
 
   const language = getCurrentLanguage() === "ar" ? "ar" : "en";
-  const formatter = new Intl.NumberFormat(`${language}-${region}`, {
+  const formatter = new Intl.NumberFormat(`${language}-${region}-u-nu-latn`, {
     style: "currency",
     currency: normalizedCurrency,
     minimumFractionDigits: 0,
@@ -268,7 +268,7 @@ export function formatMarketPrice(amount: number, currencyCode: string): string 
 }
 
 export function formatDZD(amount: number): string {
-  const formatter = new Intl.NumberFormat(getCurrentLanguage() === "ar" ? "ar-DZ" : "en-DZ", {
+  const formatter = new Intl.NumberFormat(getCurrentLanguage() === "ar" ? "ar-DZ-u-nu-latn" : "en-DZ-u-nu-latn", {
     style: "currency",
     currency: "DZD",
     maximumFractionDigits: 0
