@@ -23,15 +23,7 @@ function HomeProductCard({ item, price }: {
 }) {
   const theme = useAppTheme();
   const queryClient = useQueryClient();
-  const reviews = useQuery({
-    queryKey: ["approved-reviews", "product", item.product.id],
-    queryFn: () => fetchApprovedReviews("product", item.product.id),
-    staleTime: 60_000
-  });
-  const reviewCount = reviews.data?.length ?? 0;
-  const reviewAverage = reviewCount > 0
-    ? reviews.data!.reduce((total, review) => total + review.rating, 0) / reviewCount
-    : 0;
+  const [descriptionHasMore, setDescriptionHasMore] = useState(false);
 
   const openDetails = () => {
     void queryClient.prefetchQuery({
@@ -53,13 +45,7 @@ function HomeProductCard({ item, price }: {
   };
 
   return (
-    <View style={[
-      styles.productCard,
-      {
-        backgroundColor: theme.colors.surface,
-        borderColor: theme.colors.border
-      }
-    ]}>
+    <View style={[styles.productCard, { backgroundColor: theme.colors.surface }]}>
       <View style={[styles.productImage, { backgroundColor: theme.colors.surfaceMuted }]}>
         {getPrimaryImage(item) ? (
           <UiImage uri={getPrimaryImage(item)!} accessibilityLabel={item.product.name} aspectRatio={1} style={StyleSheet.absoluteFill} />
@@ -72,30 +58,50 @@ function HomeProductCard({ item, price }: {
       </View>
 
       <View style={styles.productInfo}>
-        <UiText numberOfLines={2} weight="700" style={styles.productName}>{item.product.name}</UiText>
-        <View style={styles.storeMeta}>
-          <View style={styles.storeName}>
-            <Icon name="store" size={14} color={theme.colors.muted} accessibilityHidden />
-            <Caption numberOfLines={1}>{item.store.name}</Caption>
+        <View style={styles.productInfoColumns}>
+          <View style={styles.productDescriptionColumn}>
+            <UiText numberOfLines={2} weight="700" style={styles.productName}>{item.product.name}</UiText>
+            {item.product.description ? (
+              <View style={styles.descriptionPreview}>
+                <UiText
+                  onTextLayout={(event) => {
+                    const hasMore = event.nativeEvent.lines.length > 2;
+                    setDescriptionHasMore((current) => current === hasMore ? current : hasMore);
+                  }}
+                  style={styles.productDescription}
+                >
+                  {item.product.description}
+                </UiText>
+              </View>
+            ) : null}
+            {descriptionHasMore ? (
+              <Button label={translate("homeShowMore")} onPress={openDetails} variant="ghost" size="sm" style={styles.showMoreButton} />
+            ) : null}
           </View>
-          <View style={[styles.availability, { backgroundColor: theme.colors.surfaceMuted }]}>
-            <Caption style={{ color: theme.colors.foreground }}>{translate("homeProductAvailable")}</Caption>
+
+          <View style={styles.storeColumn}>
+            <View style={styles.storeIdentity}>
+              <UiText numberOfLines={1} weight="600" style={styles.storeTitle}>{item.store.name}</UiText>
+              <View style={[styles.storeAvatar, { backgroundColor: theme.colors.surfaceMuted }]}>
+                {item.store.logo_url ? (
+                  <UiImage uri={item.store.logo_url} accessibilityLabel={item.store.name} aspectRatio={1} style={styles.storeAvatarImage} />
+                ) : (
+                  <Icon name="store" size={19} color={theme.colors.muted} accessibilityHidden />
+                )}
+              </View>
+            </View>
+            {item.store.rating != null ? (
+              <View style={styles.storeRating}>
+                <Icon name="star" size={14} color="#E5A000" fill="#E5A000" accessibilityHidden />
+                <Caption>{item.store.rating.toFixed(1)}</Caption>
+              </View>
+            ) : null}
           </View>
         </View>
-        <View style={styles.productMeta}>
+
+        <View style={styles.priceRow}>
           <PriceDisplay value={price} />
-          <View style={styles.rating}>
-            <RatingStars value={reviewAverage} size={15} showValue />
-            <Caption>{reviewCount}</Caption>
-          </View>
         </View>
-        <Button
-          label={translate("homeBuyNow")}
-          onPress={openDetails}
-          fullWidth
-          size="lg"
-          style={styles.buyNowButton}
-        />
       </View>
     </View>
   );
@@ -148,15 +154,21 @@ const styles = StyleSheet.create({
   feedContent: { paddingHorizontal: 0, paddingTop: 0, paddingBottom: 0, gap: 0 },
   feedPage: { width: "100%", paddingHorizontal: designTokens.spacing.xl, paddingVertical: designTokens.spacing.md },
   feedState: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: designTokens.spacing.xl },
-  productCard: { flex: 1, width: "100%", borderRadius: designTokens.radius.xl, borderWidth: StyleSheet.hairlineWidth, padding: designTokens.spacing.sm, gap: designTokens.spacing.md, overflow: "hidden" },
-  productImage: { flex: 6.5, minHeight: 0, borderRadius: designTokens.radius.lg, overflow: "hidden", alignItems: "center", justifyContent: "center" },
-  favoriteButton: { position: "absolute", top: designTokens.spacing.sm, end: designTokens.spacing.sm },
-  productInfo: { flex: 3.5, minHeight: 0, justifyContent: "space-between", gap: designTokens.spacing.xs, paddingHorizontal: designTokens.spacing.xs, paddingBottom: designTokens.spacing.xs },
-  productName: { minHeight: 40, lineHeight: 22, textAlign: "auto" },
-  storeMeta: { minHeight: 24, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: designTokens.spacing.sm },
-  storeName: { flex: 1, flexDirection: "row", alignItems: "center", gap: designTokens.spacing.xs },
-  availability: { paddingHorizontal: designTokens.spacing.sm, paddingVertical: designTokens.spacing.xs, borderRadius: designTokens.radius.pill },
-  productMeta: { minHeight: 34, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: designTokens.spacing.sm },
-  rating: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.xs },
-  buyNowButton: { borderRadius: designTokens.radius.md }
+  productCard: { flex: 1, width: "100%", borderRadius: designTokens.radius.xl, overflow: "hidden" },
+  productImage: { flex: 3, minHeight: 0, overflow: "hidden", alignItems: "center", justifyContent: "center" },
+  favoriteButton: { position: "absolute", top: designTokens.spacing.md, end: designTokens.spacing.md },
+  productInfo: { flex: 1, minHeight: 0, backgroundColor: "transparent", justifyContent: "space-between", paddingHorizontal: designTokens.spacing.md, paddingVertical: designTokens.spacing.sm, gap: designTokens.spacing.xs },
+  productInfoColumns: { flex: 1, minHeight: 0, flexDirection: "row", justifyContent: "space-between", gap: designTokens.spacing.md },
+  productDescriptionColumn: { flex: 1, minWidth: 0, alignItems: "flex-start", gap: 3 },
+  productName: { lineHeight: 21, textAlign: "auto" },
+  descriptionPreview: { maxHeight: 36, overflow: "hidden", alignSelf: "stretch" },
+  productDescription: { fontSize: 12, lineHeight: 18, textAlign: "auto" },
+  showMoreButton: { minHeight: 22, paddingHorizontal: 0, paddingVertical: 0, alignSelf: "flex-start" },
+  storeColumn: { flex: 1, minWidth: 0, alignItems: "flex-end", gap: designTokens.spacing.xs },
+  storeIdentity: { flexDirection: "row", alignItems: "center", justifyContent: "flex-end", gap: designTokens.spacing.xs, maxWidth: "100%" },
+  storeTitle: { flexShrink: 1, fontSize: 13, textAlign: "auto" },
+  storeAvatar: { width: 38, height: 38, borderRadius: 19, overflow: "hidden", alignItems: "center", justifyContent: "center" },
+  storeAvatarImage: { width: 38, height: 38, borderRadius: 19 },
+  storeRating: { flexDirection: "row", alignItems: "center", gap: 4 },
+  priceRow: { minHeight: 30, justifyContent: "center", alignItems: "flex-start" }
 });
