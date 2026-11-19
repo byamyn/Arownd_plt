@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
   categoryTrack: { flexDirection: "row", alignItems: "center", direction: "ltr" },
   categoryGroup: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.sm, paddingRight: designTokens.spacing.sm, flexShrink: 0, direction: "ltr" },
   grid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", rowGap: designTokens.spacing.md },
-  gridRow: { justifyContent: "space-between", gap: designTokens.spacing.md },
-  productTile: { width: "48%", flexGrow: 0, flexShrink: 0 },
+  gridRow: { justifyContent: "space-between" },
+  productTile: { width: "47%", flexGrow: 0, flexShrink: 0 },
   footer: { fontSize: designTokens.typography.caption, textAlign: "center", padding: designTokens.spacing.lg }
 });
