@@ -98,7 +98,7 @@ const HomeProductCard = memo(function HomeProductCard({ item, price }: {
     onPanResponderTerminationRequest: () => false
   }), [imageScale]);
   const selectImage = (index: number) => {
-    if (imageWidth > 0) imagePagerRef.current?.scrollTo({ x: index * imageWidth, animated: true });
+    if (imageWidth > 0) imagePagerRef.current?.scrollToOffset({ offset: index * imageWidth, animated: true });
     setActiveImageIndex(index);
   };
 
