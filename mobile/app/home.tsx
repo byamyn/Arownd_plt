@@ -83,11 +83,11 @@ function HomeProductCard({ item, width, price }: {
           </View>
         </View>
         <Button
-          label={translate("homeShowMore")}
+          label={translate("homeBuyNow")}
           onPress={openDetails}
           fullWidth
           size="lg"
-          style={styles.moreButton}
+          style={styles.buyNowButton}
         />
       </View>
     </View>
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: designTokens.spacing.xs
   },
-  moreButton: {
+  buyNowButton: {
     borderRadius: designTokens.radius.md
   }
 });
