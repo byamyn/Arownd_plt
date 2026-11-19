@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Redirect, router } from "expo-router";
-import { useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -56,8 +56,8 @@ export default function MerchantProductsScreen() {
     retry: false
   });
 
-  const saveOffer = async (
-    offer: MerchantProductOffer,
+  const saveOffer = useCallback(async (
+    offerId: string,
     priceInput: string,
     stockInput: string
   ): Promise<void> => {
@@ -70,12 +70,12 @@ export default function MerchantProductsScreen() {
       return;
     }
 
-    setBusyOfferId(offer.id);
+    setBusyOfferId(offerId);
     setNotice(null);
     setActionError(null);
 
     try {
-      await updateMerchantProductOffer(offer.id, storeId, values);
+      await updateMerchantProductOffer(offerId, storeId, values);
       await queryClient.invalidateQueries({ queryKey: ["merchant-products", storeId] });
       await queryClient.invalidateQueries({ queryKey: ["merchant-dashboard", storeId] });
       setNotice(translate("merchantProductsSaved"));
@@ -84,9 +84,9 @@ export default function MerchantProductsScreen() {
     } finally {
       setBusyOfferId(null);
     }
-  };
+  }, [busyOfferId, queryClient, storeId]);
 
-  const toggleVisibility = async (offer: MerchantProductOffer): Promise<void> => {
+  const toggleVisibility = useCallback(async (offerId: string, isMerchantHidden: boolean): Promise<void> => {
     if (!storeId || busyOfferId) return;
 
     setBusyOfferId(offer.id);
@@ -94,7 +94,7 @@ export default function MerchantProductsScreen() {
     setActionError(null);
 
     try {
-      await setMerchantProductVisibility(offer.id, storeId, offer.is_merchant_hidden);
+      await setMerchantProductVisibility(offerId, storeId, isMerchantHidden);
       await queryClient.invalidateQueries({ queryKey: ["merchant-products", storeId] });
       setNotice(translate("merchantProductsSaved"));
     } catch {
@@ -102,7 +102,18 @@ export default function MerchantProductsScreen() {
     } finally {
       setBusyOfferId(null);
     }
-  };
+  }, [busyOfferId, queryClient, storeId]);
+
+  const editOffer = useCallback((offerId: string) => {
+    if (storeId) {
+      void queryClient.prefetchQuery({
+        queryKey: ["merchant-product", storeId, offerId],
+        queryFn: () => fetchMerchantProductOffer(storeId, offerId),
+        staleTime: 30_000
+      });
+    }
+    router.push({ pathname: "/merchant/products/[offerId]", params: { offerId } });
+  }, [queryClient, storeId]);
 
   if (access.isPending) {
     return <MessageScreen theme={theme} loading label={translate("merchantLoading")} />;
@@ -201,18 +212,9 @@ export default function MerchantProductsScreen() {
                   theme={theme}
                   busy={busyOfferId === offer.id}
                   anyBusy={busyOfferId !== null}
-                  onSave={(price, stock) => void saveOffer(offer, price, stock)}
-                  onToggleVisibility={() => void toggleVisibility(offer)}
-                  onEdit={() => {
-                    if (storeId) {
-                      void queryClient.prefetchQuery({
-                        queryKey: ["merchant-product", storeId, offer.id],
-                        queryFn: () => fetchMerchantProductOffer(storeId, offer.id),
-                        staleTime: 30_000
-                      });
-                    }
-                    router.push({ pathname: "/merchant/products/[offerId]", params: { offerId: offer.id } });
-                  }}
+                  onSave={saveOffer}
+                  onToggleVisibility={toggleVisibility}
+                  onEdit={editOffer}
                 />
               </View>
             ))}
@@ -223,7 +225,7 @@ export default function MerchantProductsScreen() {
   );
 }
 
-function MerchantOfferCard({
+const MerchantOfferCard = memo(function MerchantOfferCard({
   offer,
   theme,
   busy,
@@ -236,9 +238,9 @@ function MerchantOfferCard({
   theme: AppTheme;
   busy: boolean;
   anyBusy: boolean;
-  onSave: (price: string, stock: string) => void;
-  onToggleVisibility: () => void;
-  onEdit: () => void;
+  onSave: (offerId: string, price: string, stock: string) => void;
+  onToggleVisibility: (offerId: string, isMerchantHidden: boolean) => void;
+  onEdit: (offerId: string) => void;
 }) {
   const styles = createStyles(theme);
   const [price, setPrice] = useState(String(offer.price));
@@ -250,6 +252,9 @@ function MerchantOfferCard({
     setStock(String(offer.stock_quantity));
   }, [offer.price, offer.stock_quantity]);
 
+  const handleSave = useCallback(() => onSave(offer.id, price, stock), [onSave, offer.id, price, stock]);
+  const handleToggleVisibility = useCallback(() => onToggleVisibility(offer.id, offer.is_merchant_hidden), [onToggleVisibility, offer.id, offer.is_merchant_hidden]);
+  const handleEdit = useCallback(() => onEdit(offer.id), [onEdit, offer.id]);
   const image = offer.images.find((item) => item.is_primary) ?? offer.images[0] ?? null;
   const inventoryLevel = getMerchantInventoryLevel(offer.stock_quantity);
   const inventoryLabel = inventoryLevel === "out"
@@ -333,7 +338,7 @@ function MerchantOfferCard({
 
         <Button
         label={translate("merchantProductsSave")}
-        onPress={() => onSave(price, stock)}
+        onPress={handleSave}
         loading={busy}
         disabled={anyBusy}
         fullWidth
@@ -341,7 +346,7 @@ function MerchantOfferCard({
         <View style={styles.actionsRow}>
         <Button
           label={offer.is_merchant_hidden ? translate("merchantProductsShow") : translate("merchantProductsHide")}
-          onPress={onToggleVisibility}
+          onPress={handleToggleVisibility}
           disabled={anyBusy}
           variant="outline"
           size="sm"
@@ -350,7 +355,7 @@ function MerchantOfferCard({
         />
         <Button
           label={translate("merchantProductEditOpen")}
-          onPress={onEdit}
+          onPress={handleEdit}
           disabled={anyBusy}
           variant="ghost"
           size="sm"
