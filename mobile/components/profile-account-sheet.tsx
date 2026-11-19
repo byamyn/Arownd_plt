@@ -4,7 +4,7 @@ import * as Linking from "expo-linking";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { Button, Card, Caption, FormLabel, Heading, Icon, PressableSurface, SegmentedControl, StatusBadge, Text as UiText, TextField } from "@/components/ui";
-import { ErrorState, LoadingState } from "@/components/customer-ui";
+import { ErrorState, PageSkeleton } from "@/components/customer-ui";
 import { fetchCheckoutRegions } from "@/lib/checkout";
 import { fetchDeliveryProfileCommunes, fetchMyDeliveryProfile, saveMyDeliveryProfile } from "@/lib/delivery-profile";
 import { DeliveryProfileSchema, type DeliveryProfileInput } from "@/lib/delivery-profile-state";
@@ -80,7 +80,7 @@ function DeliveryContent() {
     setError(null);
     mutation.mutate(parsed.data);
   };
-  if (profile.isPending || regions.isPending) return <LoadingState label={translate("stateLoading")} />;
+  if (profile.isPending || regions.isPending) return <PageSkeleton variant="form" rows={4} />;
   if (profile.isError || regions.isError) return <ErrorState title={translate("deliveryProfileLoadError")} retryLabel={translate("retry")} busy={profile.isFetching || regions.isFetching} onRetry={() => { void profile.refetch(); void regions.refetch(); }} />;
   if (picker) {
     const items: DeliveryPickerItem[] = picker === "region"
