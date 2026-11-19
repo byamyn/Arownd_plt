@@ -4,6 +4,7 @@ import {
   ScrollView,
   StyleSheet,
   View,
+  type ScrollViewProps,
   type StyleProp,
   type ViewStyle
 } from "react-native";
@@ -15,11 +16,12 @@ import { designTokens, useAppTheme } from "@/lib/theme";
 import { Button, Caption, Heading, Icon, Image as UiImage, PriceDisplay, PressableSurface, RatingStars, RefreshableScrollView, SearchField, Text as UiText } from "@/components/ui";
 export { EmptyState, ErrorState, LoadingState } from "@/components/ui";
 
-export function CustomerScreen({ children, footer, showNavigation = true, onRefresh, refreshing = false, contentStyle, scrollRef, stickyHeaderIndices }: { children: ReactNode; footer?: ReactNode; showNavigation?: boolean; onRefresh?: (() => void) | undefined; refreshing?: boolean; contentStyle?: StyleProp<ViewStyle>; scrollRef?: Ref<ComponentRef<typeof ScrollView>> | undefined; stickyHeaderIndices?: number[] }) {
+export function CustomerScreen({ children, header, footer, showNavigation = true, onRefresh, refreshing = false, contentStyle, scrollRef, stickyHeaderIndices, scrollViewProps }: { children: ReactNode; header?: ReactNode; footer?: ReactNode; showNavigation?: boolean; onRefresh?: (() => void) | undefined; refreshing?: boolean; contentStyle?: StyleProp<ViewStyle>; scrollRef?: Ref<ComponentRef<typeof ScrollView>> | undefined; stickyHeaderIndices?: number[]; scrollViewProps?: Pick<ScrollViewProps, "pagingEnabled" | "decelerationRate" | "onLayout"> }) {
   const theme = useAppTheme();
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.colors.background }]}>
-      <RefreshableScrollView scrollRef={scrollRef} {...(stickyHeaderIndices ? { stickyHeaderIndices } : {})} style={styles.scroll} contentContainerStyle={[styles.content, contentStyle]} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} onRefresh={onRefresh} refreshing={refreshing}>
+      {header ? <View style={styles.screenHeader}>{header}</View> : null}
+      <RefreshableScrollView scrollRef={scrollRef} {...(stickyHeaderIndices ? { stickyHeaderIndices } : {})} {...scrollViewProps} style={styles.scroll} contentContainerStyle={[styles.content, contentStyle]} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} onRefresh={onRefresh} refreshing={refreshing}>
         {children}
       </RefreshableScrollView>
       {footer ? <View style={[styles.footer, { backgroundColor: theme.colors.background, borderTopColor: theme.colors.border }]}>{footer}</View> : null}
@@ -174,6 +176,7 @@ export function StoreTile({ name, description, logoUrl, commune, rating, verifie
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
+  screenHeader: { paddingHorizontal: designTokens.spacing.xl, paddingTop: designTokens.spacing.sm, paddingBottom: designTokens.spacing.sm },
   scroll: { flex: 1 },
   footer: { paddingHorizontal: designTokens.spacing.xl, paddingTop: designTokens.spacing.sm, paddingBottom: designTokens.spacing.sm, borderTopWidth: StyleSheet.hairlineWidth },
   content: { paddingHorizontal: designTokens.spacing.xl, paddingTop: designTokens.spacing.sm, paddingBottom: designTokens.spacing.xxl, gap: designTokens.spacing.xxl },
