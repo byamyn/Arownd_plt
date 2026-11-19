@@ -130,7 +130,7 @@ export default function StoreVerificationModerationScreen() {
             <Detail label={translate("verificationAddress")} value={item.store.address_line ?? translate("verificationMissingValue")} theme={theme} />
             <Detail label={translate("verificationWorkingHours")} value={item.store.opening_hours.open + " – " + item.store.opening_hours.close} theme={theme} />
             <UiText style={[styles.meta, { color: theme.colors.muted }]}>
-              {translate("verificationSubmittedAt")}: {new Date(item.submitted_at).toLocaleString("en-DZ-u-nu-latn")}
+              {translate("verificationSubmittedAt")}: {new Date(item.submitted_at).toLocaleString(language === "ar" ? "ar-DZ-u-nu-latn" : "en-DZ-u-nu-latn")}
             </UiText>
             <TextField
               value={rejectionNotes[item.id] ?? ""}
