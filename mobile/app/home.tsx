@@ -1,7 +1,7 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
-import { Animated, FlatList, PanResponder, Pressable, ScrollView, StyleSheet, View, type LayoutChangeEvent, type NativeScrollEvent, type NativeSyntheticEvent, type ScrollViewInstance } from "react-native";
+import { Animated, FlatList, PanResponder, Pressable, ScrollView, StyleSheet, View, type LayoutChangeEvent, type NativeScrollEvent, type NativeSyntheticEvent, type FlatList as FlatListInstance } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { FavoriteButton, useFavoriteToggle } from "@/components/favorite-button";
@@ -26,7 +26,7 @@ const HomeProductCard = memo(function HomeProductCard({ item, price }: {
   const theme = useAppTheme();
   const queryClient = useQueryClient();
   const lastImageTapAt = useRef(0);
-  const imagePagerRef = useRef<ScrollViewInstance>(null);
+  const imagePagerRef = useRef<FlatListInstance<string>>(null);
   const [imageWidth, setImageWidth] = useState(0);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const imageScale = useRef(new Animated.Value(1)).current;
@@ -36,17 +36,9 @@ const HomeProductCard = memo(function HomeProductCard({ item, price }: {
   const heartOpacity = useRef(new Animated.Value(0)).current;
   const heartScale = useRef(new Animated.Value(0.35)).current;
   const productFavorite = useFavoriteToggle("products", item.product.id);
-  const productReviews = useQuery({
-    queryKey: ["approved-reviews", "product", item.product.id],
-    queryFn: () => fetchApprovedReviews("product", item.product.id),
-    staleTime: 60_000
-  });
   const primaryImage = getPrimaryImage(item);
   const productImages = [...new Set([primaryImage, ...item.images.map((image) => image.image_url)].filter((uri): uri is string => Boolean(uri)))];
-  const reviewCount = productReviews.data?.length ?? 0;
-  const averageRating = reviewCount > 0
-    ? productReviews.data!.reduce((total, review) => total + review.rating, 0) / reviewCount
-    : null;
+  const averageRating = item.product.rating != null && item.product.rating > 0 ? item.product.rating : null;
   const handleImageScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     if (imageWidth <= 0) return;
     const nextIndex = Math.round(event.nativeEvent.contentOffset.x / imageWidth);
@@ -137,18 +129,22 @@ const HomeProductCard = memo(function HomeProductCard({ item, price }: {
         onLayout={(event) => setImageWidth(event.nativeEvent.layout.width)}
       >
         {productImages.length > 0 ? (
-          <ScrollView
+          <FlatList
             ref={imagePagerRef}
+            data={productImages}
             horizontal
             pagingEnabled
             nestedScrollEnabled
             showsHorizontalScrollIndicator={false}
             style={StyleSheet.absoluteFill}
-            onMomentumScrollEnd={handleImageScrollEnd}
-          >
-            {productImages.map((uri, index) => (
+            keyExtractor={(uri) => uri}
+            initialNumToRender={1}
+            maxToRenderPerBatch={1}
+            windowSize={2}
+            removeClippedSubviews
+            getItemLayout={imageWidth > 0 ? (_data, index) => ({ length: imageWidth, offset: imageWidth * index, index }) : undefined}
+            renderItem={({ item: uri, index }) => (
               <Pressable
-                key={uri}
                 onPress={handleImageTap}
                 accessibilityRole="button"
                 accessibilityLabel={`${item.product.name} — ${index + 1}`}
@@ -170,8 +166,9 @@ const HomeProductCard = memo(function HomeProductCard({ item, price }: {
                   />
                 </Animated.View>
               </Pressable>
-            ))}
-          </ScrollView>
+            )}
+            onMomentumScrollEnd={handleImageScrollEnd}
+          />
         ) : (
           <Icon name="image" size={42} color={theme.colors.subtle} accessibilityHidden />
         )}
@@ -225,7 +222,7 @@ const HomeProductCard = memo(function HomeProductCard({ item, price }: {
             {averageRating !== null ? (
               <View style={styles.storeRating}>
                 <Icon name="star" size={14} color="#E5A000" fill="#E5A000" accessibilityHidden />
-                <Caption>{averageRating.toFixed(1)} · {reviewCount} {translate("homeReviewCount")}</Caption>
+                <Caption>{averageRating.toFixed(1)}</Caption>
               </View>
             ) : <View />}
           </View>
