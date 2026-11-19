@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { Pressable, ScrollView, StyleSheet, View, type LayoutChangeEvent, type NativeScrollEvent, type NativeSyntheticEvent } from "react-native";
@@ -15,6 +15,7 @@ import { fetchHomeProducts, fetchProductDetails, fetchProductOffers, formatMarke
 import { fetchBrowsingCurrencyCode } from "@/lib/country-service";
 import { fetchApprovedReviews } from "@/lib/reviews";
 import { translate } from "@/lib/i18n";
+import { registerHomeReselectHandler } from "@/lib/customer-navigation-state";
 import { designTokens, useAppTheme } from "@/lib/theme";
 
 function HomeProductCard({ item, price }: {
@@ -174,8 +175,17 @@ function HomeProductCard({ item, price }: {
 
 export default function CustomerHomeScreen() {
   const [feedHeight, setFeedHeight] = useState(0);
+  const feedScrollRef = useRef<ScrollView>(null);
+  const queryClient = useQueryClient();
   const browsingCurrency = useQuery({ queryKey: ["browsing-country-currency"], queryFn: fetchBrowsingCurrencyCode, staleTime: 60_000 });
   const products = useQuery({ queryKey: ["customer-home-products"], queryFn: fetchHomeProducts, staleTime: 60_000 });
+  useEffect(() => registerHomeReselectHandler(() => {
+    feedScrollRef.current?.scrollTo({ y: 0, animated: true });
+    void queryClient.invalidateQueries({ queryKey: ["customer-home-products"], exact: true });
+    void queryClient.invalidateQueries({ queryKey: ["browsing-country-currency"], exact: true });
+    void queryClient.invalidateQueries({ queryKey: ["approved-reviews", "product"] });
+  }), [queryClient]);
+
   const handleFeedLayout = (event: LayoutChangeEvent) => {
     const nextHeight = Math.round(event.nativeEvent.layout.height);
     setFeedHeight((current) => current === nextHeight ? current : nextHeight);
@@ -185,6 +195,7 @@ export default function CustomerHomeScreen() {
     <CustomerScreen
       header={<CustomerMainHeader />}
       contentStyle={styles.feedContent}
+      scrollRef={feedScrollRef}
       scrollViewProps={{ pagingEnabled: true, decelerationRate: "fast", onLayout: handleFeedLayout }}
       refreshing={products.isFetching}
       onRefresh={() => { void products.refetch(); }}
