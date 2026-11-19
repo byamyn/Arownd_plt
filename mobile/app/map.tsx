@@ -80,7 +80,7 @@ export default function MapScreen() {
   const [cameraTarget, setCameraTarget] = useState<RoutePoint | null>(null);
   const [mapViewport, setMapViewport] = useState<MapStoreViewport | null>(null);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
-  const hasAppliedBrowsingCountryRef = useRef(false);
+  const appliedBrowsingCountryRef = useRef<string | null>(null);
   const browsingCountry = useQuery({
     queryKey: ["browsing-country"],
     queryFn: fetchMyBrowsingCountryCode,
@@ -126,9 +126,9 @@ export default function MapScreen() {
   const selectedStore = stores.data?.find((store) => store.id === selectedStoreId) ?? null;
 
   useEffect(() => {
-    if (!isMapLoaded || !browsingCountry.data || hasAppliedBrowsingCountryRef.current) return;
+    if (!isMapLoaded || !browsingCountry.data || appliedBrowsingCountryRef.current === browsingCountry.data) return;
     const center = BROWSING_COUNTRY_CENTERS[browsingCountry.data] ?? BROWSING_COUNTRY_CENTERS.DZ;
-    hasAppliedBrowsingCountryRef.current = true;
+    appliedBrowsingCountryRef.current = browsingCountry.data;
     cameraRef.current?.easeTo({
       center: [center.longitude, center.latitude],
       zoom: 4.5,
