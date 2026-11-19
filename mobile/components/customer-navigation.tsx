@@ -5,7 +5,7 @@ import { router, usePathname } from "expo-router";
 import { BottomNavigation, Icon } from "@/components/ui";
 import { fetchMerchantAccess } from "@/lib/merchant";
 import { translate } from "@/lib/i18n";
-import { getCustomerTab, type CustomerTab } from "@/lib/customer-navigation-state";
+import { getCustomerTab, reselectHome, type CustomerTab } from "@/lib/customer-navigation-state";
 import { useAppTheme } from "@/lib/theme";
 
 type NavigationTab = {
@@ -69,6 +69,10 @@ export function CustomerNavigation() {
       value={selectedTab === "none" ? "" : selectedTab ?? ""}
       onChange={(key) => {
         const destination = tabs.find((tab) => tab.id === key)?.path;
+        if (destination && pathname === destination && key === "home") {
+          reselectHome();
+          return;
+        }
         if (destination && pathname !== destination) router.replace(destination);
       }}
       items={tabs.map((tab) => {
