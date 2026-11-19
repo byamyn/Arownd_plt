@@ -121,6 +121,7 @@ export default function ProductDetailsScreen() {
   const productOffers = offers.data ?? [];
   const bestOffer = chooseBestProductOffer(productOffers);
   const selectedOffer = productOffers.find((offer) => offer.id === selectedOfferId) ?? bestOffer;
+  const isProductAvailable = Boolean(selectedOffer?.is_available && selectedOffer.stock_quantity > 0);
   const selectedOfferImages = (selectedOffer?.images ?? [])
     .filter((image): image is typeof image & { image_url: string } => typeof image.image_url === "string" && image.image_url.trim().length > 0)
     .sort((a, b) => Number(Boolean(b.is_primary)) - Number(Boolean(a.is_primary)))
@@ -164,6 +165,9 @@ export default function ProductDetailsScreen() {
       <View style={styles.infoSection}>
         <UiText weight="700" style={styles.productName}>{productDetails.name}</UiText>
         {selectedOffer ? <PriceDisplay value={browsingCurrency.data ? formatMarketPrice(selectedOffer.price, browsingCurrency.data) : "—"} style={styles.priceDisplay} /> : null}
+        <View style={[styles.availabilityBadge, { backgroundColor: theme.colors.surfaceMuted }]}>
+          <UiText weight="700" style={styles.availabilityStatus}>{translate(isProductAvailable ? "productAvailable" : "productUnavailable")}</UiText>
+        </View>
         <View style={styles.ratingRow}>
           <View style={styles.ratingInfo}>
             <RatingStars value={reviewAverage} size={15} showValue />
@@ -264,6 +268,8 @@ const styles = StyleSheet.create({
   infoSection: { gap: designTokens.spacing.xs, paddingVertical: designTokens.spacing.xs },
   productName: { fontSize: designTokens.typography.title - 2, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
   priceDisplay: { justifyContent: "flex-end" },
+  availabilityBadge: { alignSelf: "flex-start", borderRadius: designTokens.radius.md, paddingHorizontal: designTokens.spacing.md, paddingVertical: designTokens.spacing.xs },
+  availabilityStatus: { fontSize: designTokens.typography.caption + 1, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
   ratingRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: designTokens.spacing.md },
   ratingInfo: { flex: 1, flexDirection: "row", alignItems: "center", flexWrap: "wrap", gap: designTokens.spacing.sm },
   reviewCount: { fontSize: designTokens.typography.caption },
