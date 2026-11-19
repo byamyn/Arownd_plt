@@ -166,7 +166,39 @@ export function MetricCardSkeleton({ style }: SkeletonLayoutProps) {
   );
 }
 
-export type PageSkeletonVariant = "list" | "form" | "profile" | "details";
+export type PageSkeletonVariant = "list" | "form" | "profile" | "details" | "cart" | "checkout";
+
+export function ProductFeedSkeleton({ style }: SkeletonLayoutProps) {
+  const theme = useAppTheme();
+  return (
+    <View accessibilityElementsHidden style={[{ flex: 1, width: "100%", overflow: "hidden", backgroundColor: theme.colors.background }, style]}>
+      <View style={{ flex: 3, minHeight: 0, backgroundColor: theme.colors.surfaceMuted, justifyContent: "flex-end", alignItems: "center", paddingBottom: designTokens.spacing.lg }}>
+        <View style={{ flexDirection: "row", gap: designTokens.spacing.xs }}>
+          <Skeleton width={16} height={6} radius={theme.radius.pill} />
+          <Skeleton width={6} height={6} radius={theme.radius.pill} />
+          <Skeleton width={6} height={6} radius={theme.radius.pill} />
+        </View>
+      </View>
+      <View style={{ flex: 1, minHeight: 0, justifyContent: "space-between", paddingHorizontal: designTokens.spacing.md, paddingVertical: designTokens.spacing.sm }}>
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: designTokens.spacing.md }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: designTokens.spacing.sm, flex: 1 }}>
+            <Skeleton width={36} height={36} radius={theme.radius.pill} />
+            <Skeleton width="42%" height={12} />
+          </View>
+          <Skeleton width={64} height={12} />
+        </View>
+        <Skeleton width="76%" height={15} />
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: designTokens.spacing.md }}>
+          <Skeleton width="24%" height={18} />
+          <View style={{ flexDirection: "row", alignItems: "center", gap: designTokens.spacing.sm }}>
+            <Skeleton width={104} height={40} radius={theme.radius.lg} />
+            <Skeleton width={40} height={40} radius={theme.radius.pill} />
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+}
 
 export function PageSkeleton({
   variant = "list",
@@ -197,7 +229,53 @@ export function PageSkeleton({
         </>
       ) : null}
 
-      {variant === "form" ? (
+      {variant === "cart" ? (
+        <View style={{ gap: designTokens.spacing.md }}>
+          {rowKeys.map((index) => (
+            <View key={index} style={{ flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md, paddingVertical: designTokens.spacing.sm, borderBottomWidth: index === count - 1 ? 0 : StyleSheet.hairlineWidth, borderBottomColor: theme.colors.border }}>
+              <Skeleton width={82} height={94} radius={theme.radius.lg} />
+              <View style={{ flex: 1, gap: designTokens.spacing.sm }}>
+                <Skeleton width="72%" height={14} />
+                <Skeleton width="48%" height={11} />
+                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: designTokens.spacing.xs }}>
+                  <Skeleton width="34%" height={16} />
+                  <Skeleton width={76} height={30} radius={theme.radius.md} />
+                </View>
+              </View>
+            </View>
+          ))}
+          <View style={{ gap: designTokens.spacing.md, paddingTop: designTokens.spacing.md }}>
+            <Skeleton width="100%" height={48} radius={theme.radius.lg} />
+            <Skeleton width="100%" height={48} radius={theme.radius.lg} />
+          </View>
+        </View>
+      ) : variant === "checkout" ? (
+        <View style={{ gap: designTokens.spacing.lg }}>
+          <View style={{ gap: designTokens.spacing.md }}>
+            <Skeleton width="42%" height={15} />
+            <Skeleton width="100%" height={82} radius={theme.radius.lg} />
+          </View>
+          <View style={{ gap: designTokens.spacing.md }}>
+            <Skeleton width="34%" height={15} />
+            {rowKeys.slice(0, 2).map((index) => (
+              <View key={index} style={{ flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md }}>
+                <Skeleton width={58} height={58} radius={theme.radius.md} />
+                <View style={{ flex: 1, gap: designTokens.spacing.sm }}>
+                  <Skeleton width="68%" height={12} />
+                  <Skeleton width="38%" height={11} />
+                </View>
+                <Skeleton width={54} height={13} />
+              </View>
+            ))}
+          </View>
+          <View style={{ gap: designTokens.spacing.md, paddingTop: designTokens.spacing.md }}>
+            <Skeleton width="38%" height={15} />
+            <Skeleton width="100%" height={48} radius={theme.radius.md} />
+            <Skeleton width="100%" height={48} radius={theme.radius.md} />
+            <Skeleton width="100%" height={52} radius={theme.radius.lg} />
+          </View>
+        </View>
+      ) : variant === "form" ? (
         <View style={{ gap: designTokens.spacing.md }}>
           {rowKeys.map((index) => (
             <View key={index} style={{ gap: designTokens.spacing.sm }}>
