@@ -3,7 +3,7 @@ import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 
-import { PageSkeleton, CustomerScreen, ErrorState, LoadingState } from "@/components/customer-ui";
+import { PageSkeleton, CustomerScreen, ErrorState } from "@/components/customer-ui";
 import { AppHeader, Button, Caption, Heading, Icon, PressableSurface, Text as UiText } from "@/components/ui";
 import { fetchMySupportConversations } from "@/lib/support";
 import { getSupabaseClient } from "@/lib/supabase";
