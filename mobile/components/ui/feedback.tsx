@@ -166,6 +166,80 @@ export function MetricCardSkeleton({ style }: SkeletonLayoutProps) {
   );
 }
 
+export type PageSkeletonVariant = "list" | "form" | "profile" | "details";
+
+export function PageSkeleton({
+  variant = "list",
+  rows = 3,
+  style
+}: {
+  variant?: PageSkeletonVariant;
+  rows?: number;
+  style?: StyleProp<ViewStyle>;
+}) {
+  const theme = useAppTheme();
+  const count = Math.max(1, Math.min(rows, 6));
+  const rowKeys = Array.from({ length: count }, (_, index) => index);
+
+  return (
+    <View accessibilityElementsHidden style={[{ width: "100%", gap: designTokens.spacing.lg, paddingVertical: designTokens.spacing.md }, style]}>
+      {variant === "profile" ? (
+        <View style={{ alignItems: "center", gap: designTokens.spacing.md, paddingVertical: designTokens.spacing.md }}>
+          <Skeleton width={76} height={76} radius={theme.radius.pill} />
+          <Skeleton width="42%" height={15} />
+          <Skeleton width="58%" height={11} />
+        </View>
+      ) : variant === "details" ? (
+        <>
+          <Skeleton height={190} radius={theme.radius.lg} />
+          <Skeleton width="72%" height={18} />
+          <Skeleton width="44%" height={13} />
+        </>
+      ) : null}
+
+      {variant === "form" ? (
+        <View style={{ gap: designTokens.spacing.md }}>
+          {rowKeys.map((index) => (
+            <View key={index} style={{ gap: designTokens.spacing.sm }}>
+              <Skeleton width={index % 2 === 0 ? "34%" : "46%"} height={12} />
+              <Skeleton height={48} radius={theme.radius.md} />
+            </View>
+          ))}
+        </View>
+      ) : variant === "list" ? (
+        <View style={{ gap: designTokens.spacing.md }}>
+          {rowKeys.map((index) => (
+            <View key={index} style={{ flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md, paddingVertical: designTokens.spacing.xs }}>
+              <Skeleton width={52} height={52} radius={theme.radius.md} />
+              <View style={{ flex: 1, gap: designTokens.spacing.sm }}>
+                <Skeleton width={index % 2 === 0 ? "68%" : "54%"} height={13} />
+                <Skeleton width="88%" height={10} />
+                <Skeleton width="36%" height={10} />
+              </View>
+            </View>
+          ))}
+        </View>
+      ) : variant === "profile" ? (
+        <View style={{ gap: designTokens.spacing.md }}>
+          {rowKeys.slice(0, 3).map((index) => (
+            <View key={index} style={{ gap: designTokens.spacing.sm, padding: designTokens.spacing.md, borderRadius: theme.radius.lg, backgroundColor: theme.colors.surfaceSecondary }}>
+              <Skeleton width="38%" height={12} />
+              <Skeleton width="82%" height={13} />
+              <Skeleton width="58%" height={11} />
+            </View>
+          ))}
+        </View>
+      ) : variant === "details" ? (
+        <View style={{ gap: designTokens.spacing.md }}>
+          <Skeleton width="100%" height={42} radius={theme.radius.md} />
+          <Skeleton width="100%" height={74} radius={theme.radius.md} />
+          <Skeleton width="62%" height={12} />
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
 export function SuccessState({
   title,
   description,
