@@ -269,12 +269,12 @@ export default function MapScreen() {
 
     void queryClient.prefetchQuery({
       queryKey: ["customer-store", storeId],
-      queryFn: () => fetchStoreDetails(storeId),
+      queryFn: ({ signal }) => fetchStoreDetails(storeId, signal),
       staleTime: 60_000
     });
     void queryClient.prefetchQuery({
       queryKey: ["customer-store-offers", storeId],
-      queryFn: () => fetchStoreOffers(storeId),
+      queryFn: ({ signal }) => fetchStoreOffers(storeId, signal),
       staleTime: 30_000
     });
 
