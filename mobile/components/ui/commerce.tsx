@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { Pressable, ScrollView, View, type ImageStyle, type StyleProp, type ViewStyle } from "react-native";
+import { FlatList, Pressable, ScrollView, View, type ImageStyle, type StyleProp, type ViewStyle } from "react-native";
 import { Image as ExpoImage } from "expo-image";
 import { Text as UiText } from "./typography";
 
@@ -216,11 +216,16 @@ export function ProductImageGallery({
       style={{ width: "100%" }}
     >
       {images.length > 0 ? (
-        <ScrollView
+        <FlatList
           horizontal
           pagingEnabled
           nestedScrollEnabled
           showsHorizontalScrollIndicator={false}
+          data={images}
+          keyExtractor={(uri, index) => `${uri}-${index}`}
+          initialNumToRender={1}
+          maxToRenderPerBatch={2}
+          windowSize={3}
           onMomentumScrollEnd={(event) => {
             if (containerWidth > 0) {
               const nextIndex = Math.max(0, Math.min(images.length - 1, Math.round(event.nativeEvent.contentOffset.x / containerWidth)));
@@ -228,9 +233,8 @@ export function ProductImageGallery({
             }
           }}
           style={{ width: "100%" }}
-        >
-          {images.map((uri, index) => (
-            <View key={uri + index} style={{ width: containerWidth || "100%" }}>
+          renderItem={({ item: uri, index }) => (
+            <View style={{ width: containerWidth || "100%" }}>
               <ExpoImage
                 source={{ uri }}
                 contentFit="cover"
@@ -240,8 +244,8 @@ export function ProductImageGallery({
                 style={[{ width: "100%", aspectRatio: 1, borderRadius: theme.radius.xl, backgroundColor: theme.colors.surfaceMuted }, imageStyle]}
               />
             </View>
-          ))}
-        </ScrollView>
+          )}
+        />
       ) : null}
     </View>
   );
