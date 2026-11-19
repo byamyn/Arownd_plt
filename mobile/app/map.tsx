@@ -522,6 +522,37 @@ export default function MapScreen() {
           {hasLocationPermission ? <UserLocation animated accuracy /> : null}
         </MapLibreMap>
 
+        {stores.isPending ? (
+          <View pointerEvents="none" style={styles.mapStatusContainer}>
+            <View style={[styles.mapStatusCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+              <ActivityIndicator size="small" color={theme.colors.accentOnSurface} />
+              <UiText weight="600">{translate("mapStoresLoading", language)}</UiText>
+            </View>
+          </View>
+        ) : stores.isError && !stores.data ? (
+          <View style={styles.mapStatusContainer}>
+            <View style={[styles.mapStatusCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+              <UiText weight="600" style={styles.mapStatusText}>{translate("mapStoresLoadError", language)}</UiText>
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => void stores.refetch()}
+                style={[styles.mapRetryButton, { backgroundColor: theme.colors.accent }]}
+              >
+                <UiText weight="700" style={{ color: theme.colors.accentForeground }}>
+                  {translate("mapStoresRetry", language)}
+                </UiText>
+              </Pressable>
+            </View>
+          </View>
+        ) : stores.data?.length === 0 ? (
+          <View pointerEvents="none" style={styles.mapStatusContainer}>
+            <View style={[styles.mapStatusCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+              <UiText weight="600" style={styles.mapStatusText}>{translate("mapStoresEmpty", language)}</UiText>
+              <UiText tone="muted" style={styles.mapStatusHint}>{translate("mapStoresEmptyHint", language)}</UiText>
+            </View>
+          </View>
+        ) : null}
+
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={translate("mapLocateMe", language)}
@@ -735,6 +766,43 @@ const styles = StyleSheet.create({
     start: 16,
     end: 16,
     zIndex: 5
+  },
+  mapStatusContainer: {
+    position: "absolute",
+    top: 136,
+    start: 20,
+    end: 20,
+    zIndex: 4,
+    alignItems: "center"
+  },
+  mapStatusCard: {
+    width: "100%",
+    maxWidth: 360,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: 16,
+    padding: designTokens.spacing.md,
+    alignItems: "center",
+    gap: designTokens.spacing.sm,
+    elevation: 3,
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 4
+  },
+  mapStatusText: {
+    textAlign: "center"
+  },
+  mapStatusHint: {
+    fontSize: designTokens.typography.caption,
+    textAlign: "center"
+  },
+  mapRetryButton: {
+    minHeight: 40,
+    minWidth: 112,
+    paddingHorizontal: designTokens.spacing.lg,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center"
   },
   locationButton: {
     position: "absolute",
