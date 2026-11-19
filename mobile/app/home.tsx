@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState, type ComponentRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
-import { Pressable, ScrollView, StyleSheet, View, type LayoutChangeEvent, type NativeScrollEvent, type NativeSyntheticEvent } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View, type LayoutChangeEvent, type NativeScrollEvent, type NativeSyntheticEvent, type ScrollViewInstance } from "react-native";
 
 import { FavoriteButton, useFavoriteToggle } from "@/components/favorite-button";
 import { CustomerMainHeader } from "@/components/customer-main-header";
@@ -25,7 +25,7 @@ function HomeProductCard({ item, price }: {
   const theme = useAppTheme();
   const queryClient = useQueryClient();
   const lastImageTapAt = useRef(0);
-  const imagePagerRef = useRef<ComponentRef<typeof ScrollView>>(null);
+  const imagePagerRef = useRef<ScrollViewInstance>(null);
   const [imageWidth, setImageWidth] = useState(0);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const productFavorite = useFavoriteToggle("products", item.product.id);
@@ -175,7 +175,7 @@ function HomeProductCard({ item, price }: {
 
 export default function CustomerHomeScreen() {
   const [feedHeight, setFeedHeight] = useState(0);
-  const feedScrollRef = useRef<ScrollView>(null);
+  const feedScrollRef = useRef<ScrollViewInstance>(null);
   const queryClient = useQueryClient();
   const browsingCurrency = useQuery({ queryKey: ["browsing-country-currency"], queryFn: fetchBrowsingCurrencyCode, staleTime: 60_000 });
   const products = useQuery({ queryKey: ["customer-home-products"], queryFn: fetchHomeProducts, staleTime: 60_000 });
