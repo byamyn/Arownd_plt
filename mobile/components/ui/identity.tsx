@@ -60,7 +60,7 @@ export function Avatar({
         }}
       >
         {imageSource ? (
-          <Image source={imageSource} contentFit="cover" cachePolicy="memory-disk" recyclingKey={imageUri} style={{ width: size, height: size }} />
+          <Image source={imageSource} contentFit="cover" cachePolicy="memory-disk" recyclingKey={imageUri ?? name} style={{ width: size, height: size }} />
         ) : (
           <UiText
             numberOfLines={1}
