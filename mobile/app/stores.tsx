@@ -97,8 +97,8 @@ export default function StoresScreen() {
                   verified={store.is_verified}
                   {...(store.latitude != null && store.longitude != null ? { onDirections: () => router.push({ pathname: "/map", params: { storeId: store.id, directions: "1" } }) } : {})}
                   onPress={() => {
-                    void queryClient.prefetchQuery({ queryKey: ["customer-store", store.id], queryFn: () => fetchStoreDetails(store.id), staleTime: 60_000 });
-                    void queryClient.prefetchQuery({ queryKey: ["customer-store-offers", store.id], queryFn: () => fetchStoreOffers(store.id), staleTime: 30_000 });
+                    void queryClient.prefetchQuery({ queryKey: ["customer-store", store.id], queryFn: ({ signal }) => fetchStoreDetails(store.id, signal), staleTime: 60_000 });
+                    void queryClient.prefetchQuery({ queryKey: ["customer-store-offers", store.id], queryFn: ({ signal }) => fetchStoreOffers(store.id, signal), staleTime: 30_000 });
                     router.push({ pathname: "/store/[storeId]", params: { storeId: store.id } });
                   }}
                 />
