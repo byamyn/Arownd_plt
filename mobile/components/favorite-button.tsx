@@ -4,13 +4,13 @@ import { Button, Icon, IconButton } from "@/components/ui";
 import { getFavorites, toggleFavorite } from "@/lib/favorites";
 import { hasFavorite, type FavoriteKind } from "@/lib/favorites-state";
 import { translate } from "@/lib/i18n";
-import { useAppTheme } from "@/lib/theme";
 
 export const FAVORITES_QUERY_KEY = ["customer-favorites"] as const;
 
-const FAVORITE_PINK = "#E85D91";
-const FAVORITE_PINK_SURFACE = "#FCE4EC";
-const FAVORITE_PINK_SURFACE_DARK = "#3A1F2B";
+const FAVORITE_CORAL = "#F0646A";
+const FAVORITE_IDLE_SURFACE = "#F2F2F0";
+const FAVORITE_ACTIVE_SURFACE = "#FFE9ED";
+const FAVORITE_IDLE_ICON = "#343434";
 
 export function useFavoriteToggle(kind: FavoriteKind, id: string) {
   const queryClient = useQueryClient();
@@ -33,7 +33,6 @@ export function useFavoriteToggle(kind: FavoriteKind, id: string) {
 }
 
 export function FavoriteButton({ kind, id, iconOnly = false, floating = false }: { kind: FavoriteKind; id: string; iconOnly?: boolean; floating?: boolean }) {
-  const theme = useAppTheme();
   const { active, disabled, toggle } = useFavoriteToggle(kind, id);
   const label = translate(active ? "favoriteSaved" : "favoriteAdd");
 
@@ -45,15 +44,10 @@ export function FavoriteButton({ kind, id, iconOnly = false, floating = false }:
         disabled={disabled}
         variant="surface"
         size={floating ? 36 : 44}
-        icon={<Icon name="heart" size={floating ? 17 : 20} color={active ? FAVORITE_PINK : theme.colors.muted} fill={active ? FAVORITE_PINK : "none"} accessibilityHidden />}
-        style={floating ? {
-          backgroundColor: active
-            ? (theme.mode === "dark" ? "rgba(58, 31, 43, 0.82)" : "rgba(252, 228, 236, 0.82)")
-            : (theme.mode === "dark" ? "rgba(0, 0, 0, 0.42)" : "rgba(255, 255, 255, 0.68)"),
+        icon={<Icon name="heart" size={floating ? 17 : 20} color={active ? FAVORITE_CORAL : FAVORITE_IDLE_ICON} fill={active ? FAVORITE_CORAL : "none"} accessibilityHidden />}
+        style={{
+          backgroundColor: active ? FAVORITE_ACTIVE_SURFACE : FAVORITE_IDLE_SURFACE,
           borderColor: "transparent"
-        } : {
-          backgroundColor: active ? (theme.mode === "dark" ? FAVORITE_PINK_SURFACE_DARK : FAVORITE_PINK_SURFACE) : theme.colors.surface,
-          borderColor: active ? FAVORITE_PINK : theme.colors.border
         }}
       />
     );
@@ -67,15 +61,15 @@ export function FavoriteButton({ kind, id, iconOnly = false, floating = false }:
       size="sm"
       disabled={disabled}
       startIcon={
-        <Icon name="heart" size={19} color={active ? FAVORITE_PINK : theme.colors.muted} accessibilityHidden />
+        <Icon name="heart" size={19} color={active ? FAVORITE_CORAL : FAVORITE_IDLE_ICON} accessibilityHidden />
       }
-      textStyle={{ color: active ? FAVORITE_PINK : theme.colors.foreground, fontSize: 11 }}
+      textStyle={{ color: active ? FAVORITE_CORAL : FAVORITE_IDLE_ICON, fontSize: 11 }}
       style={{
         minHeight: 44,
         minWidth: 112,
         borderRadius: 13,
-        backgroundColor: active ? (theme.mode === "dark" ? FAVORITE_PINK_SURFACE_DARK : FAVORITE_PINK_SURFACE) : theme.colors.surface,
-        borderColor: active ? FAVORITE_PINK : theme.colors.border
+        backgroundColor: active ? FAVORITE_ACTIVE_SURFACE : FAVORITE_IDLE_SURFACE,
+        borderColor: "transparent"
       }}
     />
   );
