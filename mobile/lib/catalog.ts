@@ -175,7 +175,7 @@ export async function fetchMapStoresInBounds(
     p_center_lat: viewport.centerLatitude,
     p_center_long: viewport.centerLongitude,
     p_include_store_id: includeStoreId ?? null,
-    p_limit: 120
+    p_limit: 1000
   });
 
   if (error) throw error;
