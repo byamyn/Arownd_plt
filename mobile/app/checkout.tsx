@@ -175,7 +175,7 @@ export default function CheckoutScreen() {
   if (cart.isError || auth.isError || regionOptions.isError) return <CustomerScreen><ErrorState title={translate("catalogLoadError")} retryLabel={translate("retry")} busy={cart.isFetching || auth.isFetching} onRetry={() => { void cart.refetch(); void auth.refetch(); }} /></CustomerScreen>;
   if (!cart.data.length) return <CustomerScreen>
     <AppHeader title={translate("checkoutTitle")} leading={<IconButton accessibilityLabel={translate("back")} onPress={() => router.back()} icon={<Icon name="arrow-right" size={22} color={theme.colors.foreground} />} variant="ghost" />} />
-    <EmptyState icon="shopping-cart" title={translate("cartEmpty")} hint={translate("cartEmptyHint")} />
+    <EmptyState icon="shopping-bag" title={translate("cartEmpty")} hint={translate("cartEmptyHint")} />
     <Button label={translate("cartBrowse")} onPress={() => router.replace("/explore")} fullWidth />
   </CustomerScreen>;
 
