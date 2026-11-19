@@ -10,7 +10,7 @@ import {
   EmptyState,
   ErrorState,
 } from "@/components/customer-ui";
-import { Button, Caption, Icon, Image as UiImage, PriceDisplay, RatingStars, Text as UiText, ProductCardSkeleton } from "@/components/ui";
+import { Button, Caption, Icon, Image as UiImage, PriceDisplay, Text as UiText, ProductCardSkeleton } from "@/components/ui";
 import { fetchHomeProducts, fetchProductDetails, fetchProductOffers, formatMarketPrice, getPrimaryImage } from "@/lib/catalog";
 import { fetchBrowsingCurrencyCode } from "@/lib/country-service";
 import { fetchApprovedReviews } from "@/lib/reviews";
