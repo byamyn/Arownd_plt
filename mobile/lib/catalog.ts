@@ -155,16 +155,30 @@ export async function fetchHomeProducts(): Promise<HomeProduct[]> {
 }
 
 export async function fetchMapStores(): Promise<MapStore[]> {
-  const { data, error } = await getSupabaseClient()
-    .from("stores")
-    .select("id, name, logo_url, commune, address_line, latitude, longitude, is_verified")
-    .not("latitude", "is", null)
-    .not("longitude", "is", null)
-    .order("name", { ascending: true })
-    .limit(500);
+  const pageSize = 500;
+  const allStores: unknown[] = [];
+  let offset = 0;
 
-  if (error) throw error;
-  return MapStoreSchema.array().parse(data as unknown);
+  while (true) {
+    const { data, error } = await getSupabaseClient()
+      .from("stores")
+      .select("id, name, logo_url, commune, address_line, latitude, longitude, is_verified")
+      .not("latitude", "is", null)
+      .not("longitude", "is", null)
+      .order("name", { ascending: true })
+      .order("id", { ascending: true })
+      .range(offset, offset + pageSize - 1);
+
+    if (error) throw error;
+
+    const page = data ?? [];
+    allStores.push(...page);
+
+    if (page.length < pageSize) break;
+    offset += pageSize;
+  }
+
+  return MapStoreSchema.array().parse(allStores);
 }
 
 export async function fetchFeaturedStores(): Promise<FeaturedStore[]> {
