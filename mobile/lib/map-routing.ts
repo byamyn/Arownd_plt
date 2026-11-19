@@ -98,7 +98,11 @@ export function distanceBetweenCoordinates(first: RoutePoint, second: RoutePoint
   return 6_371_000 * 2 * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
 }
 
-function distanceToSegmentMeters(position: RoutePoint, start: RoutePoint, end: RoutePoint): number {
+function projectPointToSegment(
+  position: RoutePoint,
+  start: RoutePoint,
+  end: RoutePoint
+): { distance: number; fraction: number } {
   const earthRadius = 6_371_000;
   const radians = (value: number) => value * Math.PI / 180;
   const referenceLatitude = radians(position.latitude);
@@ -111,12 +115,46 @@ function distanceToSegmentMeters(position: RoutePoint, start: RoutePoint, end: R
   const deltaX = second.x - first.x;
   const deltaY = second.y - first.y;
   const segmentLengthSquared = deltaX * deltaX + deltaY * deltaY;
-  if (segmentLengthSquared === 0) return Math.hypot(first.x, first.y);
+  if (segmentLengthSquared === 0) {
+    return { distance: Math.hypot(first.x, first.y), fraction: 0 };
+  }
 
-  const projection = Math.max(0, Math.min(1,
+  const fraction = Math.max(0, Math.min(1,
     -(first.x * deltaX + first.y * deltaY) / segmentLengthSquared
   ));
-  return Math.hypot(first.x + projection * deltaX, first.y + projection * deltaY);
+  return {
+    distance: Math.hypot(first.x + fraction * deltaX, first.y + fraction * deltaY),
+    fraction
+  };
+}
+
+function distanceToSegmentMeters(position: RoutePoint, start: RoutePoint, end: RoutePoint): number {
+  return projectPointToSegment(position, start, end).distance;
+}
+
+function getRouteProgressMeters(position: RoutePoint, route: RoutePoint[]): number {
+  if (route.length === 0) return Number.POSITIVE_INFINITY;
+  if (route.length === 1) return distanceBetweenCoordinates(position, route[0]!);
+
+  let travelled = 0;
+  let bestDistance = Number.POSITIVE_INFINITY;
+  let bestProgress = 0;
+
+  for (let index = 0; index < route.length - 1; index += 1) {
+    const start = route[index];
+    const end = route[index + 1];
+    if (!start || !end) continue;
+
+    const segmentLength = distanceBetweenCoordinates(start, end);
+    const projection = projectPointToSegment(position, start, end);
+    if (projection.distance < bestDistance) {
+      bestDistance = projection.distance;
+      bestProgress = travelled + segmentLength * projection.fraction;
+    }
+    travelled += segmentLength;
+  }
+
+  return bestProgress;
 }
 
 export function distanceToRouteMeters(position: RoutePoint, route: RoutePoint[]): number {
@@ -158,21 +196,39 @@ export function getRemainingRouteMetrics(
 export function getActiveStepIndex(
   steps: RouteStep[],
   position: RoutePoint,
-  currentIndex: number
+  currentIndex: number,
+  routeCoordinates: RoutePoint[]
 ): number {
-  let nextIndex = Math.min(currentIndex, Math.max(0, steps.length - 1));
+  if (steps.length === 0) return 0;
+
+  let nextIndex = Math.min(Math.max(0, currentIndex), steps.length - 1);
+  const currentProgress = getRouteProgressMeters(position, routeCoordinates);
+
   while (nextIndex < steps.length - 1) {
     const currentStep = steps[nextIndex];
-    if (!currentStep) break;
+    if (!currentStep || currentStep.maneuverType === "arrive") break;
+
     const distance = distanceBetweenCoordinates(position, currentStep.location);
     if (currentStep.maneuverType === "depart") {
       if (distance <= 28) break;
       nextIndex += 1;
       continue;
     }
-    if (distance > 28) break;
-    nextIndex += 1;
+
+    if (distance <= 28) {
+      nextIndex += 1;
+      continue;
+    }
+
+    const stepProgress = getRouteProgressMeters(currentStep.location, routeCoordinates);
+    if (currentProgress > stepProgress + 20) {
+      nextIndex += 1;
+      continue;
+    }
+
+    break;
   }
+
   return nextIndex;
 }
 
