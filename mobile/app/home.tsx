@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ComponentRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { Pressable, ScrollView, StyleSheet, View, type LayoutChangeEvent, type NativeScrollEvent, type NativeSyntheticEvent } from "react-native";
@@ -25,7 +25,7 @@ function HomeProductCard({ item, price }: {
   const theme = useAppTheme();
   const queryClient = useQueryClient();
   const lastImageTapAt = useRef(0);
-  const imagePagerRef = useRef<ScrollView>(null);
+  const imagePagerRef = useRef<ComponentRef<typeof ScrollView>>(null);
   const [imageWidth, setImageWidth] = useState(0);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const productFavorite = useFavoriteToggle("products", item.product.id);
