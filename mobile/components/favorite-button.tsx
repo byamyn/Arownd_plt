@@ -12,8 +12,7 @@ const FAVORITE_PINK = "#E85D91";
 const FAVORITE_PINK_SURFACE = "#FCE4EC";
 const FAVORITE_PINK_SURFACE_DARK = "#3A1F2B";
 
-export function FavoriteButton({ kind, id, iconOnly = false }: { kind: FavoriteKind; id: string; iconOnly?: boolean }) {
-  const theme = useAppTheme();
+export function useFavoriteToggle(kind: FavoriteKind, id: string) {
   const queryClient = useQueryClient();
   const favorites = useQuery({
     queryKey: FAVORITES_QUERY_KEY,
@@ -26,16 +25,23 @@ export function FavoriteButton({ kind, id, iconOnly = false }: { kind: FavoriteK
       void queryClient.invalidateQueries({ queryKey: ["customer-favorites-content"] });
     }
   });
+  return {
+    active: favorites.data ? hasFavorite(favorites.data, kind, id) : false,
+    disabled: favorites.isPending || mutation.isPending || favorites.isError,
+    toggle: () => mutation.mutate()
+  };
+}
 
-  const active = favorites.data ? hasFavorite(favorites.data, kind, id) : false;
-  const disabled = favorites.isPending || mutation.isPending || favorites.isError;
+export function FavoriteButton({ kind, id, iconOnly = false }: { kind: FavoriteKind; id: string; iconOnly?: boolean }) {
+  const theme = useAppTheme();
+  const { active, disabled, toggle } = useFavoriteToggle(kind, id);
   const label = translate(active ? "favoriteSaved" : "favoriteAdd");
 
   if (iconOnly) {
     return (
       <IconButton
         accessibilityLabel={label}
-        onPress={() => mutation.mutate()}
+        onPress={toggle}
         disabled={disabled}
         variant="surface"
         size={44}
