@@ -56,7 +56,8 @@ describe("map routing helpers", () => {
     expect(getActiveStepIndex(
       steps,
       { longitude: 3, latitude: 36 },
-      0
+      0,
+      [{ longitude: 3, latitude: 36 }, { longitude: 3.001, latitude: 36 }, { longitude: 3.002, latitude: 36 }]
     )).toBe(0);
   });
 
@@ -64,7 +65,26 @@ describe("map routing helpers", () => {
     expect(getActiveStepIndex(
       steps,
       { longitude: 3.0005, latitude: 36 },
-      0
+      0,
+      [{ longitude: 3, latitude: 36 }, { longitude: 3.001, latitude: 36 }, { longitude: 3.002, latitude: 36 }]
+    )).toBe(1);
+  });
+
+  it("advances after passing a maneuver even when GPS never entered its arrival radius", () => {
+    expect(getActiveStepIndex(
+      steps,
+      { longitude: 3.0015, latitude: 36 },
+      1,
+      [{ longitude: 3, latitude: 36 }, { longitude: 3.001, latitude: 36 }, { longitude: 3.002, latitude: 36 }]
+    )).toBe(2);
+  });
+
+  it("does not advance a maneuver while the user is still approaching it", () => {
+    expect(getActiveStepIndex(
+      steps,
+      { longitude: 3.0006, latitude: 36 },
+      1,
+      [{ longitude: 3, latitude: 36 }, { longitude: 3.001, latitude: 36 }, { longitude: 3.002, latitude: 36 }]
     )).toBe(1);
   });
 
