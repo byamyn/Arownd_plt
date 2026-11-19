@@ -325,7 +325,8 @@ export default function MapScreen() {
     const nextStepIndex = getActiveStepIndex(
       navigation.route.steps,
       userPosition,
-      navigation.currentStepIndex
+      navigation.currentStepIndex,
+      navigation.route.coordinates
     );
     if (nextStepIndex !== navigation.currentStepIndex) {
       setNavigation((current) => current
