@@ -53,7 +53,7 @@ export default function MerchantProductsScreen() {
 
   const products = useQuery({
     queryKey: ["merchant-products", storeId],
-    queryFn: () => fetchMerchantProducts(storeId ?? ""),
+    queryFn: ({ signal }) => fetchMerchantProducts(storeId ?? "", signal),
     enabled: ready,
     retry: false
   });
@@ -117,7 +117,7 @@ export default function MerchantProductsScreen() {
     if (storeId) {
       void queryClient.prefetchQuery({
         queryKey: ["merchant-product", storeId, offerId],
-        queryFn: () => fetchMerchantProductOffer(storeId, offerId),
+        queryFn: ({ signal }) => fetchMerchantProductOffer(storeId, offerId, signal),
         staleTime: 30_000
       });
     }
