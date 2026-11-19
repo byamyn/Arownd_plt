@@ -91,20 +91,22 @@ const ORDER_SELECT = [
   "daira:country_regions!orders_daira_region_fkey(name_ar, name_fr)"
 ].join(" ");
 
-export async function fetchMyOrders(): Promise<CustomerOrder[]> {
+export async function fetchMyOrders(signal?: AbortSignal): Promise<CustomerOrder[]> {
   const { data: auth, error: authError } = await getSupabaseClient().auth.getUser();
   if (authError) throw authError;
   if (!auth.user) return [];
-  const { data, error } = await getSupabaseClient()
+  let request = getSupabaseClient()
     .from("orders")
     .select(ORDER_SELECT)
     .eq("user_id", auth.user.id)
     .order("created_at", { ascending: false });
+  if (signal) request = request.abortSignal(signal);
+  const { data, error } = await request;
   if (error) throw error;
   return OrderSchema.array().parse(data as unknown);
 }
 
-export async function fetchCustomerOrderDetails(orderId: string): Promise<{
+export async function fetchCustomerOrderDetails(orderId: string, signal?: AbortSignal): Promise<{
   order: CustomerOrder | null;
   shipments: CustomerShipment[];
   trackingEvents: { merchantOrderId: string; events: CustomerTrackingEvent[] }[];
@@ -113,9 +115,15 @@ export async function fetchCustomerOrderDetails(orderId: string): Promise<{
   if (authError) throw authError;
   if (!auth.user) throw new Error("not_authenticated");
   const client = getSupabaseClient();
+  let orderRequest = client.from("orders").select(ORDER_SELECT).eq("id", orderId).eq("user_id", auth.user.id);
+  let shipmentsRequest = client.from("shipments").select("id, status, notes, updated_at, created_at, merchant_order_id").eq("order_id", orderId).order("created_at", { ascending: true });
+  if (signal) {
+    orderRequest = orderRequest.abortSignal(signal);
+    shipmentsRequest = shipmentsRequest.abortSignal(signal);
+  }
   const [{ data: order, error: orderError }, { data: shipments, error: shipmentError }] = await Promise.all([
-    client.from("orders").select(ORDER_SELECT).eq("id", orderId).eq("user_id", auth.user.id).maybeSingle(),
-    client.from("shipments").select("id, status, notes, updated_at, created_at, merchant_order_id").eq("order_id", orderId).order("created_at", { ascending: true })
+    orderRequest.maybeSingle(),
+    shipmentsRequest
   ]);
   if (orderError) throw orderError;
   if (shipmentError) throw shipmentError;
