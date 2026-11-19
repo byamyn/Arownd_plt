@@ -44,12 +44,12 @@ export default function SupportConversationScreen() {
   });
   const conversation = useQuery({
     queryKey: ["support-conversation", conversationId],
-    queryFn: () => fetchSupportConversation(conversationId),
+    queryFn: ({ signal }) => fetchSupportConversation(conversationId, signal),
     enabled: Boolean(conversationId) && auth.isSuccess && Boolean(auth.data)
   });
   const messages = useQuery({
     queryKey: ["support-messages", conversationId],
-    queryFn: () => fetchSupportMessages(conversationId),
+    queryFn: ({ signal }) => fetchSupportMessages(conversationId, signal),
     enabled: Boolean(conversationId) && auth.isSuccess && Boolean(auth.data)
   });
 
