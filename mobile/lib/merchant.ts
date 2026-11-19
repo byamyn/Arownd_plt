@@ -333,7 +333,8 @@ export type MerchantTrackingStatus = "preparing" | "ready_for_dispatch" | "out_f
 
 export async function fetchMerchantOrderDetails(
   merchantOrderId: string,
-  storeId: string
+  storeId: string,
+  signal?: AbortSignal
 ): Promise<MerchantOrderDetail> {
   const client = getSupabaseClient();
   const { data: authData, error: authError } = await client.auth.getUser();
@@ -341,41 +342,50 @@ export async function fetchMerchantOrderDetails(
   if (authError) throw authError;
   if (!authData.user) throw new Error("not_authenticated");
 
-  const { data: ownedStore, error: storeError } = await client
+  let ownedStoreRequest = client
     .from("stores")
     .select("id")
     .eq("id", storeId)
-    .eq("owner_id", authData.user.id)
-    .maybeSingle();
+    .eq("owner_id", authData.user.id);
+  if (signal) ownedStoreRequest = ownedStoreRequest.abortSignal(signal);
+  const { data: ownedStore, error: storeError } = await ownedStoreRequest.maybeSingle();
 
   if (storeError) throw storeError;
   if (!ownedStore) throw new Error("merchant_store_not_found");
 
-  const { data: merchantOrderData, error: merchantOrderError } = await client
+  let merchantOrderRequest = client
     .from("merchant_orders")
     .select("id, order_id, store_id, status, subtotal, shipping_fee, quoted_at, payment_status, paid_amount, paid_at, order:orders!inner(id, status, full_name, phone, commune, country_code, currency_code, region_id, secondary_region_id, address_line, delivery_type, payment_method, created_at, region:country_regions!orders_country_region_fkey(name_ar, name_fr, name_en), secondary_region:country_regions!orders_country_secondary_region_fkey(name_ar, name_fr, name_en), wilaya:wilayas(id, name_ar, name_fr), daira:country_regions!orders_daira_region_fkey(name_ar, name_fr))")
     .eq("id", merchantOrderId)
-    .eq("store_id", storeId)
-    .maybeSingle();
+    .eq("store_id", storeId);
+  if (signal) merchantOrderRequest = merchantOrderRequest.abortSignal(signal);
+  const { data: merchantOrderData, error: merchantOrderError } = await merchantOrderRequest.maybeSingle();
 
   if (merchantOrderError) throw merchantOrderError;
   if (!merchantOrderData) throw new Error("merchant_order_not_found");
 
   const merchantOrder = MerchantOrderDetailSchema.parse(merchantOrderData as unknown);
   const [itemsResult, shipmentResult, trackingEvents] = await Promise.all([
-    client
-      .from("order_items")
-      .select("id, product_name, quantity, unit_price, options")
-      .eq("merchant_order_id", merchantOrderId)
-      .eq("store_id", storeId)
-      .is("merchant_archived_at", null)
-      .order("id", { ascending: true }),
-    client
-      .from("shipments")
-      .select("id, status, fee, updated_at, notes")
-      .eq("merchant_order_id", merchantOrderId)
-      .maybeSingle(),
-    fetchMerchantOrderTracking(merchantOrderId)
+    (() => {
+      let request = client
+        .from("order_items")
+        .select("id, product_name, quantity, unit_price, options")
+        .eq("merchant_order_id", merchantOrderId)
+        .eq("store_id", storeId)
+        .is("merchant_archived_at", null)
+        .order("id", { ascending: true });
+      if (signal) request = request.abortSignal(signal);
+      return request;
+    })(),
+    (() => {
+      let request = client
+        .from("shipments")
+        .select("id, status, fee, updated_at, notes")
+        .eq("merchant_order_id", merchantOrderId);
+      if (signal) request = request.abortSignal(signal);
+      return request.maybeSingle();
+    })(),
+    fetchMerchantOrderTracking(merchantOrderId, signal)
   ]);
 
   if (itemsResult.error) throw itemsResult.error;
@@ -430,11 +440,14 @@ export async function rejectMerchantOrder(
 }
 
 export async function fetchMerchantOrderTracking(
-  merchantOrderId: string
+  merchantOrderId: string,
+  signal?: AbortSignal
 ): Promise<MerchantTrackingEvent[]> {
-  const { data, error } = await getSupabaseClient().rpc("fetch_merchant_order_tracking", {
+  let request = getSupabaseClient().rpc("fetch_merchant_order_tracking", {
     _merchant_order_id: merchantOrderId
   });
+  if (signal) request = request.abortSignal(signal);
+  const { data, error } = await request;
 
   if (error) throw error;
   return MerchantTrackingEventSchema.array().parse(data as unknown);
