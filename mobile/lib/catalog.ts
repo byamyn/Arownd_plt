@@ -115,14 +115,15 @@ export async function fetchOffersByIds(ids: string[]): Promise<ProductOffer[]> {
   return ProductOfferSchema.array().parse(data as unknown);
 }
 
-export async function fetchHomeProducts(): Promise<HomeProduct[]> {
+export async function fetchHomeProducts(signal?: AbortSignal): Promise<HomeProduct[]> {
   const { data, error } = await getSupabaseClient()
     .from("store_offers")
     .select("id, price, stock_quantity, is_available, product:products!inner(id, name, description, category, brand, rating), store:stores!inner(id, name, logo_url, rating), images:product_images(image_url, is_primary)")
     .eq("is_available", true)
     .gt("stock_quantity", 0)
     .order("created_at", { ascending: false })
-    .limit(60);
+    .limit(60)
+    .abortSignal(signal ?? new AbortController().signal);
 
   if (error) throw error;
 
@@ -166,7 +167,8 @@ export type MapStoreViewport = {
 
 export async function fetchMapStoresInBounds(
   viewport: MapStoreViewport,
-  includeStoreId?: string | null
+  includeStoreId?: string | null,
+  signal?: AbortSignal
 ): Promise<MapStore[]> {
   const { data, error } = await getSupabaseClient().rpc("fetch_map_stores_in_view", {
     p_west: viewport.west,
@@ -177,7 +179,7 @@ export async function fetchMapStoresInBounds(
     p_center_long: viewport.centerLongitude,
     p_include_store_id: includeStoreId ?? null,
     p_limit: 1000
-  });
+  }).abortSignal(signal ?? new AbortController().signal);
 
   if (error) throw error;
   return MapStoreSchema.array().parse(data as unknown);
@@ -213,7 +215,7 @@ export function getCategoryFilterIds(category: string): readonly string[] {
   return [category];
 }
 
-export async function searchCatalogProducts(query: string, category?: string): Promise<HomeProduct[]> {
+export async function searchCatalogProducts(query: string, category?: string, signal?: AbortSignal): Promise<HomeProduct[]> {
   const normalized = query.trim().replace(/[%,()]/g, " ");
   let request = getSupabaseClient()
     .from("store_offers")
@@ -226,7 +228,8 @@ export async function searchCatalogProducts(query: string, category?: string): P
 
   const { data, error } = await request
     .order("created_at", { ascending: false })
-    .limit(40);
+    .limit(40)
+    .abortSignal(signal ?? new AbortController().signal);
 
   if (error) throw error;
   return HomeProductSchema.array().parse(data as unknown);
