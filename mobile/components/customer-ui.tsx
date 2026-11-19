@@ -1,9 +1,12 @@
 import type { ComponentRef, ReactNode, Ref } from "react";
 import { CustomerNavigation } from "@/components/customer-navigation";
 import {
+  FlatList,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   View,
+  type FlatListProps,
   type ScrollViewProps,
   type StyleProp,
   type ViewStyle
@@ -25,6 +28,38 @@ export function CustomerScreen({ children, header, footer, showNavigation = true
         {children}
       </RefreshableScrollView>
       {footer ? <View style={[styles.footer, { backgroundColor: theme.colors.background, borderTopColor: theme.colors.border }]}>{footer}</View> : null}
+      {showNavigation ? <CustomerNavigation /> : null}
+    </SafeAreaView>
+  );
+}
+
+export type CustomerFlatListProps<T> = Pick<FlatListProps<T>, "data" | "renderItem" | "keyExtractor" | "numColumns" | "columnWrapperStyle" | "ListHeaderComponent" | "ListEmptyComponent" | "ListFooterComponent" | "initialNumToRender" | "maxToRenderPerBatch" | "updateCellsBatchingPeriod" | "windowSize" | "removeClippedSubviews" | "keyboardShouldPersistTaps"> & {
+  refreshing?: boolean;
+  onRefresh?: (() => void) | undefined;
+  contentContainerStyle?: StyleProp<ViewStyle>;
+  showNavigation?: boolean;
+};
+
+export function CustomerFlatList<T>({
+  refreshing = false,
+  onRefresh,
+  contentContainerStyle,
+  showNavigation = true,
+  ...listProps
+}: CustomerFlatListProps<T>) {
+  const theme = useAppTheme();
+  const indicatorColor = theme.mode === "light" ? theme.colors.foreground : theme.colors.accent;
+  return (
+    <SafeAreaView style={[styles.safe, { backgroundColor: theme.colors.background }]}>
+      <FlatList
+        {...listProps}
+        style={styles.scroll}
+        contentContainerStyle={[styles.content, contentContainerStyle]}
+        showsVerticalScrollIndicator={false}
+        refreshControl={onRefresh ? (
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[indicatorColor]} progressBackgroundColor={theme.colors.background} tintColor={indicatorColor} />
+        ) : undefined}
+      />
       {showNavigation ? <CustomerNavigation /> : null}
     </SafeAreaView>
   );
