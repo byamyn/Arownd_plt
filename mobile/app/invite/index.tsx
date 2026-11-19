@@ -50,7 +50,7 @@ export default function InviteScreen() {
   const formatDate = (value: string) => {
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return "";
-    return date.toLocaleDateString(language === "ar" ? "ar-DZ" : "en-GB", {
+    return date.toLocaleDateString(language === "ar" ? "ar-DZ-u-nu-latn" : "en-GB-u-nu-latn", {
       day: "numeric",
       month: "short",
       year: "numeric"
