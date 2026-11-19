@@ -14,15 +14,15 @@ export function prefetchCustomerProduct(queryClient: QueryClient, productId: str
   void Promise.all([
     queryClient.prefetchQuery({
       queryKey: ["customer-product", productId],
-      queryFn: () => fetchProductDetails(productId)
+      queryFn: ({ signal }) => fetchProductDetails(productId, signal)
     }),
     queryClient.prefetchQuery({
       queryKey: ["customer-product-offers", productId],
-      queryFn: () => fetchProductOffers(productId)
+      queryFn: ({ signal }) => fetchProductOffers(productId, signal)
     }),
     queryClient.prefetchQuery({
       queryKey: ["approved-reviews", "product", productId],
-      queryFn: () => fetchApprovedReviews("product", productId)
+      queryFn: ({ signal }) => fetchApprovedReviews("product", productId, signal)
     })
   ]);
 }
@@ -33,11 +33,11 @@ export function prefetchCustomerStore(queryClient: QueryClient, storeId: string)
   void Promise.all([
     queryClient.prefetchQuery({
       queryKey: ["customer-store", storeId],
-      queryFn: () => fetchStoreDetails(storeId)
+      queryFn: ({ signal }) => fetchStoreDetails(storeId, signal)
     }),
     queryClient.prefetchQuery({
       queryKey: ["customer-store-offers", storeId],
-      queryFn: () => fetchStoreOffers(storeId)
+      queryFn: ({ signal }) => fetchStoreOffers(storeId, signal)
     })
   ]);
 }
