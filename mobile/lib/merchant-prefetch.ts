@@ -11,7 +11,7 @@ export function prefetchMerchantProducts(queryClient: QueryClient, storeId: stri
   if (!storeId) return;
   void queryClient.prefetchQuery({
     queryKey: ["merchant-products", storeId],
-    queryFn: () => fetchMerchantProducts(storeId)
+    queryFn: ({ signal }) => fetchMerchantProducts(storeId, signal)
   });
 }
 
@@ -19,7 +19,7 @@ export function prefetchMerchantAnalytics(queryClient: QueryClient, storeId: str
   if (!storeId) return;
   void queryClient.prefetchQuery({
     queryKey: ["merchant-analytics", storeId],
-    queryFn: () => fetchMerchantAnalytics(storeId)
+    queryFn: ({ signal }) => fetchMerchantAnalytics(storeId, signal)
   });
 }
 
@@ -44,11 +44,11 @@ export function prefetchMerchantProduct(
   void Promise.all([
     queryClient.prefetchQuery({
       queryKey: ["merchant-product", storeId, offerId],
-      queryFn: () => fetchMerchantProductOffer(storeId, offerId)
+      queryFn: ({ signal }) => fetchMerchantProductOffer(storeId, offerId, signal)
     }),
     queryClient.prefetchQuery({
       queryKey: ["merchant-categories"],
-      queryFn: fetchMerchantCategories
+      queryFn: ({ signal }) => fetchMerchantCategories(signal)
     })
   ]);
 }
