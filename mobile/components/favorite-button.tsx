@@ -8,6 +8,10 @@ import { useAppTheme } from "@/lib/theme";
 
 export const FAVORITES_QUERY_KEY = ["customer-favorites"] as const;
 
+const FAVORITE_PINK = "#E85D91";
+const FAVORITE_PINK_SURFACE = "#FCE4EC";
+const FAVORITE_PINK_SURFACE_DARK = "#3A1F2B";
+
 export function FavoriteButton({ kind, id, iconOnly = false }: { kind: FavoriteKind; id: string; iconOnly?: boolean }) {
   const theme = useAppTheme();
   const queryClient = useQueryClient();
@@ -35,10 +39,10 @@ export function FavoriteButton({ kind, id, iconOnly = false }: { kind: FavoriteK
         disabled={disabled}
         variant="surface"
         size={44}
-        icon={<Icon name="heart" size={20} color={active ? theme.colors.accentForeground : theme.colors.muted} fill={active ? theme.colors.accentForeground : "none"} accessibilityHidden />}
+        icon={<Icon name="heart" size={20} color={active ? FAVORITE_PINK : theme.colors.muted} fill={active ? FAVORITE_PINK : "none"} accessibilityHidden />}
         style={{
-          backgroundColor: active ? theme.colors.accent : theme.colors.surface,
-          borderColor: active ? theme.colors.accent : theme.colors.border
+          backgroundColor: active ? (theme.mode === "dark" ? FAVORITE_PINK_SURFACE_DARK : FAVORITE_PINK_SURFACE) : theme.colors.surface,
+          borderColor: active ? FAVORITE_PINK : theme.colors.border
         }}
       />
     );
@@ -52,15 +56,15 @@ export function FavoriteButton({ kind, id, iconOnly = false }: { kind: FavoriteK
       size="sm"
       disabled={disabled}
       startIcon={
-        <Icon name="heart" size={19} color={active ? theme.colors.accentForeground : theme.colors.muted} accessibilityHidden />
+        <Icon name="heart" size={19} color={active ? FAVORITE_PINK : theme.colors.muted} accessibilityHidden />
       }
-      textStyle={{ color: active ? theme.colors.accentForeground : theme.colors.foreground, fontSize: 11 }}
+      textStyle={{ color: active ? FAVORITE_PINK : theme.colors.foreground, fontSize: 11 }}
       style={{
         minHeight: 44,
         minWidth: 112,
         borderRadius: 13,
-        backgroundColor: active ? theme.colors.accent : theme.colors.surface,
-        borderColor: active ? theme.colors.accent : theme.colors.border
+        backgroundColor: active ? (theme.mode === "dark" ? FAVORITE_PINK_SURFACE_DARK : FAVORITE_PINK_SURFACE) : theme.colors.surface,
+        borderColor: active ? FAVORITE_PINK : theme.colors.border
       }}
     />
   );
