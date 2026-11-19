@@ -3,7 +3,7 @@ import { router } from "expo-router";
 import { StyleSheet, View } from "react-native";
 
 import { designTokens, useAppTheme, type AppTheme } from "@/lib/theme";
-import { CustomerScreen, EmptyState, ErrorState, LoadingState } from "@/components/customer-ui";
+import { CustomerScreen, EmptyState, ErrorState, PageSkeleton } from "@/components/customer-ui";
 import {
   AppHeader,
   Button,
@@ -47,7 +47,7 @@ export default function MyReviewsScreen() {
         leading={<IconButton accessibilityLabel={translate("back")} onPress={() => router.back()} icon={<Icon name="arrow-right" size={20} />} variant="ghost" />}
       />
       <Caption>{translate("myReviewsSubtitle")}</Caption>
-      {auth.isPending || (auth.data && query.isPending) ? <LoadingState label={translate("stateLoading")} /> : null}
+      {auth.isPending || (auth.data && query.isPending) ? <PageSkeleton variant="list" rows={3} /> : null}
       {auth.isError || query.isError ? (
         <ErrorState
           title={translate("myReviewsLoadError")}
