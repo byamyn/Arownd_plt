@@ -27,7 +27,7 @@ export function CustomerMainHeader({ variant = "cart" }: CustomerMainHeaderProps
   });
   const notifications = useQuery({
     queryKey: ["my-notifications", auth.data?.id],
-    queryFn: fetchMyNotifications,
+    queryFn: ({ signal }) => fetchMyNotifications(signal),
     enabled: auth.isSuccess && Boolean(auth.data),
     staleTime: 30_000
   });
