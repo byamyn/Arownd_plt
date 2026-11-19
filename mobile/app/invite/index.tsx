@@ -115,12 +115,11 @@ export default function InviteScreen() {
               <View style={styles.linkCopy}>
                 <UiText numberOfLines={2} style={styles.linkText}>{inviteLink}</UiText>
               </View>
-              <Icon name="share" size={18} color={theme.colors.muted} />
             </View>
             <Button
               label={translate("inviteShare")}
               fullWidth
-              startIcon={<Icon name="share" size={17} />}
+              startIcon={<Icon name="send" size={17} />}
               onPress={() => {
                 void share(`${translate("inviteShareMessage")}\n${inviteLink}`);
               }}
