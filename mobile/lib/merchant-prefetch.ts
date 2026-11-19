@@ -31,7 +31,7 @@ export function prefetchMerchantOrder(
   if (!storeId || !merchantOrderId) return;
   void queryClient.prefetchQuery({
     queryKey: ["merchant-order-detail", storeId, merchantOrderId],
-    queryFn: () => fetchMerchantOrderDetails(merchantOrderId, storeId)
+    queryFn: ({ signal }) => fetchMerchantOrderDetails(merchantOrderId, storeId, signal)
   });
 }
 
