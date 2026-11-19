@@ -41,7 +41,7 @@ export {
 } from "./forms";
 export type { TextAreaProps, NumberFieldProps, CheckboxProps, RadioOption, SelectOption } from "./forms";
 
-export { Alert, Banner, ProgressBar, Spinner, Skeleton, ProductCardSkeleton, StoreCardSkeleton, OrderCardSkeleton, MetricCardSkeleton, PageSkeleton, SuccessState, Dialog, ConfirmDialog, BottomSheet, Toast } from "./feedback";
+export { Alert, Banner, ProgressBar, Spinner, Skeleton, ProductCardSkeleton, StoreCardSkeleton, OrderCardSkeleton, MetricCardSkeleton, PageSkeleton, ProductFeedSkeleton, SuccessState, Dialog, ConfirmDialog, BottomSheet, Toast } from "./feedback";
 export type { FeedbackTone } from "./feedback";
 
 export {
