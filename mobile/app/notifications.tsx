@@ -93,7 +93,7 @@ export default function NotificationsScreen() {
   });
   const notifications = useQuery({
     queryKey: ["my-notifications", auth.data?.id],
-    queryFn: fetchMyNotifications,
+    queryFn: ({ signal }) => fetchMyNotifications(signal),
     enabled: auth.isSuccess && Boolean(auth.data)
   });
 
