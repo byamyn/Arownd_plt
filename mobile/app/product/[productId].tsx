@@ -26,6 +26,8 @@ export default function ProductDetailsScreen() {
   const [color, setColor] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [productInfoExpanded, setProductInfoExpanded] = useState(false);
+  const [reviewsExpanded, setReviewsExpanded] = useState(false);
   const imageAnchorRef = useRef<ComponentRef<typeof View>>(null);
   const cartFlyImageRef = useRef<string | null>(null);
   const queryClient = useQueryClient();
@@ -159,49 +161,61 @@ export default function ProductDetailsScreen() {
             showsVerticalScrollIndicator={false}
             refreshControl={<RefreshControl refreshing={product.isFetching || offers.isFetching || reviews.isFetching} onRefresh={() => { void Promise.all([product.refetch(), offers.refetch(), reviews.refetch()]); }} tintColor={theme.colors.accentOnSurface} />}
           >
-      <View ref={imageAnchorRef} collapsable={false}>
+      <View ref={imageAnchorRef} collapsable={false} style={styles.heroWrap}>
         {imageUrl ? <ProductImageGallery images={galleryImages} selectedIndex={Math.min(selectedImageIndex, Math.max(0, galleryImages.length - 1))} accessibilityLabel={productDetails.name} onSelect={setSelectedImageIndex} imageStyle={styles.heroImage} /> : <View style={[styles.heroImage, { backgroundColor: theme.colors.surfaceMuted }]}><Icon name="image" size={42} color={theme.colors.subtle} accessibilityHidden /></View>}
-      </View>
-      <View style={styles.infoSection}>
-        <UiText weight="700" style={styles.productName}>{productDetails.name}</UiText>
-        {selectedOffer ? <PriceDisplay value={browsingCurrency.data ? formatMarketPrice(selectedOffer.price, browsingCurrency.data) : "—"} style={styles.priceDisplay} /> : null}
-        <View style={[styles.availabilityBadge, { backgroundColor: theme.colors.surfaceMuted }]}>
-          <UiText weight="700" style={styles.availabilityStatus}>{translate(isProductAvailable ? "productAvailable" : "productUnavailable")}</UiText>
-        </View>
-        <View style={styles.ratingRow}>
-          <View style={styles.ratingInfo}>
-            <RatingStars value={reviewAverage} size={15} showValue />
-            <UiText tone="muted" style={styles.reviewCount}>{reviewCount} · {translate("reviewsTitle")}</UiText>
-          </View>
+        <View style={styles.favoriteOverlay}>
           <FavoriteButton kind="products" id={productId} iconOnly />
         </View>
-        <View style={styles.metadata}>
-          {productDetails.brand ? <UiText tone="muted" style={styles.metaText}>{translate("productBrand")}: {productDetails.brand}</UiText> : null}
-          {productDetails.category ? <UiText tone="muted" style={styles.metaText}>{translate("productCategory")}: {getLocalizedProductCategoryLabel(productDetails.category, language)}</UiText> : null}
+      </View>
+      {galleryImages.length > 0 ? (
+        <View style={styles.galleryIndicator}>
+          <UiText tone="muted" style={styles.reviewCount}>{selectedImageIndex + 1} / {galleryImages.length}</UiText>
+          <View style={styles.galleryDots}>
+            {galleryImages.map((image, index) => (
+              <View key={image + index} style={[styles.galleryDot, { backgroundColor: index === selectedImageIndex ? theme.colors.foreground : theme.colors.border }]} />
+            ))}
+          </View>
+        </View>
+      ) : null}
+      <View style={styles.infoSection}>
+        <View style={styles.productTitleRow}>
+          <UiText weight="700" style={styles.productName}>{productDetails.name}</UiText>
+          <View style={[styles.availabilityBadge, { backgroundColor: theme.colors.surfaceMuted }]}>
+            <UiText weight="700" style={styles.availabilityStatus}>{translate(isProductAvailable ? "productAvailable" : "productUnavailable")}</UiText>
+          </View>
         </View>
         {productDetails.description?.trim() ? <UiText tone="muted" style={styles.description}>{productDetails.description.trim()}</UiText> : null}
-      </View>
-
-      {selectedOffer ? (
-        <View style={styles.purchaseOptions}>
-          <View style={styles.storeRow}>
+        {selectedOffer ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={translate("productSelectedOffer") + ": " + selectedOffer.store.name}
+            onPress={() => router.push({ pathname: "/store/[storeId]", params: { storeId: selectedOffer.store.id } })}
+            style={styles.storeRow}
+          >
             <View style={styles.storeIdentity}>
               <View style={[styles.storeIcon, { backgroundColor: theme.colors.surfaceMuted }]}>
                 <Icon name="store" size={18} color={theme.colors.foreground} />
               </View>
               <View style={styles.storeCopy}>
                 <UiText weight="700" numberOfLines={1}>{selectedOffer.store.name}</UiText>
-               </View>
+              </View>
             </View>
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => router.push({ pathname: "/store/[storeId]", params: { storeId: selectedOffer.store.id } })}
-              style={styles.storeVisit}
-              accessibilityLabel={translate("productSelectedOffer") + ": " + selectedOffer.store.name}
-            >
-              <Icon name="chevron-left" size={18} color={theme.colors.muted} />
-            </Pressable>
+            <Icon name="chevron-left" size={18} color={theme.colors.muted} />
+          </Pressable>
+        ) : null}
+      </View>
+      {selectedOffer ? (
+        <View style={styles.priceRatingRow}>
+          <PriceDisplay value={browsingCurrency.data ? formatMarketPrice(selectedOffer.price, browsingCurrency.data) : "—"} style={styles.priceDisplay} />
+          <View style={styles.ratingInfo}>
+            <RatingStars value={reviewAverage} size={15} showValue />
+            <UiText tone="muted" style={styles.reviewCount}>{reviewCount} · {translate("reviewsTitle")}</UiText>
           </View>
+        </View>
+      ) : null}
+
+      {selectedOffer ? (
+        <View style={styles.purchaseOptions}>
           {variants.colors.length > 0 ? (
             <View style={styles.optionGroup}>
               <UiText style={styles.optionLabel}>{translate("productColorOption")}</UiText>
@@ -220,8 +234,36 @@ export default function ProductDetailsScreen() {
           </View>
         </View>
       ) : null}
+      <View style={styles.accordion}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityState={{ expanded: productInfoExpanded }}
+          onPress={() => setProductInfoExpanded((current) => !current)}
+          style={styles.accordionHeader}
+        >
+          <UiText weight="700">{translate("productInformation")}</UiText>
+          <Icon name={productInfoExpanded ? "chevron-up" : "chevron-down"} size={18} color={theme.colors.muted} />
+        </Pressable>
+        {productInfoExpanded ? (
+          <View style={styles.metadata}>
+            {productDetails.brand ? <UiText tone="muted" style={styles.metaText}>{translate("productBrand")}: {productDetails.brand}</UiText> : null}
+            {productDetails.category ? <UiText tone="muted" style={styles.metaText}>{translate("productCategory")}: {getLocalizedProductCategoryLabel(productDetails.category, language)}</UiText> : null}
+          </View>
+        ) : null}
+      </View>
+      <View style={styles.accordion}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityState={{ expanded: reviewsExpanded }}
+          onPress={() => setReviewsExpanded((current) => !current)}
+          style={styles.accordionHeader}
+        >
+          <UiText weight="700">{translate("reviewsTitle")} ({reviewCount})</UiText>
+          <Icon name={reviewsExpanded ? "chevron-up" : "chevron-down"} size={18} color={theme.colors.muted} />
+        </Pressable>
+        {reviewsExpanded ? <ReviewPanel targetType="product" targetId={productId} /> : null}
+      </View>
       <ContentReportAction targetType="product" targetId={productId} />
-            <ReviewPanel targetType="product" targetId={productId} />
           </ScrollView>
           {selectedOffer ? (
             <View style={[styles.purchaseFooter, { backgroundColor: theme.colors.background, borderTopColor: theme.colors.border }]}>
@@ -264,12 +306,19 @@ const styles = StyleSheet.create({
   sheetHeader: { minHeight: 42, paddingHorizontal: designTokens.spacing.xl, alignItems: "flex-start", justifyContent: "center" },
   sheetScroll: { flex: 1 },
   sheetContent: { gap: designTokens.spacing.md, paddingHorizontal: designTokens.spacing.xl, paddingTop: designTokens.spacing.xs, paddingBottom: designTokens.spacing.xl },
-  heroImage: { height: 224, borderRadius: designTokens.radius.lg, overflow: "hidden", alignItems: "center", justifyContent: "center" },
+  heroWrap: { position: "relative" },
+  heroImage: { height: 300, borderRadius: designTokens.radius.lg, overflow: "hidden", alignItems: "center", justifyContent: "center" },
+  favoriteOverlay: { position: "absolute", top: designTokens.spacing.md, end: designTokens.spacing.md },
+  galleryIndicator: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: designTokens.spacing.xs },
+  galleryDots: { flexDirection: "row", alignItems: "center", gap: 5 },
+  galleryDot: { width: 6, height: 6, borderRadius: 3 },
   infoSection: { gap: designTokens.spacing.xs, paddingVertical: designTokens.spacing.xs },
-  productName: { fontSize: designTokens.typography.title - 2, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
+  productTitleRow: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", gap: designTokens.spacing.md },
+  productName: { flex: 1, fontSize: designTokens.typography.title - 2, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
   priceDisplay: { justifyContent: "flex-end" },
   availabilityBadge: { alignSelf: "flex-start", borderRadius: designTokens.radius.md, paddingHorizontal: designTokens.spacing.md, paddingVertical: designTokens.spacing.xs },
   availabilityStatus: { fontSize: designTokens.typography.caption + 1, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
+  priceRatingRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: designTokens.spacing.md, paddingVertical: designTokens.spacing.xs },
   ratingRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: designTokens.spacing.md },
   ratingInfo: { flex: 1, flexDirection: "row", alignItems: "center", flexWrap: "wrap", gap: designTokens.spacing.sm },
   reviewCount: { fontSize: designTokens.typography.caption },
@@ -286,7 +335,9 @@ const styles = StyleSheet.create({
   purchaseOptions: { gap: designTokens.spacing.md, paddingVertical: designTokens.spacing.xs },
   storeRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: designTokens.spacing.sm, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: "rgba(127,127,127,0.22)", marginBottom: designTokens.spacing.xs },
   storeIdentity: { flex: 1, flexDirection: "row", alignItems: "center", gap: designTokens.spacing.sm },
-  storeIcon: { width: 38, height: 38, borderRadius: designTokens.radius.md, alignItems: "center", justifyContent: "center" },
+  storeIcon: { width: 42, height: 42, borderRadius: 21, alignItems: "center", justifyContent: "center" },
+  accordion: { paddingVertical: designTokens.spacing.sm, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: "rgba(127,127,127,0.22)" },
+  accordionHeader: { minHeight: 44, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   storeCopy: { flex: 1, gap: 2 },
   storeVisit: { flexDirection: "row", alignItems: "center", gap: 2, paddingVertical: designTokens.spacing.sm, paddingStart: designTokens.spacing.sm },
   optionGroup: { gap: designTokens.spacing.sm },
