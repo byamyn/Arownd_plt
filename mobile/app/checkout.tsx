@@ -397,7 +397,7 @@ export default function CheckoutScreen() {
             <UiText style={[styles.sectionTitle, { color: theme.colors.foreground }]}>{modalTitle}</UiText>
             <PressableSurface accessibilityLabel={translate("back")} onPress={() => setPicker(null)} hitSlop={10}><UiText style={styles.back}>{translate("back")}</UiText></PressableSurface>
           </View>
-          {((picker === "region" && regionOptions.isPending) || (picker === "secondary" && secondaryOptions.isPending)) ? <LoadingState label={translate("stateLoading")} /> : null}
+          {((picker === "region" && regionOptions.isPending) || (picker === "secondary" && secondaryOptions.isPending)) ? <PageSkeleton variant="list" rows={3} /> : null}
           
           <ScrollView keyboardShouldPersistTaps="handled">
             {pickerItems.map((item) => <PressableSurface key={item.id} onPress={() => {
