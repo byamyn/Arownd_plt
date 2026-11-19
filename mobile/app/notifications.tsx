@@ -3,7 +3,7 @@ import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 
-import { CustomerScreen, EmptyState, ErrorState, LoadingState } from "@/components/customer-ui";
+import { PageSkeleton, CustomerScreen, EmptyState, ErrorState, LoadingState } from "@/components/customer-ui";
 import {
   Alert,
   AppHeader,
@@ -131,7 +131,7 @@ export default function NotificationsScreen() {
   });
 
   if (auth.isPending || (auth.data && notifications.isPending)) {
-    return <CustomerScreen><LoadingState label={translate("stateLoading")} /></CustomerScreen>;
+    return <CustomerScreen><AppHeader title={translate("notificationsTitle")} /><PageSkeleton variant="list" rows={4} /></CustomerScreen>;
   }
   if (auth.isError || notifications.isError) {
     return (
