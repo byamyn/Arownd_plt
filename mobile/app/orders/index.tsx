@@ -222,7 +222,7 @@ export default function OrdersScreen() {
       const total = row.status === "cancelled" || row.status === "rejected" ? 0 : row.subtotal + row.shippingFee;
       const rowKey = row.merchantOrderId ?? row.order.id;
       const orderCard = <OrderCard key={rowKey} onPress={() => {
-        void queryClient.prefetchQuery({ queryKey: ["customer-order-details", row.order.id], queryFn: () => fetchCustomerOrderDetails(row.order.id), staleTime: 15_000 });
+        void queryClient.prefetchQuery({ queryKey: ["customer-order-details", row.order.id], queryFn: ({ signal }) => fetchCustomerOrderDetails(row.order.id, signal), staleTime: 15_000 });
         router.push({ pathname: "/orders/[orderId]", params: { orderId: row.order.id } });
       }} accessibilityLabel={`${translate("ordersCode")} ${orderCode}، ${statusLabel(row.status)}، ${formatMarketPrice(total, row.order.currency_code)}`} style={styles.card} contentStyle={styles.cardContent}>
         <View style={styles.cardHeader}>
