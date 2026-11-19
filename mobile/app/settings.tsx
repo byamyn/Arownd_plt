@@ -52,7 +52,7 @@ export default function SettingsScreen() {
   const browsingCountry = useQuery({ queryKey: ["browsing-country"], queryFn: fetchMyBrowsingCountryCode });
   const browsingCountryMutation = useMutation({
     mutationFn: updateBrowsingCountryCode,
-    onSuccess: async (countryCode) => {
+    onSuccess: async (_data, countryCode) => {
       setFormError(null);
       queryClient.setQueryData(["browsing-country"], countryCode);
       await Promise.all([
