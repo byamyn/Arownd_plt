@@ -6,7 +6,7 @@ import { Image as NativeImage, Modal, StyleSheet, View } from "react-native";
 
 import { designTokens, useAppTheme } from "@/lib/theme";
 import { CustomerMainHeader } from "@/components/customer-main-header";
-import { CustomerScreen, ErrorState, LoadingState } from "@/components/customer-ui";
+import { PageSkeleton, CustomerScreen, ErrorState, LoadingState } from "@/components/customer-ui";
 import {
   BottomSheet,
   Button,
@@ -130,7 +130,7 @@ export default function ProfileScreen() {
   });
 
   if (user.isPending) {
-    return <CustomerScreen><CustomerMainHeader variant="settings" /><LoadingState label={translate("stateLoading")} /></CustomerScreen>;
+    return <CustomerScreen><CustomerMainHeader variant="settings" /><PageSkeleton variant="profile" rows={3} /></CustomerScreen>;
   }
   if (user.isError) {
     return (
@@ -185,7 +185,7 @@ export default function ProfileScreen() {
       <Caption>{translate("profileSubtitle")}</Caption>
 
       {profile.isPending ? (
-        <LoadingState label={translate("stateLoading")} />
+        <PageSkeleton variant="profile" rows={2} />
       ) : (
         <>
           <Card contentStyle={styles.identityCard}>
