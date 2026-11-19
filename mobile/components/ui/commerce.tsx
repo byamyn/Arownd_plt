@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { Image, Pressable, ScrollView, View, type ImageStyle, type StyleProp, type ViewStyle } from "react-native";
+import { Pressable, ScrollView, View, type ImageStyle, type StyleProp, type ViewStyle } from "react-native";
 import { Image as ExpoImage } from "expo-image";
 import { Text as UiText } from "./typography";
 
