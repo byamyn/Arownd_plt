@@ -168,7 +168,7 @@ function AddressesContent() {
     if (!parsed.success) { setError(translate("addressesValidation")); return; }
     save.mutate(parsed.data);
   };
-  if (addresses.isPending || regions.isPending) return <LoadingState label={translate("stateLoading")} />;
+  if (addresses.isPending || regions.isPending) return <PageSkeleton variant="form" rows={3} />;
   if (addresses.isError || regions.isError) return <ErrorState title={translate("addressesLoadError")} retryLabel={translate("retry")} busy={addresses.isFetching || regions.isFetching} onRetry={() => { void addresses.refetch(); void regions.refetch(); }} />;
   if (deleteTarget) return <View style={{ gap: designTokens.spacing.md }}>
     <Heading level={3}>{translate("addressesDeleteTitle")}</Heading>
@@ -235,7 +235,7 @@ function InviteContent() {
     const date = new Date(value);
     return Number.isNaN(date.getTime()) ? "" : date.toLocaleDateString(language === "ar" ? "ar-DZ-u-nu-latn" : "en-GB-u-nu-latn", { day: "numeric", month: "short", year: "numeric" });
   };
-  if (invite.isPending) return <LoadingState label={translate("stateLoading")} />;
+  if (invite.isPending) return <PageSkeleton variant="form" rows={3} />;
   if (invite.isError || !invite.data) return <ErrorState title={translate("inviteLoadError")} retryLabel={translate("retry")} busy={invite.isFetching} onRetry={() => { void invite.refetch(); }} />;
   return <ScrollView contentContainerStyle={{ gap: designTokens.spacing.md, paddingBottom: designTokens.spacing.lg }}>
     <Card contentStyle={{ padding: designTokens.spacing.lg, gap: designTokens.spacing.xs }}>
