@@ -54,7 +54,7 @@ export default function MerchantOrderDetailsScreen() {
 
   const detail = useQuery({
     queryKey: ["merchant-order-detail", storeId, orderId],
-    queryFn: () => fetchMerchantOrderDetails(orderId ?? "", storeId ?? ""),
+    queryFn: ({ signal }) => fetchMerchantOrderDetails(orderId ?? "", storeId ?? "", signal),
     enabled: isReady,
     retry: false
   });
