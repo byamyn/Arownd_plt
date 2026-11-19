@@ -76,7 +76,7 @@ function HomeProductCard({ item, price }: {
 
       <View style={styles.productInfo}>
         <View style={styles.productInfoColumns}>
-          <View style={styles.productDescriptionColumn}>
+          <View style={styles.productTitleColumn}>
             <UiText numberOfLines={2} weight="700" style={styles.productName}>{item.product.name}</UiText>
             {item.store.rating != null ? (
               <View style={styles.storeRating}>
@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
   favoriteButton: { position: "absolute", top: designTokens.spacing.md, start: designTokens.spacing.md },
   productInfo: { flex: 1, minHeight: 0, backgroundColor: "transparent", justifyContent: "space-between", paddingHorizontal: designTokens.spacing.md, paddingVertical: designTokens.spacing.sm, gap: designTokens.spacing.xs },
   productInfoColumns: { flex: 1, minHeight: 0, flexDirection: "row", justifyContent: "space-between", gap: designTokens.spacing.md },
-  productDescriptionColumn: { flex: 1, minWidth: 0, alignItems: "flex-start", gap: 3 },
+  productTitleColumn: { flex: 1, minWidth: 0, alignItems: "flex-start", gap: 3 },
   productName: { lineHeight: 21, textAlign: "auto" },
   storeColumn: { flex: 1, minWidth: 0, alignItems: "flex-end", gap: designTokens.spacing.xs },
   storeIdentity: { flexDirection: "row", alignItems: "center", justifyContent: "flex-end", gap: designTokens.spacing.xs, maxWidth: "100%" },
