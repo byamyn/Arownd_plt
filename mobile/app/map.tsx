@@ -4,9 +4,10 @@ import {
   GeoJSONSource,
   Layer,
   Map as MapLibreMap,
-  Marker,
   RasterSource,
   UserLocation,
+  type CameraRef,
+  type GeoJSONSourceRef,
   type MapRef
 } from "@maplibre/maplibre-react-native";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -14,7 +15,6 @@ import { router, useLocalSearchParams } from "expo-router";
 import {
   ActivityIndicator,
   Alert,
-  Animated,
   Image,
   Pressable,
   ScrollView,
@@ -50,7 +50,6 @@ const MAP_DARK_STYLE = "https://tiles.openfreemap.org/styles/dark";
 const EOX_SATELLITE_TILES = "https://e.tiles.maps.eox.at/wmts/1.0.0/s2cloudless_3857/default/GoogleMapsCompatible/${z}/${y}/${x}.jpg";
 const EOX_ATTRIBUTION =
   "EOxCloudless https://cloudless.eox.at by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016 & 2017)";
-const MAX_VISIBLE_STORE_MARKERS = 120;
 const OFF_ROUTE_DISTANCE_METERS = 70;
 const REROUTE_COOLDOWN_MS = 15_000;
 
@@ -60,39 +59,6 @@ type NavigationSession = {
   isRerouting: boolean;
 };
 
-function StoreMapMarker({ selected, verified, isDark }: { selected: boolean; verified: boolean; isDark: boolean }) {
-  const scale = useRef(new Animated.Value(selected ? 1.18 : 1)).current;
-
-  useEffect(() => {
-    const animation = Animated.spring(scale, {
-      toValue: selected ? 1.18 : 1,
-      useNativeDriver: true,
-      speed: 20,
-      bounciness: 6
-    });
-    animation.start();
-    return () => animation.stop();
-  }, [scale, selected]);
-
-  return (
-    <View style={styles.markerWrap} pointerEvents="none">
-      <Animated.View
-        style={[
-          styles.markerCircle,
-          selected && (isDark ? styles.markerSelectedDark : styles.markerSelectedLight),
-          { transform: [{ scale }] }
-        ]}
-      >
-        <Icon name="store" size={22} color="#000000" accessibilityHidden />
-        {verified ? (
-          <View style={styles.markerVerified}>
-            <Icon name="check" size={9} color={designTokens.brand.accent} accessibilityHidden />
-          </View>
-        ) : null}
-      </Animated.View>
-    </View>
-  );
-}
 
 export default function MapScreen() {
   const theme = useAppTheme();
@@ -102,9 +68,10 @@ export default function MapScreen() {
   const isDark = theme.mode === "dark";
   const styleUrl = isDark ? MAP_DARK_STYLE : MAP_LIGHT_STYLE;
   const [cameraTarget, setCameraTarget] = useState<RoutePoint | null>(null);
-  const [mapCenter, setMapCenter] = useState<RoutePoint>({ longitude: 2.6, latitude: 28.0 });
   const [mapViewport, setMapViewport] = useState<MapStoreViewport | null>(null);
   const mapRef = useRef<MapRef | null>(null);
+  const cameraRef = useRef<CameraRef | null>(null);
+  const storeSourceRef = useRef<GeoJSONSourceRef | null>(null);
   const [hasLocationPermission, setHasLocationPermission] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
   const [userPosition, setUserPosition] = useState<RoutePoint | null>(null);
@@ -149,22 +116,23 @@ export default function MapScreen() {
     }
   }, [requestedDirections, requestedStoreId, stores.data, selectedStoreId]);
 
-  const visibleStores = useMemo(() => {
-    const allStores = stores.data ?? [];
-    return [...allStores]
-      .sort((left, right) => {
-        const leftDistance = distanceBetweenCoordinates(mapCenter, {
-          longitude: left.longitude,
-          latitude: left.latitude
-        });
-        const rightDistance = distanceBetweenCoordinates(mapCenter, {
-          longitude: right.longitude,
-          latitude: right.latitude
-        });
-        return leftDistance - rightDistance;
-      })
-      .slice(0, MAX_VISIBLE_STORE_MARKERS);
-  }, [stores.data, mapCenter]);
+  const visibleStores = stores.data ?? [];
+  const storeFeatureCollection = useMemo(() => ({
+    type: "FeatureCollection" as const,
+    features: visibleStores.map((store) => ({
+      type: "Feature" as const,
+      id: store.id,
+      properties: {
+        storeId: store.id,
+        isVerified: store.is_verified,
+        selected: store.id === selectedStoreId
+      },
+      geometry: {
+        type: "Point" as const,
+        coordinates: [store.longitude, store.latitude]
+      }
+    }))
+  }), [visibleStores, selectedStoreId]);
 
   const navigationRoute = navigation?.route ?? null;
   const routeFeatureCollection = useMemo(() => ({
@@ -436,14 +404,12 @@ export default function MapScreen() {
             void mapRef.current?.getViewState().then((viewState) => {
               const [west, south, east, north] = viewState.bounds;
               const [centerLongitude, centerLatitude] = viewState.center;
-              setMapCenter({ longitude: centerLongitude, latitude: centerLatitude });
               setMapViewport({ west, south, east, north, centerLatitude, centerLongitude });
             }).catch(() => undefined);
           }}
           onRegionDidChange={(event) => {
             const [longitude, latitude] = event.nativeEvent.center;
             const [west, south, east, north] = event.nativeEvent.bounds;
-            setMapCenter({ longitude, latitude });
             if ([west, south, east, north, latitude, longitude].every(Number.isFinite)
               && south <= north) {
               setMapViewport({
@@ -458,6 +424,7 @@ export default function MapScreen() {
           }}
         >
           <Camera
+            ref={cameraRef}
             {...(cameraTarget
               ? {
                   center: [cameraTarget.longitude, cameraTarget.latitude] as [number, number],
@@ -525,25 +492,113 @@ export default function MapScreen() {
             </GeoJSONSource>
           ) : null}
 
-          {visibleStores.map((store) => (
-            <Marker
-              key={store.id}
-              id={store.id}
-              lngLat={[store.longitude, store.latitude]}
-              anchor="center"
-              onPress={() => {
+          <GeoJSONSource
+            id="arownd-store-clusters"
+            ref={storeSourceRef}
+            data={storeFeatureCollection}
+            cluster
+            clusterRadius={48}
+            clusterMinPoints={2}
+            clusterMaxZoom={14}
+            onPress={(event) => {
+              const feature = event.nativeEvent.features?.[0];
+              const properties = feature?.properties as {
+                cluster?: boolean;
+                cluster_id?: number;
+                storeId?: string;
+              } | undefined;
+              if (!properties) return;
+              event.stopPropagation();
+
+              if (properties.cluster && typeof properties.cluster_id === "number") {
+                void Promise.all([
+                  storeSourceRef.current?.getClusterExpansionZoom(properties.cluster_id),
+                  mapRef.current?.getZoom()
+                ]).then(([expansionZoom, currentZoom]) => {
+                  if (typeof expansionZoom !== "number") return;
+                  const [longitude, latitude] = event.nativeEvent.lngLat;
+                  cameraRef.current?.easeTo({
+                    center: [longitude, latitude],
+                    zoom: Math.min(20, Math.max(expansionZoom, (currentZoom ?? 0) + 1)),
+                    duration: 500
+                  });
+                }).catch(() => undefined);
+                return;
+              }
+
+              if (typeof properties.storeId === "string") {
                 if (navigationRef.current) stopNavigation();
-                selectedStoreIdRef.current = store.id;
-                setSelectedStoreId(store.id);
+                selectedStoreIdRef.current = properties.storeId;
+                setSelectedStoreId(properties.storeId);
+              }
+            }}
+          >
+            <Layer
+              id="arownd-store-cluster-circles"
+              type="circle"
+              filter={["has", "point_count"]}
+              paint={{
+                "circle-color": "#FFFF00",
+                "circle-radius": [
+                  "step", ["get", "point_count"],
+                  18, 20, 21, 50, 25, 100, 29
+                ],
+                "circle-stroke-color": isDark ? "#FFFFFF" : "#171717",
+                "circle-stroke-width": 2
               }}
-            >
-              <StoreMapMarker
-                selected={selectedStoreId === store.id}
-                verified={store.is_verified}
-                isDark={isDark}
-              />
-            </Marker>
-          ))}
+            />
+            <Layer
+              id="arownd-store-cluster-count"
+              type="symbol"
+              filter={["has", "point_count"]}
+              layout={{
+                "text-field": ["get", "point_count_abbreviated"],
+                "text-font": ["Open Sans Bold", "Arial Unicode MS"],
+                "text-size": 12,
+                "text-allow-overlap": true,
+                "text-ignore-placement": true
+              }}
+              paint={{ "text-color": "#111111" }}
+            />
+            <Layer
+              id="arownd-store-point-circles"
+              type="circle"
+              filter={["!", ["has", "point_count"]]}
+              paint={{
+                "circle-color": [
+                  "case", ["==", ["get", "selected"], true], "#FFFFFF", "#FFFF00"
+                ],
+                "circle-radius": 18,
+                "circle-stroke-color": isDark ? "#FFFFFF" : "#171717",
+                "circle-stroke-width": 1.5
+              }}
+            />
+            <Layer
+              id="arownd-store-point-label"
+              type="symbol"
+              filter={["!", ["has", "point_count"]]}
+              layout={{
+                "text-field": "S",
+                "text-font": ["Open Sans Bold", "Arial Unicode MS"],
+                "text-size": 13,
+                "text-allow-overlap": true,
+                "text-ignore-placement": true
+              }}
+              paint={{ "text-color": "#111111" }}
+            />
+            <Layer
+              id="arownd-store-verified-dot"
+              type="circle"
+              filter={["all", ["!", ["has", "point_count"]], ["==", ["get", "isVerified"], true]]}
+              paint={{
+                "circle-color": "#111111",
+                "circle-radius": 4,
+                "circle-translate": [12, -12],
+                "circle-stroke-color": "#FFFF00",
+                "circle-stroke-width": 1.5
+              }}
+            />
+          </GeoJSONSource>
 
           {hasLocationPermission ? <UserLocation animated accuracy /> : null}
         </MapLibreMap>
@@ -843,57 +898,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.16,
     shadowRadius: 4
-  },
-  markerWrap: {
-    width: 60,
-    height: 60,
-    alignItems: "center",
-    justifyContent: "center",
-    overflow: "visible"
-  },
-  markerCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: designTokens.brand.accent,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "rgba(0,0,0,0.12)",
-    elevation: 3,
-    shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3
-  },
-  markerSelectedLight: {
-    borderWidth: 1,
-    borderColor: "#000000",
-    elevation: 7,
-    shadowColor: "#000000",
-    shadowOpacity: 0.24,
-    shadowRadius: 5
-  },
-  markerSelectedDark: {
-    borderWidth: 1,
-    borderColor: "#FFFFFF",
-    elevation: 7,
-    shadowColor: "#FFFFFF",
-    shadowOpacity: 0.18,
-    shadowRadius: 5
-  },
-  markerVerified: {
-    position: "absolute",
-    right: -3,
-    bottom: -3,
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: "#111111",
-    borderWidth: 2,
-    borderColor: designTokens.brand.accent,
-    alignItems: "center",
-    justifyContent: "center"
   },
   storeCard: {
     gap: designTokens.spacing.lg
