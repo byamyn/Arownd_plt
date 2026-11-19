@@ -245,9 +245,9 @@ export function getManeuverInstruction(step: RouteStep, language: Language): str
 export function formatDistance(meters: number, language: Language): string {
   const locale = language === "ar" ? "ar-DZ" : "en-DZ";
   if (meters < 1_000) {
-    return `${new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }).format(Math.max(0, meters))} ${language === "ar" ? "م" : "m"}`;
+    return `${new Intl.NumberFormat(`${locale}-u-nu-latn`, { maximumFractionDigits: 0 }).format(Math.max(0, meters))} ${language === "ar" ? "م" : "m"}`;
   }
-  return `${new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(meters / 1_000)} ${language === "ar" ? "كم" : "km"}`;
+  return `${new Intl.NumberFormat(`${locale}-u-nu-latn`, { maximumFractionDigits: 1 }).format(meters / 1_000)} ${language === "ar" ? "كم" : "km"}`;
 }
 
 export function formatDuration(seconds: number, language: Language): string {
