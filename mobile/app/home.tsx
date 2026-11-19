@@ -108,17 +108,17 @@ const HomeProductCard = memo(function HomeProductCard({ item, price }: {
   const openDetails = () => {
     void queryClient.prefetchQuery({
       queryKey: ["customer-product", item.product.id],
-      queryFn: () => fetchProductDetails(item.product.id),
+      queryFn: ({ signal }) => fetchProductDetails(item.product.id, signal),
       staleTime: 60_000
     });
     void queryClient.prefetchQuery({
       queryKey: ["customer-product-offers", item.product.id],
-      queryFn: () => fetchProductOffers(item.product.id),
+      queryFn: ({ signal }) => fetchProductOffers(item.product.id, signal),
       staleTime: 30_000
     });
     void queryClient.prefetchQuery({
       queryKey: ["approved-reviews", "product", item.product.id],
-      queryFn: () => fetchApprovedReviews("product", item.product.id),
+      queryFn: ({ signal }) => fetchApprovedReviews("product", item.product.id, signal),
       staleTime: 60_000
     });
     router.push({ pathname: "/product/[productId]", params: { productId: item.product.id } });
