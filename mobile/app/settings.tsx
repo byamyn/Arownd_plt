@@ -25,7 +25,7 @@ import { translate, useLanguage } from "@/lib/i18n";
 import { resetPasswordSchema } from "@/lib/auth-validation";
 import { getSupabaseClient } from "@/lib/supabase";
 import { unregisterCurrentPushDevice } from "@/lib/push-notifications";
-import { fetchCountries, fetchMyBrowsingCountryCode, updateBrowsingCountryCode, type Country } from "@/lib/country-service";
+import { BROWSING_CURRENCY_QUERY_KEY, fetchCountries, fetchMyBrowsingCountryCode, updateBrowsingCountryCode, type Country } from "@/lib/country-service";
 
 type SettingsSheet = "password" | "appearance" | "language" | "country" | null;
 
@@ -52,7 +52,20 @@ export default function SettingsScreen() {
   const browsingCountry = useQuery({ queryKey: ["browsing-country"], queryFn: fetchMyBrowsingCountryCode });
   const browsingCountryMutation = useMutation({
     mutationFn: updateBrowsingCountryCode,
-    onSuccess: async () => { setFormError(null); await queryClient.invalidateQueries(); await browsingCountry.refetch(); closeSheet(); },
+    onSuccess: async (countryCode) => {
+      setFormError(null);
+      queryClient.setQueryData(["browsing-country"], countryCode);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: BROWSING_CURRENCY_QUERY_KEY }),
+        queryClient.invalidateQueries({ queryKey: ["customer-home-products"] }),
+        queryClient.invalidateQueries({ queryKey: ["customer-explore-products"] }),
+        queryClient.invalidateQueries({ queryKey: ["customer-market-regions"] }),
+        queryClient.invalidateQueries({ queryKey: ["customer-stores-by-region"] }),
+        queryClient.invalidateQueries({ queryKey: ["customer-featured-stores"] }),
+        queryClient.invalidateQueries({ queryKey: ["map-stores"] })
+      ]);
+      closeSheet();
+    },
     onError: () => setFormError(translate("settingsCountrySaveError"))
   });
 
