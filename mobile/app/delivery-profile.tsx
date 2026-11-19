@@ -3,7 +3,7 @@ import { router } from "expo-router";
 import { useEffect, useMemo, useRef, useState, type ComponentRef } from "react";
 import { Modal, ScrollView, StyleSheet, View } from "react-native";
 
-import { CustomerScreen, ErrorState, LoadingState } from "@/components/customer-ui";
+import { PageSkeleton, CustomerScreen, ErrorState, LoadingState } from "@/components/customer-ui";
 import { AppHeader, Button, Card, Caption, FormLabel, Icon, IconButton, PressableSurface, Spinner, Text as UiText, TextField } from "@/components/ui";
 import { fetchCheckoutRegions } from "@/lib/checkout";
 import { fetchDeliveryProfileCommunes, fetchMyDeliveryProfile, saveMyDeliveryProfile } from "@/lib/delivery-profile";
@@ -97,7 +97,7 @@ export default function DeliveryProfileScreen() {
   }, [profile.data, profile.isSuccess, initialized]);
 
   if (profile.isPending || regionOptions.isPending) {
-    return <CustomerScreen><LoadingState label={translate("stateLoading")} /></CustomerScreen>;
+    return <CustomerScreen><AppHeader title={translate("deliveryProfileTitle")} /><PageSkeleton variant="form" rows={5} /></CustomerScreen>;
   }
   if (profile.isError || regionOptions.isError) {
     return <CustomerScreen>
