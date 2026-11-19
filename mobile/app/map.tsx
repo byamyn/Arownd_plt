@@ -124,6 +124,7 @@ export default function MapScreen() {
       id: store.id,
       properties: {
         storeId: store.id,
+        markerLabel: store.name.trim().slice(0, 1).toLocaleUpperCase() || "S",
         isVerified: store.is_verified,
         selected: store.id === selectedStoreId
       },
@@ -578,7 +579,7 @@ export default function MapScreen() {
               type="symbol"
               filter={["!", ["has", "point_count"]]}
               layout={{
-                "text-field": "S",
+                "text-field": ["get", "markerLabel"],
                 "text-font": ["Open Sans Bold", "Arial Unicode MS"],
                 "text-size": 13,
                 "text-allow-overlap": true,
