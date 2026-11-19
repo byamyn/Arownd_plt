@@ -116,14 +116,15 @@ export async function fetchOffersByIds(ids: string[]): Promise<ProductOffer[]> {
 }
 
 export async function fetchHomeProducts(signal?: AbortSignal): Promise<HomeProduct[]> {
-  const { data, error } = await getSupabaseClient()
+  let request = getSupabaseClient()
     .from("store_offers")
     .select("id, price, stock_quantity, is_available, product:products!inner(id, name, description, category, brand, rating), store:stores!inner(id, name, logo_url, rating), images:product_images(image_url, is_primary)")
     .eq("is_available", true)
     .gt("stock_quantity", 0)
     .order("created_at", { ascending: false })
-    .limit(60)
-    .abortSignal(signal ?? new AbortController().signal);
+    .limit(60);
+  if (signal) request = request.abortSignal(signal);
+  const { data, error } = await request;
 
   if (error) throw error;
 
@@ -170,7 +171,7 @@ export async function fetchMapStoresInBounds(
   includeStoreId?: string | null,
   signal?: AbortSignal
 ): Promise<MapStore[]> {
-  const { data, error } = await getSupabaseClient().rpc("fetch_map_stores_in_view", {
+  let request = getSupabaseClient().rpc("fetch_map_stores_in_view", {
     p_west: viewport.west,
     p_south: viewport.south,
     p_east: viewport.east,
@@ -179,7 +180,9 @@ export async function fetchMapStoresInBounds(
     p_center_long: viewport.centerLongitude,
     p_include_store_id: includeStoreId ?? null,
     p_limit: 1000
-  }).abortSignal(signal ?? new AbortController().signal);
+  });
+  if (signal) request = request.abortSignal(signal);
+  const { data, error } = await request;
 
   if (error) throw error;
   return MapStoreSchema.array().parse(data as unknown);
@@ -226,10 +229,9 @@ export async function searchCatalogProducts(query: string, category?: string, si
   if (normalized) request = request.or("name.ilike.%" + normalized + "%,brand.ilike.%" + normalized + "%", { referencedTable: "products" });
   if (category) request = request.in("product.category", [...getCategoryFilterIds(category)]);
 
-  const { data, error } = await request
-    .order("created_at", { ascending: false })
-    .limit(40)
-    .abortSignal(signal ?? new AbortController().signal);
+  request = request.order("created_at", { ascending: false }).limit(40);
+  if (signal) request = request.abortSignal(signal);
+  const { data, error } = await request;
 
   if (error) throw error;
   return HomeProductSchema.array().parse(data as unknown);
