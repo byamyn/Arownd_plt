@@ -137,12 +137,18 @@ export async function fetchHomeProducts(): Promise<HomeProduct[]> {
   const balancedProducts: HomeProduct[] = [];
   const storeQueues = [...productsByStore.values()];
 
-  while (storeQueues.length > 0) {
-    for (let index = storeQueues.length - 1; index >= 0; index -= 1) {
-      const nextProduct = storeQueues[index].shift();
-      if (nextProduct) balancedProducts.push(nextProduct);
-      if (storeQueues[index].length === 0) storeQueues.splice(index, 1);
+  while (true) {
+    let hasRemainingProducts = false;
+
+    for (const storeQueue of storeQueues) {
+      const nextProduct = storeQueue.shift();
+      if (!nextProduct) continue;
+
+      balancedProducts.push(nextProduct);
+      hasRemainingProducts = true;
     }
+
+    if (!hasRemainingProducts) break;
   }
 
   return balancedProducts;
