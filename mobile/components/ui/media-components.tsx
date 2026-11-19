@@ -3,7 +3,7 @@ import { Image as ExpoImage, type ImageSource } from "expo-image";
 import {
   Modal,
   Pressable,
-  ScrollView,
+  FlatList,
   View,
   type ImageStyle,
   type StyleProp,
@@ -50,9 +50,21 @@ export function ImageGallery({
   return (
     <View accessibilityLabel={accessibilityLabel} style={{ gap: designTokens.spacing.sm }}>
       <Image uri={images[selectedIndex]?.uri} accessibilityLabel={images[selectedIndex]?.label ?? accessibilityLabel} aspectRatio={1} />
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ flexDirection: "row", gap: designTokens.spacing.sm }}>
-        {images.map((image, index) => <Pressable key={image.key} accessibilityRole="button" accessibilityLabel={image.label} accessibilityState={{ selected: index === selectedIndex }} onPress={() => onSelect(index)} style={{ borderWidth: index === selectedIndex ? 2 : 1, borderColor: index === selectedIndex ? theme.colors.accent : theme.colors.border, borderRadius: theme.radius.md, overflow: "hidden" }}><ExpoImage source={{ uri: image.uri }} contentFit="cover" cachePolicy="memory-disk" recyclingKey={image.key} style={{ width: 60, height: 60 }} /></Pressable>)}
-      </ScrollView>
+      <FlatList
+        horizontal
+        data={images}
+        keyExtractor={(image) => image.key}
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ flexDirection: "row", gap: designTokens.spacing.sm }}
+        initialNumToRender={5}
+        maxToRenderPerBatch={5}
+        windowSize={5}
+        renderItem={({ item: image, index }) => (
+          <Pressable accessibilityRole="button" accessibilityLabel={image.label} accessibilityState={{ selected: index === selectedIndex }} onPress={() => onSelect(index)} style={{ borderWidth: index === selectedIndex ? 2 : 1, borderColor: index === selectedIndex ? theme.colors.accent : theme.colors.border, borderRadius: theme.radius.md, overflow: "hidden" }}>
+            <ExpoImage source={{ uri: image.uri }} contentFit="cover" cachePolicy="memory-disk" recyclingKey={image.key} style={{ width: 60, height: 60 }} />
+          </Pressable>
+        )}
+      />
     </View>
   );
 }
