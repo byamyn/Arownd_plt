@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { KeyboardAvoidingView, Platform, StyleSheet, TextInput, View } from "react-native";
 
-import { CustomerScreen, EmptyState, ErrorState, LoadingState } from "@/components/customer-ui";
+import { PageSkeleton, CustomerScreen, EmptyState, ErrorState, LoadingState } from "@/components/customer-ui";
 import { AppHeader, Caption, Heading, Icon, PressableSurface, Text as UiText } from "@/components/ui";
 import { fetchSupportConversation, fetchSupportMessages, sendSupportMessage, supportMessageInputSchema, type SupportMessageInput } from "@/lib/support";
 import { getSupabaseClient } from "@/lib/supabase";
@@ -81,7 +81,7 @@ export default function SupportConversationScreen() {
   });
 
   if (auth.isPending || conversation.isPending || messages.isPending) {
-    return <CustomerScreen showNavigation={false}><SupportHeader title={translate("supportConversationTitle")} /><LoadingState label={translate("stateLoading")} /></CustomerScreen>;
+    return <CustomerScreen showNavigation={false}><SupportHeader title={translate("supportConversationTitle")} /><PageSkeleton variant="details" rows={3} /></CustomerScreen>;
   }
   if (auth.isError || conversation.isError || messages.isError) {
     return <CustomerScreen showNavigation={false}>
