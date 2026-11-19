@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
-import { StyleSheet, View, type LayoutChangeEvent } from "react-native";
+import { Pressable, StyleSheet, View, type LayoutChangeEvent } from "react-native";
 
-import { FavoriteButton } from "@/components/favorite-button";
+import { FavoriteButton, useFavoriteToggle } from "@/components/favorite-button";
 import { CustomerMainHeader } from "@/components/customer-main-header";
 import {
   CustomerScreen,
@@ -24,6 +24,8 @@ function HomeProductCard({ item, price }: {
   const theme = useAppTheme();
   const queryClient = useQueryClient();
   const [descriptionHasMore, setDescriptionHasMore] = useState(false);
+  const lastImageTapAt = useRef(0);
+  const productFavorite = useFavoriteToggle("products", item.product.id);
 
   const openDetails = () => {
     void queryClient.prefetchQuery({
@@ -46,7 +48,21 @@ function HomeProductCard({ item, price }: {
 
   return (
     <View style={[styles.productCard, { backgroundColor: theme.colors.surface }]}>
-      <View style={[styles.productImage, { backgroundColor: theme.colors.surfaceMuted }]}>
+      <Pressable
+        style={[styles.productImage, { backgroundColor: theme.colors.surfaceMuted }]}
+        onPress={() => {
+          const now = Date.now();
+          if (now - lastImageTapAt.current <= 300 && !productFavorite.disabled) {
+            productFavorite.toggle();
+            lastImageTapAt.current = 0;
+            return;
+          }
+          lastImageTapAt.current = now;
+        }}
+        accessibilityRole="button"
+        accessibilityLabel={item.product.name}
+        accessibilityHint={translate("favoriteAdd")}
+      >
         {getPrimaryImage(item) ? (
           <UiImage uri={getPrimaryImage(item)!} accessibilityLabel={item.product.name} aspectRatio={1} style={StyleSheet.absoluteFill} />
         ) : (
@@ -55,7 +71,7 @@ function HomeProductCard({ item, price }: {
         <View style={styles.favoriteButton}>
           <FavoriteButton kind="products" id={item.product.id} iconOnly />
         </View>
-      </View>
+      </Pressable>
 
       <View style={styles.productInfo}>
         <View style={styles.productInfoColumns}>
@@ -80,7 +96,12 @@ function HomeProductCard({ item, price }: {
           </View>
 
           <View style={styles.storeColumn}>
-            <View style={styles.storeIdentity}>
+            <Pressable
+              style={styles.storeIdentity}
+              onPress={() => router.push({ pathname: "/store/[storeId]", params: { storeId: item.store.id } })}
+              accessibilityRole="button"
+              accessibilityLabel={item.store.name}
+            >
               <UiText numberOfLines={1} weight="600" style={styles.storeTitle}>{item.store.name}</UiText>
               <View style={[styles.storeAvatar, { backgroundColor: theme.colors.surfaceMuted }]}>
                 {item.store.logo_url ? (
@@ -89,7 +110,7 @@ function HomeProductCard({ item, price }: {
                   <Icon name="store" size={19} color={theme.colors.muted} accessibilityHidden />
                 )}
               </View>
-            </View>
+            </Pressable>
             {item.store.rating != null ? (
               <View style={styles.storeRating}>
                 <Icon name="star" size={14} color="#E5A000" fill="#E5A000" accessibilityHidden />
@@ -101,6 +122,7 @@ function HomeProductCard({ item, price }: {
 
         <View style={styles.priceRow}>
           <PriceDisplay value={price} />
+          <Button label={translate("homeBuyNow")} onPress={openDetails} size="sm" />
         </View>
       </View>
     </View>
@@ -170,5 +192,5 @@ const styles = StyleSheet.create({
   storeAvatar: { width: 38, height: 38, borderRadius: 19, overflow: "hidden", alignItems: "center", justifyContent: "center" },
   storeAvatarImage: { width: 38, height: 38, borderRadius: 19 },
   storeRating: { flexDirection: "row", alignItems: "center", gap: 4 },
-  priceRow: { minHeight: 30, justifyContent: "center", alignItems: "flex-start" }
+  priceRow: { minHeight: 34, flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: designTokens.spacing.sm }
 });
