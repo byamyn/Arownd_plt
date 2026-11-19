@@ -21,6 +21,13 @@ const CountrySchema = z.object({
 
 export type Country = z.infer<typeof CountrySchema>;
 
+function getRelatedCurrencyCode(value: unknown): string | null {
+  const row = Array.isArray(value) ? value[0] : value;
+  if (typeof row !== "object" || row === null) return null;
+  const currencyCode = (row as { currency_code?: unknown }).currency_code;
+  return typeof currencyCode === "string" && /^[A-Z]{3}$/.test(currencyCode) ? currencyCode : null;
+}
+
 export async function fetchCountries(): Promise<Country[]> {
   const { data, error } = await getSupabaseClient()
     .from("countries")
@@ -71,8 +78,8 @@ export async function fetchMyAccountCurrencyCode(): Promise<string> {
     .single();
   if (profileError) throw profileError;
   if (typeof profile.country_code !== "string" || !/^[A-Z]{2}$/.test(profile.country_code)) throw new Error("INVALID_ACCOUNT_COUNTRY");
-  const currencyCode = profile.country?.currency_code;
-  if (typeof currencyCode !== "string" || !/^[A-Z]{3}$/.test(currencyCode)) throw new Error("INVALID_ACCOUNT_CURRENCY");
+  const currencyCode = getRelatedCurrencyCode(profile.country);
+  if (!currencyCode) throw new Error("INVALID_ACCOUNT_CURRENCY");
   return currencyCode;
 }
 
@@ -91,8 +98,8 @@ export async function fetchBrowsingCurrencyCode(): Promise<string> {
     throw new Error("INVALID_BROWSING_COUNTRY");
   }
 
-  const currencyCode = profile.country?.currency_code;
-  if (typeof currencyCode !== "string" || !/^[A-Z]{3}$/.test(currencyCode)) {
+  const currencyCode = getRelatedCurrencyCode(profile.country);
+  if (!currencyCode) {
     throw new Error("INVALID_BROWSING_CURRENCY");
   }
 
