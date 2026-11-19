@@ -3,7 +3,7 @@ import { router } from "expo-router";
 import { useCallback, useMemo, useRef, useState, type ReactNode } from "react";
 import { Animated, I18nManager, PanResponder, ScrollView, StyleSheet, View } from "react-native";
 
-import { CustomerScreen, ErrorState, LoadingState } from "@/components/customer-ui";
+import { PageSkeleton, CustomerScreen, ErrorState, LoadingState } from "@/components/customer-ui";
 import {
   AppHeader,
   Button,
@@ -147,7 +147,7 @@ export default function AddressesScreen() {
   };
 
   if (addresses.isPending || regionOptions.isPending) {
-    return <CustomerScreen><LoadingState label={translate("stateLoading")} /></CustomerScreen>;
+    return <CustomerScreen><AppHeader title={translate("addressesTitle")} /><PageSkeleton variant="list" rows={3} /></CustomerScreen>;
   }
 
   if (addresses.isError || regionOptions.isError) {
