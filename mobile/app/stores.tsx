@@ -3,7 +3,7 @@ import { router } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 
-import { CustomerScreen, EmptyState, ErrorState, LoadingState, StoreTile } from "@/components/customer-ui";
+import { CustomerScreen, EmptyState, ErrorState, PageSkeleton, StoreTile } from "@/components/customer-ui";
 import { AppHeader, Icon, IconButton, PressableSurface, Text as UiText } from "@/components/ui";
 import { fetchStoreDetails, fetchStoreOffers, fetchVerifiedStoresByRegion } from "@/lib/catalog";
 import { fetchCountryRegions, getRegionDisplayName } from "@/lib/country-regions";
@@ -51,7 +51,7 @@ export default function StoresScreen() {
       {selectedRegionId === null ? (
         <>
           <UiText tone="muted" style={styles.subtitle}>{translate("storesChooseWilayaHint")}</UiText>
-          {regions.isPending || browsingCountry.isPending ? <LoadingState label={translate("stateLoading")} /> : regions.isError || browsingCountry.isError ? (
+          {regions.isPending || browsingCountry.isPending ? <PageSkeleton variant="list" rows={4} /> : regions.isError || browsingCountry.isError ? (
             <ErrorState title={translate("catalogLoadError")} retryLabel={translate("retry")} busy={regions.isFetching || browsingCountry.isFetching} onRetry={() => { void regions.refetch(); void browsingCountry.refetch(); }} />
           ) : (regions.data?.regions.length ?? 0) === 0 ? (
             <EmptyState icon="map-pin" title={translate("storesNoWilayas")} />
@@ -80,7 +80,7 @@ export default function StoresScreen() {
       ) : (
         <>
           <UiText tone="muted" style={styles.subtitle}>{translate("storesInWilayaHint")}</UiText>
-          {stores.isPending ? <LoadingState label={translate("stateLoading")} /> : stores.isError ? (
+          {stores.isPending ? <PageSkeleton variant="list" rows={3} /> : stores.isError ? (
             <ErrorState title={translate("catalogLoadError")} retryLabel={translate("retry")} busy={stores.isFetching} onRetry={() => void stores.refetch()} />
           ) : stores.data.length === 0 ? (
             <EmptyState icon="store" title={translate("storesNoWilayaStores")} hint={translate("storesNoWilayaStoresHint")} />
