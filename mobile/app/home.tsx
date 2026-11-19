@@ -136,15 +136,8 @@ function HomeProductCard({ item, price }: {
       </View>
 
       <View style={styles.productInfo}>
-        <View style={styles.productInfoColumns}>
-          <View style={styles.productDetailsColumn}>
-            <UiText numberOfLines={2} weight="700" style={styles.productName}>{item.product.name}</UiText>
-            {averageRating !== null ? (
-              <View style={styles.storeRating}>
-                <Icon name="star" size={14} color="#E5A000" fill="#E5A000" accessibilityHidden />
-                <Caption>{averageRating.toFixed(1)} · {reviewCount} {translate("homeReviewCount")}</Caption>
-              </View>
-            ) : null}
+        <View style={styles.productInfoRows}>
+          <View style={styles.productStoreRow}>
             <Pressable
               style={styles.storeIdentity}
               onPress={() => router.push({ pathname: "/store/[storeId]", params: { storeId: item.store.id } })}
@@ -160,12 +153,22 @@ function HomeProductCard({ item, price }: {
                 )}
               </View>
             </Pressable>
-            <PriceDisplay value={price} />
+            {averageRating !== null ? (
+              <View style={styles.storeRating}>
+                <Icon name="star" size={14} color="#E5A000" fill="#E5A000" accessibilityHidden />
+                <Caption>{averageRating.toFixed(1)} · {reviewCount} {translate("homeReviewCount")}</Caption>
+              </View>
+            ) : <View />}
           </View>
 
-          <View style={styles.productActionsColumn}>
-            <FavoriteButton kind="products" id={item.product.id} iconOnly />
-            <Button label={translate("homeBuyNow")} onPress={openDetails} size="sm" style={styles.buyNowButton} />
+          <UiText numberOfLines={2} weight="700" style={styles.productName}>{item.product.name}</UiText>
+
+          <View style={styles.productPurchaseRow}>
+            <PriceDisplay value={price} />
+            <View style={styles.productActionsRow}>
+              <Button label={translate("homeBuyNow")} onPress={openDetails} size="sm" style={styles.buyNowButton} />
+              <FavoriteButton kind="products" id={item.product.id} iconOnly />
+            </View>
           </View>
         </View>
       </View>
@@ -236,15 +239,16 @@ const styles = StyleSheet.create({
   imagePaginationDot: { width: 6, height: 6, borderRadius: 3 },
   imagePaginationDotActive: { width: 16, backgroundColor: "#FFFFFF", opacity: 1 },
   imagePaginationDotInactive: { backgroundColor: "#888888", opacity: 0.65 },
-  productInfo: { flex: 1, minHeight: 0, backgroundColor: "transparent", justifyContent: "space-between", paddingHorizontal: designTokens.spacing.md, paddingVertical: designTokens.spacing.sm, gap: designTokens.spacing.xs },
-  productInfoColumns: { flex: 1, minHeight: 0, flexDirection: "row", justifyContent: "space-between", alignItems: "stretch", gap: designTokens.spacing.md },
-  productDetailsColumn: { flex: 1, minWidth: 0, alignItems: "flex-start", justifyContent: "space-between", gap: 3 },
-  productActionsColumn: { width: 116, alignItems: "center", justifyContent: "space-between", paddingVertical: 1 },
-  productName: { lineHeight: 21, textAlign: "auto" },
-  storeIdentity: { flexDirection: "row", alignItems: "center", justifyContent: "flex-end", gap: designTokens.spacing.xs, maxWidth: "100%" },
+  productInfo: { flex: 1, minHeight: 0, backgroundColor: "transparent", justifyContent: "center", paddingHorizontal: designTokens.spacing.md, paddingVertical: designTokens.spacing.sm },
+  productInfoRows: { flex: 1, minHeight: 0, justifyContent: "space-between", gap: designTokens.spacing.sm },
+  productStoreRow: { minHeight: 38, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: designTokens.spacing.sm },
+  productPurchaseRow: { minHeight: 44, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: designTokens.spacing.sm },
+  productActionsRow: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.sm },
+  productName: { lineHeight: 21, textAlign: "auto", alignSelf: "stretch" },
+  storeIdentity: { flexDirection: "row", alignItems: "center", justifyContent: "flex-start", gap: designTokens.spacing.xs, flexShrink: 1, minWidth: 0 },
   storeTitle: { flexShrink: 1, fontSize: 13, textAlign: "auto" },
-  storeAvatar: { width: 38, height: 38, borderRadius: 19, overflow: "hidden", alignItems: "center", justifyContent: "center" },
-  storeAvatarImage: { width: 38, height: 38, borderRadius: 19 },
-  storeRating: { flexDirection: "row", alignItems: "center", gap: 4 },
+  storeAvatar: { width: 36, height: 36, borderRadius: 18, overflow: "hidden", alignItems: "center", justifyContent: "center" },
+  storeAvatarImage: { width: 36, height: 36, borderRadius: 18 },
+  storeRating: { flexDirection: "row", alignItems: "center", gap: 4, flexShrink: 0 },
   buyNowButton: { minHeight: 44, minWidth: 112, paddingHorizontal: designTokens.spacing.sm, borderRadius: designTokens.radius.lg }
 });
