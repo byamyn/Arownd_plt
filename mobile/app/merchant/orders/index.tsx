@@ -186,7 +186,7 @@ export default function MerchantOrdersScreen() {
                 language={language}
                 theme={theme}
                 onPress={() => {
-                  if (storeId) void queryClient.prefetchQuery({ queryKey: ["merchant-order-detail", storeId, order.id], queryFn: () => fetchMerchantOrderDetails(order.id, storeId), staleTime: 15_000 });
+                  if (storeId) void queryClient.prefetchQuery({ queryKey: ["merchant-order-detail", storeId, order.id], queryFn: ({ signal }) => fetchMerchantOrderDetails(order.id, storeId, signal), staleTime: 15_000 });
                   router.push({ pathname: "/merchant/orders/[orderId]", params: { orderId: order.id } });
                 }}
               />
