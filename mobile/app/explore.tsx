@@ -196,9 +196,9 @@ export default function ExploreScreen() {
           price={browsingCurrency.data ? formatMarketPrice(item.price, browsingCurrency.data) : "—"}
           imageUrl={getPrimaryImage(item)}
           onPress={() => {
-            void queryClient.prefetchQuery({ queryKey: ["customer-product", item.product.id], queryFn: () => fetchProductDetails(item.product.id), staleTime: 60_000 });
-            void queryClient.prefetchQuery({ queryKey: ["customer-product-offers", item.product.id], queryFn: () => fetchProductOffers(item.product.id), staleTime: 30_000 });
-            void queryClient.prefetchQuery({ queryKey: ["approved-reviews", "product", item.product.id], queryFn: () => fetchApprovedReviews("product", item.product.id), staleTime: 60_000 });
+            void queryClient.prefetchQuery({ queryKey: ["customer-product", item.product.id], queryFn: ({ signal }) => fetchProductDetails(item.product.id, signal), staleTime: 60_000 });
+            void queryClient.prefetchQuery({ queryKey: ["customer-product-offers", item.product.id], queryFn: ({ signal }) => fetchProductOffers(item.product.id, signal), staleTime: 30_000 });
+            void queryClient.prefetchQuery({ queryKey: ["approved-reviews", "product", item.product.id], queryFn: ({ signal }) => fetchApprovedReviews("product", item.product.id, signal), staleTime: 60_000 });
             router.push({ pathname: "/product/[productId]", params: { productId: item.product.id } });
           }}
           style={styles.productTile}
