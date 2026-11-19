@@ -66,7 +66,7 @@ describe("catalog presentation helpers", () => {
 
     for (const currency of Object.keys(regions)) {
       const formattedPrice = formatMarketPrice(1250, currency);
-      const parts = new Intl.NumberFormat(`ar-${regions[currency]}`, {
+      const parts = new Intl.NumberFormat(`ar-${regions[currency]}-u-nu-latn`, {
         style: "currency",
         currency,
         minimumFractionDigits: 0,
@@ -84,7 +84,7 @@ describe("catalog presentation helpers", () => {
     }
 
     const formattedDzd = formatDZD(1250);
-    const dzdCurrencyPart = new Intl.NumberFormat("ar-DZ", {
+    const dzdCurrencyPart = new Intl.NumberFormat("ar-DZ-u-nu-latn", {
       style: "currency",
       currency: "DZD",
       maximumFractionDigits: 0
