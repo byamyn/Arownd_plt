@@ -240,7 +240,7 @@ const HomeProductCard = memo(function HomeProductCard({ item, price }: {
       </View>
     </View>
   );
-}
+});
 
 export default function CustomerHomeScreen() {
   const [feedHeight, setFeedHeight] = useState(0);
