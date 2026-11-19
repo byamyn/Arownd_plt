@@ -174,7 +174,7 @@ export default function ExploreScreen() {
     </View>
   );
 
-  const listEmpty = !hasActiveFilter ? null : products.isPending ? (
+  const listEmpty = !hasActiveFilter ? undefined : products.isPending ? (
     <View style={styles.grid}>{[0, 1, 2, 3].map((item) => <ProductCardSkeleton key={item} style={{ width: "47%", flex: 0 }} />)}</View>
   ) : products.isError ? (
     <ErrorState title={translate("catalogLoadError")} retryLabel={translate("retry")} onRetry={() => void products.refetch()} />
@@ -206,7 +206,7 @@ export default function ExploreScreen() {
       )}
       ListHeaderComponent={listHeader}
       ListEmptyComponent={listEmpty}
-      ListFooterComponent={hasActiveFilter ? <UiText style={[styles.footer, { color: theme.colors.muted }]}>{translate("exploreFooter")}</UiText> : null}
+      ListFooterComponent={hasActiveFilter ? <UiText style={[styles.footer, { color: theme.colors.muted }]}>{translate("exploreFooter")}</UiText> : undefined}
       refreshing={hasActiveFilter && products.isFetching}
       onRefresh={hasActiveFilter ? () => { void products.refetch(); } : undefined}
       initialNumToRender={6}
