@@ -37,7 +37,10 @@ const HomeProductCard = memo(function HomeProductCard({ item, price }: {
   const heartScale = useRef(new Animated.Value(0.35)).current;
   const productFavorite = useFavoriteToggle("products", item.product.id);
   const primaryImage = getPrimaryImage(item);
-  const productImages = [...new Set([primaryImage, ...item.images.map((image) => image.image_url)].filter((uri): uri is string => Boolean(uri)))];
+  const productImages = useMemo(
+    () => [...new Set([primaryImage, ...item.images.map((image) => image.image_url)].filter((uri): uri is string => Boolean(uri)))],
+    [primaryImage, item.images]
+  );
   const averageRating = item.product.rating != null && item.product.rating > 0 ? item.product.rating : null;
   const handleImageScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     if (imageWidth <= 0) return;
