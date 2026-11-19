@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Image, Pressable, ScrollView, View, type ImageSourcePropType, type ImageStyle, type StyleProp, type ViewStyle } from "react-native";
 import { Text as UiText } from "./typography";
 
@@ -207,18 +207,45 @@ export function ProductImageGallery({
   imageStyle?: StyleProp<ImageStyle>;
 }) {
   const theme = useAppTheme();
-  const selected = images[selectedIndex];
-  const selectedSource: ImageSourcePropType | undefined = selected ? { uri: selected } : undefined;
+  const [containerWidth, setContainerWidth] = useState(0);
+  const pagerRef = useRef<ScrollView>(null);
+
+  useEffect(() => {
+    if (containerWidth > 0) {
+      pagerRef.current?.scrollTo({ x: selectedIndex * containerWidth, animated: false });
+    }
+  }, [containerWidth, selectedIndex]);
 
   return (
-    <View accessibilityLabel={accessibilityLabel} style={{ gap: designTokens.spacing.sm }}>
-      {selectedSource ? <Image source={selectedSource} resizeMode="cover" style={[{ width: "100%", aspectRatio: 1, borderRadius: theme.radius.xl, backgroundColor: theme.colors.surfaceMuted }, imageStyle]} /> : null}
-      {images.length > 1 ? (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ flexDirection: "row", gap: designTokens.spacing.sm }}>
+    <View
+      accessibilityLabel={accessibilityLabel}
+      onLayout={(event) => setContainerWidth(event.nativeEvent.layout.width)}
+      style={{ width: "100%" }}
+    >
+      {images.length > 0 ? (
+        <ScrollView
+          ref={pagerRef}
+          horizontal
+          pagingEnabled
+          nestedScrollEnabled
+          showsHorizontalScrollIndicator={false}
+          onMomentumScrollEnd={(event) => {
+            if (containerWidth > 0) {
+              const nextIndex = Math.max(0, Math.min(images.length - 1, Math.round(event.nativeEvent.contentOffset.x / containerWidth)));
+              if (nextIndex !== selectedIndex) onSelect(nextIndex);
+            }
+          }}
+          style={{ width: "100%" }}
+        >
           {images.map((uri, index) => (
-            <Pressable key={uri + index} accessibilityRole="button" accessibilityLabel={`${accessibilityLabel} ${index + 1}`} accessibilityState={{ selected: index === selectedIndex }} onPress={() => onSelect(index)} style={{ borderRadius: theme.radius.md, borderWidth: index === selectedIndex ? 2 : 1, borderColor: index === selectedIndex ? theme.colors.accent : theme.colors.border, overflow: "hidden" }}>
-              <Image source={{ uri }} resizeMode="cover" style={{ width: 64, height: 64 }} />
-            </Pressable>
+            <View key={uri + index} style={{ width: containerWidth || "100%" }}>
+              <Image
+                source={{ uri }}
+                resizeMode="cover"
+                accessibilityLabel={`${accessibilityLabel} ${index + 1}`}
+                style={[{ width: "100%", aspectRatio: 1, borderRadius: theme.radius.xl, backgroundColor: theme.colors.surfaceMuted }, imageStyle]}
+              />
+            </View>
           ))}
         </ScrollView>
       ) : null}
