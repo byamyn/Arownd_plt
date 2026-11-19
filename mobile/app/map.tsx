@@ -110,6 +110,7 @@ export default function MapScreen() {
   const [isStartingNavigation, setIsStartingNavigation] = useState(false);
   const [navigationError, setNavigationError] = useState(false);
   const watchSubscriptionRef = useRef<Location.LocationSubscription | null>(null);
+  const watchGenerationRef = useRef(0);
   const lastRerouteAtRef = useRef(0);
   const navigationRef = useRef<NavigationSession | null>(null);
   const hasAutoStartedDirectionsRef = useRef(false);
@@ -166,12 +167,7 @@ export default function MapScreen() {
     }] : []
   }), [navigationRoute]);
 
-  useEffect(() => () => {
-    watchSubscriptionRef.current?.remove();
-    watchSubscriptionRef.current = null;
-  }, []);
-
-  const startLocationTracking = async () => {
+  const getCurrentLocation = async () => {
     const permission = await Location.requestForegroundPermissionsAsync();
     if (permission.status !== "granted") {
       Alert.alert(
@@ -190,34 +186,61 @@ export default function MapScreen() {
       longitude: position.coords.longitude
     };
     setUserPosition(currentPosition);
-
-    if (!watchSubscriptionRef.current) {
-      watchSubscriptionRef.current = await Location.watchPositionAsync(
-        {
-          accuracy: Location.Accuracy.Balanced,
-          timeInterval: 2_000,
-          distanceInterval: 5
-        },
-        (nextPosition) => {
-          const next: RoutePoint = {
-            latitude: nextPosition.coords.latitude,
-            longitude: nextPosition.coords.longitude
-          };
-          setUserPosition(next);
-          if (navigationRef.current) setCameraTarget(next);
-        }
-      );
-    }
-
     return currentPosition;
   };
+
+  const isNavigationActive = navigation !== null;
+
+  useEffect(() => {
+    if (!isNavigationActive) return;
+
+    let isActive = true;
+    const generation = watchGenerationRef.current + 1;
+    watchGenerationRef.current = generation;
+
+    void Location.watchPositionAsync(
+      {
+        accuracy: Location.Accuracy.Balanced,
+        timeInterval: 2_000,
+        distanceInterval: 5
+      },
+      (nextPosition) => {
+        if (!isActive || watchGenerationRef.current !== generation) return;
+        const next: RoutePoint = {
+          latitude: nextPosition.coords.latitude,
+          longitude: nextPosition.coords.longitude
+        };
+        setUserPosition(next);
+        if (navigationRef.current) setCameraTarget(next);
+      }
+    ).then((subscription) => {
+      if (!isActive || watchGenerationRef.current !== generation) {
+        subscription.remove();
+        return;
+      }
+      watchSubscriptionRef.current = subscription;
+    }).catch(() => {
+      if (isActive && watchGenerationRef.current === generation) {
+        setNavigationError(true);
+      }
+    });
+
+    return () => {
+      isActive = false;
+      if (watchGenerationRef.current === generation) {
+        watchGenerationRef.current += 1;
+      }
+      watchSubscriptionRef.current?.remove();
+      watchSubscriptionRef.current = null;
+    };
+  }, [isNavigationActive]);
 
   const locateUser = async () => {
     if (isLocating) return;
     setIsLocating(true);
 
     try {
-      const currentPosition = await startLocationTracking();
+      const currentPosition = await getCurrentLocation();
       if (currentPosition) {
         setCameraTarget(currentPosition);
       }
@@ -257,7 +280,7 @@ export default function MapScreen() {
     setNavigationError(false);
 
     try {
-      const origin = await startLocationTracking();
+      const origin = await getCurrentLocation();
       if (!origin) return;
 
       const destination: RoutePoint = {
