@@ -106,7 +106,7 @@ export default function OrderDetailsScreen() {
   });
   const query = useQuery({
     queryKey: ["customer-order-details", orderId],
-    queryFn: () => fetchCustomerOrderDetails(orderId),
+    queryFn: ({ signal }) => fetchCustomerOrderDetails(orderId, signal),
     enabled: Boolean(orderId) && auth.isSuccess && auth.data !== null,
     refetchInterval: 45_000
   });
