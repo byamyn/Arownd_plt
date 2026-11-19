@@ -12,7 +12,7 @@ import {
   RasterSource
 } from "@maplibre/maplibre-react-native";
 
-import { BottomSheet, AppHeader, Button, Card, ErrorState, Heading, Icon, IconButton, Image as UiImage, LoadingState, PressableSurface, Text as UiText, TextField } from "@/components/ui";
+import { BottomSheet, AppHeader, Button, Card, ErrorState, Heading, Icon, IconButton, Image as UiImage, LoadingState, PageSkeleton, PressableSurface, Text as UiText, TextField } from "@/components/ui";
 import { fetchMerchantAccess } from "@/lib/merchant";
 import { fetchCheckoutRegions } from "@/lib/checkout";
 import { STORE_IMAGE_MAX_BYTES, uploadMerchantStoreImage, validateStoreImageAsset } from "@/lib/merchant-store-images";
@@ -579,7 +579,7 @@ function Message({ theme, label, loading = false, actionLabel, onAction, busy = 
       <View style={styles.message}>
         <AppHeader
           title={translate("merchantStoreSettingsTitle")}        />
-        {loading ? <LoadingState label={label} /> : null}
+        {loading ? <PageSkeleton variant="form" rows={5} /> : null}
         {!loading && actionLabel && onAction ? (
           <ErrorState title={label} retryLabel={actionLabel} busy={busy} onRetry={onAction} />
         ) : null}
