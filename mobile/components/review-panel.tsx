@@ -3,7 +3,7 @@ import { router } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 
-import { EmptyState, ErrorState, LoadingState } from "@/components/customer-ui";
+import { EmptyState, ErrorState, PageSkeleton } from "@/components/customer-ui";
 import { Button, RatingSelector, RatingStars, Text as UiText, TextField } from "@/components/ui";
 import { fetchApprovedReviews, fetchMyReview, submitMyReview } from "@/lib/reviews";
 import { getSupabaseClient } from "@/lib/supabase";
@@ -50,7 +50,7 @@ export function ReviewPanel({ targetType, targetId }: { targetType: "product" | 
     <View style={[styles.panel, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
       <UiText style={[styles.heading, { color: theme.colors.foreground }]}>{translate("reviewsTitle")}</UiText>
       <UiText style={[styles.subtitle, { color: theme.colors.muted }]}>{translate("reviewsSubtitle")}</UiText>
-      {auth.isPending || reviews.isPending || (auth.data && mine.isPending) ? <LoadingState label={translate("stateLoading")} /> : null}
+      {auth.isPending || reviews.isPending || (auth.data && mine.isPending) ? <PageSkeleton variant="list" rows={2} /> : null}
       {reviews.isError || mine.isError || auth.isError ? (
         <ErrorState title={translate("reviewsLoadError")} retryLabel={translate("retry")} onRetry={() => {
           void auth.refetch(); void reviews.refetch(); void mine.refetch();
