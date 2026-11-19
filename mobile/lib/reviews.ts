@@ -14,11 +14,13 @@ const ReviewSchema = z.object({
 
 export type AppReview = z.infer<typeof ReviewSchema>;
 
-export async function fetchApprovedReviews(targetType: "product" | "store", targetId: string): Promise<AppReview[]> {
-  const { data, error } = await getSupabaseClient().from("reviews")
+export async function fetchApprovedReviews(targetType: "product" | "store", targetId: string, signal?: AbortSignal): Promise<AppReview[]> {
+  let request = getSupabaseClient().from("reviews")
     .select("id, target_type, target_id, rating, comment, status, created_at")
     .eq("target_type", targetType).eq("target_id", targetId).eq("status", "approved")
     .order("created_at", { ascending: false }).limit(30);
+  if (signal) request = request.abortSignal(signal);
+  const { data, error } = await request;
   if (error) throw error;
   return ReviewSchema.array().parse(data as unknown);
 }
