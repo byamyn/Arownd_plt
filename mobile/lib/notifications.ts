@@ -13,14 +13,16 @@ const NotificationSchema = z.object({
 
 export type AppNotification = z.infer<typeof NotificationSchema>;
 
-export async function fetchMyNotifications(): Promise<AppNotification[]> {
+export async function fetchMyNotifications(signal?: AbortSignal): Promise<AppNotification[]> {
   const client = getSupabaseClient();
   const { data: auth, error: authError } = await client.auth.getUser();
   if (authError) throw authError;
   if (!auth.user) return [];
-  const { data, error } = await client.from("notifications")
+  let request = client.from("notifications")
     .select("id, type, title, body, data, read, created_at")
     .eq("user_id", auth.user.id).order("created_at", { ascending: false }).limit(100);
+  if (signal) request = request.abortSignal(signal);
+  const { data, error } = await request;
   if (error) throw error;
   return NotificationSchema.array().parse(data as unknown);
 }
