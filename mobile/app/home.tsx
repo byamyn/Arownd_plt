@@ -27,6 +27,7 @@ function HomeProductCard({ item, price }: {
   const imagePagerRef = useRef<ScrollView>(null);
   const [imageWidth, setImageWidth] = useState(0);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const productFavorite = useFavoriteToggle("products", item.product.id);
   const productReviews = useQuery({
     queryKey: ["approved-reviews", "product", item.product.id],
     queryFn: () => fetchApprovedReviews("product", item.product.id),
@@ -45,8 +46,8 @@ function HomeProductCard({ item, price }: {
   };
   const handleImageTap = () => {
     const now = Date.now();
-    if (now - lastImageTapAt.current <= 300) {
-      // Double-tap favorite is handled by the dedicated favorite control below.
+    if (now - lastImageTapAt.current <= 300 && !productFavorite.disabled) {
+      productFavorite.toggle();
       lastImageTapAt.current = 0;
       return;
     }
