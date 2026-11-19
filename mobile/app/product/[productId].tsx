@@ -242,7 +242,7 @@ export default function ProductDetailsScreen() {
           style={styles.accordionHeader}
         >
           <UiText weight="700">{translate("productInformation")}</UiText>
-          <Icon name={productInfoExpanded ? "chevron-up" : "chevron-down"} size={18} color={theme.colors.muted} />
+          <Icon name={productInfoExpanded ? "minus" : "chevron-down"} size={18} color={theme.colors.muted} />
         </Pressable>
         {productInfoExpanded ? (
           <View style={styles.metadata}>
@@ -259,7 +259,7 @@ export default function ProductDetailsScreen() {
           style={styles.accordionHeader}
         >
           <UiText weight="700">{translate("reviewsTitle")} ({reviewCount})</UiText>
-          <Icon name={reviewsExpanded ? "chevron-up" : "chevron-down"} size={18} color={theme.colors.muted} />
+          <Icon name={reviewsExpanded ? "minus" : "chevron-down"} size={18} color={theme.colors.muted} />
         </Pressable>
         {reviewsExpanded ? <ReviewPanel targetType="product" targetId={productId} /> : null}
       </View>
