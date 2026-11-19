@@ -171,7 +171,7 @@ export default function CheckoutScreen() {
     </CustomerScreen>;
   }
 
-  if (cart.isPending || auth.isPending || regionOptions.isPending) return <CustomerScreen><AppHeader title={translate("checkoutTitle")} /><PageSkeleton variant="form" rows={4} /></CustomerScreen>;
+  if (cart.isPending || auth.isPending || regionOptions.isPending) return <CustomerScreen><AppHeader title={translate("checkoutTitle")} /><PageSkeleton variant="checkout" rows={3} /></CustomerScreen>;
   if (cart.isError || auth.isError || regionOptions.isError) return <CustomerScreen><ErrorState title={translate("catalogLoadError")} retryLabel={translate("retry")} busy={cart.isFetching || auth.isFetching} onRetry={() => { void cart.refetch(); void auth.refetch(); }} /></CustomerScreen>;
   if (!cart.data.length) return <CustomerScreen>
     <AppHeader title={translate("checkoutTitle")} leading={<IconButton accessibilityLabel={translate("back")} onPress={() => router.back()} icon={<Icon name="arrow-right" size={22} color={theme.colors.foreground} />} variant="ghost" />} />
@@ -273,7 +273,7 @@ export default function CheckoutScreen() {
     <Card style={styles.sectionCard} contentStyle={styles.section}>
       <UiText style={styles.sectionTitle}>{translate("checkoutDeliveryTitle")}</UiText>
       {savedAddresses.isPending ? (
-        <LoadingState label={translate("checkoutAddressesLoading")} />
+        <PageSkeleton variant="list" rows={1} />
       ) : savedAddresses.isError ? (
         <PressableSurface accessibilityLabel={translate("checkoutSavedAddressesError")} onPress={() => void savedAddresses.refetch()}><UiText style={styles.retryText}>{translate("checkoutSavedAddressesError")}</UiText></PressableSurface>
       ) : savedAddresses.data && savedAddresses.data.length > 0 ? (
