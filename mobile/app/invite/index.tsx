@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import * as Linking from "expo-linking";
 import { router } from "expo-router";
 
-import { CustomerScreen, ErrorState, LoadingState } from "@/components/customer-ui";
+import { CustomerScreen, ErrorState, PageSkeleton } from "@/components/customer-ui";
 import {
   AppHeader,
   BadgeText,
@@ -75,7 +75,7 @@ export default function InviteScreen() {
       />
 
       {invite.isPending ? (
-        <LoadingState label={translate("stateLoading")} />
+        <PageSkeleton variant="details" rows={3} />
       ) : invite.isError || !invite.data ? (
         <ErrorState
           title={translate("inviteLoadError")}
