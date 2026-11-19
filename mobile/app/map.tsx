@@ -110,7 +110,7 @@ export default function MapScreen() {
 
   const stores = useQuery({
     queryKey: ["map-stores", mapViewport, requestedStoreId],
-    queryFn: () => fetchMapStoresInBounds(mapViewport!, requestedStoreId ?? null),
+    queryFn: ({ signal }) => fetchMapStoresInBounds(mapViewport!, requestedStoreId ?? null, signal),
     enabled: mapViewport !== null,
     staleTime: 30_000,
     placeholderData: (previousData) => previousData
