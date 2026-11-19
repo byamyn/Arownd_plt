@@ -21,7 +21,7 @@ export default function StoresScreen() {
   const regions = useQuery({ queryKey: ["customer-market-regions", browsingCountry.data], queryFn: () => fetchCountryRegions(browsingCountry.data as string), enabled: Boolean(browsingCountry.data), staleTime: 30 * 60_000 });
   const stores = useQuery({
     queryKey: ["customer-stores-by-region", browsingCountry.data, selectedRegionId],
-    queryFn: () => fetchVerifiedStoresByRegion(browsingCountry.data as string, selectedRegionId as number),
+    queryFn: ({ signal }) => fetchVerifiedStoresByRegion(browsingCountry.data as string, selectedRegionId as number, signal),
     enabled: Boolean(browsingCountry.data) && selectedRegionId !== null,
     staleTime: 60_000
   });
