@@ -32,7 +32,7 @@ export function useFavoriteToggle(kind: FavoriteKind, id: string) {
   };
 }
 
-export function FavoriteButton({ kind, id, iconOnly = false }: { kind: FavoriteKind; id: string; iconOnly?: boolean }) {
+export function FavoriteButton({ kind, id, iconOnly = false, floating = false }: { kind: FavoriteKind; id: string; iconOnly?: boolean; floating?: boolean }) {
   const theme = useAppTheme();
   const { active, disabled, toggle } = useFavoriteToggle(kind, id);
   const label = translate(active ? "favoriteSaved" : "favoriteAdd");
@@ -44,9 +44,14 @@ export function FavoriteButton({ kind, id, iconOnly = false }: { kind: FavoriteK
         onPress={toggle}
         disabled={disabled}
         variant="surface"
-        size={44}
-        icon={<Icon name="heart" size={20} color={active ? FAVORITE_PINK : theme.colors.muted} fill={active ? FAVORITE_PINK : "none"} accessibilityHidden />}
-        style={{
+        size={floating ? 36 : 44}
+        icon={<Icon name="heart" size={floating ? 17 : 20} color={active ? FAVORITE_PINK : theme.colors.muted} fill={active ? FAVORITE_PINK : "none"} accessibilityHidden />}
+        style={floating ? {
+          backgroundColor: active
+            ? (theme.mode === "dark" ? "rgba(58, 31, 43, 0.82)" : "rgba(252, 228, 236, 0.82)")
+            : (theme.mode === "dark" ? "rgba(0, 0, 0, 0.42)" : "rgba(255, 255, 255, 0.68)"),
+          borderColor: "transparent"
+        } : {
           backgroundColor: active ? (theme.mode === "dark" ? FAVORITE_PINK_SURFACE_DARK : FAVORITE_PINK_SURFACE) : theme.colors.surface,
           borderColor: active ? FAVORITE_PINK : theme.colors.border
         }}
