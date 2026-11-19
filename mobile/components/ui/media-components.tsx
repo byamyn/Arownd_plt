@@ -1,11 +1,10 @@
 import type { ReactNode } from "react";
+import { Image as ExpoImage, type ImageSource } from "expo-image";
 import {
-  Image as NativeImage,
   Modal,
   Pressable,
   ScrollView,
   View,
-  type ImageSourcePropType,
   type ImageStyle,
   type StyleProp,
   type ViewStyle
@@ -23,7 +22,7 @@ export function Image({
   style
 }: {
   uri?: string | undefined;
-  source?: ImageSourcePropType;
+  source?: ImageSource;
   accessibilityLabel: string;
   aspectRatio?: number;
   resizeMode?: "cover" | "contain" | "stretch" | "center";
@@ -31,8 +30,9 @@ export function Image({
 }) {
   const theme = useAppTheme();
   const imageSource = source ?? (uri ? { uri } : undefined);
+  const contentFit = resizeMode === "stretch" ? "fill" : resizeMode === "center" ? "none" : resizeMode;
   if (!imageSource) return <View accessibilityLabel={accessibilityLabel} style={[{ width: "100%", aspectRatio, borderRadius: theme.radius.md, backgroundColor: theme.mode === "dark" ? theme.colors.surfaceSecondary : theme.colors.surfaceMuted }, style as StyleProp<ViewStyle>]} />;
-  return <NativeImage accessibilityLabel={accessibilityLabel} source={imageSource} resizeMode={resizeMode} style={[{ width: "100%", aspectRatio, borderRadius: theme.radius.md, backgroundColor: theme.mode === "dark" ? theme.colors.surfaceSecondary : theme.colors.surfaceMuted }, style]} />;
+  return <ExpoImage accessibilityLabel={accessibilityLabel} source={imageSource} contentFit={contentFit} cachePolicy="memory-disk" style={[{ width: "100%", aspectRatio, borderRadius: theme.radius.md, backgroundColor: theme.mode === "dark" ? theme.colors.surfaceSecondary : theme.colors.surfaceMuted }, style]} />;
 }
 
 export function ImageGallery({
@@ -51,7 +51,7 @@ export function ImageGallery({
     <View accessibilityLabel={accessibilityLabel} style={{ gap: designTokens.spacing.sm }}>
       <Image uri={images[selectedIndex]?.uri} accessibilityLabel={images[selectedIndex]?.label ?? accessibilityLabel} aspectRatio={1} />
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ flexDirection: "row", gap: designTokens.spacing.sm }}>
-        {images.map((image, index) => <Pressable key={image.key} accessibilityRole="button" accessibilityLabel={image.label} accessibilityState={{ selected: index === selectedIndex }} onPress={() => onSelect(index)} style={{ borderWidth: index === selectedIndex ? 2 : 1, borderColor: index === selectedIndex ? theme.colors.accent : theme.colors.border, borderRadius: theme.radius.md, overflow: "hidden" }}><NativeImage source={{ uri: image.uri }} style={{ width: 60, height: 60 }} /></Pressable>)}
+        {images.map((image, index) => <Pressable key={image.key} accessibilityRole="button" accessibilityLabel={image.label} accessibilityState={{ selected: index === selectedIndex }} onPress={() => onSelect(index)} style={{ borderWidth: index === selectedIndex ? 2 : 1, borderColor: index === selectedIndex ? theme.colors.accent : theme.colors.border, borderRadius: theme.radius.md, overflow: "hidden" }}><ExpoImage source={{ uri: image.uri }} contentFit="cover" cachePolicy="memory-disk" recyclingKey={image.key} style={{ width: 60, height: 60 }} /></Pressable>)}
       </ScrollView>
     </View>
   );
@@ -69,7 +69,7 @@ export function ImagePreview({
   onRequestClose: () => void;
 }) {
   const theme = useAppTheme();
-  return <Modal visible={visible} transparent animationType="fade" onRequestClose={onRequestClose}><Pressable accessibilityRole="button" accessibilityLabel={accessibilityLabel} onPress={onRequestClose} style={{ flex: 1, justifyContent: "center", padding: designTokens.spacing.md, backgroundColor: theme.colors.overlay }}><NativeImage source={{ uri }} resizeMode="contain" style={{ width: "100%", height: "80%" }} /></Pressable></Modal>;
+  return <Modal visible={visible} transparent animationType="fade" onRequestClose={onRequestClose}><Pressable accessibilityRole="button" accessibilityLabel={accessibilityLabel} onPress={onRequestClose} style={{ flex: 1, justifyContent: "center", padding: designTokens.spacing.md, backgroundColor: theme.colors.overlay }}><ExpoImage source={{ uri }} contentFit="contain" cachePolicy="memory-disk" style={{ width: "100%", height: "80%" }} /></Pressable></Modal>;
 }
 
 export function CameraButton({
