@@ -57,7 +57,7 @@ export default function ProductDetailsScreen() {
   });
   const reviews = useQuery({
     queryKey: ["approved-reviews", "product", productId],
-    queryFn: () => fetchApprovedReviews("product", productId),
+    queryFn: ({ signal }) => fetchApprovedReviews("product", productId, signal),
     enabled: Boolean(productId)
   });
 
