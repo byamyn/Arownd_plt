@@ -3,7 +3,7 @@ import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 
-import { CustomerScreen, ErrorState, LoadingState } from "@/components/customer-ui";
+import { PageSkeleton, CustomerScreen, ErrorState, LoadingState } from "@/components/customer-ui";
 import { AppHeader, Button, Caption, Heading, Icon, PressableSurface, Text as UiText } from "@/components/ui";
 import { fetchMySupportConversations } from "@/lib/support";
 import { getSupabaseClient } from "@/lib/supabase";
@@ -61,7 +61,7 @@ export default function SupportScreen() {
   if (auth.isPending || (auth.data && conversations.isPending)) {
     return <CustomerScreen showNavigation={false}>
       <SupportHeader title={translate("supportTitle")} />
-      <LoadingState label={translate("stateLoading")} />
+      <PageSkeleton variant="list" rows={3} />
     </CustomerScreen>;
   }
   if (auth.isError || conversations.isError) {
