@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Image, Pressable, ScrollView, View, type ImageSourcePropType, type ImageStyle, type StyleProp, type ViewStyle } from "react-native";
+import { useState, type ReactNode } from "react";
+import { Image, Pressable, ScrollView, View, type ImageStyle, type StyleProp, type ViewStyle } from "react-native";
 import { Text as UiText } from "./typography";
 
 import { designTokens, useAppTheme } from "@/lib/theme";
@@ -208,14 +208,6 @@ export function ProductImageGallery({
 }) {
   const theme = useAppTheme();
   const [containerWidth, setContainerWidth] = useState(0);
-  const pagerRef = useRef<ScrollView>(null);
-
-  useEffect(() => {
-    if (containerWidth > 0) {
-      pagerRef.current?.scrollTo({ x: selectedIndex * containerWidth, animated: false });
-    }
-  }, [containerWidth, selectedIndex]);
-
   return (
     <View
       accessibilityLabel={accessibilityLabel}
@@ -224,7 +216,6 @@ export function ProductImageGallery({
     >
       {images.length > 0 ? (
         <ScrollView
-          ref={pagerRef}
           horizontal
           pagingEnabled
           nestedScrollEnabled
