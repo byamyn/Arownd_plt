@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
   imagePaginationDotActive: { width: 16, backgroundColor: "#FFFFFF", opacity: 1 },
   imagePaginationDotInactive: { backgroundColor: "#888888", opacity: 0.65 },
   productInfo: { flex: 1, minHeight: 0, backgroundColor: "transparent", justifyContent: "space-between", paddingHorizontal: designTokens.spacing.md, paddingVertical: designTokens.spacing.sm, gap: designTokens.spacing.xs },
-  productInfoColumns: { flex: 1, minHeight: 0, flexDirection: "row-reverse", justifyContent: "space-between", alignItems: "stretch", gap: designTokens.spacing.md },
+  productInfoColumns: { flex: 1, minHeight: 0, flexDirection: "row", justifyContent: "space-between", alignItems: "stretch", gap: designTokens.spacing.md },
   productDetailsColumn: { flex: 1, minWidth: 0, alignItems: "flex-start", justifyContent: "space-between", gap: 3 },
   productActionsColumn: { width: 116, alignItems: "center", justifyContent: "space-between", paddingVertical: 1 },
   productName: { lineHeight: 21, textAlign: "auto" },
