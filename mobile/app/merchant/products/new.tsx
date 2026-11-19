@@ -39,7 +39,7 @@ import {
 import { translate, useLanguage } from "@/lib/i18n";
 import { getLocalizedMerchantCategoryLabel } from "@/lib/locale-data";
 import { designTokens, useAppTheme, type AppTheme } from "@/lib/theme";
-import { BottomSheet, AppHeader, Button, Card, ErrorState, Icon, Image as UiImage, LoadingState, MediaViewer, Spinner, PressableSurface, Text as UiText, TextField } from "@/components/ui";
+import { BottomSheet, AppHeader, Button, Card, ErrorState, Icon, Image as UiImage, PageSkeleton, MediaViewer, Spinner, PressableSurface, Text as UiText, TextField } from "@/components/ui";
 
 type ProductForm = {
   name: string;
@@ -668,7 +668,7 @@ function MessageScreen({
         <AppHeader
           title={translate("merchantProductCreateTitle")}        />
         {loading ? (
-          <LoadingState label={label} />
+          <PageSkeleton variant="form" rows={4} />
         ) : actionLabel && onAction ? (
           <ErrorState title={label} retryLabel={actionLabel} busy={busy} onRetry={onAction} />
         ) : (
