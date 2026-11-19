@@ -45,7 +45,12 @@ const HomeProductSchema = z.object({
   stock_quantity: z.coerce.number(),
   is_available: z.boolean(),
   product: ProductSummarySchema,
-  store: z.object({ id: z.string(), name: z.string() }),
+  store: z.object({
+    id: z.string(),
+    name: z.string(),
+    logo_url: z.string().nullable().optional(),
+    rating: z.preprocess((value: unknown) => value == null ? null : Number(value), z.number().nullable()).optional()
+  }),
   images: z.array(ProductImageSchema).default([])
 }).passthrough();
 
@@ -112,7 +117,7 @@ export async function fetchOffersByIds(ids: string[]): Promise<ProductOffer[]> {
 export async function fetchHomeProducts(): Promise<HomeProduct[]> {
   const { data, error } = await getSupabaseClient()
     .from("store_offers")
-    .select("id, price, stock_quantity, is_available, product:products!inner(id, name, category, brand), store:stores!inner(id, name), images:product_images(image_url, is_primary)")
+    .select("id, price, stock_quantity, is_available, product:products!inner(id, name, description, category, brand), store:stores!inner(id, name, logo_url, rating), images:product_images(image_url, is_primary)")
     .eq("is_available", true)
     .gt("stock_quantity", 0)
     .order("created_at", { ascending: false })
