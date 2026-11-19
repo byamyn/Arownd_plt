@@ -8,7 +8,8 @@ const ProductSummarySchema = z.object({
   name: z.string(),
   description: z.string().nullable().optional(),
   category: z.string().nullable().optional(),
-  brand: z.string().nullable().optional()
+  brand: z.string().nullable().optional(),
+  rating: z.preprocess((value: unknown) => value == null ? null : Number(value), z.number().nullable()).optional()
 }).passthrough();
 
 const StoreSummarySchema = z.object({
@@ -117,7 +118,7 @@ export async function fetchOffersByIds(ids: string[]): Promise<ProductOffer[]> {
 export async function fetchHomeProducts(): Promise<HomeProduct[]> {
   const { data, error } = await getSupabaseClient()
     .from("store_offers")
-    .select("id, price, stock_quantity, is_available, product:products!inner(id, name, description, category, brand), store:stores!inner(id, name, logo_url, rating), images:product_images(image_url, is_primary)")
+    .select("id, price, stock_quantity, is_available, product:products!inner(id, name, description, category, brand, rating), store:stores!inner(id, name, logo_url, rating), images:product_images(image_url, is_primary)")
     .eq("is_available", true)
     .gt("stock_quantity", 0)
     .order("created_at", { ascending: false })
