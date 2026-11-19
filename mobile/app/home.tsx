@@ -71,7 +71,7 @@ function HomeProductCard({ item, price }: {
           )}
         </Pressable>
         <View style={styles.favoriteButton}>
-          <FavoriteButton kind="products" id={item.product.id} iconOnly />
+          <FavoriteButton kind="products" id={item.product.id} iconOnly floating />
         </View>
       </View>
 
@@ -79,6 +79,12 @@ function HomeProductCard({ item, price }: {
         <View style={styles.productInfoColumns}>
           <View style={styles.productDescriptionColumn}>
             <UiText numberOfLines={2} weight="700" style={styles.productName}>{item.product.name}</UiText>
+            {item.store.rating != null ? (
+              <View style={styles.storeRating}>
+                <Icon name="star" size={14} color="#E5A000" fill="#E5A000" accessibilityHidden />
+                <Caption>{item.store.rating.toFixed(1)}</Caption>
+              </View>
+            ) : null}
             {item.product.description ? (
               <View style={styles.descriptionPreview}>
                 <UiText
@@ -113,18 +119,12 @@ function HomeProductCard({ item, price }: {
                 )}
               </View>
             </Pressable>
-            {item.store.rating != null ? (
-              <View style={styles.storeRating}>
-                <Icon name="star" size={14} color="#E5A000" fill="#E5A000" accessibilityHidden />
-                <Caption>{item.store.rating.toFixed(1)}</Caption>
-              </View>
-            ) : null}
           </View>
         </View>
 
         <View style={styles.priceRow}>
+          <Button label={translate("homeBuyNow")} onPress={openDetails} size="sm" style={styles.buyNowButton} />
           <PriceDisplay value={price} />
-          <Button label={translate("homeBuyNow")} onPress={openDetails} size="sm" />
         </View>
       </View>
     </View>
@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
   feedState: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: designTokens.spacing.xl },
   productCard: { flex: 1, width: "100%", borderRadius: designTokens.radius.xl, overflow: "hidden" },
   productImage: { flex: 3, minHeight: 0, overflow: "hidden", alignItems: "center", justifyContent: "center" },
-  favoriteButton: { position: "absolute", top: designTokens.spacing.md, end: designTokens.spacing.md },
+  favoriteButton: { position: "absolute", top: designTokens.spacing.md, start: designTokens.spacing.md },
   productInfo: { flex: 1, minHeight: 0, backgroundColor: "transparent", justifyContent: "space-between", paddingHorizontal: designTokens.spacing.md, paddingVertical: designTokens.spacing.sm, gap: designTokens.spacing.xs },
   productInfoColumns: { flex: 1, minHeight: 0, flexDirection: "row", justifyContent: "space-between", gap: designTokens.spacing.md },
   productDescriptionColumn: { flex: 1, minWidth: 0, alignItems: "flex-start", gap: 3 },
@@ -194,5 +194,6 @@ const styles = StyleSheet.create({
   storeAvatar: { width: 38, height: 38, borderRadius: 19, overflow: "hidden", alignItems: "center", justifyContent: "center" },
   storeAvatarImage: { width: 38, height: 38, borderRadius: 19 },
   storeRating: { flexDirection: "row", alignItems: "center", gap: 4 },
-  priceRow: { minHeight: 34, flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: designTokens.spacing.sm }
+  priceRow: { minHeight: 48, flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: designTokens.spacing.md },
+  buyNowButton: { minHeight: 48, minWidth: 132, paddingHorizontal: designTokens.spacing.lg, borderRadius: designTokens.radius.lg }
 });
