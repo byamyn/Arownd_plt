@@ -233,7 +233,7 @@ function InviteContent() {
   const share = async (message: string) => { try { await Share.share({ message }); } catch { /* Native share may be unavailable. */ } };
   const formatDate = (value: string) => {
     const date = new Date(value);
-    return Number.isNaN(date.getTime()) ? "" : date.toLocaleDateString(language === "ar" ? "ar-DZ" : "en-GB", { day: "numeric", month: "short", year: "numeric" });
+    return Number.isNaN(date.getTime()) ? "" : date.toLocaleDateString(language === "ar" ? "ar-DZ-u-nu-latn" : "en-GB-u-nu-latn", { day: "numeric", month: "short", year: "numeric" });
   };
   if (invite.isPending) return <LoadingState label={translate("stateLoading")} />;
   if (invite.isError || !invite.data) return <ErrorState title={translate("inviteLoadError")} retryLabel={translate("retry")} busy={invite.isFetching} onRetry={() => { void invite.refetch(); }} />;
