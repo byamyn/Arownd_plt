@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
-import { Pressable, StyleSheet, View, type LayoutChangeEvent } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View, type LayoutChangeEvent, type NativeScrollEvent, type NativeSyntheticEvent } from "react-native";
 
 import { FavoriteButton, useFavoriteToggle } from "@/components/favorite-button";
 import { CustomerMainHeader } from "@/components/customer-main-header";
@@ -24,7 +24,30 @@ function HomeProductCard({ item, price }: {
   const theme = useAppTheme();
   const queryClient = useQueryClient();
   const lastImageTapAt = useRef(0);
+  const imagePagerRef = useRef<ScrollView>(null);
+  const [imageWidth, setImageWidth] = useState(0);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
   const productFavorite = useFavoriteToggle("products", item.product.id);
+  const primaryImage = getPrimaryImage(item);
+  const productImages = [...new Set([primaryImage, ...item.images.map((image) => image.image_url)].filter((uri): uri is string => Boolean(uri)))];
+  const handleImageScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    if (imageWidth <= 0) return;
+    const nextIndex = Math.round(event.nativeEvent.contentOffset.x / imageWidth);
+    setActiveImageIndex(Math.max(0, Math.min(nextIndex, productImages.length - 1)));
+  };
+  const handleImageTap = () => {
+    const now = Date.now();
+    if (now - lastImageTapAt.current <= 300 && !productFavorite.disabled) {
+      productFavorite.toggle();
+      lastImageTapAt.current = 0;
+      return;
+    }
+    lastImageTapAt.current = now;
+  };
+  const selectImage = (index: number) => {
+    if (imageWidth > 0) imagePagerRef.current?.scrollTo({ x: index * imageWidth, animated: true });
+    setActiveImageIndex(index);
+  };
 
   const openDetails = () => {
     void queryClient.prefetchQuery({
@@ -47,28 +70,59 @@ function HomeProductCard({ item, price }: {
 
   return (
     <View style={[styles.productCard, { backgroundColor: theme.colors.surface }]}>
-      <View style={[styles.productImage, { backgroundColor: theme.colors.surfaceMuted }]}>
-        <Pressable
-          style={StyleSheet.absoluteFill}
-          onPress={() => {
-            const now = Date.now();
-            if (now - lastImageTapAt.current <= 300 && !productFavorite.disabled) {
-              productFavorite.toggle();
-              lastImageTapAt.current = 0;
-              return;
-            }
-            lastImageTapAt.current = now;
-          }}
-          accessibilityRole="button"
-          accessibilityLabel={item.product.name}
-          accessibilityHint={translate("favoriteAdd")}
-        >
-          {getPrimaryImage(item) ? (
-            <UiImage uri={getPrimaryImage(item)!} accessibilityLabel={item.product.name} aspectRatio={1} style={StyleSheet.absoluteFill} />
-          ) : (
-            <Icon name="image" size={42} color={theme.colors.subtle} accessibilityHidden />
-          )}
-        </Pressable>
+      <View
+        style={[styles.productImage, { backgroundColor: theme.colors.surfaceMuted }]}
+        onLayout={(event) => setImageWidth(event.nativeEvent.layout.width)}
+      >
+        {productImages.length > 0 ? (
+          <ScrollView
+            ref={imagePagerRef}
+            horizontal
+            pagingEnabled
+            nestedScrollEnabled
+            showsHorizontalScrollIndicator={false}
+            style={StyleSheet.absoluteFill}
+            onMomentumScrollEnd={handleImageScrollEnd}
+          >
+            {productImages.map((uri, index) => (
+              <Pressable
+                key={uri}
+                onPress={handleImageTap}
+                accessibilityRole="button"
+                accessibilityLabel={`${item.product.name} — ${index + 1}`}
+                accessibilityHint={translate("favoriteAdd")}
+                style={{ width: imageWidth || "100%", height: "100%" }}
+              >
+                <UiImage
+                  uri={uri}
+                  accessibilityLabel={item.product.name}
+                  aspectRatio={1}
+                  style={{ width: "100%", height: "100%", borderRadius: 0 }}
+                />
+              </Pressable>
+            ))}
+          </ScrollView>
+        ) : (
+          <Icon name="image" size={42} color={theme.colors.subtle} accessibilityHidden />
+        )}
+        {productImages.length > 1 ? (
+          <View style={styles.imagePagination} accessibilityLabel={` ${activeImageIndex + 1} / ${productImages.length}`}>
+            {productImages.map((uri, index) => (
+              <Pressable
+                key={uri}
+                onPress={() => selectImage(index)}
+                accessibilityRole="button"
+                accessibilityLabel={`الصورة ${index + 1}`}
+                accessibilityState={{ selected: activeImageIndex === index }}
+                hitSlop={6}
+                style={[
+                  styles.imagePaginationDot,
+                  activeImageIndex === index ? styles.imagePaginationDotActive : styles.imagePaginationDotInactive
+                ]}
+              />
+            ))}
+          </View>
+        ) : null}
         <View style={styles.favoriteButton}>
           <FavoriteButton kind="products" id={item.product.id} iconOnly floating />
         </View>
@@ -164,6 +218,10 @@ const styles = StyleSheet.create({
   productCard: { flex: 1, width: "100%", borderRadius: designTokens.radius.xl, overflow: "hidden" },
   productImage: { flex: 3, minHeight: 0, overflow: "hidden", alignItems: "center", justifyContent: "center" },
   favoriteButton: { position: "absolute", top: designTokens.spacing.md, start: designTokens.spacing.md },
+  imagePagination: { position: "absolute", bottom: designTokens.spacing.md, alignSelf: "center", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6 },
+  imagePaginationDot: { width: 6, height: 6, borderRadius: 3 },
+  imagePaginationDotActive: { width: 16, backgroundColor: "#FFFFFF", opacity: 1 },
+  imagePaginationDotInactive: { backgroundColor: "#888888", opacity: 0.65 },
   productInfo: { flex: 1, minHeight: 0, backgroundColor: "transparent", justifyContent: "space-between", paddingHorizontal: designTokens.spacing.md, paddingVertical: designTokens.spacing.sm, gap: designTokens.spacing.xs },
   productInfoColumns: { flex: 1, minHeight: 0, flexDirection: "row", justifyContent: "space-between", gap: designTokens.spacing.md },
   productTitleColumn: { flex: 1, minWidth: 0, alignItems: "flex-start", gap: 3 },
