@@ -21,7 +21,7 @@ export default function MerchantAnalyticsScreen() {
   const ready = access.data?.status === "merchant_ready" && Boolean(storeId);
   const analytics = useQuery({
     queryKey: ["merchant-analytics", storeId],
-    queryFn: () => fetchMerchantAnalytics(storeId ?? ""),
+    queryFn: ({ signal }) => fetchMerchantAnalytics(storeId ?? "", signal),
     enabled: ready,
     retry: false
   });
