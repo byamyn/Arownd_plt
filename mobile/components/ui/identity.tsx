@@ -1,7 +1,6 @@
+import { Image } from "expo-image";
 import {
-  Image,
   View,
-  type ImageSourcePropType,
   type StyleProp,
   type ViewStyle
 } from "react-native";
@@ -40,7 +39,7 @@ export function Avatar({
   style
 }: AvatarProps) {
   const theme = useAppTheme();
-  const imageSource: ImageSourcePropType | undefined = imageUri ? { uri: imageUri } : undefined;
+  const imageSource = imageUri ? { uri: imageUri } : undefined;
 
   return (
     <View
@@ -61,7 +60,7 @@ export function Avatar({
         }}
       >
         {imageSource ? (
-          <Image source={imageSource} resizeMode="cover" style={{ width: size, height: size }} />
+          <Image source={imageSource} contentFit="cover" cachePolicy="memory-disk" recyclingKey={imageUri} style={{ width: size, height: size }} />
         ) : (
           <UiText
             numberOfLines={1}
