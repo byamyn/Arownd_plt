@@ -84,13 +84,15 @@ export type MerchantCategory = {
   emoji: string;
 };
 
-export async function fetchMerchantCategories(): Promise<MerchantCategory[]> {
-  const { data, error } = await getSupabaseClient()
+export async function fetchMerchantCategories(signal?: AbortSignal): Promise<MerchantCategory[]> {
+  let request = getSupabaseClient()
     .from("categories")
     .select("id, parent_id, label_ar, emoji")
     .eq("is_active", true)
     .is("parent_id", null)
     .order("sort_order");
+  if (signal) request = request.abortSignal(signal);
+  const { data, error } = await request;
 
   if (error) throw error;
 
