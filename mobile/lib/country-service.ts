@@ -65,14 +65,15 @@ export async function fetchMyAccountCurrencyCode(): Promise<string> {
   const { data: authData, error: authError } = await getSupabaseClient().auth.getUser();
   if (authError || !authData.user) throw new Error("NOT_AUTHENTICATED");
   const { data: profile, error: profileError } = await getSupabaseClient()
-    .from("profiles").select("country_code").eq("user_id", authData.user.id).single();
+    .from("profiles")
+    .select("country_code, country:countries!profiles_country_code_fkey(currency_code)")
+    .eq("user_id", authData.user.id)
+    .single();
   if (profileError) throw profileError;
   if (typeof profile.country_code !== "string" || !/^[A-Z]{2}$/.test(profile.country_code)) throw new Error("INVALID_ACCOUNT_COUNTRY");
-  const { data: country, error: countryError } = await getSupabaseClient()
-    .from("countries").select("currency_code").eq("code", profile.country_code).single();
-  if (countryError) throw countryError;
-  if (typeof country.currency_code !== "string" || !/^[A-Z]{3}$/.test(country.currency_code)) throw new Error("INVALID_ACCOUNT_CURRENCY");
-  return country.currency_code;
+  const currencyCode = profile.country?.currency_code;
+  if (typeof currencyCode !== "string" || !/^[A-Z]{3}$/.test(currencyCode)) throw new Error("INVALID_ACCOUNT_CURRENCY");
+  return currencyCode;
 }
 
 export async function fetchBrowsingCurrencyCode(): Promise<string> {
@@ -81,7 +82,7 @@ export async function fetchBrowsingCurrencyCode(): Promise<string> {
 
   const { data: profile, error: profileError } = await getSupabaseClient()
     .from("profiles")
-    .select("browsing_country_code")
+    .select("browsing_country_code, country:countries!profiles_browsing_country_code_fkey(currency_code)")
     .eq("user_id", authData.user.id)
     .single();
 
@@ -90,18 +91,12 @@ export async function fetchBrowsingCurrencyCode(): Promise<string> {
     throw new Error("INVALID_BROWSING_COUNTRY");
   }
 
-  const { data: country, error: countryError } = await getSupabaseClient()
-    .from("countries")
-    .select("currency_code")
-    .eq("code", profile.browsing_country_code)
-    .single();
-
-  if (countryError) throw countryError;
-  if (typeof country.currency_code !== "string" || !/^[A-Z]{3}$/.test(country.currency_code)) {
+  const currencyCode = profile.country?.currency_code;
+  if (typeof currencyCode !== "string" || !/^[A-Z]{3}$/.test(currencyCode)) {
     throw new Error("INVALID_BROWSING_CURRENCY");
   }
 
-  return country.currency_code;
+  return currencyCode;
 }
 
 export async function updateBrowsingCountryCode(countryCode: string): Promise<void> {
