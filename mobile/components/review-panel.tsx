@@ -28,7 +28,7 @@ export function ReviewPanel({ targetType, targetId }: { targetType: "product" | 
   });
   const reviews = useQuery({
     queryKey: ["approved-reviews", targetType, targetId],
-    queryFn: () => fetchApprovedReviews(targetType, targetId)
+    queryFn: ({ signal }) => fetchApprovedReviews(targetType, targetId, signal)
   });
   const mine = useQuery({
     queryKey: ["my-review", targetType, targetId],
