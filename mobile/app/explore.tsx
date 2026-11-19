@@ -120,9 +120,9 @@ export default function ExploreScreen() {
   const normalized = debouncedQuery;
   const products = useQuery({
     queryKey: ["customer-explore-products", normalized, category],
-    queryFn: () => normalized || category
-      ? searchCatalogProducts(normalized, category)
-      : fetchHomeProducts(),
+    queryFn: ({ signal }) => normalized || category
+      ? searchCatalogProducts(normalized, category, signal)
+      : fetchHomeProducts(signal),
     staleTime: 30_000,
     enabled: hasActiveFilter
   });
