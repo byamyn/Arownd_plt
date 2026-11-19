@@ -1,7 +1,7 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
-import { Animated, FlatList, PanResponder, Pressable, ScrollView, StyleSheet, View, type LayoutChangeEvent, type NativeScrollEvent, type NativeSyntheticEvent, type FlatList as FlatListInstance } from "react-native";
+import { Animated, FlatList, PanResponder, Pressable, StyleSheet, View, type LayoutChangeEvent, type NativeScrollEvent, type NativeSyntheticEvent } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { FavoriteButton, useFavoriteToggle } from "@/components/favorite-button";
@@ -26,7 +26,7 @@ const HomeProductCard = memo(function HomeProductCard({ item, price }: {
   const theme = useAppTheme();
   const queryClient = useQueryClient();
   const lastImageTapAt = useRef(0);
-  const imagePagerRef = useRef<FlatListInstance<string>>(null);
+  const imagePagerRef = useRef<FlatList<string>>(null);
   const [imageWidth, setImageWidth] = useState(0);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const imageScale = useRef(new Animated.Value(1)).current;
