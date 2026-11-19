@@ -6,7 +6,8 @@ import { designTokens, useAppTheme } from "@/lib/theme";
 import { Avatar, type AvatarProps } from "./identity";
 import { Icon } from "./icon";
 
-const RATING_GOLD = "#D4A017";
+const RATING_GOLD = "#E5A000";
+const RATING_GOLD_HIGHLIGHT = "#F7C95C";
 
 export function AvatarGroup({
   people,
@@ -67,7 +68,7 @@ export function RatingStars({
   return (
     <View accessibilityRole="image" accessibilityLabel={String(value)} style={[{ flexDirection: "row", alignItems: "center", gap: designTokens.spacing.xs }, style]}>
       {Array.from({ length: count }, (_, index) => (
-        <Icon key={index} name="star" size={size} color={index < Math.round(normalized) ? RATING_GOLD : theme.colors.muted} fill={index < Math.round(normalized) ? RATING_GOLD : "none"} accessibilityHidden />
+        <Icon key={index} name="star" size={size} color={index < Math.round(normalized) ? RATING_GOLD_HIGHLIGHT : theme.colors.muted} fill={index < Math.round(normalized) ? RATING_GOLD : "none"} accessibilityHidden />
       ))}
       {showValue ? <UiText style={{ marginStart: designTokens.spacing.xs, color: theme.colors.muted, fontSize: theme.typography.caption }}>{value.toFixed(1)}</UiText> : null}
     </View>
@@ -95,7 +96,7 @@ export function RatingSelector({
         const selected = rating <= value;
         return (
           <Pressable key={rating} accessibilityRole="radio" accessibilityLabel={`${accessibilityLabel} ${rating}`} accessibilityState={{ checked: value === rating, disabled }} disabled={disabled} onPress={() => onChange(rating)} hitSlop={4} style={{ width: size, height: size, alignItems: "center", justifyContent: "center" }}>
-            <Icon name="star" size={size * 0.72} color={selected ? RATING_GOLD : theme.colors.muted} fill={selected ? RATING_GOLD : "none"} accessibilityHidden />
+            <Icon name="star" size={size * 0.72} color={selected ? RATING_GOLD_HIGHLIGHT : theme.colors.muted} fill={selected ? RATING_GOLD : "none"} accessibilityHidden />
           </Pressable>
         );
       })}
