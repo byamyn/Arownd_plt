@@ -24,3 +24,16 @@ export function getCustomerTab(pathname: string): CustomerTab | null {
   if (pathname === "/checkout") return null;
   return null;
 }
+
+let homeReselectHandler: (() => void) | null = null;
+
+export function registerHomeReselectHandler(handler: () => void): () => void {
+  homeReselectHandler = handler;
+  return () => {
+    if (homeReselectHandler === handler) homeReselectHandler = null;
+  };
+}
+
+export function reselectHome(): void {
+  homeReselectHandler?.();
+}
