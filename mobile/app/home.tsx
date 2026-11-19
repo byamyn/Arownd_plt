@@ -1,12 +1,13 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
-import { Animated, PanResponder, Pressable, ScrollView, StyleSheet, View, type LayoutChangeEvent, type NativeScrollEvent, type NativeSyntheticEvent, type ScrollViewInstance } from "react-native";
+import { Animated, FlatList, PanResponder, Pressable, ScrollView, StyleSheet, View, type LayoutChangeEvent, type NativeScrollEvent, type NativeSyntheticEvent, type ScrollViewInstance } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import { FavoriteButton, useFavoriteToggle } from "@/components/favorite-button";
+import { CustomerNavigation } from "@/components/customer-navigation";
 import { CustomerMainHeader } from "@/components/customer-main-header";
 import {
-  CustomerScreen,
   EmptyState,
   ErrorState,
 } from "@/components/customer-ui";
@@ -18,7 +19,7 @@ import { translate } from "@/lib/i18n";
 import { registerHomeReselectHandler } from "@/lib/customer-navigation-state";
 import { designTokens, useAppTheme } from "@/lib/theme";
 
-function HomeProductCard({ item, price }: {
+const HomeProductCard = memo(function HomeProductCard({ item, price }: {
   item: Awaited<ReturnType<typeof fetchHomeProducts>>[number];
   price: string;
 }) {
@@ -246,59 +247,87 @@ function HomeProductCard({ item, price }: {
 
 export default function CustomerHomeScreen() {
   const [feedHeight, setFeedHeight] = useState(0);
-  const feedScrollRef = useRef<ScrollViewInstance>(null);
+  const feedListRef = useRef<FlatList<Awaited<ReturnType<typeof fetchHomeProducts>>[number]>>(null);
   const queryClient = useQueryClient();
+  const theme = useAppTheme();
   const browsingCurrency = useQuery({ queryKey: ["browsing-country-currency"], queryFn: fetchBrowsingCurrencyCode, staleTime: 60_000 });
   const products = useQuery({ queryKey: ["customer-home-products"], queryFn: fetchHomeProducts, staleTime: 60_000 });
+
   useEffect(() => registerHomeReselectHandler(() => {
-    feedScrollRef.current?.scrollTo({ y: 0, animated: true });
+    feedListRef.current?.scrollToOffset({ offset: 0, animated: true });
     void queryClient.invalidateQueries({ queryKey: ["customer-home-products"], exact: true });
     void queryClient.invalidateQueries({ queryKey: ["browsing-country-currency"], exact: true });
     void queryClient.invalidateQueries({ queryKey: ["approved-reviews", "product"] });
   }), [queryClient]);
 
-  const handleFeedLayout = (event: LayoutChangeEvent) => {
+  const handleFeedLayout = useCallback((event: LayoutChangeEvent) => {
     const nextHeight = Math.round(event.nativeEvent.layout.height);
     setFeedHeight((current) => current === nextHeight ? current : nextHeight);
-  };
+  }, []);
+
+  const renderProduct = useCallback(({ item }: { item: Awaited<ReturnType<typeof fetchHomeProducts>>[number] }) => (
+    <View style={[styles.feedPage, { height: feedHeight || 560 }]}>
+      <HomeProductCard
+        item={item}
+        price={browsingCurrency.data ? formatMarketPrice(item.price, browsingCurrency.data) : "—"}
+      />
+    </View>
+  ), [browsingCurrency.data, feedHeight]);
+
+  const emptyContent = products.isPending ? (
+    <View style={[styles.feedPage, { height: feedHeight || 560 }]}>
+      <ProductFeedSkeleton />
+    </View>
+  ) : products.isError ? (
+    <View style={[styles.feedState, { minHeight: feedHeight || 560 }]}>
+      <ErrorState title={translate("catalogLoadError")} retryLabel={translate("retry")} busy={products.isFetching} onRetry={() => void products.refetch()} />
+    </View>
+  ) : (
+    <View style={[styles.feedState, { minHeight: feedHeight || 560 }]}>
+      <EmptyState icon="package" title={translate("homeNoProducts")} hint={translate("homeNoProductsHint")} />
+    </View>
+  );
 
   return (
-    <CustomerScreen
-      header={<CustomerMainHeader />}
-      contentStyle={styles.feedContent}
-      scrollRef={feedScrollRef}
-      scrollViewProps={{ pagingEnabled: true, decelerationRate: "fast", onLayout: handleFeedLayout }}
-      refreshing={products.isFetching}
-      onRefresh={() => { void products.refetch(); }}
-    >
-      {products.isPending ? (
-        <View style={[styles.feedPage, { height: feedHeight || 560 }]}>
-          <ProductFeedSkeleton />
-        </View>
-      ) : products.isError ? (
-        <View style={[styles.feedState, { minHeight: feedHeight || 560 }]}>
-          <ErrorState title={translate("catalogLoadError")} retryLabel={translate("retry")} busy={products.isFetching} onRetry={() => void products.refetch()} />
-        </View>
-      ) : products.data.length === 0 ? (
-        <View style={[styles.feedState, { minHeight: feedHeight || 560 }]}>
-          <EmptyState icon="package" title={translate("homeNoProducts")} hint={translate("homeNoProductsHint")} />
-        </View>
-      ) : (
-        products.data.map((item) => (
-          <View key={item.id} style={[styles.feedPage, { height: feedHeight || 560 }]}>
-            <HomeProductCard
-              item={item}
-              price={browsingCurrency.data ? formatMarketPrice(item.price, browsingCurrency.data) : "—"}
-            />
-          </View>
-        ))
-      )}
-    </CustomerScreen>
+    <SafeAreaView style={[styles.safe, { backgroundColor: theme.colors.background }]}>
+      <View style={styles.screenHeader}>
+        <CustomerMainHeader />
+      </View>
+      <View style={styles.feedViewport} onLayout={handleFeedLayout}>
+        <FlatList
+          ref={feedListRef}
+          data={products.data ?? []}
+          renderItem={renderProduct}
+          keyExtractor={(item) => item.id}
+          ListEmptyComponent={emptyContent}
+          pagingEnabled
+          decelerationRate="fast"
+          showsVerticalScrollIndicator={false}
+          refreshing={products.isFetching}
+          onRefresh={() => { void products.refetch(); }}
+          initialNumToRender={1}
+          maxToRenderPerBatch={2}
+          updateCellsBatchingPeriod={50}
+          windowSize={3}
+          removeClippedSubviews
+          getItemLayout={feedHeight > 0 ? (_data, index) => ({
+            length: feedHeight,
+            offset: feedHeight * index,
+            index
+          }) : undefined}
+          contentContainerStyle={styles.feedListContent}
+        />
+      </View>
+      <CustomerNavigation />
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  feedContent: { paddingHorizontal: 0, paddingTop: 0, paddingBottom: 0, gap: 0 },
+  safe: { flex: 1 },
+  screenHeader: { paddingHorizontal: designTokens.spacing.xl, paddingTop: designTokens.spacing.sm, paddingBottom: designTokens.spacing.sm },
+  feedViewport: { flex: 1 },
+  feedListContent: { flexGrow: 1, paddingHorizontal: 0, paddingTop: 0, paddingBottom: 0 },
   feedPage: { width: "100%", paddingHorizontal: 0, paddingVertical: 0 },
   feedState: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: designTokens.spacing.xl },
   productCard: { flex: 1, width: "100%", borderRadius: 0, overflow: "hidden" },
