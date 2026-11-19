@@ -112,10 +112,14 @@ export default function MapScreen() {
   const watchSubscriptionRef = useRef<Location.LocationSubscription | null>(null);
   const watchGenerationRef = useRef(0);
   const lastRerouteAtRef = useRef(0);
+  const navigationSessionRef = useRef(0);
+  const rerouteRequestRef = useRef(0);
+  const selectedStoreIdRef = useRef<string | null>(null);
   const navigationRef = useRef<NavigationSession | null>(null);
   const hasAutoStartedDirectionsRef = useRef(false);
 
   navigationRef.current = navigation;
+  selectedStoreIdRef.current = selectedStoreId;
 
   const stores = useQuery({
     queryKey: ["map-stores"],
@@ -269,6 +273,8 @@ export default function MapScreen() {
       staleTime: 30_000
     });
 
+    navigationSessionRef.current += 1;
+    rerouteRequestRef.current += 1;
     setNavigation(null);
     setSelectedStoreId(null);
     router.push({ pathname: "/store/[storeId]", params: { storeId } });
@@ -276,18 +282,25 @@ export default function MapScreen() {
 
   const startNavigation = async () => {
     if (!selectedStore || isStartingNavigation) return;
+    const sessionId = navigationSessionRef.current + 1;
+    navigationSessionRef.current = sessionId;
+    rerouteRequestRef.current += 1;
+    const destinationStoreId = selectedStore.id;
     setIsStartingNavigation(true);
     setNavigationError(false);
 
     try {
       const origin = await getCurrentLocation();
-      if (!origin) return;
+      if (!origin || navigationSessionRef.current !== sessionId
+        || selectedStoreIdRef.current !== destinationStoreId) return;
 
       const destination: RoutePoint = {
         latitude: selectedStore.latitude,
         longitude: selectedStore.longitude
       };
       const route = await fetchDrivingRoute(origin, destination);
+      if (navigationSessionRef.current !== sessionId
+        || selectedStoreIdRef.current !== destinationStoreId) return;
       if (route.coordinates.length < 2) throw new Error("route_geometry_missing");
 
       setNavigation({
@@ -315,6 +328,8 @@ export default function MapScreen() {
   }, [requestedDirections, requestedStoreId, selectedStore]);
 
   const stopNavigation = () => {
+    navigationSessionRef.current += 1;
+    rerouteRequestRef.current += 1;
     setNavigation(null);
     setNavigationError(false);
   };
@@ -339,24 +354,39 @@ export default function MapScreen() {
     if (Date.now() - lastRerouteAtRef.current < REROUTE_COOLDOWN_MS) return;
 
     lastRerouteAtRef.current = Date.now();
+    const sessionId = navigationSessionRef.current;
+    const requestId = rerouteRequestRef.current + 1;
+    rerouteRequestRef.current = requestId;
+    const sourceRoute = navigation.route;
+    const destinationStoreId = selectedStore?.id ?? null;
     setNavigation((current) => current ? { ...current, isRerouting: true } : current);
 
     const destination = selectedStore
       ? { latitude: selectedStore.latitude, longitude: selectedStore.longitude }
       : null;
-    if (!destination) {
+    if (!destination || !destinationStoreId) {
       setNavigation((current) => current ? { ...current, isRerouting: false } : current);
       return;
     }
 
+    const isRequestCurrent = () =>
+      navigationSessionRef.current === sessionId
+      && rerouteRequestRef.current === requestId
+      && selectedStoreIdRef.current === destinationStoreId
+      && navigationRef.current?.route === sourceRoute;
+
     void fetchDrivingRoute(userPosition, destination)
       .then((route) => {
-        setNavigation((current) => current
+        if (!isRequestCurrent()) return;
+        setNavigation((current) => current && current.route === sourceRoute
           ? { route, currentStepIndex: 0, isRerouting: false }
           : current);
       })
       .catch(() => {
-        setNavigation((current) => current ? { ...current, isRerouting: false } : current);
+        if (!isRequestCurrent()) return;
+        setNavigation((current) => current && current.route === sourceRoute
+          ? { ...current, isRerouting: false }
+          : current);
       });
   }, [userPosition, navigation, selectedStore]);
 
