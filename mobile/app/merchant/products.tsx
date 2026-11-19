@@ -29,6 +29,8 @@ import {
 import { translate, useLanguage } from "@/lib/i18n";
 import { designTokens, useAppTheme, type AppTheme } from "@/lib/theme";
 
+const EMPTY_MERCHANT_PRODUCTS: MerchantProductOffer[] = [];
+
 export default function MerchantProductsScreen() {
   useLanguage();
   const theme = useAppTheme();
@@ -55,6 +57,13 @@ export default function MerchantProductsScreen() {
     enabled: ready,
     retry: false
   });
+
+  const allOffers = products.data ?? EMPTY_MERCHANT_PRODUCTS;
+  const summary = useMemo(() => getMerchantInventorySummary(allOffers), [allOffers]);
+  const visibleOffers = useMemo(
+    () => filterMerchantProducts(allOffers, search, filter),
+    [allOffers, search, filter]
+  );
 
   const saveOffer = useCallback(async (
     offerId: string,
@@ -149,10 +158,6 @@ export default function MerchantProductsScreen() {
       />
     );
   }
-
-  const allOffers = products.data;
-  const summary = getMerchantInventorySummary(allOffers);
-  const visibleOffers = filterMerchantProducts(allOffers, search, filter);
 
   return (
     <SafeAreaView edges={["top", "left", "right"]} style={[styles.safe, { backgroundColor: theme.colors.background }]}>
