@@ -3,7 +3,7 @@ import { router } from "expo-router";
 import { useCallback, useMemo, useRef, useState, type ReactNode } from "react";
 import { Animated, I18nManager, PanResponder, ScrollView, StyleSheet, View } from "react-native";
 
-import { PageSkeleton, CustomerScreen, ErrorState, LoadingState } from "@/components/customer-ui";
+import { PageSkeleton, CustomerScreen, ErrorState } from "@/components/customer-ui";
 import {
   AppHeader,
   Button,
@@ -279,7 +279,7 @@ export default function AddressesScreen() {
       </BottomSheet>
 
       <BottomSheet visible={secondaryPickerOpen} onRequestClose={() => setSecondaryPickerOpen(false)} title={secondaryOptions.data ? getRegionLevelDisplayName(secondaryOptions.data.selectedLevel, language) : ""} maxHeight="78%">
-        {secondaryOptions.isPending ? <LoadingState label={translate("stateLoading")} /> : null}
+        {secondaryOptions.isPending ? <PageSkeleton variant="list" rows={3} /> : null}
         {secondaryOptions.isError ? <UiText tone="danger">{translate("checkoutDairaLoadError")}</UiText> : null}
         <ScrollView>
           {(secondaryOptions.data?.regions ?? []).map((item) => <PressableSurface key={item.id} onPress={() => { setSecondaryRegionId(item.id); setSecondaryPickerOpen(false); }} style={styles.pickerOption}>
