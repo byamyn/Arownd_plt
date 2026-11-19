@@ -154,31 +154,32 @@ export async function fetchHomeProducts(): Promise<HomeProduct[]> {
   return balancedProducts;
 }
 
-export async function fetchMapStores(): Promise<MapStore[]> {
-  const pageSize = 500;
-  const allStores: unknown[] = [];
-  let offset = 0;
+export type MapStoreViewport = {
+  west: number;
+  south: number;
+  east: number;
+  north: number;
+  centerLatitude: number;
+  centerLongitude: number;
+};
 
-  while (true) {
-    const { data, error } = await getSupabaseClient()
-      .from("stores")
-      .select("id, name, logo_url, commune, address_line, latitude, longitude, is_verified")
-      .not("latitude", "is", null)
-      .not("longitude", "is", null)
-      .order("name", { ascending: true })
-      .order("id", { ascending: true })
-      .range(offset, offset + pageSize - 1);
+export async function fetchMapStoresInBounds(
+  viewport: MapStoreViewport,
+  includeStoreId?: string | null
+): Promise<MapStore[]> {
+  const { data, error } = await getSupabaseClient().rpc("fetch_map_stores_in_view", {
+    p_west: viewport.west,
+    p_south: viewport.south,
+    p_east: viewport.east,
+    p_north: viewport.north,
+    p_center_lat: viewport.centerLatitude,
+    p_center_long: viewport.centerLongitude,
+    p_include_store_id: includeStoreId ?? null,
+    p_limit: 120
+  });
 
-    if (error) throw error;
-
-    const page = data ?? [];
-    allStores.push(...page);
-
-    if (page.length < pageSize) break;
-    offset += pageSize;
-  }
-
-  return MapStoreSchema.array().parse(allStores);
+  if (error) throw error;
+  return MapStoreSchema.array().parse(data as unknown);
 }
 
 export async function fetchFeaturedStores(): Promise<FeaturedStore[]> {
