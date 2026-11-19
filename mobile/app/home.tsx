@@ -48,30 +48,32 @@ function HomeProductCard({ item, price }: {
 
   return (
     <View style={[styles.productCard, { backgroundColor: theme.colors.surface }]}>
-      <Pressable
-        style={[styles.productImage, { backgroundColor: theme.colors.surfaceMuted }]}
-        onPress={() => {
-          const now = Date.now();
-          if (now - lastImageTapAt.current <= 300 && !productFavorite.disabled) {
-            productFavorite.toggle();
-            lastImageTapAt.current = 0;
-            return;
-          }
-          lastImageTapAt.current = now;
-        }}
-        accessibilityRole="button"
-        accessibilityLabel={item.product.name}
-        accessibilityHint={translate("favoriteAdd")}
-      >
-        {getPrimaryImage(item) ? (
-          <UiImage uri={getPrimaryImage(item)!} accessibilityLabel={item.product.name} aspectRatio={1} style={StyleSheet.absoluteFill} />
-        ) : (
-          <Icon name="image" size={42} color={theme.colors.subtle} accessibilityHidden />
-        )}
+      <View style={[styles.productImage, { backgroundColor: theme.colors.surfaceMuted }]}>
+        <Pressable
+          style={StyleSheet.absoluteFill}
+          onPress={() => {
+            const now = Date.now();
+            if (now - lastImageTapAt.current <= 300 && !productFavorite.disabled) {
+              productFavorite.toggle();
+              lastImageTapAt.current = 0;
+              return;
+            }
+            lastImageTapAt.current = now;
+          }}
+          accessibilityRole="button"
+          accessibilityLabel={item.product.name}
+          accessibilityHint={translate("favoriteAdd")}
+        >
+          {getPrimaryImage(item) ? (
+            <UiImage uri={getPrimaryImage(item)!} accessibilityLabel={item.product.name} aspectRatio={1} style={StyleSheet.absoluteFill} />
+          ) : (
+            <Icon name="image" size={42} color={theme.colors.subtle} accessibilityHidden />
+          )}
+        </Pressable>
         <View style={styles.favoriteButton}>
           <FavoriteButton kind="products" id={item.product.id} iconOnly />
         </View>
-      </Pressable>
+      </View>
 
       <View style={styles.productInfo}>
         <View style={styles.productInfoColumns}>
