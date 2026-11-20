@@ -1,4 +1,4 @@
-import { LocaleProvider, Stack, router, usePathname } from "expo-router";
+import { LocaleProvider, Stack, router } from "expo-router";
 import * as Notifications from "expo-notifications";
 import { StatusBar } from "expo-status-bar";
 import { useFonts } from "expo-font";
@@ -11,7 +11,7 @@ import {
   Inter_800ExtraBold
 } from "@expo-google-fonts/inter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Animated, Easing, Platform, StyleSheet, Text, View } from "react-native";
+import { Animated, Platform, StyleSheet, Text, View } from "react-native";
 import { useEffect, useRef, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -74,33 +74,11 @@ function RootLayoutContent() {
   const theme = useAppTheme();
   const insets = useSafeAreaInsets();
   const { language, isReady: languageReady } = useLanguage();
-  const pathname = usePathname();
-  const screenScale = useRef(new Animated.Value(1)).current;
   const splashDotOne = useRef(new Animated.Value(1)).current;
   const splashDotTwo = useRef(new Animated.Value(1)).current;
   const splashDotThree = useRef(new Animated.Value(1)).current;
-  const previousPathname = useRef(pathname);
   const { isReady: themeReady } = useThemePreference();
   const appReady = (fontsLoaded || Boolean(fontError)) && themeReady && languageReady;
-
-  useEffect(() => {
-    if (previousPathname.current === pathname) return;
-    const previousPath = previousPathname.current;
-    previousPathname.current = pathname;
-    // Product details owns its native bottom-sheet transition; do not animate its stack container.
-    if (previousPath.startsWith("/product/") || pathname.startsWith("/product/")) return;
-
-    screenScale.stopAnimation();
-    screenScale.setValue(0.98);
-    const animation = Animated.timing(screenScale, {
-      toValue: 1,
-      duration: 280,
-      easing: Easing.out(Easing.cubic),
-      useNativeDriver: true
-    });
-    animation.start();
-    return () => animation.stop();
-  }, [pathname, screenScale]);
 
   useEffect(() => {
     const createPulse = (value: Animated.Value) => Animated.loop(
@@ -199,17 +177,17 @@ function RootLayoutContent() {
       <QueryClientProvider client={queryClient}>
         <StatusBar style={theme.mode === "dark" ? "light" : "dark"} />
         <LocaleProvider direction={language === "ar" ? "rtl" : "ltr"}>
-          <Animated.View style={[styles.navigation, { transform: [{ scale: screenScale }] }]}>
+          <View style={styles.navigation}>
             <Stack
               screenOptions={{
                 headerShown: false,
                 animation: "fade",
-                animationDuration: 280,
+                animationDuration: 140,
                 animationMatchesGesture: true,
                 contentStyle: { backgroundColor: theme.colors.background }
               }}
             />
-          </Animated.View>
+          </View>
         </LocaleProvider>
         <AuthCaptchaHost />
       </QueryClientProvider>
