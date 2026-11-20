@@ -52,7 +52,7 @@ export function CustomerNavigation() {
         ? "products"
         : pathname.startsWith("/merchant/analytics")
           ? "analytics"
-          : pathname.startsWith("/merchant/settings") || pathname.startsWith("/merchant/account-settings") || pathname.startsWith("/merchant/verification")
+          : pathname.startsWith("/merchant/settings") || pathname.startsWith("/merchant/account-settings") || pathname.startsWith("/merchant/verification") || pathname.startsWith("/merchant/team")
             ? null
             : "orders";
   const activeTab = useStudioNavigation
