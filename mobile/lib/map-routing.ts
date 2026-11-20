@@ -44,7 +44,8 @@ type OsrmResponse = {
 
 export async function fetchDrivingRoute(
   origin: RoutePoint,
-  destination: RoutePoint
+  destination: RoutePoint,
+  signal?: AbortSignal
 ): Promise<DrivingRoute> {
   const coordinates = [
     `${origin.longitude},${origin.latitude}`,
@@ -52,7 +53,8 @@ export async function fetchDrivingRoute(
   ].join(";");
   const url = `https://router.project-osrm.org/route/v1/driving/${coordinates}?overview=full&geometries=geojson&steps=true&alternatives=false&annotations=false`;
   const response = await fetch(url, {
-    headers: { Accept: "application/json" }
+    headers: { Accept: "application/json" },
+    ...(signal ? { signal } : {})
   });
 
   if (!response.ok) throw new Error("route_service_unavailable");
