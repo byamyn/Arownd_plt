@@ -38,7 +38,7 @@ export default function FavoritesScreen() {
   useLanguage();
   const theme = useAppTheme();
   const queryClient = useQueryClient();
-  const browsingCurrency = useQuery({ queryKey: BROWSING_CURRENCY_QUERY_KEY, queryFn: fetchBrowsingCurrencyCode, staleTime: 60_000 });
+  const browsingCurrency = useQuery({ queryKey: BROWSING_CURRENCY_QUERY_KEY, queryFn: ({ signal }) => fetchBrowsingCurrencyCode(signal), staleTime: 60_000 });
   const styles = createStyles(theme);
   const [tab, setTab] = useState<FavoriteTab>("products");
   const favorites = useQuery({ queryKey: FAVORITES_QUERY_KEY, queryFn: getFavorites });
