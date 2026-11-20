@@ -79,6 +79,7 @@ export default function MapScreen() {
   const styleUrl = isDark ? MAP_DARK_STYLE : MAP_LIGHT_STYLE;
   const [cameraTarget, setCameraTarget] = useState<RoutePoint | null>(null);
   const [mapViewport, setMapViewport] = useState<MapStoreViewport | null>(null);
+  const viewportUpdateTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
   const appliedBrowsingCountryRef = useRef<string | null>(null);
   const browsingCountry = useQuery({
@@ -112,6 +113,8 @@ export default function MapScreen() {
   useEffect(() => () => {
     routeRequestControllerRef.current?.abort();
     routeRequestControllerRef.current = null;
+    if (viewportUpdateTimerRef.current) clearTimeout(viewportUpdateTimerRef.current);
+    viewportUpdateTimerRef.current = null;
   }, []);
 
   const stores = useQuery({
@@ -463,6 +466,8 @@ export default function MapScreen() {
             void mapRef.current?.getViewState().then((viewState) => {
               const [west, south, east, north] = viewState.bounds;
               const [centerLongitude, centerLatitude] = viewState.center;
+              if (viewportUpdateTimerRef.current) clearTimeout(viewportUpdateTimerRef.current);
+              viewportUpdateTimerRef.current = null;
               setMapViewport({ west, south, east, north, centerLatitude, centerLongitude });
             }).catch(() => undefined);
           }}
@@ -471,14 +476,18 @@ export default function MapScreen() {
             const [west, south, east, north] = event.nativeEvent.bounds;
             if ([west, south, east, north, latitude, longitude].every(Number.isFinite)
               && south <= north) {
-              setMapViewport({
-                west,
-                south,
-                east,
-                north,
-                centerLatitude: latitude,
-                centerLongitude: longitude
-              });
+              if (viewportUpdateTimerRef.current) clearTimeout(viewportUpdateTimerRef.current);
+              viewportUpdateTimerRef.current = setTimeout(() => {
+                viewportUpdateTimerRef.current = null;
+                setMapViewport({
+                  west,
+                  south,
+                  east,
+                  north,
+                  centerLatitude: latitude,
+                  centerLongitude: longitude
+                });
+              }, 180);
             }
           }}
         >
