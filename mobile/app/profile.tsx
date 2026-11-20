@@ -28,6 +28,7 @@ import { fetchMyReviews } from "@/lib/reviews";
 import { getSupabaseClient } from "@/lib/supabase";
 import { fetchStoreVerificationReviewerAccess } from "@/lib/store-verification";
 import { ProfileAccountSheet, type ProfileAccountSection } from "@/components/profile-account-sheet";
+import { ProfileActivitySheet, type ProfileActivitySection } from "@/components/profile-activity-sheet";
 
 export default function ProfileScreen() {
   useLanguage();
@@ -36,6 +37,7 @@ export default function ProfileScreen() {
   const [avatarPickerError, setAvatarPickerError] = useState(false);
   const [avatarActionsOpen, setAvatarActionsOpen] = useState(false);
   const [accountSheet, setAccountSheet] = useState<ProfileAccountSection | null>(null);
+  const [activitySheet, setActivitySheet] = useState<ProfileActivitySection | null>(null);
   const [selectedAvatar, setSelectedAvatar] = useState<ImagePicker.ImagePickerAsset | null>(null);
   const uploadAvatar = useMutation({
     mutationFn: uploadMyProfileAvatar,
@@ -217,17 +219,17 @@ export default function ProfileScreen() {
           </Card>
 
           <View style={styles.statsGrid}>
-            <PressableSurface accessibilityRole="button" accessibilityLabel={translate("profileOrders")} onPress={() => router.push("/orders")} style={[styles.statTile, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+            <PressableSurface accessibilityRole="button" accessibilityLabel={translate("profileOrders")} onPress={() => setActivitySheet("orders")} style={[styles.statTile, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
               <View style={[styles.statIcon, { backgroundColor: theme.colors.surfaceSecondary }]}><Icon name="package" size={designTokens.dimensions.iconSize.sm} /></View>
               <UiText weight="700" style={styles.statValue}>{orders.isPending ? "…" : orders.isError ? "—" : String(orders.data?.length ?? 0)}</UiText>
               <Caption>{translate("profileOrders")}</Caption>
             </PressableSurface>
-            <PressableSurface accessibilityRole="button" accessibilityLabel={translate("profileFavorites")} onPress={() => router.push("/favorites")} style={[styles.statTile, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+            <PressableSurface accessibilityRole="button" accessibilityLabel={translate("profileFavorites")} onPress={() => setActivitySheet("favorites")} style={[styles.statTile, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
               <View style={[styles.statIcon, { backgroundColor: theme.colors.surfaceSecondary }]}><Icon name="heart" size={designTokens.dimensions.iconSize.sm} /></View>
               <UiText weight="700" style={styles.statValue}>{favorites.isPending ? "…" : favorites.isError ? "—" : String(favoriteCount)}</UiText>
               <Caption>{translate("profileFavorites")}</Caption>
             </PressableSurface>
-            <PressableSurface accessibilityRole="button" accessibilityLabel={translate("myReviewsTitle")} onPress={() => router.push("/my-reviews")} style={[styles.statTile, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+            <PressableSurface accessibilityRole="button" accessibilityLabel={translate("myReviewsTitle")} onPress={() => setActivitySheet("reviews")} style={[styles.statTile, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
               <View style={[styles.statIcon, { backgroundColor: theme.colors.surfaceSecondary }]}><Icon name="star" size={designTokens.dimensions.iconSize.sm} /></View>
               <UiText weight="700" style={styles.statValue}>{reviews.isPending ? "…" : reviews.isError ? "—" : String(reviews.data?.length ?? 0)}</UiText>
               <Caption>{translate("myReviewsTitle")}</Caption>
@@ -315,6 +317,15 @@ export default function ProfileScreen() {
         maxHeight="94%"
       >
         {accountSheet ? <ProfileAccountSheet section={accountSheet} onManageAvatar={() => setAvatarActionsOpen(true)} /> : null}
+      </BottomSheet>
+      <BottomSheet
+        visible={activitySheet !== null}
+        onRequestClose={() => setActivitySheet(null)}
+        title={activitySheet === "orders" ? translate("profileOrders") : activitySheet === "favorites" ? translate("profileFavorites") : translate("myReviewsTitle")}
+        height="82%"
+        maxHeight="94%"
+      >
+        {activitySheet ? <ProfileActivitySheet section={activitySheet} /> : null}
       </BottomSheet>
       <BottomSheet
         visible={avatarActionsOpen}
