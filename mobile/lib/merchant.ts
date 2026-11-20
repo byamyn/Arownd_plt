@@ -91,9 +91,10 @@ export async function fetchMerchantAccess(signal?: AbortSignal): Promise<Merchan
     store: OwnedStoreSchema
   })).parse(membershipResult.data as unknown);
   const ownedStores = OwnedStoreSchema.array().parse(storeResult.data as unknown);
+  const ownedStoreIds = new Set(ownedStores.map((ownedStore) => ownedStore.id));
   const storeMemberships = membershipRows.map((row) => ({
     ...row.store,
-    role: row.role
+    role: ownedStoreIds.has(row.store_id) ? "owner" as const : row.role
   }));
   for (const ownedStore of ownedStores) {
     if (!storeMemberships.some((item) => item.id === ownedStore.id)) {
