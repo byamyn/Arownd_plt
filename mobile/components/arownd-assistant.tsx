@@ -89,7 +89,6 @@ export function ArowndAssistant() {
   const [messages, setMessages] = useState<AssistantMessage[]>([]);
   const checkingRef = useRef(false);
   const tourStartedRef = useRef(false);
-  const currentUserRef = useRef<string | null>(null);
   const isArabic = language === "ar";
   const copy = useMemo(() => ({
     title: "Arownd AI",
@@ -126,7 +125,7 @@ export function ArowndAssistant() {
         if (!mounted || completed || pending !== "1") return;
         const access = await fetchMerchantAccess().catch(() => null);
         if (!mounted) return;
-        if (access?.status === "merchant_setup_required") return;
+        if (!access || access.status === "merchant_setup_required") return;
         const hasMerchantSpace = access?.status === "merchant_ready";
         setMerchantTour(hasMerchantSpace);
         tourStartedRef.current = true;
@@ -140,7 +139,6 @@ export function ArowndAssistant() {
     const client = getSupabaseClient();
     const { data } = client.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_OUT") {
-        currentUserRef.current = null;
         tourStartedRef.current = false;
         setUserId(null);
         setTourStep(-1);
@@ -148,14 +146,12 @@ export function ArowndAssistant() {
         return;
       }
       if ((event === "INITIAL_SESSION" || event === "SIGNED_IN" || event === "TOKEN_REFRESHED") && session?.user) {
-        currentUserRef.current = session.user.id;
         setUserId(session.user.id);
         void tryStartTour(session.user.id);
       }
     });
     void client.auth.getSession().then(({ data: sessionData }) => {
       if (!mounted || !sessionData.session?.user) return;
-      currentUserRef.current = sessionData.session.user.id;
       setUserId(sessionData.session.user.id);
       void tryStartTour(sessionData.session.user.id);
     }).catch(() => undefined);
