@@ -16,7 +16,7 @@ export default function DeleteAccountScreen() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const request = useQuery({
     queryKey: ["account-deletion-request"],
-    queryFn: fetchMyAccountDeletionRequest,
+    queryFn: ({ signal }) => fetchMyAccountDeletionRequest(signal),
     retry: false
   });
   const refresh = () => queryClient.invalidateQueries({ queryKey: ["account-deletion-request"] });
