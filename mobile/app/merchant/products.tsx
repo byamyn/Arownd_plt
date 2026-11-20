@@ -50,6 +50,7 @@ export default function MerchantProductsScreen() {
 
   const storeId = access.data?.store?.id ?? null;
   const ready = access.data?.status === "merchant_ready" && !!storeId;
+  const canManageCatalog = access.data?.teamRole === "owner" || access.data?.teamRole === "admin";
 
   const products = useQuery({
     queryKey: ["merchant-products", storeId],
@@ -180,7 +181,7 @@ export default function MerchantProductsScreen() {
           <FilterChip label={translate("merchantProductsHidden")} selected={filter === "hidden"} onPress={() => setFilter("hidden")} leading={<Icon name="eye-off" size={14} color={filter === "hidden" ? theme.colors.accentForeground : theme.colors.muted} accessibilityHidden />} />
         </FilterBar>
 
-        <Button label={translate("merchantProductCreateOpen")} onPress={() => router.push("/merchant/products/new")} fullWidth />
+        {canManageCatalog ? <Button label={translate("merchantProductCreateOpen")} onPress={() => router.push("/merchant/products/new")} fullWidth /> : null}
 
         <View style={styles.summaryGrid}>
           <MerchantMetricCard label={translate("merchantProductsSummaryTotal")} value={String(summary.total)} style={styles.summaryCard} />
@@ -217,6 +218,7 @@ export default function MerchantProductsScreen() {
                   theme={theme}
                   busy={busyOfferId === offer.id}
                   anyBusy={busyOfferId !== null}
+                  canManageCatalog={canManageCatalog}
                   onSave={saveOffer}
                   onToggleVisibility={toggleVisibility}
                   onEdit={editOffer}
@@ -235,6 +237,7 @@ const MerchantOfferCard = memo(function MerchantOfferCard({
   theme,
   busy,
   anyBusy,
+  canManageCatalog,
   onSave,
   onToggleVisibility,
   onEdit
@@ -243,6 +246,7 @@ const MerchantOfferCard = memo(function MerchantOfferCard({
   theme: AppTheme;
   busy: boolean;
   anyBusy: boolean;
+  canManageCatalog: boolean;
   onSave: (offerId: string, price: string, stock: string) => void;
   onToggleVisibility: (offerId: string, isMerchantHidden: boolean) => void;
   onEdit: (offerId: string) => void;
@@ -320,7 +324,7 @@ const MerchantOfferCard = memo(function MerchantOfferCard({
             value={price}
             onChangeText={setPrice}
             keyboardType="number-pad"
-            editable={!anyBusy}
+            editable={canManageCatalog && !anyBusy}
             accessibilityLabel={translate("merchantProductsPriceLabel")}
             style={[styles.valueInput, { color: theme.colors.foreground, borderColor: (theme.colors.inputBorder), backgroundColor: theme.colors.background }]}
           />
@@ -341,33 +345,15 @@ const MerchantOfferCard = memo(function MerchantOfferCard({
         </View>
         </View>
 
-        <Button
-        label={translate("merchantProductsSave")}
-        onPress={handleSave}
-        loading={busy}
-        disabled={anyBusy}
-        fullWidth
-      />
-        <View style={styles.actionsRow}>
-        <Button
-          label={offer.is_merchant_hidden ? translate("merchantProductsShow") : translate("merchantProductsHide")}
-          onPress={handleToggleVisibility}
-          disabled={anyBusy}
-          variant="outline"
-          size="sm"
-          fullWidth
-          style={{ flex: 1 }}
-        />
-        <Button
-          label={translate("merchantProductEditOpen")}
-          onPress={handleEdit}
-          disabled={anyBusy}
-          variant="ghost"
-          size="sm"
-          fullWidth
-          style={{ flex: 1 }}
-        />
-        </View>
+{canManageCatalog ? (
+          <>
+            <Button label={translate("merchantProductsSave")} onPress={handleSave} loading={busy} disabled={anyBusy} fullWidth />
+            <View style={styles.actionsRow}>
+              <Button label={offer.is_merchant_hidden ? translate("merchantProductsShow") : translate("merchantProductsHide")} onPress={handleToggleVisibility} disabled={anyBusy} variant="outline" size="sm" fullWidth style={{ flex: 1 }} />
+              <Button label={translate("merchantProductEditOpen")} onPress={handleEdit} disabled={anyBusy} variant="ghost" size="sm" fullWidth style={{ flex: 1 }} />
+            </View>
+          </>
+        ) : null}
       </View>
 
       <MediaViewer
