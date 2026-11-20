@@ -31,7 +31,7 @@ export default function ProductDetailsScreen() {
   const imageAnchorRef = useRef<ComponentRef<typeof View>>(null);
   const cartFlyImageRef = useRef<string | null>(null);
   const queryClient = useQueryClient();
-  const browsingCurrency = useQuery({ queryKey: BROWSING_CURRENCY_QUERY_KEY, queryFn: fetchBrowsingCurrencyCode, staleTime: 60_000 });
+  const browsingCurrency = useQuery({ queryKey: BROWSING_CURRENCY_QUERY_KEY, queryFn: ({ signal }) => fetchBrowsingCurrencyCode(signal), staleTime: 60_000 });
   const addMutation = useMutation({
     mutationFn: addToCart,
     onSuccess: (next) => {
