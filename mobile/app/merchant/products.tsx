@@ -55,7 +55,7 @@ export default function MerchantProductsScreen() {
   const products = useQuery({
     queryKey: ["merchant-products", storeId],
     queryFn: ({ signal }) => fetchMerchantProducts(storeId ?? "", signal),
-    enabled: ready,
+    enabled: ready && canManageCatalog,
     retry: false
   });
 
@@ -142,6 +142,7 @@ export default function MerchantProductsScreen() {
   }
 
   if (!access.data) return <Redirect href="/login" />;
+  if (access.data.teamRole === "staff") return <Redirect href="/merchant/orders" />;
   if (!ready) return <Redirect href="/merchant" />;
 
   if (products.isPending) {
