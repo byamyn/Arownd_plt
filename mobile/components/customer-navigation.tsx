@@ -17,7 +17,7 @@ type NavigationTab = {
 
 const customerTabs: NavigationTab[] = [
   { id: "home", label: "navHome", icon: "home", path: "/home" },
-  { id: "explore", label: "navExplore", icon: "search", path: "/explore" },
+  { id: "cart", label: "navCart", icon: "shopping-bag", path: "/cart" },
   { id: "map", label: "navMap", icon: "map", path: "/map" },
   { id: "profile", label: "navAccount", icon: "user", path: "/profile" }
 ];
