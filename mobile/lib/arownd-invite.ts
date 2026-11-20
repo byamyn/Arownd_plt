@@ -13,28 +13,31 @@ export type InviteOverview = {
   total: number;
 };
 
-export async function fetchMyInviteOverview(): Promise<InviteOverview> {
+export async function fetchMyInviteOverview(signal?: AbortSignal): Promise<InviteOverview> {
   const client = getSupabaseClient();
   const { data: auth, error: authError } = await client.auth.getUser();
   if (authError) throw authError;
   if (!auth.user) throw new Error("not_authenticated");
 
-  const { data: profile, error: profileError } = await client
+  let profileRequest = client
     .from("profiles")
     .select("referral_code")
-    .eq("user_id", auth.user.id)
-    .maybeSingle();
+    .eq("user_id", auth.user.id);
+  if (signal) profileRequest = profileRequest.abortSignal(signal);
+  const { data: profile, error: profileError } = await profileRequest.maybeSingle();
 
   if (profileError) throw profileError;
   if (!profile?.referral_code || typeof profile.referral_code !== "string") {
     throw new Error("invite_code_missing");
   }
 
-  const { data: referralRows, error: referralsError } = await client
+  let referralsRequest = client
     .from("user_referrals")
     .select("invitee_user_id, created_at")
     .eq("inviter_user_id", auth.user.id)
     .order("created_at", { ascending: false });
+  if (signal) referralsRequest = referralsRequest.abortSignal(signal);
+  const { data: referralRows, error: referralsError } = await referralsRequest;
 
   if (referralsError) throw referralsError;
 
@@ -43,10 +46,12 @@ export async function fetchMyInviteOverview(): Promise<InviteOverview> {
   const publicProfilesById = new Map<string, { full_name: string | null; avatar_url: string | null }>();
 
   if (inviteeIds.length > 0) {
-    const { data: publicProfiles, error: publicProfilesError } = await client
+    let publicProfilesRequest = client
       .from("public_personal_profiles")
       .select("user_id, full_name, avatar_url")
       .in("user_id", inviteeIds);
+    if (signal) publicProfilesRequest = publicProfilesRequest.abortSignal(signal);
+    const { data: publicProfiles, error: publicProfilesError } = await publicProfilesRequest;
 
     if (publicProfilesError) throw publicProfilesError;
 
