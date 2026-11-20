@@ -52,7 +52,7 @@ export default function MerchantOnboardingScreen() {
 
   const suggestedStoreName = useQuery({
     queryKey: ["merchant-signup-business-name"],
-    queryFn: ({ signal }) => fetchMerchantSignupBusinessName(signal),
+    queryFn: fetchMerchantSignupBusinessName,
     enabled: canStartOnboarding,
     staleTime: Infinity
   });
