@@ -1,187 +1,198 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useRef, useState } from "react";
-import { Animated, Easing, PanResponder, StyleSheet, View } from "react-native";
+import { useEffect, useState } from "react";
+import { Pressable, StyleSheet, View } from "react-native";
 
-import { CustomerFlatList, CustomerHeading, EmptyState, ErrorState, ProductTile, SectionTitle } from "@/components/customer-ui";
+import { CustomerFlatList, EmptyState, ErrorState, ProductTile, SectionTitle, StoreTile } from "@/components/customer-ui";
 import { CustomerMainHeader } from "@/components/customer-main-header";
-import { fetchHomeProducts, fetchProductDetails, fetchProductOffers, formatMarketPrice, getPrimaryImage, searchCatalogProducts } from "@/lib/catalog";
+import { fetchProductDetails, fetchProductOffers, fetchStoreDetails, fetchStoreOffers, formatMarketPrice, getPrimaryImage, searchCatalogProducts, searchCatalogStores } from "@/lib/catalog";
 import { BROWSING_CURRENCY_QUERY_KEY, fetchBrowsingCurrencyCode } from "@/lib/country-service";
 import { fetchApprovedReviews } from "@/lib/reviews";
 import { translate, useLanguage } from "@/lib/i18n";
-import { getLocalizedProductCategoryLabel } from "@/lib/locale-data";
 import { designTokens, useAppTheme } from "@/lib/theme";
-import { CategorySelectorTile, ProductCardSkeleton, SearchField, Text as UiText } from "@/components/ui";
+import { Icon, SearchField, Text as UiText } from "@/components/ui";
 
-const categories = [
-  { id: "fashion", icon: "shirt" },
-  { id: "electronics", icon: "smartphone" },
-  { id: "beauty", icon: "sparkles" },
-  { id: "home", icon: "house" },
-  { id: "misc", icon: "package" }
-] as const;
+const SEARCH_HISTORY_KEY = "arownd:explore-search-history";
+type SearchTab = "all" | "products" | "stores";
 
 export default function ExploreScreen() {
   const { language } = useLanguage();
   const theme = useAppTheme();
   const queryClient = useQueryClient();
-  const browsingCurrency = useQuery({ queryKey: BROWSING_CURRENCY_QUERY_KEY, queryFn: ({ signal }) => fetchBrowsingCurrencyCode(signal), staleTime: 60_000 });
-  const params = useLocalSearchParams<{ q?: string; category?: string }>();
+  const params = useLocalSearchParams<{ q?: string }>();
   const initialQuery = typeof params.q === "string" ? params.q : "";
-  const category = typeof params.category === "string" ? params.category : undefined;
   const [query, setQuery] = useState(initialQuery);
-  const [debouncedQuery, setDebouncedQuery] = useState(initialQuery);
-  const [viewportWidth, setViewportWidth] = useState(0);
-  const [railWidth, setRailWidth] = useState(0);
-  const translateX = useRef(new Animated.Value(0)).current;
-  const animationRef = useRef<Animated.CompositeAnimation | null>(null);
-  const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const gestureStartX = useRef(0);
-  const currentTranslateX = useRef(0);
-  const categoryMetrics = useRef({ viewportWidth: 0, railWidth: 0, language });
-  categoryMetrics.current = { viewportWidth, railWidth, language };
-  useEffect(() => {
-    const listenerId = translateX.addListener(({ value }) => {
-      currentTranslateX.current = value;
-    });
-    return () => translateX.removeListener(listenerId);
-  }, [translateX]);
-
-  const resumeCategoryAnimation = () => {
-    const { viewportWidth: width, railWidth: contentWidth } = categoryMetrics.current;
-    if (width <= 0 || contentWidth <= width) return;
-    const currentX = currentTranslateX.current;
-    const animation = Animated.loop(
-      Animated.timing(translateX, {
-        toValue: currentX - contentWidth,
-        duration: Math.max(28_000, Math.round(contentWidth * 45)),
-        easing: Easing.linear,
-        useNativeDriver: true
-      })
-    );
-    animationRef.current = animation;
-    animation.start();
-  };
-  const categoryPanResponder = useRef(PanResponder.create({
-    onMoveShouldSetPanResponder: (_event, gesture) =>
-      Math.abs(gesture.dx) > 6 && Math.abs(gesture.dx) > Math.abs(gesture.dy),
-    onPanResponderGrant: () => {
-      animationRef.current?.stop();
-      if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
-      gestureStartX.current = currentTranslateX.current;
-    },
-    onPanResponderMove: (_event, gesture) => {
-      const { viewportWidth: width, railWidth: contentWidth, language: currentLanguage } = categoryMetrics.current;
-      const rtlStart = -(contentWidth - width);
-      const maxX = currentLanguage === "ar" ? rtlStart : 0;
-      const minX = maxX - contentWidth;
-      translateX.setValue(Math.max(minX, Math.min(maxX, gestureStartX.current + gesture.dx)));
-    },
-    onPanResponderRelease: () => {
-      resumeTimerRef.current = setTimeout(resumeCategoryAnimation, 900);
-    },
-    onPanResponderTerminate: () => {
-      resumeTimerRef.current = setTimeout(resumeCategoryAnimation, 900);
-    }
-  })).current;
-  const hasActiveFilter = Boolean(debouncedQuery || category);
+  const [debouncedQuery, setDebouncedQuery] = useState(initialQuery.trim());
+  const [activeTab, setActiveTab] = useState<SearchTab>("all");
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const browsingCurrency = useQuery({
+    queryKey: BROWSING_CURRENCY_QUERY_KEY,
+    queryFn: ({ signal }) => fetchBrowsingCurrencyCode(signal),
+    staleTime: 60_000
+  });
 
   useEffect(() => setQuery(initialQuery), [initialQuery]);
+
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedQuery(query.trim()), 300);
     return () => clearTimeout(timer);
   }, [query]);
 
   useEffect(() => {
-    if (viewportWidth <= 0 || railWidth <= viewportWidth) return;
+    let mounted = true;
+    void AsyncStorage.getItem(SEARCH_HISTORY_KEY).then((value) => {
+      if (!mounted || !value) return;
+      try {
+        const parsed: unknown = JSON.parse(value);
+        if (Array.isArray(parsed)) {
+          setRecentSearches(parsed.filter((item): item is string => typeof item === "string").slice(0, 8));
+        }
+      } catch {
+        setRecentSearches([]);
+      }
+    }).catch(() => undefined);
+    return () => { mounted = false; };
+  }, []);
 
-    const startOffset = language === "ar" ? -(railWidth - viewportWidth) : 0;
-    translateX.setValue(startOffset);
-
-    const animation = Animated.loop(
-      Animated.timing(translateX, {
-        toValue: startOffset - railWidth,
-        duration: Math.max(28_000, Math.round(railWidth * 45)),
-        easing: Easing.linear,
-        useNativeDriver: true
-      })
-    );
-
-    animationRef.current = animation;
-    animation.start();
-
-    return () => {
-      animation.stop();
-      if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
-      if (animationRef.current === animation) animationRef.current = null;
-    };
-  }, [language, railWidth, translateX, viewportWidth]);
-
-  const normalized = debouncedQuery;
-  const products = useQuery({
-    queryKey: ["customer-explore-products", normalized, category],
-    queryFn: ({ signal }) => normalized || category
-      ? searchCatalogProducts(normalized, category, signal)
-      : fetchHomeProducts(signal),
-    staleTime: 30_000,
-    enabled: hasActiveFilter
+  const search = useQuery({
+    queryKey: ["customer-explore-search", debouncedQuery],
+    queryFn: async ({ signal }) => {
+      const [products, stores] = await Promise.all([
+        searchCatalogProducts(debouncedQuery, undefined, signal),
+        searchCatalogStores(debouncedQuery, signal)
+      ]);
+      return { products, stores };
+    },
+    enabled: debouncedQuery.length > 0,
+    staleTime: 30_000
   });
 
-  const orderedCategories = language === "ar" ? [...categories].reverse() : categories;
+  useEffect(() => {
+    if (!debouncedQuery || search.isPending || search.isError || !search.data) return;
+    const timer = setTimeout(() => {
+      setRecentSearches((current) => {
+        const next = [debouncedQuery, ...current.filter((item) => item !== debouncedQuery)].slice(0, 8);
+        void AsyncStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(next)).catch(() => undefined);
+        return next;
+      });
+    }, 1_000);
+    return () => clearTimeout(timer);
+  }, [debouncedQuery, search.data, search.isError, search.isPending]);
 
-  const renderCategory = (item: (typeof categories)[number], instance: "primary" | "duplicate") => {
-    const selected = category === item.id;
-
-    return (
-      <CategorySelectorTile
-        key={`${instance}-${item.id}`}
-        label={getLocalizedProductCategoryLabel(item.id, language)}
-        accessibilityLabel={getLocalizedProductCategoryLabel(item.id, language)}
-        icon={item.icon}
-        selected={selected}
-        onPress={() => {
-          animationRef.current?.stop();
-          if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
-          resumeTimerRef.current = setTimeout(() => animationRef.current?.start(), 900);
-          router.setParams({ category: selected ? undefined : item.id });
-        }}
-      />
-    );
+  const selectRecentSearch = (value: string) => {
+    setQuery(value);
+    setActiveTab("all");
   };
 
+  const clearHistory = () => {
+    setRecentSearches([]);
+    void AsyncStorage.removeItem(SEARCH_HISTORY_KEY).catch(() => undefined);
+  };
+
+  const isSearching = debouncedQuery.length > 0;
+  const stores = search.data?.stores ?? [];
+  const products = search.data?.products ?? [];
+  const showStores = activeTab !== "products" && stores.length > 0;
+  const showProducts = activeTab !== "stores";
+  const listData = isSearching && !search.isPending && !search.isError && showProducts ? products : [];
+
   const listHeader = (
-    <View style={{ gap: designTokens.spacing.xxl }}>
-      <View style={styles.topSection}>
-        <CustomerMainHeader />
-        <View style={styles.search}>
-          <SearchField value={query} onChangeText={setQuery} placeholder={translate("homeSearchPlaceholder")} accessibilityLabel={translate("homeSearchPlaceholder")} style={{ backgroundColor: "transparent", borderRadius: theme.radius.pill }} />
+    <View style={styles.headerContent}>
+      <CustomerMainHeader variant="settings" />
+      <SearchField
+        value={query}
+        onChangeText={(value) => {
+          setQuery(value);
+          if (!value.trim()) setActiveTab("all");
+        }}
+        placeholder={translate("homeSearchPlaceholder")}
+        accessibilityLabel={translate("homeSearchPlaceholder")}
+        style={{ backgroundColor: theme.colors.surfaceSecondary, borderRadius: theme.radius.pill }}
+      />
+
+      {!isSearching ? (
+        <View style={styles.historySection}>
+          <SectionTitle
+            title={translate("exploreRecent")}
+            action={recentSearches.length > 0 ? translate("exploreClear") : undefined}
+            onAction={clearHistory}
+          />
+          {recentSearches.length > 0 ? recentSearches.map((item) => (
+            <Pressable key={item} onPress={() => selectRecentSearch(item)} style={styles.historyItem}>
+              <Icon name="clock-3" size={17} color={theme.colors.muted} accessibilityHidden />
+              <UiText numberOfLines={1} style={styles.historyText}>{item}</UiText>
+              <Icon name="arrow-up-left" size={16} color={theme.colors.subtle} accessibilityHidden />
+            </Pressable>
+          )) : (
+            <UiText style={{ color: theme.colors.muted }}>{translate("exploreSearchHint")}</UiText>
+          )}
         </View>
-        <CustomerHeading title={translate("exploreTitle")} subtitle={translate("exploreSubtitle")} />
-      </View>
-      <View>
-        <SectionTitle title={translate("homeCategories")} />
-        <View style={styles.categoryViewport} onLayout={(event) => setViewportWidth(event.nativeEvent.layout.width)} {...categoryPanResponder.panHandlers}>
-          <Animated.View style={[styles.categoryTrack, { transform: [{ translateX }] }]}>
-            <View style={styles.categoryGroup} onLayout={(event) => setRailWidth(event.nativeEvent.layout.width)}>
-              {orderedCategories.map((item) => renderCategory(item, "primary"))}
-            </View>
-            <View style={styles.categoryGroup} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-              {orderedCategories.map((item) => renderCategory(item, "duplicate"))}
-            </View>
-          </Animated.View>
+      ) : (
+        <View style={styles.resultsSection}>
+          <View style={styles.tabs}>
+            {(["all", "products", "stores"] as const).map((tab) => {
+              const selected = activeTab === tab;
+              const label = tab === "all" ? translate("ordersTabAll") : tab === "products" ? translate("favoriteProducts") : translate("favoriteStores");
+              return (
+                <Pressable
+                  key={tab}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected }}
+                  onPress={() => setActiveTab(tab)}
+                  style={[styles.tab, { backgroundColor: selected ? theme.colors.accent : theme.colors.surfaceSecondary }]}
+                >
+                  <UiText weight={selected ? "700" : "500"} style={{ color: selected ? "#000000" : theme.colors.foreground }}>{label}</UiText>
+                </Pressable>
+              );
+            })}
+          </View>
+
+          {search.isPending ? (
+            <UiText style={{ color: theme.colors.muted }}>{translate("stateLoading")}</UiText>
+          ) : search.isError ? (
+            <ErrorState title={translate("catalogLoadError")} retryLabel={translate("retry")} onRetry={() => void search.refetch()} />
+          ) : (
+            <>
+              {showStores ? (
+                <View style={styles.resultGroup}>
+                  <SectionTitle title={translate("exploreStoreResults")} />
+                  {stores.map((store) => (
+                    <StoreTile
+                      key={store.id}
+                      name={store.name}
+                      description={store.description}
+                      logoUrl={store.logo_url}
+                      commune={store.commune}
+                      rating={store.rating}
+                      verified={store.is_verified}
+                      onPress={() => {
+                        void queryClient.prefetchQuery({ queryKey: ["customer-store", store.id], queryFn: ({ signal }) => fetchStoreDetails(store.id, signal), staleTime: 60_000 });
+                        void queryClient.prefetchQuery({ queryKey: ["customer-store-offers", store.id], queryFn: ({ signal }) => fetchStoreOffers(store.id, signal), staleTime: 30_000 });
+                        router.push({ pathname: "/store/[storeId]", params: { storeId: store.id } });
+                      }}
+                    />
+                  ))}
+                </View>
+              ) : null}
+              {showProducts && products.length > 0 ? (
+                <SectionTitle title={translate("exploreProductResults")} />
+              ) : null}
+              {activeTab === "stores" && stores.length === 0 ? (
+                <EmptyState title={translate("exploreNoResults")} hint={translate("exploreNoResultsHint")} />
+              ) : null}
+              {activeTab === "products" && products.length === 0 ? (
+                <EmptyState title={translate("exploreNoResults")} hint={translate("exploreNoResultsHint")} />
+              ) : null}
+              {activeTab === "all" && stores.length === 0 && products.length === 0 ? (
+                <EmptyState title={translate("exploreNoResults")} hint={translate("exploreNoResultsHint")} />
+              ) : null}
+            </>
+          )}
         </View>
-      </View>
+      )}
     </View>
   );
-
-  const listEmpty = !hasActiveFilter ? undefined : products.isPending ? (
-    <View style={styles.grid}>{[0, 1, 2, 3].map((item) => <ProductCardSkeleton key={item} style={{ width: "47%", flex: 0 }} />)}</View>
-  ) : products.isError ? (
-    <ErrorState title={translate("catalogLoadError")} retryLabel={translate("retry")} onRetry={() => void products.refetch()} />
-  ) : (
-    <EmptyState title={translate("exploreNoResults")} hint={translate("exploreNoResultsHint")} />
-  );
-  const listData = hasActiveFilter && !products.isPending && !products.isError ? products.data ?? [] : [];
 
   return (
     <CustomerFlatList
@@ -205,10 +216,9 @@ export default function ExploreScreen() {
         />
       )}
       ListHeaderComponent={listHeader}
-      ListEmptyComponent={listEmpty}
-      ListFooterComponent={hasActiveFilter ? <UiText style={[styles.footer, { color: theme.colors.muted }]}>{translate("exploreFooter")}</UiText> : undefined}
-      refreshing={hasActiveFilter && products.isFetching}
-      onRefresh={hasActiveFilter ? () => { void products.refetch(); } : undefined}
+      ListEmptyComponent={isSearching && !search.isPending && !search.isError && activeTab !== "stores" && products.length === 0 ? null : undefined}
+      refreshing={isSearching && search.isFetching}
+      onRefresh={isSearching ? () => { void search.refetch(); } : undefined}
       initialNumToRender={6}
       maxToRenderPerBatch={6}
       updateCellsBatchingPeriod={50}
@@ -220,14 +230,14 @@ export default function ExploreScreen() {
 }
 
 const styles = StyleSheet.create({
-  topSection: { gap: designTokens.spacing.md },
-  search: { width: "100%" },
-
-  categoryViewport: { overflow: "hidden" },
-  categoryTrack: { flexDirection: "row", alignItems: "center", direction: "ltr" },
-  categoryGroup: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.sm, paddingRight: designTokens.spacing.sm, flexShrink: 0, direction: "ltr" },
-  grid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", rowGap: designTokens.spacing.md },
+  headerContent: { gap: designTokens.spacing.lg },
+  historySection: { gap: designTokens.spacing.sm },
+  historyItem: { minHeight: 42, flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md },
+  historyText: { flex: 1 },
+  resultsSection: { gap: designTokens.spacing.lg },
+  tabs: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.sm },
+  tab: { minHeight: 36, paddingHorizontal: designTokens.spacing.lg, borderRadius: designTokens.radius.pill, justifyContent: "center", alignItems: "center" },
+  resultGroup: { gap: designTokens.spacing.sm },
   gridRow: { justifyContent: "space-between" },
-  productTile: { width: "47%", flexGrow: 0, flexShrink: 0 },
-  footer: { fontSize: designTokens.typography.caption, textAlign: "center", padding: designTokens.spacing.lg }
+  productTile: { width: "47%", flexGrow: 0, flexShrink: 0 }
 });
