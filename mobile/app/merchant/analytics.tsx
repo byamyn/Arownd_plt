@@ -36,6 +36,7 @@ export default function MerchantAnalyticsScreen() {
     return <Message theme={theme} label={translate("merchantDashboardError")} actionLabel={translate("merchantRetry")} busy={analytics.isFetching || accountCurrency.isFetching} onAction={() => { void analytics.refetch(); void accountCurrency.refetch(); }} />;
   }
   if (!access.data) return <Redirect href="/login" />;
+  if (access.data.teamRole === "staff") return <Redirect href="/merchant/orders" />;
   if (!ready || !analytics.data || !accountCurrency.data) return <Redirect href="/merchant" />;
 
   const data = analytics.data;
