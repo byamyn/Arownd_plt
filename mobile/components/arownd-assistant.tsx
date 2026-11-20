@@ -313,7 +313,7 @@ export function ArowndAssistant() {
                     onSubmitEditing={submitQuestion}
                     returnKeyType="send"
                     style={[styles.input, { color: theme.colors.foreground }]}
-                    textAlign="auto"
+                    textAlign={isArabic ? "right" : "left"}
                   />
                   <Pressable accessibilityRole="button" accessibilityLabel={copy.send} onPress={submitQuestion} style={[styles.sendButton, { backgroundColor: theme.colors.accent }]}>
                     <Icon name="send" size={18} color={theme.colors.accentForeground} />
@@ -331,7 +331,7 @@ export function ArowndAssistant() {
 const styles = StyleSheet.create({
   floatingButton: { position: "absolute", width: 54, height: 54, borderRadius: 27, alignItems: "center", justifyContent: "center", zIndex: 30, elevation: 8 },
   modalRoot: { flex: 1, justifyContent: "flex-end" },
-  scrim: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.42)" },
+  scrim: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(0,0,0,0.42)" },
   panel: { borderTopLeftRadius: 24, borderTopRightRadius: 24, borderWidth: 1, paddingHorizontal: 20, paddingTop: 18, gap: 18, maxHeight: "78%" },
   panelHeader: { flexDirection: "row", alignItems: "center", gap: 12 },
   assistantMark: { width: 42, height: 42, borderRadius: 13, alignItems: "center", justifyContent: "center" },
