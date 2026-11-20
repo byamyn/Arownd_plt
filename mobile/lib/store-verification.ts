@@ -119,8 +119,9 @@ export async function fetchMyStoreVerificationOverview(storeId: string, signal?:
   };
 }
 
-export async function submitMyStoreVerificationRequest(): Promise<string> {
-  const { data, error } = await getSupabaseClient().rpc("submit_store_verification_request");
+export async function submitMyStoreVerificationRequest(storeId: string): Promise<string> {
+  const storeUuid = z.string().uuid().parse(storeId);
+  const { data, error } = await getSupabaseClient().rpc("submit_store_verification_request", { _store_id: storeUuid });
   if (error) throw new Error(`${error.code ?? ""} ${error.message}`.trim());
   return z.string().uuid().parse(data as unknown);
 }
