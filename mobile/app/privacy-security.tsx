@@ -22,7 +22,6 @@ export default function PrivacySecurityScreen() {
       />
       <Heading level={3}>{translate("settingsPrivacyTitle")}</Heading>
       <Card contentStyle={styles.group}>
-        <PrivacyRow icon="lock" label={translate("settingsPasswordChangeTitle")} onPress={() => router.push("/settings")} theme={theme} styles={styles} />
         <PrivacyRow icon="shield-check" label={translate("settingsPrivacyPolicy")} onPress={() => router.push("/privacy")} theme={theme} styles={styles} />
         <PrivacyRow icon="file-text" label={translate("settingsTermsOfUse")} onPress={() => router.push("/terms")} theme={theme} styles={styles} />
         <PrivacyRow icon="trash-2" label={translate("deleteAccountTitle")} onPress={() => router.push("/delete-account")} theme={theme} styles={styles} last destructive />
@@ -41,7 +40,7 @@ function PrivacyRow({
   last = false,
   destructive = false
 }: {
-  icon: "lock" | "shield-check" | "file-text" | "trash-2";
+  icon: "shield-check" | "file-text" | "trash-2";
   label: string;
   onPress: () => void;
   theme: AppTheme;
@@ -58,7 +57,7 @@ function PrivacyRow({
     >
       <View style={styles.rowLeading}>
         <Icon name={icon} size={19} color={destructive ? theme.colors.danger : theme.colors.foregroundSecondary} />
-        <UiText weight="700" tone={destructive ? "danger" : "default"}>{label}</UiText>
+        <UiText weight="700" style={destructive ? { color: theme.colors.danger } : undefined}>{label}</UiText>
       </View>
       <Icon name="chevron-left" size={18} color={theme.colors.subtle} />
     </PressableSurface>
