@@ -31,17 +31,18 @@ const StoreSettingsRecordSchema = z.object({
   website_url: z.string().nullable()
 });
 
-export async function fetchMyMerchantStoreSettings(storeId: string): Promise<MerchantStoreSettings> {
+export async function fetchMyMerchantStoreSettings(storeId: string, signal?: AbortSignal): Promise<MerchantStoreSettings> {
   const client = getSupabaseClient();
   const { data: auth, error: authError } = await client.auth.getUser();
   if (authError) throw authError;
   if (!auth.user) throw new Error("not_authenticated");
 
-  const { data, error } = await client.from("stores")
+  let request = client.from("stores")
     .select("id, owner_id, country_code, name, description, phone, whatsapp, region_id, secondary_region_id, commune, address_line, latitude, longitude, opening_hours, logo_url, cover_url, instagram_url, facebook_url, tiktok_url, website_url")
     .eq("id", storeId)
-    .eq("owner_id", auth.user.id)
-    .maybeSingle();
+    .eq("owner_id", auth.user.id);
+  if (signal) request = request.abortSignal(signal);
+  const { data, error } = await request.maybeSingle();
   if (error) throw error;
   if (!data) throw new Error("merchant_store_not_found");
 

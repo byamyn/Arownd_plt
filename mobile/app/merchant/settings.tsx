@@ -43,7 +43,7 @@ export default function MerchantStoreSettingsScreen() {
   const regionOptions = useQuery({ queryKey: ["merchant-regions"], queryFn: () => fetchCheckoutRegions(), staleTime: Infinity });
   const settings = useQuery({
     queryKey: ["merchant-store-settings", storeId],
-    queryFn: () => fetchMyMerchantStoreSettings(storeId ?? ""),
+    queryFn: ({ signal }) => fetchMyMerchantStoreSettings(storeId ?? "", signal),
     enabled: ready,
     retry: false
   });
@@ -55,7 +55,7 @@ export default function MerchantStoreSettingsScreen() {
   const mapStyleUrl = theme.mode === "dark" ? MAP_DARK_STYLE : MAP_LIGHT_STYLE;
   const localizedMapStyle = useQuery({
     queryKey: ["map-style", mapStyleUrl, language],
-    queryFn: () => fetchLocalizedMapStyle(mapStyleUrl, language),
+    queryFn: ({ signal }) => fetchLocalizedMapStyle(mapStyleUrl, language, signal),
     enabled: mapPickerOpen,
     staleTime: 24 * 60 * 60 * 1000,
     retry: 1

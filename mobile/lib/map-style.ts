@@ -22,10 +22,12 @@ function hasNameField(value: unknown): boolean {
 
 export async function fetchLocalizedMapStyle(
   styleUrl: string,
-  language: Language
+  language: Language,
+  signal?: AbortSignal
 ): Promise<StyleSpecification> {
   const response = await fetch(styleUrl, {
-    headers: { Accept: "application/json" }
+    headers: { Accept: "application/json" },
+    ...(signal ? { signal } : {})
   });
   if (!response.ok) throw new Error("map_style_unavailable");
 
