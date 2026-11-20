@@ -238,7 +238,7 @@ export default function MerchantNewProductScreen() {
   if (categories.isPending) {
     return <MessageScreen theme={theme} label={translate("merchantProductCategoriesLoading")} loading />;
   }
-  if (categories.isError || !categories.data?.length) {
+  if (categories.isError || !Array.isArray(categories.data) || categories.data.length === 0) {
     return (
       <MessageScreen
         theme={theme}
