@@ -297,7 +297,16 @@ export default function ProfileScreen() {
           ) : null}
 
           <Card contentStyle={styles.accountLinksCard}>
-            <PressableSurface accessibilityRole="button" accessibilityLabel={translate("profileEditDetails")} onPress={() => setAccountSheet("delivery")} style={styles.accountLinkRow}>
+            <PressableSurface accessibilityRole="button" accessibilityLabel={translate("profileTeamInvitations")} onPress={() => router.push("/team-invitations")} style={styles.accountLinkRow}>
+              <View style={[styles.accountLinkIcon, { backgroundColor: theme.colors.surfaceSecondary }]}><Icon name="users" size={20} color={theme.colors.accentOnSurface} /></View>
+              <View style={styles.accountLinkText}>
+                <UiText weight="700">{translate("profileTeamInvitations")}</UiText>
+                <Caption>{translate("profileTeamInvitationsHint")}</Caption>
+              </View>
+              <Icon name="chevron-left" size={18} color={theme.colors.subtle} />
+            </PressableSurface>
+            <View style={[styles.accountLinkDivider, { backgroundColor: theme.colors.border }]} />
+            <PressableSurface accessibilityRole="button" accessibilityLabel={translate("profileEditDetails") onPress={() => setAccountSheet("delivery")} style={styles.accountLinkRow}>
               <View style={[styles.accountLinkIcon, { backgroundColor: theme.colors.surfaceSecondary }]}><Icon name="user" size={20} color={theme.colors.accentOnSurface} /></View>
               <View style={styles.accountLinkText}>
                 <UiText weight="700">{translate("profileEditDetails")}</UiText>
