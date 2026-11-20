@@ -234,6 +234,7 @@ export default function MerchantNewProductScreen() {
   }
   if (!access.data) return <Redirect href="/login" />;
   if (access.data.status !== "merchant_ready" || !storeId) return <Redirect href="/merchant" />;
+  if (access.data.teamRole === "staff") return <Redirect href="/merchant/orders" />;
 
   if (categories.isPending) {
     return <MessageScreen theme={theme} label={translate("merchantProductCategoriesLoading")} loading />;
