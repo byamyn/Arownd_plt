@@ -1,6 +1,8 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Redirect, router } from "expo-router";
 import { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -27,6 +29,8 @@ import {
   removeStoreTeamMember,
   revokeStoreTeamInvitation,
   updateStoreTeamMemberRole,
+  storeTeamInvitationSchema,
+  type StoreTeamInvitationInput,
   type StoreTeamInvitation,
   type StoreTeamMember
 } from "@/lib/merchant-team";
@@ -43,12 +47,14 @@ export default function MerchantTeamScreen() {
   const styles = createStyles(theme);
   const queryClient = useQueryClient();
   const [inviteOpen, setInviteOpen] = useState(false);
-  const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteRole, setInviteRole] = useState<"admin" | "staff">("staff");
   const [inviteError, setInviteError] = useState(false);
   const [actionError, setActionError] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [pendingAction, setPendingAction] = useState<TeamAction | null>(null);
+  const { control, handleSubmit, reset, formState: { errors: inviteFormErrors } } = useForm<StoreTeamInvitationInput>({
+    resolver: zodResolver(storeTeamInvitationSchema),
+    defaultValues: { email: "", role: "staff" }
+  });
 
   const access = useQuery({
     queryKey: ["merchant-access"],
@@ -79,16 +85,20 @@ export default function MerchantTeamScreen() {
   };
 
   const invite = useMutation({
-    mutationFn: () => inviteStoreTeamMember({ storeId: storeId ?? "", email: inviteEmail, role: inviteRole }),
+    mutationFn: (values: StoreTeamInvitationInput) => inviteStoreTeamMember({ storeId: storeId ?? "", ...values }),
     onSuccess: async () => {
       setInviteOpen(false);
-      setInviteEmail("");
-      setInviteRole("staff");
+      reset({ email: "", role: "staff" });
       setInviteError(false);
       setNotice(translate("merchantTeamInviteSuccess"));
       await refreshTeam();
     },
     onError: () => setInviteError(true)
+  });
+
+  const submitInvite = handleSubmit((values) => {
+    setInviteError(false);
+    invite.mutate(values);
   });
 
   const changeRole = useMutation({
@@ -268,37 +278,48 @@ export default function MerchantTeamScreen() {
       </ScrollView>
 
       <BottomSheet visible={inviteOpen} onRequestClose={() => setInviteOpen(false)} title={translate("merchantTeamInvite")}>
-        <TextField
-          label={translate("merchantTeamInviteEmail")}
-          value={inviteEmail}
-          onChangeText={(value) => {
-            setInviteEmail(value);
-            setInviteError(false);
-          }}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          autoCorrect={false}
-          editable={!invite.isPending}
+        <Controller
+          control={control}
+          name="email"
+          render={({ field: { onChange, onBlur, value } }) => (
+            <TextField
+              label={translate("merchantTeamInviteEmail")}
+              value={value}
+              onChangeText={(nextValue) => {
+                onChange(nextValue);
+                setInviteError(false);
+              }}
+              onBlur={onBlur}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoCorrect={false}
+              editable={!invite.isPending}
+              error={inviteFormErrors.email ? translate("invalidEmail") : undefined}
+            />
+          )}
         />
         <UiText weight="700">{translate("merchantTeamRole")}</UiText>
-        <SegmentedControl
-          options={[
-            { key: "admin", label: translate("merchantTeamRoleAdmin") },
-            { key: "staff", label: translate("merchantTeamRoleStaff") }
-          ]}
-          value={inviteRole}
-          onChange={(value) => {
-            if (value === "admin" || value === "staff") setInviteRole(value);
-          }}
-          accessibilityLabel={translate("merchantTeamRole")}
+        <Controller
+          control={control}
+          name="role"
+          render={({ field: { onChange, value } }) => (
+            <SegmentedControl
+              options={[
+                { key: "admin", label: translate("merchantTeamRoleAdmin") },
+                { key: "staff", label: translate("merchantTeamRoleStaff") }
+              ]}
+              value={value}
+              onChange={onChange}
+              accessibilityLabel={translate("merchantTeamRole")}
+            />
+          )}
         />
         {inviteError ? <Alert description={translate("merchantTeamInviteError")} tone="danger" /> : null}
         <Alert description={translate("merchantTeamInviteHint")} tone="info" />
         <Button
           label={translate("merchantTeamInviteSend")}
-          onPress={() => invite.mutate()}
+          onPress={() => void submitInvite()}
           loading={invite.isPending}
-          disabled={!inviteEmail.trim()}
           fullWidth
         />
       </BottomSheet>
