@@ -5,15 +5,15 @@ import { getCustomerTab } from "./customer-navigation-state";
 describe("getCustomerTab", () => {
   it("maps the main customer navigation routes", () => {
     expect(getCustomerTab("/home")).toBe("home");
-    expect(getCustomerTab("/explore")).toBe("explore");
+    expect(getCustomerTab("/explore")).toBe("none");
     expect(getCustomerTab("/map")).toBe("map");
-    expect(getCustomerTab("/cart")).toBe("none");
+    expect(getCustomerTab("/cart")).toBe("cart");
     expect(getCustomerTab("/stores")).toBe("none");
     expect(getCustomerTab("/favorites")).toBe("none");
   });
 
-  it("keeps product detail associated with explore", () => {
-    expect(getCustomerTab("/product/abc")).toBe("explore");
+  it("does not select an unrelated bottom tab for explore and product detail routes", () => {
+    expect(getCustomerTab("/product/abc")).toBe("none");
   });
 
   it("keeps account routes associated with profile", () => {
