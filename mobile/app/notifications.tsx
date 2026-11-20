@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 
 import { PageSkeleton, CustomerScreen, EmptyState, ErrorState } from "@/components/customer-ui";
 import {
@@ -9,8 +9,7 @@ import {
   AppHeader,
   Button,
   Caption,
-  NotificationCard,
-  StatusBadge,
+  Icon,
   Text as UiText
 } from "@/components/ui";
 import { countUnreadNotifications, fetchMyNotifications, markAllNotificationsRead, markNotificationRead, type AppNotification } from "@/lib/notifications";
@@ -82,6 +81,7 @@ export default function NotificationsScreen() {
   const theme = useAppTheme();
   const queryClient = useQueryClient();
   const [actionError, setActionError] = useState(false);
+  const [filter, setFilter] = useState<"all" | "unread">("all");
   const auth = useQuery({
     queryKey: ["notifications-auth"],
     queryFn: async () => {
@@ -157,85 +157,162 @@ export default function NotificationsScreen() {
 
   const rows = notifications.data ?? [];
   const unreadCount = countUnreadNotifications(rows);
+  const visibleRows = filter === "unread" ? rows.filter((item) => !item.read) : rows;
+  const iconByType: Record<AppNotification["type"], "package-check" | "tag" | "calendar-days" | "shield-check" | "bell"> = {
+    order: "package-check",
+    offer: "tag",
+    reservation: "calendar-days",
+    system: "shield-check",
+    info: "bell"
+  };
 
   return (
     <CustomerScreen
       refreshing={auth.isFetching || (Boolean(auth.data) && notifications.isFetching)}
       onRefresh={() => { void auth.refetch().then((result) => { if (result.isSuccess && result.data) void notifications.refetch(); }); }}
     >
-      <AppHeader
-        title={translate("notificationsTitle")}
-      />
-      <Caption>{translate("notificationsSubtitle")}</Caption>
+      <AppHeader title={translate("notificationsTitle")} />
       {actionError ? <Alert tone="danger" description={translate("notificationsMarkError")} /> : null}
-      {unreadCount > 0 ? (
-        <Button
-          label={translate("notificationsMarkAll") + " · " + unreadCount}
-          onPress={() => markAll.mutate()}
-          loading={markAll.isPending}
-          fullWidth
-        />
-      ) : null}
+      <View style={styles.toolbar}>
+        <View style={styles.filters}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityState={{ selected: filter === "all" }}
+            onPress={() => setFilter("all")}
+            style={[styles.filterButton, filter === "all" && { backgroundColor: theme.colors.accent }]}
+          >
+            <UiText weight="700" style={{ color: filter === "all" ? theme.colors.accentForeground : theme.colors.muted }}>
+              {translate("ordersTabAll")}
+            </UiText>
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityState={{ selected: filter === "unread" }}
+            onPress={() => setFilter("unread")}
+            style={[styles.filterButton, filter === "unread" && { backgroundColor: theme.colors.accent }]}
+          >
+            <UiText weight="700" style={{ color: filter === "unread" ? theme.colors.accentForeground : theme.colors.muted }}>
+              {language === "ar" ? "غير المقروءة" : "Unread"}{unreadCount > 0 ? ` · ${unreadCount}` : ""}
+            </UiText>
+          </Pressable>
+        </View>
+        {unreadCount > 0 ? (
+          <Pressable
+            accessibilityRole="button"
+            disabled={markAll.isPending}
+            onPress={() => markAll.mutate()}
+            style={styles.markAllButton}
+          >
+            <UiText weight="700" tone="accent">{translate("notificationsMarkAll")}</UiText>
+          </Pressable>
+        ) : null}
+      </View>
       {rows.length === 0 ? (
         <EmptyState icon="bell" title={translate("notificationsEmpty")} hint={translate("notificationsEmptyHint")} />
-      ) : rows.map((item) => {
-        const destination = getNotificationDestination(item);
-        const orderId = typeof item.data.order_id === "string" ? item.data.order_id : null;
-        const orderCode = item.type === "order" && orderId && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(orderId)
-          ? formatOrderCode(orderId)
-          : null;
-        const copy = localizedNotificationCopy(item);
-        const body = orderCode && copy.body && orderId
-          ? copy.body.replace(new RegExp(orderId.slice(0, 8), "i"), orderCode)
-          : copy.body;
-        return (
-          <NotificationCard
-            key={item.id}
-            style={styles.card}
-            contentStyle={styles.cardContent}
-            onPress={() => {
-              if (!item.read) markOne.mutate(item.id);
-              if (destination) router.push(destination as never);
-            }}
-            accessibilityLabel={item.title}
-          >
-            <View style={styles.cardHeader}>
-              <Caption tone="accentMuted" weight="800">{typeLabel(item.type)}</Caption>
-              <Caption>{dateLabel(item.created_at, language)}</Caption>
-            </View>
-            <UiText weight="800">{copy.title}</UiText>
-            {orderCode ? <Caption>{translate("ordersCode")}: {orderCode}</Caption> : null}
-            {body ? <UiText tone="muted">{body}</UiText> : null}
-            {!item.read ? <View style={[styles.unreadDot, { backgroundColor: theme.colors.accent }]} /> : null}
-          </NotificationCard>
-        );
-      })}
+      ) : visibleRows.length === 0 ? (
+        <EmptyState icon="bell" title={language === "ar" ? "لا توجد إشعارات غير مقروءة" : "No unread notifications"} />
+      ) : (
+        <View style={styles.list}>
+          {visibleRows.map((item) => {
+            const destination = getNotificationDestination(item);
+            const orderId = typeof item.data.order_id === "string" ? item.data.order_id : null;
+            const orderCode = item.type === "order" && orderId && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(orderId)
+              ? formatOrderCode(orderId)
+              : null;
+            const copy = localizedNotificationCopy(item);
+            const body = orderCode && copy.body && orderId
+              ? copy.body.replace(new RegExp(orderId.slice(0, 8), "i"), orderCode)
+              : copy.body;
+            return (
+              <Pressable
+                key={item.id}
+                accessibilityRole="button"
+                accessibilityLabel={copy.title}
+                onPress={() => {
+                  if (!item.read) markOne.mutate(item.id);
+                  if (destination) router.push(destination as never);
+                }}
+                style={({ pressed }) => [styles.notificationRow, pressed && styles.notificationPressed]}
+              >
+                <View style={[styles.iconWrap, { backgroundColor: theme.colors.surfaceSecondary }]}>
+                  <Icon name={iconByType[item.type]} size={theme.dimensions.iconSize.md} color={theme.colors.foreground} />
+                </View>
+                <View style={styles.notificationCopy}>
+                  <UiText weight="700" numberOfLines={1}>{copy.title}</UiText>
+                  <Caption numberOfLines={1}>{orderCode ? `${translate("ordersCode")}: ${orderCode}` : body || typeLabel(item.type)}</Caption>
+                </View>
+                <View style={styles.notificationMeta}>
+                  <Caption>{dateLabel(item.created_at, language)}</Caption>
+                  {!item.read ? <View style={[styles.unreadDot, { backgroundColor: theme.colors.accent }]} /> : null}
+                </View>
+              </Pressable>
+            );
+          })}
+        </View>
+      )}
     </CustomerScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    position: "relative",
-    borderRadius: designTokens.radius.lg
-  },
-  cardContent: {
-    gap: designTokens.spacing.md,
-    padding: designTokens.spacing.lg
-  },
-  cardHeader: {
+  toolbar: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    gap: designTokens.spacing.sm,
-    paddingBottom: designTokens.spacing.xs
+    gap: designTokens.spacing.sm
+  },
+  filters: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: designTokens.spacing.xs
+  },
+  filterButton: {
+    minHeight: 34,
+    paddingHorizontal: designTokens.spacing.md,
+    borderRadius: designTokens.radius.pill,
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  markAllButton: {
+    minHeight: 34,
+    justifyContent: "center",
+    paddingHorizontal: designTokens.spacing.xs
+  },
+  list: {
+    gap: 0
+  },
+  notificationRow: {
+    minHeight: 68,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: designTokens.spacing.md,
+    paddingVertical: designTokens.spacing.sm,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: "rgba(127,127,127,0.24)"
+  },
+  notificationPressed: {
+    opacity: 0.72
+  },
+  iconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: designTokens.radius.lg,
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  notificationCopy: {
+    flex: 1,
+    gap: 4,
+    minWidth: 0
+  },
+  notificationMeta: {
+    alignItems: "flex-end",
+    justifyContent: "center",
+    gap: designTokens.spacing.sm
   },
   unreadDot: {
-    position: "absolute",
-    top: designTokens.spacing.lg,
-    start: designTokens.spacing.lg,
-    width: 8,
-    height: 8,
+    width: 7,
+    height: 7,
     borderRadius: designTokens.radius.pill
   }
 });
