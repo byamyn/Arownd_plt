@@ -124,7 +124,7 @@ export default function ProfileScreen() {
   });
   const reviews = useQuery({
     queryKey: ["my-reviews"],
-    queryFn: fetchMyReviews,
+    queryFn: ({ signal }) => fetchMyReviews(signal),
     enabled: Boolean(user.data),
     retry: false
   });

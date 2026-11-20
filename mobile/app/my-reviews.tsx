@@ -32,7 +32,7 @@ export default function MyReviewsScreen() {
   });
   const query = useQuery({
     queryKey: ["my-reviews"],
-    queryFn: fetchMyReviews,
+    queryFn: ({ signal }) => fetchMyReviews(signal),
     enabled: auth.isSuccess && Boolean(auth.data),
     retry: false
   });

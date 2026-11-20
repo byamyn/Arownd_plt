@@ -37,16 +37,18 @@ export async function fetchMyReview(targetType: "product" | "store", targetId: s
   return data ? ReviewSchema.parse(data as unknown) : null;
 }
 
-export async function fetchMyReviews(): Promise<AppReview[]> {
+export async function fetchMyReviews(signal?: AbortSignal): Promise<AppReview[]> {
   const client = getSupabaseClient();
   const { data: auth, error: authError } = await client.auth.getUser();
   if (authError) throw authError;
   if (!auth.user) return [];
-  const { data, error } = await client.from("reviews")
+  let request = client.from("reviews")
     .select("id, target_type, target_id, rating, comment, status, created_at")
     .eq("user_id", auth.user.id)
     .order("created_at", { ascending: false })
     .limit(100);
+  if (signal) request = request.abortSignal(signal);
+  const { data, error } = await request;
   if (error) throw error;
   return ReviewSchema.array().parse(data as unknown);
 }
