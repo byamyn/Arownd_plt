@@ -1,10 +1,10 @@
-export type CustomerTab = "home" | "explore" | "map" | "profile" | "none";
+export type CustomerTab = "home" | "cart" | "map" | "profile" | "none";
 
 export function getCustomerTab(pathname: string): CustomerTab | null {
   if (pathname === "/home" || pathname === "/") return "home";
-  if (pathname === "/explore" || pathname.startsWith("/product/")) return "explore";
+  if (pathname === "/cart") return "cart";
+  if (pathname === "/explore" || pathname.startsWith("/product/")) return "none";
   if (pathname === "/map") return "map";
-  if (pathname === "/cart") return "none";
   if (
     pathname === "/stores" ||
     pathname.startsWith("/store/") ||
