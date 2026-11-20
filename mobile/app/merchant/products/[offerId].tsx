@@ -88,9 +88,9 @@ export default function MerchantEditProductScreen() {
   });
 
   const offer = offerQuery.data;
-  const categoriesQuery = useQuery({
+  const categoriesQuery = useQuery<MerchantCategory[]>({
     queryKey: ["merchant-categories"],
-    queryFn: fetchMerchantCategories,
+    queryFn: ({ signal }) => fetchMerchantCategories(signal),
     enabled: ready,
     staleTime: 5 * 60 * 1000,
     retry: false
