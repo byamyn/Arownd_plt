@@ -18,7 +18,7 @@ import { translate, type Language, type TranslationKey, useLanguage } from "@/li
 import { getLocalizedWilayaLabel } from "@/lib/locale-data";
 import type { MerchantDashboardOrder } from "@/lib/merchant-dashboard-state";
 import { designTokens, useAppTheme, type AppTheme } from "@/lib/theme";
-import { RefreshableScrollView, AppHeader, Button, Card, ErrorState, FilterBar, FilterChip, Icon, OrderCardSkeleton, MerchantOrderCard, MerchantStatusBadge, PriceDisplay, Text as UiText } from "@/components/ui";
+import { RefreshableScrollView, AppHeader, Button, Card, ErrorState, FilterBar, FilterChip, Icon, IconButton, OrderCardSkeleton, MerchantOrderCard, MerchantStatusBadge, PriceDisplay, Text as UiText } from "@/components/ui";
 
 type OrderFilter = "all" | "pending" | "quoted" | "confirmed" | "shipped" | "delivered" | "cancelled" | "rejected";
 
@@ -129,6 +129,14 @@ export default function MerchantOrdersScreen() {
       <RefreshableScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} refreshing={access.isFetching || dashboard.isFetching} onRefresh={() => { void Promise.all([access.refetch(), dashboard.refetch()]); }}>
         <AppHeader
           title={translate("merchantOrdersPageTitle")}
+          trailing={
+            <IconButton
+              accessibilityLabel={translate("merchantAccountSettingsTitle")}
+              onPress={() => router.push("/merchant/account-settings")}
+              icon={<Icon name="settings" size={19} color={theme.colors.foreground} />}
+              variant="ghost"
+            />
+          }
         />
 
         <FilterBar style={styles.filters}>
