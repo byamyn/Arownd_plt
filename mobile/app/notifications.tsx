@@ -158,11 +158,11 @@ export default function NotificationsScreen() {
   const rows = notifications.data ?? [];
   const unreadCount = countUnreadNotifications(rows);
   const visibleRows = filter === "unread" ? rows.filter((item) => !item.read) : rows;
-  const iconByType: Record<AppNotification["type"], "package-check" | "tag" | "calendar-days" | "shield-check" | "bell"> = {
-    order: "package-check",
-    offer: "tag",
-    reservation: "calendar-days",
-    system: "shield-check",
+  const iconByType: Record<AppNotification["type"], "package" | "percent" | "calendar" | "lock" | "bell"> = {
+    order: "package",
+    offer: "percent",
+    reservation: "calendar",
+    system: "lock",
     info: "bell"
   };
 
@@ -203,7 +203,7 @@ export default function NotificationsScreen() {
             onPress={() => markAll.mutate()}
             style={styles.markAllButton}
           >
-            <UiText weight="700" tone="accent">{translate("notificationsMarkAll")}</UiText>
+            <UiText weight="700" tone="accentMuted">{translate("notificationsMarkAll")}</UiText>
           </Pressable>
         ) : null}
       </View>
