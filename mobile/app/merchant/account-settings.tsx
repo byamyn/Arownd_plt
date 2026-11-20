@@ -43,8 +43,9 @@ export default function MerchantAccountSettingsScreen() {
   if (!access.data) return <Redirect href="/login" />;
   if (access.data.status !== "merchant_ready" || !access.data.store?.id) return <Redirect href="/merchant" />;
 
+  const isOwner = access.data.teamRole === "owner";
   const links = [
-    {
+    ...(isOwner ? [{
       key: "store",
       icon: "store" as const,
       title: translate("merchantAccountSettingsStore"),
@@ -57,7 +58,7 @@ export default function MerchantAccountSettingsScreen() {
       title: translate("merchantAccountSettingsVerification"),
       description: translate("merchantAccountSettingsVerificationHint"),
       onPress: () => router.push("/merchant/verification")
-    },
+    }] : []),
     {
       key: "account",
       icon: "settings" as const,
