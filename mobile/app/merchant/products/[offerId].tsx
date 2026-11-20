@@ -82,7 +82,7 @@ export default function MerchantEditProductScreen() {
 
   const offerQuery = useQuery({
     queryKey: ["merchant-product", storeId, offerId],
-    queryFn: () => fetchMerchantProductOffer(storeId ?? "", offerId ?? ""),
+    queryFn: ({ signal }) => fetchMerchantProductOffer(storeId ?? "", offerId ?? "", signal),
     enabled: ready && !!offerId,
     retry: false
   });
