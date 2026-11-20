@@ -14,7 +14,7 @@ export default function MerchantLayout() {
         screenOptions={{
           headerShown: false,
           animation: "fade",
-          animationDuration: 280,
+          animationDuration: 140,
           animationMatchesGesture: true,
           contentStyle: { backgroundColor: theme.colors.background }
         }}
