@@ -325,7 +325,7 @@ export default function ProfileScreen() {
         height="82%"
         maxHeight="94%"
       >
-        {activitySheet ? <ProfileActivitySheet section={activitySheet} /> : null}
+        {activitySheet ? <ProfileActivitySheet section={activitySheet} onNavigate={() => setActivitySheet(null)} /> : null}
       </BottomSheet>
       <BottomSheet
         visible={avatarActionsOpen}
