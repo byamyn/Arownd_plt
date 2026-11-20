@@ -27,11 +27,11 @@ export default function MerchantVerificationScreen() {
   const overview = useQuery({
     queryKey: ["my-store-verification", storeId],
     queryFn: ({ signal }) => fetchMyStoreVerificationOverview(storeId ?? "", signal),
-    enabled: Boolean(storeId),
+    enabled: Boolean(storeId) && access.data?.teamRole === "owner",
     retry: false
   });
   const submit = useMutation({
-    mutationFn: submitMyStoreVerificationRequest,
+    mutationFn: () => submitMyStoreVerificationRequest(storeId ?? ""),
     onSuccess: async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["my-store-verification", storeId] }),
@@ -44,6 +44,7 @@ export default function MerchantVerificationScreen() {
   if (access.isError) return <ScreenMessage theme={theme} label={translate("merchantLoadError")} retryLabel={translate("merchantRetry")} onRetry={() => void access.refetch()} />;
   if (!access.data) return <Redirect href="/login" />;
   if (access.data.status !== "merchant_ready" || !storeId) return <Redirect href="/merchant" />;
+  if (access.data.teamRole !== "owner") return <Redirect href="/merchant/orders" />;
   if (overview.isPending) return <ScreenMessage theme={theme} label={translate("verificationLoading")} loading />;
   if (overview.isError || !overview.data) return <ScreenMessage theme={theme} label={translate("verificationLoadError")} retryLabel={translate("merchantRetry")} onRetry={() => void overview.refetch()} />;
 
