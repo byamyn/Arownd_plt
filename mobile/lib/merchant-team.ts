@@ -34,7 +34,11 @@ export type StoreTeamMember = z.infer<typeof TeamMemberSchema>;
 export type StoreTeamInvitation = z.infer<typeof TeamInvitationSchema>;
 export type PendingStoreTeamInvitation = z.infer<typeof PendingTeamInvitationSchema>;
 
-const TeamEmailSchema = z.string().trim().email().max(254);
+export const storeTeamInvitationSchema = z.object({
+  email: z.string().trim().email().max(254),
+  role: z.enum(["admin", "staff"])
+});
+export type StoreTeamInvitationInput = z.infer<typeof storeTeamInvitationSchema>;
 
 export async function fetchStoreTeamMembers(storeId: string, signal?: AbortSignal): Promise<StoreTeamMember[]> {
   let request = getSupabaseClient().rpc("get_store_team_members", { _store_id: storeId });
@@ -62,7 +66,8 @@ export async function inviteStoreTeamMember(input: {
   email: string;
   role: "admin" | "staff";
 }): Promise<string> {
-  const email = TeamEmailSchema.parse(input.email).toLowerCase();
+  const values = storeTeamInvitationSchema.parse({ email: input.email, role: input.role });
+  const email = values.email.toLowerCase();
   const { data, error } = await getSupabaseClient().rpc("invite_store_team_member", {
     _store_id: input.storeId,
     _email: email,
