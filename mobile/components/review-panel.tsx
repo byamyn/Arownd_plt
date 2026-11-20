@@ -32,7 +32,7 @@ export function ReviewPanel({ targetType, targetId }: { targetType: "product" | 
   });
   const mine = useQuery({
     queryKey: ["my-review", targetType, targetId],
-    queryFn: () => fetchMyReview(targetType, targetId),
+    queryFn: ({ signal }) => fetchMyReview(targetType, targetId, signal),
     enabled: auth.isSuccess && Boolean(auth.data)
   });
   const submit = useMutation({

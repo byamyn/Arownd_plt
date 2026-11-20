@@ -25,14 +25,16 @@ export async function fetchApprovedReviews(targetType: "product" | "store", targ
   return ReviewSchema.array().parse(data as unknown);
 }
 
-export async function fetchMyReview(targetType: "product" | "store", targetId: string): Promise<AppReview | null> {
+export async function fetchMyReview(targetType: "product" | "store", targetId: string, signal?: AbortSignal): Promise<AppReview | null> {
   const client = getSupabaseClient();
   const { data: auth, error: authError } = await client.auth.getUser();
   if (authError) throw authError;
   if (!auth.user) return null;
-  const { data, error } = await client.from("reviews")
+  let request = client.from("reviews")
     .select("id, target_type, target_id, rating, comment, status, created_at")
-    .eq("target_type", targetType).eq("target_id", targetId).eq("user_id", auth.user.id).maybeSingle();
+    .eq("target_type", targetType).eq("target_id", targetId).eq("user_id", auth.user.id);
+  if (signal) request = request.abortSignal(signal);
+  const { data, error } = await request.maybeSingle();
   if (error) throw error;
   return data ? ReviewSchema.parse(data as unknown) : null;
 }
