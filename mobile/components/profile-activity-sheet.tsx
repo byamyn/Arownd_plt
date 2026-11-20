@@ -7,23 +7,20 @@ import {
   Button,
   Caption,
   Card,
-  EmptyState,
-  ErrorState,
-  FavoriteButton as FavoriteToggle,
   Heading,
   Icon,
   Image,
   OrderCard,
   OrderStatusBadge,
   PriceDisplay,
-  ProductTile,
   RatingStars,
   SegmentedControl,
   StatusBadge,
   StoreCard,
   Text as UiText
 } from "@/components/ui";
-import { CustomerScreen } from "@/components/customer-ui";
+import { EmptyState, ErrorState, ProductTile } from "@/components/customer-ui";
+import { FavoriteButton as FavoriteToggle } from "@/components/favorite-button";
 import { chooseBestProductOffer, fetchProductDetails, fetchProductOffers, fetchStoreDetails, fetchStoreOffers, formatMarketPrice, formatNumber, getPrimaryImage } from "@/lib/catalog";
 import { BROWSING_CURRENCY_QUERY_KEY, fetchBrowsingCurrencyCode } from "@/lib/country-service";
 import { FAVORITES_QUERY_KEY } from "@/components/favorite-button";
@@ -54,7 +51,6 @@ function orderStatusLabel(status: string) {
 
 export function ProfileActivitySheet({ section }: { section: ProfileActivitySection }) {
   useLanguage();
-  const title = section === "orders" ? translate("profileOrders") : section === "favorites" ? translate("profileFavorites") : translate("myReviewsTitle");
   return (
     <View style={{ flex: 1, minHeight: 0 }}>
       {section === "orders" ? <OrdersContent /> : section === "favorites" ? <FavoritesContent /> : <ReviewsContent />}
@@ -147,7 +143,6 @@ function OrderSheetSkeleton() {
 }
 
 function FavoritesContent() {
-  const theme = useAppTheme();
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<FavoriteKind>("products");
   const currency = useQuery({ queryKey: BROWSING_CURRENCY_QUERY_KEY, queryFn: ({ signal }) => fetchBrowsingCurrencyCode(signal), staleTime: 60_000 });
