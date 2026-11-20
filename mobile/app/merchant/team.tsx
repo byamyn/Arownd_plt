@@ -7,7 +7,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import {
   Alert,
   AppHeader,
-  Avatar,
   BottomSheet,
   Button,
   Card,
@@ -19,6 +18,7 @@ import {
   Text as UiText,
   TextField
 } from "@/components/ui";
+import { Avatar } from "@/components/ui/identity";
 import { fetchMerchantAccess } from "@/lib/merchant";
 import {
   fetchStoreTeamInvitations,
@@ -336,7 +336,7 @@ export default function MerchantTeamScreen() {
 function createStyles(theme: ReturnType<typeof useAppTheme>) {
   return StyleSheet.create({
     safe: { flex: 1 },
-    content: { padding: designTokens.spacing.xl, paddingBottom: designTokens.spacing.xxxl, gap: designTokens.spacing.lg },
+    content: { padding: designTokens.spacing.xl, paddingBottom: designTokens.spacing.xxl, gap: designTokens.spacing.lg },
     subtitle: { color: theme.colors.muted, fontSize: theme.typography.caption + 1, lineHeight: 20 },
     sectionHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: designTokens.spacing.sm },
     listCard: { padding: 0, gap: 0 },
