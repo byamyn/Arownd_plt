@@ -283,7 +283,7 @@ export function ArowndAssistant() {
               </View>
             ) : (
               <View style={styles.chatContent}>
-                <UiText weight="700" size="lg">{copy.title}</UiText>
+                <UiText weight="700" style={{ fontSize: 19 }}>{copy.title}</UiText>
                 <UiText style={styles.bodyCopy}>{copy.intro}</UiText>
                 {messages.map((message) => (
                   <View key={message.id} style={[styles.messageBubble, { backgroundColor: theme.colors.surfaceSecondary, alignSelf: message.route ? "flex-start" : "flex-end" }]}>
