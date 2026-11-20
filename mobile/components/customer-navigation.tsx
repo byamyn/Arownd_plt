@@ -33,12 +33,13 @@ export function CustomerNavigation() {
   const isMerchantReady = access.data?.status === "merchant_ready";
   const isMerchantRoute = pathname.startsWith("/merchant");
   const ownedStoreId = access.data?.store?.id;
+  const canViewAnalytics = access.data?.teamRole === "owner" || access.data?.teamRole === "admin";
   const isOwnStoreRoute = Boolean(ownedStoreId && pathname === `/store/${ownedStoreId}`);
   const useStudioNavigation = (isMerchantRoute || isOwnStoreRoute) && isMerchantReady;
   const studioTabs: NavigationTab[] = [
     { id: "orders", label: "merchantOrdersPageTitle", icon: "file-text", path: "/merchant/orders" },
     { id: "products", label: "merchantProductsTitle", icon: "package", path: "/merchant/products" },
-    { id: "analytics", label: "merchantAnalyticsTitle", icon: "layout-grid", path: "/merchant/analytics" },
+    ...(canViewAnalytics ? [{ id: "analytics" as const, label: "merchantAnalyticsTitle" as const, icon: "layout-grid" as const, path: "/merchant/analytics" }] : []),
     ...(ownedStoreId ? [{ id: "store" as const, label: "merchantMyStore" as const, icon: "store" as const, path: `/store/${ownedStoreId}` }] : [])
   ];
   const tabs = useStudioNavigation ? studioTabs : customerTabs;
