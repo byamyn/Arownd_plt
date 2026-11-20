@@ -240,7 +240,7 @@ export function ArowndAssistant() {
               </View>
               <View style={styles.headerCopy}>
                 <UiText weight="700">{copy.title}</UiText>
-                <UiText tone="muted" size="xs">{copy.welcome}</UiText>
+                <UiText tone="muted" style={{ fontSize: 12 }}>{copy.welcome}</UiText>
               </View>
               <Pressable accessibilityRole="button" accessibilityLabel={copy.close} onPress={closeModal} hitSlop={10} style={styles.closeButton}>
                 <Icon name="x" size={20} color={theme.colors.foreground} />
@@ -251,8 +251,8 @@ export function ArowndAssistant() {
                 <View style={[styles.progressTrack, { backgroundColor: theme.colors.surfaceSecondary }]}>
                   <View style={[styles.progressValue, { backgroundColor: theme.colors.accent, width: `${((tourStep + 1) / steps.length) * 100}%` }]} />
                 </View>
-                <UiText tone="muted" size="xs">{copy.progress} {tourStep + 1} {copy.of} {steps.length}</UiText>
-                <UiText weight="700" size="lg">{activeStep.title}</UiText>
+                <UiText tone="muted" style={{ fontSize: 12 }}>{copy.progress} {tourStep + 1} {copy.of} {steps.length}</UiText>
+                <UiText weight="700" style={{ fontSize: 19 }}>{activeStep.title}</UiText>
                 <UiText style={styles.bodyCopy}>{activeStep.description}</UiText>
                 <View style={styles.tourActions}>
                   <Pressable onPress={completeTour} style={styles.skipButton}>
@@ -287,7 +287,7 @@ export function ArowndAssistant() {
                 <View style={styles.suggestions}>
                   {copy.suggested.map((suggestion) => (
                     <Pressable key={suggestion} onPress={() => { setQuestion(suggestion); }} style={[styles.suggestionChip, { borderColor: theme.colors.border }]}>
-                      <UiText size="xs">{suggestion}</UiText>
+                      <UiText style={{ fontSize: 12 }}>{suggestion}</UiText>
                     </Pressable>
                   ))}
                 </View>
