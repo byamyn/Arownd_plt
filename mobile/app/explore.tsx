@@ -116,14 +116,14 @@ export default function ExploreScreen() {
         <View style={styles.historySection}>
           <SectionTitle
             title={translate("exploreRecent")}
-            action={recentSearches.length > 0 ? translate("exploreClear") : undefined}
+            action={recentSearches.length > 0 ? translate("exploreClear") : ""}
             onAction={clearHistory}
           />
           {recentSearches.length > 0 ? recentSearches.map((item) => (
             <Pressable key={item} onPress={() => selectRecentSearch(item)} style={styles.historyItem}>
-              <Icon name="clock-3" size={17} color={theme.colors.muted} accessibilityHidden />
+              <Icon name="clock" size={17} color={theme.colors.muted} accessibilityHidden />
               <UiText numberOfLines={1} style={styles.historyText}>{item}</UiText>
-              <Icon name="arrow-up-left" size={16} color={theme.colors.subtle} accessibilityHidden />
+              <Icon name="arrow-left" size={16} color={theme.colors.subtle} accessibilityHidden />
             </Pressable>
           )) : (
             <UiText style={{ color: theme.colors.muted }}>{translate("exploreSearchHint")}</UiText>
@@ -217,7 +217,6 @@ export default function ExploreScreen() {
         />
       )}
       ListHeaderComponent={listHeader}
-      ListEmptyComponent={isSearching && !searchPending && !search.isError && activeTab !== "stores" && products.length === 0 ? null : undefined}
       refreshing={isSearching && !searchPending && search.isFetching}
       onRefresh={isSearching && !searchPending ? () => { void search.refetch(); } : undefined}
       initialNumToRender={6}
