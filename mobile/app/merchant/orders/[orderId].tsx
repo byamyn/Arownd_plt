@@ -132,7 +132,7 @@ export default function MerchantOrderDetailsScreen() {
     ? getNextMerchantTrackingStatus(latestTrackingStatus, deliveryType ?? "")
     : null;
   const nextStatusLabel = nextStatus ? trackingTranslationKeys[nextStatus] : null;
-  const canCollectCod = access.data.teamRole !== "staff" && canCollectMerchantOrderCod(order.status, order.payment_status, deliveryType ?? "", false);
+  const canCollectCod = access.data.teamRole === "owner" && canCollectMerchantOrderCod(order.status, order.payment_status, deliveryType ?? "", false);
   const canQuote = customerOrder.status !== "cancelled" && order.status === "pending" && !order.quoted_at;
   const canReject = canQuote;
 
