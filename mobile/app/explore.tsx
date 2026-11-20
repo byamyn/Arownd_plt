@@ -25,7 +25,7 @@ export default function ExploreScreen() {
   const { language } = useLanguage();
   const theme = useAppTheme();
   const queryClient = useQueryClient();
-  const browsingCurrency = useQuery({ queryKey: BROWSING_CURRENCY_QUERY_KEY, queryFn: fetchBrowsingCurrencyCode, staleTime: 60_000 });
+  const browsingCurrency = useQuery({ queryKey: BROWSING_CURRENCY_QUERY_KEY, queryFn: ({ signal }) => fetchBrowsingCurrencyCode(signal), staleTime: 60_000 });
   const params = useLocalSearchParams<{ q?: string; category?: string }>();
   const initialQuery = typeof params.q === "string" ? params.q : "";
   const category = typeof params.category === "string" ? params.category : undefined;
