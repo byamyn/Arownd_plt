@@ -73,7 +73,7 @@ export default function MerchantEditProductScreen() {
 
   const access = useQuery({
     queryKey: ["merchant-access"],
-    queryFn: fetchMerchantAccess,
+    queryFn: ({ signal }) => fetchMerchantAccess(signal),
     retry: false
   });
 
