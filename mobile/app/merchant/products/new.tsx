@@ -81,7 +81,7 @@ export default function MerchantNewProductScreen() {
 
   const access = useQuery({
     queryKey: ["merchant-access"],
-    queryFn: fetchMerchantAccess,
+    queryFn: ({ signal }) => fetchMerchantAccess(signal),
     retry: false
   });
   const categories = useQuery({
