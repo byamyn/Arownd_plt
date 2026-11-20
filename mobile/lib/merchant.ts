@@ -25,6 +25,7 @@ export type MerchantAccess = {
   userId: string;
   status: Exclude<MerchantAccessStatus, "signed_out">;
   store: { id: string; name: string; slug: string } | null;
+  teamRole: "owner" | "admin" | "staff" | null;
 };
 
 export async function fetchMerchantSignupBusinessName(): Promise<string | null> {
@@ -48,34 +49,56 @@ export async function fetchMerchantAccess(signal?: AbortSignal): Promise<Merchan
   let accountTypeRequest = client.rpc("get_my_account_type");
   let rolesRequest = client.from("user_roles").select("role").eq("user_id", userId);
   let storeRequest = client.from("stores").select("id, name, slug").eq("owner_id", userId);
+  let membershipRequest = client
+    .from("store_team_members")
+    .select("role, store:stores!inner(id, name, slug)")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: true })
+    .limit(1);
   if (signal) {
     accountTypeRequest = accountTypeRequest.abortSignal(signal);
     rolesRequest = rolesRequest.abortSignal(signal);
     storeRequest = storeRequest.abortSignal(signal);
+    membershipRequest = membershipRequest.abortSignal(signal);
   }
-  const [accountTypeResult, rolesResult, storeResult] = await Promise.all([
+
+  const [accountTypeResult, rolesResult, storeResult, membershipResult] = await Promise.all([
     accountTypeRequest,
     rolesRequest,
-    storeRequest.maybeSingle()
+    storeRequest.maybeSingle(),
+    membershipRequest.maybeSingle()
   ]);
 
   if (accountTypeResult.error) throw accountTypeResult.error;
   if (rolesResult.error) throw rolesResult.error;
   if (storeResult.error) throw storeResult.error;
+  if (membershipResult.error) throw membershipResult.error;
 
   const accountType = AccountTypeSchema.parse(accountTypeResult.data as unknown);
   const roles = RoleRowsSchema.parse(rolesResult.data as unknown).map((row) => row.role);
+  const membership = membershipResult.data as unknown as {
+    role: "owner" | "admin" | "staff";
+    store: { id: string; name: string; slug: string };
+  } | null;
   const store = storeResult.data
     ? OwnedStoreSchema.parse(storeResult.data as unknown)
-    : null;
+    : membership?.store
+      ? OwnedStoreSchema.parse(membership.store)
+      : null;
 
   const status = resolveMerchantAccessStatus({
     accountType,
     roles,
-    hasOwnedStore: store !== null
+    hasOwnedStore: storeResult.data !== null,
+    hasTeamMembership: membership !== null
   });
 
-  return { userId, status, store };
+  return {
+    userId,
+    status,
+    store,
+    teamRole: membership?.role ?? (storeResult.data ? "owner" : null)
+  };
 }
 
 const MerchantCategorySchema = z.object({
@@ -221,8 +244,7 @@ export async function fetchMerchantDashboard(storeId: string, signal?: AbortSign
   let storeRequest = client
     .from("stores")
     .select("id, name, slug, phone, commune, logo_url, is_verified, rating")
-    .eq("id", storeId)
-    .eq("owner_id", authData.user.id);
+    .eq("id", storeId);
   if (signal) storeRequest = storeRequest.abortSignal(signal);
   const { data: storeData, error: storeError } = await storeRequest.maybeSingle();
 
