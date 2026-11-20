@@ -74,7 +74,7 @@ export async function inviteStoreTeamMember(input: {
     _role: input.role
   });
   if (error) throw error;
-  return z.string().uuid().parse(data as unknown);
+  return data === null ? null : z.string().uuid().parse(data as unknown);
 }
 
 export async function revokeStoreTeamInvitation(invitationId: string): Promise<void> {
@@ -116,7 +116,7 @@ export async function fetchMyPendingStoreTeamInvitations(signal?: AbortSignal): 
   return PendingTeamInvitationSchema.array().parse(data as unknown);
 }
 
-export async function acceptStoreTeamInvitation(invitationId: string): Promise<string> {
+export async function acceptStoreTeamInvitation(invitationId: string): Promise<string | null> {
   const { data, error } = await getSupabaseClient().rpc("accept_store_team_invitation", {
     _invitation_id: invitationId
   });
