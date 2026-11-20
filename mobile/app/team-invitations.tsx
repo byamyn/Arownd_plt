@@ -16,6 +16,7 @@ import {
   acceptStoreTeamInvitation,
   fetchMyPendingStoreTeamInvitations
 } from "@/lib/merchant-team";
+import { setActiveMerchantStoreId } from "@/lib/merchant";
 import { translate, useLanguage } from "@/lib/i18n";
 import { designTokens, useAppTheme } from "@/lib/theme";
 
@@ -34,6 +35,7 @@ export default function TeamInvitationsScreen() {
   const accept = useMutation({
     mutationFn: acceptStoreTeamInvitation,
     onSuccess: async (storeId) => {
+      if (storeId) await setActiveMerchantStoreId(storeId);
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["merchant-access"] }),
         queryClient.invalidateQueries({ queryKey: ["my-pending-team-invitations"] })
