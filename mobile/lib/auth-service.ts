@@ -63,7 +63,7 @@ export async function signUpPersonal(input: PersonalSignupInput): Promise<boolea
   });
 
   if (error) throw error;
-  if (data.user) await AsyncStorage.setItem(AI_TOUR_PENDING_PREFIX + data.user.id, "1");
+  if (data.user) await AsyncStorage.setItem(AI_TOUR_PENDING_PREFIX + data.user.id, "1").catch(() => undefined);
   await clearPendingInviteCode().catch(() => undefined);
   return data.session !== null;
 }
