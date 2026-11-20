@@ -16,7 +16,6 @@ import {
   Icon,
   IdentityRow,
   PressableSurface,
-  StatCard
 } from "@/components/ui";
 import { fetchMyDeliveryProfile } from "@/lib/delivery-profile";
 import { removeMyProfileAvatar, uploadMyProfileAvatar } from "@/lib/profile-avatar";
@@ -219,6 +218,24 @@ export default function ProfileScreen() {
               </View>
             ) : null}
           </Card>
+
+          <View style={styles.statsGrid}>
+            <PressableSurface accessibilityRole="button" accessibilityLabel={translate("profileOrders")} onPress={() => router.push("/orders")} style={[styles.statTile, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+              <View style={[styles.statIcon, { backgroundColor: theme.colors.surfaceSecondary }]}><Icon name="package" size={designTokens.dimensions.iconSize.sm} /></View>
+              <UiText weight="700" style={styles.statValue}>{orders.isPending ? "…" : orders.isError ? "—" : String(orders.data?.length ?? 0)}</UiText>
+              <Caption>{translate("profileOrders")}</Caption>
+            </PressableSurface>
+            <PressableSurface accessibilityRole="button" accessibilityLabel={translate("profileFavorites")} onPress={() => router.push("/favorites")} style={[styles.statTile, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+              <View style={[styles.statIcon, { backgroundColor: theme.colors.surfaceSecondary }]}><Icon name="heart" size={designTokens.dimensions.iconSize.sm} /></View>
+              <UiText weight="700" style={styles.statValue}>{favorites.isPending ? "…" : favorites.isError ? "—" : String(favoriteCount)}</UiText>
+              <Caption>{translate("profileFavorites")}</Caption>
+            </PressableSurface>
+            <PressableSurface accessibilityRole="button" accessibilityLabel={translate("myReviewsTitle")} onPress={() => router.push("/my-reviews")} style={[styles.statTile, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+              <View style={[styles.statIcon, { backgroundColor: theme.colors.surfaceSecondary }]}><Icon name="star" size={designTokens.dimensions.iconSize.sm} /></View>
+              <UiText weight="700" style={styles.statValue}>{reviews.isPending ? "…" : reviews.isError ? "—" : String(reviews.data?.length ?? 0)}</UiText>
+              <Caption>{translate("myReviewsTitle")}</Caption>
+            </PressableSurface>
+          </View>
 
           {merchantAccess.data?.status === "merchant_ready" && merchantAccess.data.store?.id ? (
             <PressableSurface
@@ -432,7 +449,7 @@ const styles = StyleSheet.create({
   statsGrid: { flexDirection: "row", alignItems: "stretch", gap: designTokens.spacing.sm },
   statTile: { flex: 1, minWidth: 0, alignItems: "center", justifyContent: "center", gap: designTokens.spacing.sm, paddingHorizontal: designTokens.spacing.xs, paddingVertical: designTokens.spacing.md, borderRadius: designTokens.radius.lg, borderWidth: StyleSheet.hairlineWidth },
   statIcon: { width: 34, height: 34, borderRadius: designTokens.radius.md, alignItems: "center", justifyContent: "center" },
-  stat: { width: "100%", minWidth: 0, padding: 0, backgroundColor: "transparent", alignItems: "center" },
+  statValue: { fontSize: designTokens.typography.title, textAlign: "center" },
   merchantCard: { minHeight: 112, flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md, padding: designTokens.spacing.lg, borderRadius: designTokens.radius.xl, borderWidth: 1.5 },
   merchantIcon: { width: 52, height: 52, borderRadius: designTokens.radius.lg, alignItems: "center", justifyContent: "center" },
   merchantText: { flex: 1, minWidth: 0, gap: designTokens.spacing.xs },
