@@ -188,7 +188,7 @@ export default function ProfileScreen() {
       ) : (
         <>
           <Card contentStyle={styles.identityCard}>
-            <View style={styles.avatarIdentityWrap}>
+            <View style={styles.identityHeader}>
               <IdentityRow
                 name={displayName}
                 {...(user.data.email ? { subtitle: user.data.email } : {})}
@@ -197,15 +197,12 @@ export default function ProfileScreen() {
                 style={styles.identityRow}
               />
               <PressableSurface
-                accessibilityLabel={translate("profileAvatarChange")}
-                accessibilityHint={translate("profileAvatarOptionsTitle")}
-                onPress={() => setAvatarActionsOpen(true)}
-                disabled={uploadAvatar.isPending || removeAvatar.isPending}
-                style={styles.avatarActionTrigger}
+                accessibilityRole="button"
+                accessibilityLabel={translate("profileEditDetails")}
+                onPress={() => setAccountSheet("delivery")}
+                style={styles.identityEditLink}
               >
-                <View style={[styles.avatarCameraBadge, { backgroundColor: theme.colors.accent, borderColor: theme.colors.surface }]}>
-                  <Icon name="camera" size={13} color={theme.colors.accentForeground} />
-                </View>
+                <UiText weight="700" style={{ color: theme.colors.accentOnSurface }}>{translate("profileEditDetails")}</UiText>
               </PressableSurface>
             </View>
             {avatarPickerError || uploadAvatar.isError || removeAvatar.isError ? (
@@ -266,15 +263,6 @@ export default function ProfileScreen() {
               <Icon name="chevron-left" size={18} color={theme.colors.subtle} />
             </PressableSurface>
             <View style={[styles.accountLinkDivider, { backgroundColor: theme.colors.border }]} />
-            <PressableSurface accessibilityRole="button" accessibilityLabel={translate("profileEditDetails")} onPress={() => setAccountSheet("delivery")} style={styles.accountLinkRow}>
-              <View style={[styles.accountLinkIcon, { backgroundColor: theme.colors.surfaceSecondary }]}><Icon name="user" size={20} color={theme.colors.accentOnSurface} /></View>
-              <View style={styles.accountLinkText}>
-                <UiText weight="700">{translate("profileEditDetails")}</UiText>
-                <Caption>{translate("profileEditDetailsHint")}</Caption>
-              </View>
-              <Icon name="chevron-left" size={18} color={theme.colors.subtle} />
-            </PressableSurface>
-            <View style={[styles.accountLinkDivider, { backgroundColor: theme.colors.border }]} />
             <PressableSurface accessibilityRole="button" accessibilityLabel={translate("profileAddresses")} onPress={() => setAccountSheet("addresses")} style={styles.accountLinkRow}>
               <View style={[styles.accountLinkIcon, { backgroundColor: theme.colors.surfaceSecondary }]}><Icon name="map-pin" size={20} color={theme.colors.accentOnSurface} /></View>
               <View style={styles.accountLinkText}>
@@ -326,7 +314,7 @@ export default function ProfileScreen() {
         height="68%"
         maxHeight="94%"
       >
-        {accountSheet ? <ProfileAccountSheet section={accountSheet} /> : null}
+        {accountSheet ? <ProfileAccountSheet section={accountSheet} onManageAvatar={() => setAvatarActionsOpen(true)} /> : null}
       </BottomSheet>
       <BottomSheet
         visible={avatarActionsOpen}
@@ -426,9 +414,8 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   identityCard: { padding: designTokens.spacing.lg, gap: designTokens.spacing.md },
-  avatarIdentityWrap: { position: "relative" },
-  avatarActionTrigger: { position: "absolute", start: 0, top: 0, width: 64, height: 64, alignItems: "flex-end", justifyContent: "flex-end" },
-  avatarCameraBadge: { width: 26, height: 26, borderRadius: 13, borderWidth: 2, alignItems: "center", justifyContent: "center" },
+  identityHeader: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.sm },
+  identityEditLink: { minHeight: 40, justifyContent: "center", paddingHorizontal: designTokens.spacing.sm },
   avatarOption: { minHeight: 52, borderRadius: designTokens.radius.md, paddingHorizontal: designTokens.spacing.md, flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md },
   avatarModalOverlay: { flex: 1, justifyContent: "center", padding: designTokens.spacing.lg },
   avatarPreviewCard: { padding: designTokens.spacing.lg, gap: designTokens.spacing.md, alignItems: "center" },
