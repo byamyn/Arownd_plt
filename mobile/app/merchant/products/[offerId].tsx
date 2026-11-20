@@ -33,7 +33,7 @@ import {
   validateMerchantOfferValues,
   validateMerchantProductDetails
 } from "@/lib/merchant-products-state";
-import { fetchMerchantAccess, fetchMerchantCategories } from "@/lib/merchant";
+import { fetchMerchantAccess, fetchMerchantCategories, type MerchantCategory } from "@/lib/merchant";
 import { getSelectableMerchantCategories, groupMerchantCategories } from "@/lib/merchant-category-state";
 import { translate, useLanguage } from "@/lib/i18n";
 import { getLocalizedMerchantCategoryLabel } from "@/lib/locale-data";
