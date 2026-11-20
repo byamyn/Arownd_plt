@@ -128,22 +128,36 @@ export async function fetchCustomerOrderDetails(orderId: string, signal?: AbortS
   if (orderError) throw orderError;
   if (shipmentError) throw shipmentError;
   const parsedOrder = order ? OrderSchema.parse(order as unknown) : null;
-  const trackingEvents = parsedOrder
-    ? await Promise.all(parsedOrder.merchant_orders.map(async (merchantOrder) => {
-        const call = client.rpc.bind(client) as unknown as (
-          functionName: string,
-          args: { _merchant_order_id: string }
-        ) => Promise<{ data: unknown; error: { message?: string } | null }>;
-        const { data, error } = await call("fetch_merchant_order_tracking", {
-          _merchant_order_id: merchantOrder.id
-        });
-        if (error) throw new Error(error.message ?? "order_tracking_load_failed");
-        return {
-          merchantOrderId: merchantOrder.id,
-          events: TrackingEventSchema.array().parse(data as unknown)
-        };
-      }))
-    : [];
+  const merchantOrderIds = parsedOrder?.merchant_orders.map((merchantOrder) => merchantOrder.id) ?? [];
+  const trackingEvents: { merchantOrderId: string; events: CustomerTrackingEvent[] }[] =
+    merchantOrderIds.map((merchantOrderId) => ({ merchantOrderId, events: [] }));
+
+  if (merchantOrderIds.length > 0) {
+    const call = client.rpc.bind(client) as unknown as (
+      functionName: string,
+      args: { _merchant_order_ids: string[] }
+    ) => Promise<{ data: unknown; error: { message?: string } | null }>;
+    const { data, error } = await call("fetch_customer_order_tracking", {
+      _merchant_order_ids: merchantOrderIds
+    });
+    if (error) throw new Error(error.message ?? "order_tracking_load_failed");
+
+    const BatchTrackingEventSchema = TrackingEventSchema.extend({
+      merchant_order_id: z.string()
+    });
+    const events = BatchTrackingEventSchema.array().parse(data as unknown);
+    const eventsByOrder = new Map(merchantOrderIds.map((merchantOrderId) => [merchantOrderId, [] as CustomerTrackingEvent[]]));
+    for (const event of events) {
+      const orderEvents = eventsByOrder.get(event.merchant_order_id);
+      if (orderEvents) {
+        const { merchant_order_id: _merchantOrderId, ...trackingEvent } = event;
+        orderEvents.push(trackingEvent);
+      }
+    }
+    for (const entry of trackingEvents) {
+      entry.events = eventsByOrder.get(entry.merchantOrderId) ?? [];
+    }
+  }
   return {
     order: parsedOrder,
     shipments: ShipmentSchema.array().parse(shipments as unknown),
