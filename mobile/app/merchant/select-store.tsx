@@ -48,6 +48,7 @@ export default function MerchantSelectStoreScreen() {
   }
   if (!access.data) return <Redirect href="/login" />;
   if (!access.data.stores.length) return <Redirect href="/merchant" />;
+  const merchantAccess = access.data;
 
   const roleLabel = (role: "owner" | "admin" | "staff") =>
     role === "owner" ? translate("merchantTeamRoleOwner") : role === "admin" ? translate("merchantTeamRoleAdmin") : translate("merchantTeamRoleStaff");
@@ -59,8 +60,8 @@ export default function MerchantSelectStoreScreen() {
         <UiText style={styles.subtitle}>{translate("merchantSelectStoreSubtitle")}</UiText>
         {selectionError ? <Alert description={translate("merchantSelectStoreError")} tone="danger" /> : null}
         <Card contentStyle={styles.list}>
-          {access.data.stores.map((store, index) => {
-            const selected = store.id === access.data.store?.id;
+          {merchantAccess.stores.map((store, index) => {
+            const selected = store.id === merchantAccess.store?.id;
             const busy = pendingStoreId === store.id;
             return (
               <PressableSurface
