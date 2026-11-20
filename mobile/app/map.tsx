@@ -4,7 +4,6 @@ import {
   GeoJSONSource,
   Layer,
   Map as MapLibreMap,
-  RasterSource,
   UserLocation,
   type CameraRef,
   type GeoJSONSourceRef,
@@ -48,9 +47,6 @@ import { VerifiedBadge } from "@/components/ui/identity";
 
 const MAP_LIGHT_STYLE = "https://tiles.openfreemap.org/styles/liberty";
 const MAP_DARK_STYLE = "https://tiles.openfreemap.org/styles/dark";
-const EOX_SATELLITE_TILES = "https://e.tiles.maps.eox.at/wmts/1.0.0/s2cloudless_3857/default/GoogleMapsCompatible/${z}/${y}/${x}.jpg";
-const EOX_ATTRIBUTION =
-  "EOxCloudless https://cloudless.eox.at by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016 & 2017)";
 const OFF_ROUTE_DISTANCE_METERS = 70;
 const REROUTE_COOLDOWN_MS = 15_000;
 
@@ -444,10 +440,10 @@ export default function MapScreen() {
       style={[styles.screen, { backgroundColor: theme.colors.background }]}
       edges={["top", "left", "right"]}
     >
+      <View style={styles.mainHeader}>
+        <CustomerMainHeader variant="settings" />
+      </View>
       <View style={styles.mapContainer}>
-        <View style={styles.mainHeaderOverlay}>
-          <CustomerMainHeader />
-        </View>
         <MapLibreMap
           ref={mapRef}
           style={StyleSheet.absoluteFill}
@@ -509,40 +505,6 @@ export default function MapScreen() {
                   }
                 })}
           />
-
-          <RasterSource
-            id="arownd-eox-satellite"
-            tiles={[EOX_SATELLITE_TILES]}
-            tileSize={256}
-            minzoom={0}
-            maxzoom={13}
-            attribution={EOX_ATTRIBUTION}
-          >
-            <Layer
-              id="arownd-satellite-imagery"
-              type="raster"
-              source="arownd-eox-satellite"
-              afterId="background"
-              paint={{ "raster-opacity": 1 }}
-            />
-          </RasterSource>
-
-          {isDark ? (
-            <Layer
-              id="arownd-dark-3d-buildings"
-              type="fill-extrusion"
-              source="openmaptiles"
-              source-layer="building"
-              minzoom={14}
-              afterId="building"
-              paint={{
-                "fill-extrusion-base": ["coalesce", ["get", "render_min_height"], 0],
-                "fill-extrusion-height": ["coalesce", ["get", "render_height"], 8],
-                "fill-extrusion-color": "#555B66",
-                "fill-extrusion-opacity": 0.9
-              }}
-            />
-          ) : null}
 
           {navigation ? (
             <GeoJSONSource id="arownd-navigation-route" data={routeFeatureCollection}>
@@ -711,7 +673,7 @@ export default function MapScreen() {
           style={[
             styles.locationButton,
             {
-              top: 76,
+              top: 16,
               end: 16,
               backgroundColor: theme.colors.surface,
               borderColor: theme.colors.border,
@@ -735,7 +697,7 @@ export default function MapScreen() {
           if (navigation) stopNavigation();
         }}
         title={selectedStore?.name ?? ""}
-        maxHeight="88%"
+        maxHeight="60%"
       >
         {selectedStore ? (
           navigation ? (
@@ -909,12 +871,10 @@ const styles = StyleSheet.create({
   mapContainer: {
     flex: 1
   },
-  mainHeaderOverlay: {
-    position: "absolute",
-    top: 8,
-    start: 16,
-    end: 16,
-    zIndex: 5
+  mainHeader: {
+    paddingHorizontal: designTokens.spacing.xl,
+    paddingTop: designTokens.spacing.xs,
+    paddingBottom: designTokens.spacing.sm
   },
   mapStatusContainer: {
     position: "absolute",
