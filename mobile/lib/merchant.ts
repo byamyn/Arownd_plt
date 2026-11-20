@@ -382,16 +382,16 @@ export async function fetchMerchantOrderDetails(
   if (authError) throw authError;
   if (!authData.user) throw new Error("not_authenticated");
 
-  let ownedStoreRequest = client
-    .from("stores")
-    .select("id")
-    .eq("id", storeId)
-    .eq("owner_id", authData.user.id);
-  if (signal) ownedStoreRequest = ownedStoreRequest.abortSignal(signal);
-  const { data: ownedStore, error: storeError } = await ownedStoreRequest.maybeSingle();
+  let teamMembershipRequest = client
+    .from("store_team_members")
+    .select("id, role")
+    .eq("store_id", storeId)
+    .eq("user_id", authData.user.id);
+  if (signal) teamMembershipRequest = teamMembershipRequest.abortSignal(signal);
+  const { data: teamMembership, error: membershipError } = await teamMembershipRequest.maybeSingle();
 
-  if (storeError) throw storeError;
-  if (!ownedStore) throw new Error("merchant_store_not_found");
+  if (membershipError) throw membershipError;
+  if (!teamMembership) throw new Error("merchant_store_not_found");
 
   let merchantOrderRequest = client
     .from("merchant_orders")
