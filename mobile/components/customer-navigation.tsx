@@ -10,8 +10,8 @@ import { useAppTheme } from "@/lib/theme";
 
 type NavigationTab = {
   id: Exclude<CustomerTab, "none"> | "orders" | "products" | "analytics" | "store";
-  label: "navHome" | "navExplore" | "navMap" | "navAccount" | "merchantOrdersPageTitle" | "merchantProductsTitle" | "merchantAnalyticsTitle" | "merchantMyStore";
-  icon: "home" | "search" | "map" | "user" | "store" | "file-text" | "package" | "layout-grid";
+  label: "navHome" | "navExplore" | "navMap" | "navCart" | "navAccount" | "merchantOrdersPageTitle" | "merchantProductsTitle" | "merchantAnalyticsTitle" | "merchantMyStore";
+  icon: "home" | "search" | "map" | "shopping-bag" | "user" | "store" | "file-text" | "package" | "layout-grid";
   path: string;
 };
 
