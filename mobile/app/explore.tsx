@@ -77,7 +77,7 @@ export default function ExploreScreen() {
       });
     }, 1_000);
     return () => clearTimeout(timer);
-  }, [debouncedQuery, search.data, search.isError, search.isPending]);
+  }, [query, debouncedQuery, search.data, search.isError, search.isPending]);
 
   const selectRecentSearch = (value: string) => {
     setQuery(value);
@@ -89,12 +89,14 @@ export default function ExploreScreen() {
     void AsyncStorage.removeItem(SEARCH_HISTORY_KEY).catch(() => undefined);
   };
 
-  const isSearching = debouncedQuery.length > 0;
-  const stores = search.data?.stores ?? [];
-  const products = search.data?.products ?? [];
+  const isSearching = query.trim().length > 0;
+  const isDebouncing = query.trim() !== debouncedQuery;
+  const searchPending = isDebouncing || search.isPending;
+  const stores = isDebouncing ? [] : search.data?.stores ?? [];
+  const products = isDebouncing ? [] : search.data?.products ?? [];
   const showStores = activeTab !== "products" && stores.length > 0;
   const showProducts = activeTab !== "stores";
-  const listData = isSearching && !search.isPending && !search.isError && showProducts ? products : [];
+  const listData = isSearching && !searchPending && !search.isError && showProducts ? products : [];
 
   const listHeader = (
     <View style={styles.headerContent}>
@@ -147,7 +149,7 @@ export default function ExploreScreen() {
             })}
           </View>
 
-          {search.isPending ? (
+          {searchPending ? (
             <UiText style={{ color: theme.colors.muted }}>{translate("stateLoading")}</UiText>
           ) : search.isError ? (
             <ErrorState title={translate("catalogLoadError")} retryLabel={translate("retry")} onRetry={() => void search.refetch()} />
@@ -215,9 +217,9 @@ export default function ExploreScreen() {
         />
       )}
       ListHeaderComponent={listHeader}
-      ListEmptyComponent={isSearching && !search.isPending && !search.isError && activeTab !== "stores" && products.length === 0 ? null : undefined}
-      refreshing={isSearching && search.isFetching}
-      onRefresh={isSearching ? () => { void search.refetch(); } : undefined}
+      ListEmptyComponent={isSearching && !searchPending && !search.isError && activeTab !== "stores" && products.length === 0 ? null : undefined}
+      refreshing={isSearching && !searchPending && search.isFetching}
+      onRefresh={isSearching && !searchPending ? () => { void search.refetch(); } : undefined}
       initialNumToRender={6}
       maxToRenderPerBatch={6}
       updateCellsBatchingPeriod={50}
