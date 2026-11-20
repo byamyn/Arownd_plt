@@ -228,7 +228,7 @@ function AddressesContent() {
 function InviteContent() {
   const { language } = useLanguage();
   const theme = useAppTheme();
-  const invite = useQuery({ queryKey: ["my-invite-overview"], queryFn: fetchMyInviteOverview, retry: false });
+  const invite = useQuery({ queryKey: ["my-invite-overview"], queryFn: ({ signal }) => fetchMyInviteOverview(signal), retry: false });
   const link = useMemo(() => invite.data ? Linking.createURL(`invite/${invite.data.code}`, { scheme: "com.arownd.app" }) : "", [invite.data]);
   const share = async (message: string) => { try { await Share.share({ message }); } catch { /* Native share may be unavailable. */ } };
   const formatDate = (value: string) => {
