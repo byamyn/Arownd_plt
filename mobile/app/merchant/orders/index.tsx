@@ -43,7 +43,7 @@ export default function MerchantOrdersScreen() {
 
   const access = useQuery({
     queryKey: ["merchant-access"],
-    queryFn: fetchMerchantAccess,
+    queryFn: ({ signal }) => fetchMerchantAccess(signal),
     retry: false
   });
 
@@ -52,7 +52,7 @@ export default function MerchantOrdersScreen() {
 
   const dashboard = useQuery({
     queryKey: ["merchant-dashboard", storeId],
-    queryFn: () => fetchMerchantDashboard(storeId ?? ""),
+    queryFn: ({ signal }) => fetchMerchantDashboard(storeId ?? "", signal),
     enabled: ready,
     retry: false
   });
