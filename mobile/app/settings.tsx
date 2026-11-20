@@ -186,7 +186,7 @@ export default function SettingsScreen() {
       </View>
 
       <View style={styles.section}>
-        <Heading level={3}>{translate("settingsSupportSection")}</Heading>
+        <Heading level={3}>{translate("settingsAppSection")}</Heading>
         <Card contentStyle={styles.sectionContent}>
           <SettingsRow
             icon="bell"
