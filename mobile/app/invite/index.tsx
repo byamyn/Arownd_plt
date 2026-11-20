@@ -28,7 +28,7 @@ export default function InviteScreen() {
   const styles = createStyles(theme);
   const invite = useQuery({
     queryKey: ["my-invite-overview"],
-    queryFn: fetchMyInviteOverview,
+    queryFn: ({ signal }) => fetchMyInviteOverview(signal),
     retry: false
   });
 
