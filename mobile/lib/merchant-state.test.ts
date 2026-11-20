@@ -8,6 +8,14 @@ describe("resolveMerchantAccessStatus", () => {
   it("keeps a personal account in personal mode without merchant capabilities", () => {
     expect(resolveMerchantAccessStatus({ accountType: "personal", roles: [], hasOwnedStore: false })).toBe("personal");
   });
+  it("allows a personal account to enter Studio through an explicit store team membership", () => {
+    expect(resolveMerchantAccessStatus({
+      accountType: "personal",
+      roles: [],
+      hasOwnedStore: false,
+      hasTeamMembership: true
+    })).toBe("merchant_ready");
+  });
   it("identifies an incomplete merchant setup without granting merchant access", () => {
     expect(resolveMerchantAccessStatus({ accountType: "merchant", roles: ["merchant"], hasOwnedStore: false })).toBe("merchant_setup_required");
   });
