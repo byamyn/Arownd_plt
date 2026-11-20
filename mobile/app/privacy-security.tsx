@@ -22,7 +22,7 @@ export default function PrivacySecurityScreen() {
       />
       <Heading level={3}>{translate("settingsPrivacyTitle")}</Heading>
       <Card contentStyle={styles.group}>
-        <PrivacyRow icon="shield-check" label={translate("settingsPrivacyPolicy")} onPress={() => router.push("/privacy")} theme={theme} styles={styles} />
+        <PrivacyRow icon="lock" label={translate("settingsPrivacyPolicy")} onPress={() => router.push("/privacy")} theme={theme} styles={styles} />
         <PrivacyRow icon="file-text" label={translate("settingsTermsOfUse")} onPress={() => router.push("/terms")} theme={theme} styles={styles} />
         <PrivacyRow icon="trash-2" label={translate("deleteAccountTitle")} onPress={() => router.push("/delete-account")} theme={theme} styles={styles} last destructive />
       </Card>
@@ -40,7 +40,7 @@ function PrivacyRow({
   last = false,
   destructive = false
 }: {
-  icon: "shield-check" | "file-text" | "trash-2";
+  icon: "lock" | "file-text" | "trash-2";
   label: string;
   onPress: () => void;
   theme: AppTheme;
