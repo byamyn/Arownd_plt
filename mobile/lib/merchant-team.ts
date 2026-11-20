@@ -74,7 +74,7 @@ export async function inviteStoreTeamMember(input: {
     _role: input.role
   });
   if (error) throw error;
-  return data === null ? null : z.string().uuid().parse(data as unknown);
+  return z.string().uuid().parse(data as unknown);
 }
 
 export async function revokeStoreTeamInvitation(invitationId: string): Promise<void> {
@@ -121,5 +121,5 @@ export async function acceptStoreTeamInvitation(invitationId: string): Promise<s
     _invitation_id: invitationId
   });
   if (error) throw error;
-  return z.string().uuid().parse(data as unknown);
+  return data === null ? null : z.string().uuid().parse(data as unknown);
 }
