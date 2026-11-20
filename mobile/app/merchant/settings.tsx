@@ -37,7 +37,7 @@ export default function MerchantStoreSettingsScreen() {
   const theme = useAppTheme();
   const styles = createStyles(theme);
   const queryClient = useQueryClient();
-  const access = useQuery({ queryKey: ["merchant-access"], queryFn: fetchMerchantAccess, retry: false });
+  const access = useQuery({ queryKey: ["merchant-access"], queryFn: ({ signal }) => fetchMerchantAccess(signal), retry: false });
   const storeId = access.data?.store?.id ?? null;
   const ready = access.data?.status === "merchant_ready" && Boolean(storeId);
   const regionOptions = useQuery({ queryKey: ["merchant-regions"], queryFn: () => fetchCheckoutRegions(), staleTime: Infinity });
