@@ -30,23 +30,29 @@ export type RemoveMerchantProductImageResult = {
   primaryPromotionPending: boolean;
 };
 
+async function assertStoreTeamAccess(storeId: string, signal?: AbortSignal): Promise<string> {
+  const client = getSupabaseClient();
+  const { data: authData, error: authError } = await client.auth.getUser();
+  if (authError) throw authError;
+  if (!authData.user) throw new Error("not_authenticated");
+  let request = client.from("store_team_members").select("id").eq("store_id", storeId).eq("user_id", authData.user.id);
+  if (signal) request = request.abortSignal(signal);
+  const { data, error } = await request.maybeSingle();
+  if (error) throw error;
+  if (!data) throw new Error("merchant_store_not_found");
+  return authData.user.id;
+}
 async function assertOwnedStore(storeId: string, signal?: AbortSignal): Promise<string> {
   const client = getSupabaseClient();
   const { data: authData, error: authError } = await client.auth.getUser();
-
   if (authError) throw authError;
   if (!authData.user) throw new Error("not_authenticated");
-
-  let request = client
-    .from("stores")
-    .select("id")
-    .eq("id", storeId)
-    .eq("owner_id", authData.user.id);
+  let request = client.from("store_team_members").select("id").eq("store_id", storeId)
+    .eq("user_id", authData.user.id).in("role", ["owner", "admin"]);
   if (signal) request = request.abortSignal(signal);
   const { data, error } = await request.maybeSingle();
-
   if (error) throw error;
-  if (!data) throw new Error("merchant_store_not_found");
+  if (!data) throw new Error("merchant_catalog_permission_required");
   return authData.user.id;
 }
 
@@ -98,7 +104,7 @@ async function uploadProductImage(
 }
 
 export async function fetchMerchantProducts(storeId: string, signal?: AbortSignal): Promise<MerchantProductOffer[]> {
-  await assertOwnedStore(storeId, signal);
+  await assertStoreTeamAccess(storeId, signal);
 
   let request = getSupabaseClient()
     .from("store_offers")
@@ -138,20 +144,22 @@ async function updateOwnedOffer(
   patch: Partial<MerchantOfferValues> | { is_merchant_hidden: boolean }
 ): Promise<void> {
   await assertOwnedStore(storeId);
-
-  const { data, error } = await getSupabaseClient()
-    .from("store_offers")
-    .update({
-      ...patch,
-      last_confirmed_at: new Date().toISOString()
-    })
-    .eq("id", offerId)
-    .eq("store_id", storeId)
-    .select("id")
-    .maybeSingle();
-
+  const client = getSupabaseClient();
+  const { data: current, error: readError } = await client.from("store_offers")
+    .select("price, stock_quantity, options, is_merchant_hidden")
+    .eq("id", offerId).eq("store_id", storeId).maybeSingle();
+  if (readError) throw readError;
+  if (!current) throw new Error("merchant_offer_not_found");
+  const { data, error } = await client.rpc("update_merchant_product_offer", {
+    _offer_id: offerId,
+    _store_id: storeId,
+    _price: "price" in patch ? patch.price ?? current.price : current.price,
+    _stock_quantity: "stock_quantity" in patch ? patch.stock_quantity ?? current.stock_quantity : current.stock_quantity,
+    _options: "options" in patch ? patch.options ?? current.options : current.options,
+    _is_merchant_hidden: "is_merchant_hidden" in patch ? patch.is_merchant_hidden : current.is_merchant_hidden
+  });
   if (error) throw error;
-  if (!data) throw new Error("merchant_offer_not_updated");
+  z.string().uuid().parse(data as unknown);
 }
 
 export async function updateMerchantProductOffer(
