@@ -11,6 +11,7 @@ import {
 } from "@/lib/merchant-dashboard-state";
 import {
   resolveMerchantAccessStatus,
+  selectActiveStoreMembership,
   type MerchantAccessStatus
 } from "@/lib/merchant-state";
 
@@ -101,10 +102,11 @@ export async function fetchMerchantAccess(signal?: AbortSignal): Promise<Merchan
   }
   const stores = Array.from(new Map(storeMemberships.map((item) => [item.id, item])).values());
   const preferredStoreId = await AsyncStorage.getItem(ACTIVE_MERCHANT_STORE_KEY);
-  const selectedStore = stores.find((item) => item.id === preferredStoreId)
-    ?? stores.find((item) => item.role === "owner")
-    ?? stores[0]
-    ?? null;
+  const selectedStore = selectActiveStoreMembership(
+    stores,
+    preferredStoreId,
+    storeResult.data?.id ?? null
+  );
   const store = selectedStore
     ? { id: selectedStore.id, name: selectedStore.name, slug: selectedStore.slug }
     : null;
