@@ -46,6 +46,13 @@ export default function MerchantAccountSettingsScreen() {
   const isOwner = access.data.teamRole === "owner";
   const links = [
     ...(isOwner ? [{
+      key: "team",
+      icon: "users" as const,
+      title: translate("merchantTeamManage"),
+      description: translate("merchantTeamSubtitle"),
+      onPress: () => router.push("/merchant/team")
+    },
+    {
       key: "store",
       icon: "store" as const,
       title: translate("merchantAccountSettingsStore"),
