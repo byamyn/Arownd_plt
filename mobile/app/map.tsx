@@ -493,7 +493,7 @@ export default function MapScreen() {
               ? {
                   center: [cameraTarget.longitude, cameraTarget.latitude] as [number, number],
                   zoom: navigation ? 17 : 16,
-                  pitch: navigation ? 58 : 48,
+                  pitch: navigation ? 58 : 0,
                   duration: 650
                 }
               : {
