@@ -37,7 +37,7 @@ export async function fetchMerchantSignupBusinessName(): Promise<string | null> 
   return normalized.length > 0 ? normalized.slice(0, 100) : null;
 }
 
-export async function fetchMerchantAccess(): Promise<MerchantAccess | null> {
+export async function fetchMerchantAccess(signal?: AbortSignal): Promise<MerchantAccess | null> {
   const client = getSupabaseClient();
   const { data: authData, error: authError } = await client.auth.getUser();
 
@@ -45,10 +45,18 @@ export async function fetchMerchantAccess(): Promise<MerchantAccess | null> {
   if (!authData.user) return null;
 
   const userId = authData.user.id;
+  let accountTypeRequest = client.rpc("get_my_account_type");
+  let rolesRequest = client.from("user_roles").select("role").eq("user_id", userId);
+  let storeRequest = client.from("stores").select("id, name, slug").eq("owner_id", userId);
+  if (signal) {
+    accountTypeRequest = accountTypeRequest.abortSignal(signal);
+    rolesRequest = rolesRequest.abortSignal(signal);
+    storeRequest = storeRequest.abortSignal(signal);
+  }
   const [accountTypeResult, rolesResult, storeResult] = await Promise.all([
-    client.rpc("get_my_account_type"),
-    client.from("user_roles").select("role").eq("user_id", userId),
-    client.from("stores").select("id, name, slug").eq("owner_id", userId).maybeSingle()
+    accountTypeRequest,
+    rolesRequest,
+    storeRequest.maybeSingle()
   ]);
 
   if (accountTypeResult.error) throw accountTypeResult.error;
@@ -203,36 +211,43 @@ export type MerchantDashboard = {
   quotedOrderCount: number;
 };
 
-export async function fetchMerchantDashboard(storeId: string): Promise<MerchantDashboard> {
+export async function fetchMerchantDashboard(storeId: string, signal?: AbortSignal): Promise<MerchantDashboard> {
   const client = getSupabaseClient();
   const { data: authData, error: authError } = await client.auth.getUser();
 
   if (authError) throw authError;
   if (!authData.user) throw new Error("not_authenticated");
 
-  const { data: storeData, error: storeError } = await client
+  let storeRequest = client
     .from("stores")
     .select("id, name, slug, phone, commune, logo_url, is_verified, rating")
     .eq("id", storeId)
-    .eq("owner_id", authData.user.id)
-    .maybeSingle();
+    .eq("owner_id", authData.user.id);
+  if (signal) storeRequest = storeRequest.abortSignal(signal);
+  const { data: storeData, error: storeError } = await storeRequest.maybeSingle();
 
   if (storeError) throw storeError;
   if (!storeData) throw new Error("merchant_store_not_found");
 
+  let offerCountRequest = client
+    .from("store_offers")
+    .select("id", { count: "exact", head: true })
+    .eq("store_id", storeId);
+  let orderItemsRequest = client
+    .from("merchant_orders")
+    .select("id, status, subtotal, shipping_fee, quoted_at, created_at, order:orders!inner(id, status, full_name, commune, delivery_type, created_at, country_code, currency_code, region:country_regions!orders_country_region_fkey(name_ar, name_fr, name_en), secondary_region:country_regions!orders_country_secondary_region_fkey(name_ar, name_fr, name_en), wilaya:wilayas(id, name_ar, name_fr)), items:order_items!inner(id, store_id, merchant_archived_at, product_name, quantity)")
+    .eq("store_id", storeId)
+    .eq("items.store_id", storeId)
+    .is("items.merchant_archived_at", null)
+    .order("created_at", { ascending: false })
+    .limit(100);
+  if (signal) {
+    offerCountRequest = offerCountRequest.abortSignal(signal);
+    orderItemsRequest = orderItemsRequest.abortSignal(signal);
+  }
   const [offerCountResult, orderItemsResult] = await Promise.all([
-    client
-      .from("store_offers")
-      .select("id", { count: "exact", head: true })
-      .eq("store_id", storeId),
-    client
-      .from("merchant_orders")
-      .select("id, status, subtotal, shipping_fee, quoted_at, created_at, order:orders!inner(id, status, full_name, commune, delivery_type, created_at, country_code, currency_code, region:country_regions!orders_country_region_fkey(name_ar, name_fr, name_en), secondary_region:country_regions!orders_country_secondary_region_fkey(name_ar, name_fr, name_en), wilaya:wilayas(id, name_ar, name_fr)), items:order_items!inner(id, store_id, merchant_archived_at, product_name, quantity)")
-      .eq("store_id", storeId)
-      .eq("items.store_id", storeId)
-      .is("items.merchant_archived_at", null)
-      .order("created_at", { ascending: false })
-      .limit(100)
+    offerCountRequest,
+    orderItemsRequest
   ]);
 
   if (offerCountResult.error) throw offerCountResult.error;
