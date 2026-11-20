@@ -64,6 +64,7 @@ import {
   Truck,
   CloudUpload,
   User,
+  Users,
   Wallet,
   X
 } from "lucide-react-native";
@@ -139,6 +140,7 @@ const iconRegistry = {
   truck: Truck,
   "cloud-upload": CloudUpload,
   user: User,
+  users: Users,
   wallet: Wallet,
   x: X
 } as const;
