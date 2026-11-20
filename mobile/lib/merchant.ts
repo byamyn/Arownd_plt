@@ -58,7 +58,7 @@ export async function fetchMerchantAccess(signal?: AbortSignal): Promise<Merchan
   const userId = authData.user.id;
   let accountTypeRequest = client.rpc("get_my_account_type");
   let rolesRequest = client.from("user_roles").select("role").eq("user_id", userId);
-  let storeRequest = client.from("stores").select("id, name, slug").eq("owner_id", userId);
+  let storeRequest = client.from("stores").select("id, name, slug").eq("owner_id", userId).order("created_at", { ascending: true });
   let membershipRequest = client
     .from("store_team_members")
     .select("store_id, role, store:stores!inner(id, name, slug)")
