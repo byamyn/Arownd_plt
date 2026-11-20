@@ -103,7 +103,7 @@ export function ArowndAssistant() {
     placeholder: isArabic ? "اكتب سؤالك عن Arownd..." : "Ask a question about Arownd...",
     send: isArabic ? "إرسال" : "Send",
     intro: isArabic ? "يمكنني مساعدتك في فهم أقسام التطبيق والوصول إلى الصفحات المناسبة. ما الذي تريد معرفته؟" : "I can help you understand the app and find the right pages. What would you like to know?",
-    suggested: isArabic ? ["كيف أبحث عن منتج؟", "أين أجد طلباتي؟", "كيف أكتشف المتاجر؟"] : ["How do I search for a product?", "Where can I find my orders?", "How do I discover stores?"]
+    suggested: isArabic ? ["كيف أبحث عن منتج؟", "أين أجد طلباتي؟", "كيف أكتشف المتاجر؟", "إعادة الجولة التعريفية"] : ["How do I search for a product?", "Where can I find my orders?", "How do I discover stores?", "Restart the introduction tour"]
   }), [isArabic]);
   const steps = useMemo(() => {
     const localized = TOUR_STEPS[language];
@@ -194,9 +194,21 @@ export function ArowndAssistant() {
     setTourStep(index);
     if (pathname !== step.route) router.replace(step.route as never);
   };
+  const restartTour = async () => {
+    const access = await fetchMerchantAccess().catch(() => null);
+    setMerchantTour(access?.status === "merchant_ready");
+    setChatOpen(false);
+    setTourStep(0);
+    router.replace("/home");
+  };
   const submitQuestion = () => {
     const value = question.trim();
     if (!value) return;
+    if (value.toLocaleLowerCase().includes("الجولة") || value.toLocaleLowerCase().includes("tour")) {
+      setQuestion("");
+      void restartTour();
+      return;
+    }
     const answer = getQuickAnswer(value, language);
     setMessages((current) => [...current, { id: Date.now(), text: value }, { ...answer, id: Date.now() + 1 }]);
     setQuestion("");
