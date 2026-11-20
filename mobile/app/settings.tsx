@@ -210,7 +210,7 @@ export default function SettingsScreen() {
         <Heading level={3}>{translate("settingsSupportSection")}</Heading>
         <Card contentStyle={styles.sectionContent}>
           <SettingsRow
-            icon="headset"
+            icon="message-circle"
             label={translate("settingsSupportTitle")}
             onPress={() => router.push("/support")}
             theme={theme}
@@ -233,7 +233,7 @@ export default function SettingsScreen() {
           style={styles.linkRow}
         >
           <View style={styles.linkLabel}>
-            <View style={styles.iconBadge}><Icon name="shield-check" size={19} color={theme.colors.accentOnSurface} /></View>
+            <View style={styles.iconBadge}><Icon name="lock" size={19} color={theme.colors.accentOnSurface} /></View>
             <View style={styles.privacyRowCopy}>
               <UiText weight="700">{translate("settingsPrivacyTitle")}</UiText>
               <Caption>{translate("settingsPrivacyPolicy")} · {translate("settingsTermsOfUse")}</Caption>
