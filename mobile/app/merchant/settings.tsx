@@ -40,7 +40,7 @@ export default function MerchantStoreSettingsScreen() {
   const access = useQuery({ queryKey: ["merchant-access"], queryFn: ({ signal }) => fetchMerchantAccess(signal), retry: false });
   const storeId = access.data?.store?.id ?? null;
   const ready = access.data?.status === "merchant_ready" && Boolean(storeId);
-  const regionOptions = useQuery({ queryKey: ["merchant-regions"], queryFn: () => fetchCheckoutRegions(), staleTime: Infinity });
+  const regionOptions = useQuery({ queryKey: ["merchant-regions"], queryFn: ({ signal }) => fetchCheckoutRegions(undefined, signal), staleTime: Infinity });
   const settings = useQuery({
     queryKey: ["merchant-store-settings", storeId],
     queryFn: ({ signal }) => fetchMyMerchantStoreSettings(storeId ?? "", signal),
@@ -51,7 +51,7 @@ export default function MerchantStoreSettingsScreen() {
   const [mapPickerOpen, setMapPickerOpen] = useState(false);
   const [mapDraftPosition, setMapDraftPosition] = useState<{ latitude: number; longitude: number } | null>(null);
   const [mapCameraRevision, setMapCameraRevision] = useState(0);
-  const secondaryOptions = useQuery({ queryKey: ["merchant-regions", form?.region_id], queryFn: () => fetchCheckoutRegions(form?.region_id ?? null), enabled: form?.region_id !== undefined && form?.region_id !== null, staleTime: Infinity });
+  const secondaryOptions = useQuery({ queryKey: ["merchant-regions", form?.region_id], queryFn: ({ signal }) => fetchCheckoutRegions(form?.region_id ?? null, signal), enabled: form?.region_id !== undefined && form?.region_id !== null, staleTime: Infinity });
   const mapStyleUrl = theme.mode === "dark" ? MAP_DARK_STYLE : MAP_LIGHT_STYLE;
   const localizedMapStyle = useQuery({
     queryKey: ["map-style", mapStyleUrl, language],

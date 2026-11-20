@@ -37,8 +37,8 @@ export default function DeliveryProfileScreen() {
     queryKey: ["my-delivery-profile"],
     queryFn: fetchMyDeliveryProfile
   });
-  const regionOptions = useQuery({ queryKey: ["checkout-regions"], queryFn: () => fetchCheckoutRegions(), staleTime: Infinity });
-  const secondaryOptions = useQuery({ queryKey: ["checkout-regions", regionId], queryFn: () => fetchCheckoutRegions(regionId), enabled: regionId !== null, staleTime: Infinity });
+  const regionOptions = useQuery({ queryKey: ["checkout-regions"], queryFn: ({ signal }) => fetchCheckoutRegions(undefined, signal), staleTime: Infinity });
+  const secondaryOptions = useQuery({ queryKey: ["checkout-regions", regionId], queryFn: ({ signal }) => fetchCheckoutRegions(regionId, signal), enabled: regionId !== null, staleTime: Infinity });
   const communes = useQuery({
     queryKey: ["checkout-communes", regionId],
     queryFn: () => fetchDeliveryProfileCommunes(regionId as number),

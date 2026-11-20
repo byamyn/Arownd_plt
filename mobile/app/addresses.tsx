@@ -59,8 +59,8 @@ export default function AddressesScreen() {
   const [formError, setFormError] = useState<string | null>(null);
 
   const addresses = useQuery({ queryKey: ["my-addresses"], queryFn: fetchMyAddresses });
-  const regionOptions = useQuery({ queryKey: ["checkout-regions"], queryFn: () => fetchCheckoutRegions(), staleTime: Infinity });
-  const secondaryOptions = useQuery({ queryKey: ["checkout-regions", regionId], queryFn: () => fetchCheckoutRegions(regionId), enabled: regionId !== null, staleTime: Infinity });
+  const regionOptions = useQuery({ queryKey: ["checkout-regions"], queryFn: ({ signal }) => fetchCheckoutRegions(undefined, signal), staleTime: Infinity });
+  const secondaryOptions = useQuery({ queryKey: ["checkout-regions", regionId], queryFn: ({ signal }) => fetchCheckoutRegions(regionId, signal), enabled: regionId !== null, staleTime: Infinity });
   const selectedRegion = useMemo(() => regionOptions.data?.regions.find((item) => item.id === regionId) ?? null, [regionOptions.data, regionId]);
   const selectedSecondaryRegion = useMemo(() => secondaryOptions.data?.regions.find((item) => item.id === secondaryRegionId) ?? null, [secondaryOptions.data, secondaryRegionId]);
 

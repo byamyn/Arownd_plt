@@ -22,8 +22,8 @@ const ProfileSchema = z.object({
 export type CheckoutProfile = z.infer<typeof ProfileSchema>;
 export type CheckoutDeliveryType = "home" | "desk";
 
-export async function fetchCheckoutRegions(parentRegionId?: number | null) {
-  return fetchMyAccountRegions(parentRegionId);
+export async function fetchCheckoutRegions(parentRegionId?: number | null, signal?: AbortSignal) {
+  return fetchMyAccountRegions(parentRegionId, signal);
 }
 
 export async function fetchCheckoutProfile(): Promise<CheckoutProfile | null> {

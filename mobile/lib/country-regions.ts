@@ -37,22 +37,23 @@ export type AccountRegionOptions = {
   regions: CountryRegion[];
 };
 
-export async function fetchMyAccountCountryCode(): Promise<SupportedCountryCode> {
+export async function fetchMyAccountCountryCode(signal?: AbortSignal): Promise<SupportedCountryCode> {
   const client = getSupabaseClient();
   const { data: auth, error: authError } = await client.auth.getUser();
   if (authError) throw authError;
   if (!auth.user) throw new Error("not_authenticated");
 
-  const { data, error } = await client.from("profiles")
+  let request = client.from("profiles")
     .select("country_code")
-    .eq("user_id", auth.user.id)
-    .single();
+    .eq("user_id", auth.user.id);
+  if (signal) request = request.abortSignal(signal);
+  const { data, error } = await request.single();
   if (error) throw error;
   return CountryCodeSchema.parse(data.country_code);
 }
 
 /** Country-specific region levels are data, not application conditionals. */
-export async function fetchCountryRegionLevels(countryCodeInput: string): Promise<{
+export async function fetchCountryRegionLevels(countryCodeInput: string, signal?: AbortSignal): Promise<{
   countryCode: SupportedCountryCode;
   callingCode: string;
   levels: CountryRegionLevel[];
@@ -60,20 +61,23 @@ export async function fetchCountryRegionLevels(countryCodeInput: string): Promis
   const countryCode = CountryCodeSchema.parse(countryCodeInput);
   const client = getSupabaseClient();
 
-  const { data: country, error: countryError } = await client.from("countries")
+  let countryRequest = client.from("countries")
     .select("code, is_enabled, calling_code")
-    .eq("code", countryCode)
-    .single();
+    .eq("code", countryCode);
+  if (signal) countryRequest = countryRequest.abortSignal(signal);
+  const { data: country, error: countryError } = await countryRequest.single();
   if (countryError) throw countryError;
   if (!country.is_enabled) throw new Error("country_disabled");
   if (typeof country.calling_code !== "string" || !/^\+[1-9]\d{0,2}$/.test(country.calling_code)) {
     throw new Error("country_calling_code_invalid");
   }
 
-  const { data, error } = await client.from("country_region_levels")
+  let levelsRequest = client.from("country_region_levels")
     .select("country_code, level, region_types, label_ar, label_en, is_required")
     .eq("country_code", countryCode)
     .order("level", { ascending: true });
+  if (signal) levelsRequest = levelsRequest.abortSignal(signal);
+  const { data, error } = await levelsRequest;
   if (error) throw error;
 
   const levels = CountryRegionLevelSchema.array().parse(data as unknown);
@@ -109,8 +113,8 @@ export async function fetchMyAccountRegionLevels() {
   return fetchCountryRegionLevels(await fetchMyAccountCountryCode());
 }
 
-export async function fetchCountryRegions(countryCodeInput: string, parentRegionId?: number | null): Promise<AccountRegionOptions> {
-  const { countryCode, callingCode, levels } = await fetchCountryRegionLevels(countryCodeInput);
+export async function fetchCountryRegions(countryCodeInput: string, parentRegionId?: number | null, signal?: AbortSignal): Promise<AccountRegionOptions> {
+  const { countryCode, callingCode, levels } = await fetchCountryRegionLevels(countryCodeInput, signal);
   const firstLevel = levels[0];
   if (!firstLevel) throw new Error("country_region_levels_not_configured");
   let selectedLevel: CountryRegionLevel = firstLevel;
@@ -122,12 +126,13 @@ export async function fetchCountryRegions(countryCodeInput: string, parentRegion
     }
 
     const client = getSupabaseClient();
-    const { data: parent, error: parentError } = await client.from("country_regions")
+    let parentRequest = client.from("country_regions")
       .select("id, country_code, parent_id, region_type, is_enabled")
       .eq("id", parentRegionId)
       .eq("country_code", countryCode)
-      .eq("is_enabled", true)
-      .maybeSingle();
+      .eq("is_enabled", true);
+    if (signal) parentRequest = parentRequest.abortSignal(signal);
+    const { data: parent, error: parentError } = await parentRequest.maybeSingle();
     if (parentError) throw parentError;
     if (!parent) throw new Error("invalid_parent_region");
 
@@ -141,12 +146,13 @@ export async function fetchCountryRegions(countryCodeInput: string, parentRegion
     }
     if (parentLevelIndex > 0) {
       if (parent.parent_id === null) throw new Error("invalid_parent_region");
-      const { data: grandParent, error: grandParentError } = await client.from("country_regions")
+      let grandParentRequest = client.from("country_regions")
         .select("id, region_type, country_code, is_enabled")
         .eq("id", parent.parent_id)
         .eq("country_code", countryCode)
-        .eq("is_enabled", true)
-        .maybeSingle();
+        .eq("is_enabled", true);
+      if (signal) grandParentRequest = grandParentRequest.abortSignal(signal);
+      const { data: grandParent, error: grandParentError } = await grandParentRequest.maybeSingle();
       if (grandParentError) throw grandParentError;
       const previousLevel = levels[parentLevelIndex - 1];
       if (!grandParent || !previousLevel || !previousLevel.region_types.includes(grandParent.region_type)) {
@@ -161,12 +167,13 @@ export async function fetchCountryRegions(countryCodeInput: string, parentRegion
   }
 
   const client = getSupabaseClient();
-  const query = client.from("country_regions")
+  let query = client.from("country_regions")
     .select("id, country_code, parent_id, code, name_ar, name_fr, name_en, region_type, is_enabled")
     .eq("country_code", countryCode)
     .in("region_type", selectedLevel.region_types)
     .eq("is_enabled", true)
     .order("code", { ascending: true });
+  if (signal) query = query.abortSignal(signal);
 
   const { data, error } = parentId === null
     ? await query.is("parent_id", null)
@@ -183,8 +190,8 @@ export async function fetchCountryRegions(countryCodeInput: string, parentRegion
 
 }
 
-export async function fetchMyAccountRegions(parentRegionId?: number | null): Promise<AccountRegionOptions> {
-  return fetchCountryRegions(await fetchMyAccountCountryCode(), parentRegionId);
+export async function fetchMyAccountRegions(parentRegionId?: number | null, signal?: AbortSignal): Promise<AccountRegionOptions> {
+  return fetchCountryRegions(await fetchMyAccountCountryCode(signal), parentRegionId, signal);
 }
 
 export async function fetchMyAccountChildRegions(parentRegionId: number): Promise<CountryRegion[]> {

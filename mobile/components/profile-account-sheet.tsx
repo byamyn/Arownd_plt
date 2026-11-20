@@ -41,8 +41,8 @@ function DeliveryContent() {
   const [picker, setPicker] = useState<"region" | "secondary" | "commune" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const profile = useQuery({ queryKey: ["my-delivery-profile"], queryFn: fetchMyDeliveryProfile });
-  const regions = useQuery({ queryKey: ["checkout-regions"], queryFn: () => fetchCheckoutRegions(), staleTime: Infinity });
-  const secondary = useQuery({ queryKey: ["checkout-regions", regionId], queryFn: () => fetchCheckoutRegions(regionId), enabled: regionId !== null, staleTime: Infinity });
+  const regions = useQuery({ queryKey: ["checkout-regions"], queryFn: ({ signal }) => fetchCheckoutRegions(undefined, signal), staleTime: Infinity });
+  const secondary = useQuery({ queryKey: ["checkout-regions", regionId], queryFn: ({ signal }) => fetchCheckoutRegions(regionId, signal), enabled: regionId !== null, staleTime: Infinity });
   const communes = useQuery({ queryKey: ["checkout-communes", regionId], queryFn: () => fetchDeliveryProfileCommunes(regionId as number), enabled: regionId !== null, staleTime: 5 * 60 * 1000 });
   const [initialized, setInitialized] = useState(false);
   useEffect(() => {
@@ -141,8 +141,8 @@ function AddressesContent() {
   const [deleteTarget, setDeleteTarget] = useState<UserAddress | null>(null);
   const [error, setError] = useState<string | null>(null);
   const addresses = useQuery({ queryKey: ["my-addresses"], queryFn: fetchMyAddresses });
-  const regions = useQuery({ queryKey: ["checkout-regions"], queryFn: () => fetchCheckoutRegions(), staleTime: Infinity });
-  const secondary = useQuery({ queryKey: ["checkout-regions", regionId], queryFn: () => fetchCheckoutRegions(regionId), enabled: regionId !== null, staleTime: Infinity });
+  const regions = useQuery({ queryKey: ["checkout-regions"], queryFn: ({ signal }) => fetchCheckoutRegions(undefined, signal), staleTime: Infinity });
+  const secondary = useQuery({ queryKey: ["checkout-regions", regionId], queryFn: ({ signal }) => fetchCheckoutRegions(regionId, signal), enabled: regionId !== null, staleTime: Infinity });
   const selectedRegion = regions.data?.regions.find((item) => item.id === regionId) ?? null;
   const selectedSecondary = secondary.data?.regions.find((item) => item.id === secondaryId) ?? null;
   const refresh = async () => { await queryClient.invalidateQueries({ queryKey: ["my-addresses"] }); await queryClient.invalidateQueries({ queryKey: ["checkout-profile"] }); };

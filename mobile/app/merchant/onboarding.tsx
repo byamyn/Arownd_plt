@@ -57,7 +57,7 @@ export default function MerchantOnboardingScreen() {
     staleTime: Infinity
   });
 
-  const regionOptions = useQuery({ queryKey: ["merchant-regions"], queryFn: () => fetchCheckoutRegions(), enabled: canStartOnboarding, staleTime: Infinity });
+  const regionOptions = useQuery({ queryKey: ["merchant-regions"], queryFn: ({ signal }) => fetchCheckoutRegions(undefined, signal), enabled: canStartOnboarding, staleTime: Infinity });
   const {
     control,
     handleSubmit,
@@ -87,7 +87,7 @@ export default function MerchantOnboardingScreen() {
   }, [suggestedStoreName.data, getValues, setValue]);
 
   const regionId = watch("regionId");
-  const secondaryOptions = useQuery({ queryKey: ["merchant-regions", regionId], queryFn: () => fetchCheckoutRegions(regionId), enabled: canStartOnboarding && regionId !== null, staleTime: Infinity });
+  const secondaryOptions = useQuery({ queryKey: ["merchant-regions", regionId], queryFn: ({ signal }) => fetchCheckoutRegions(regionId, signal), enabled: canStartOnboarding && regionId !== null, staleTime: Infinity });
   const selectedRegion = regionOptions.data?.regions.find((item) => item.id === regionId);
   const secondaryRegionId = watch("secondaryRegionId");
   const selectedSecondaryRegion = secondaryOptions.data?.regions.find((item) => item.id === secondaryRegionId);
