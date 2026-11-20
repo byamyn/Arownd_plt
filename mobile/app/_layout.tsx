@@ -17,6 +17,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import Logo from "@/components/logo";
 import { AuthCaptchaHost } from "@/components/auth-captcha-host";
+import { ArowndAssistant } from "@/components/arownd-assistant";
 import { CartFlyOverlay } from "@/components/cart-fly-overlay";
 import { ThemeProvider, useAppTheme, useThemePreference } from "@/lib/design-system";
 import { getSupabaseClient } from "@/lib/supabase";
@@ -193,6 +194,7 @@ function RootLayoutContent() {
       </QueryClientProvider>
 
       <CartFlyOverlay />
+      <ArowndAssistant />
 
       {showSplash ? (
         <View
