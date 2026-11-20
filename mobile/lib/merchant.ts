@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { z } from "zod";
 
 import { getSupabaseClient } from "@/lib/supabase";
@@ -25,6 +26,7 @@ export type MerchantAccess = {
   userId: string;
   status: Exclude<MerchantAccessStatus, "signed_out">;
   store: { id: string; name: string; slug: string } | null;
+  stores: Array<{ id: string; name: string; slug: string; role: "owner" | "admin" | "staff" }>;
   teamRole: "owner" | "admin" | "staff" | null;
 };
 
@@ -36,6 +38,13 @@ export async function fetchMerchantSignupBusinessName(): Promise<string | null> 
   if (typeof businessName !== "string") return null;
   const normalized = businessName.trim();
   return normalized.length > 0 ? normalized.slice(0, 100) : null;
+}
+
+const ACTIVE_MERCHANT_STORE_KEY = "arownd.active-merchant-store";
+
+export async function setActiveMerchantStoreId(storeId: string | null): Promise<void> {
+  if (storeId) await AsyncStorage.setItem(ACTIVE_MERCHANT_STORE_KEY, storeId);
+  else await AsyncStorage.removeItem(ACTIVE_MERCHANT_STORE_KEY);
 }
 
 export async function fetchMerchantAccess(signal?: AbortSignal): Promise<MerchantAccess | null> {
@@ -80,25 +89,39 @@ export async function fetchMerchantAccess(signal?: AbortSignal): Promise<Merchan
     role: z.enum(["owner", "admin", "staff"]),
     store: OwnedStoreSchema
   })).parse(membershipResult.data as unknown);
-  const membership = membershipRows.find((row) => row.store_id === storeResult.data?.id) ?? membershipRows[0] ?? null;
-  const store = storeResult.data
-    ? OwnedStoreSchema.parse(storeResult.data as unknown)
-    : membership?.store
-      ? OwnedStoreSchema.parse(membership.store)
-      : null;
+  const storeMemberships = membershipRows.map((row) => ({
+    ...row.store,
+    role: row.role
+  }));
+  if (storeResult.data && !storeMemberships.some((item) => item.id === storeResult.data?.id)) {
+    storeMemberships.unshift({
+      ...OwnedStoreSchema.parse(storeResult.data as unknown),
+      role: "owner" as const
+    });
+  }
+  const stores = Array.from(new Map(storeMemberships.map((item) => [item.id, item])).values());
+  const preferredStoreId = await AsyncStorage.getItem(ACTIVE_MERCHANT_STORE_KEY);
+  const selectedStore = stores.find((item) => item.id === preferredStoreId)
+    ?? stores.find((item) => item.role === "owner")
+    ?? stores[0]
+    ?? null;
+  const store = selectedStore
+    ? { id: selectedStore.id, name: selectedStore.name, slug: selectedStore.slug }
+    : null;
 
   const status = resolveMerchantAccessStatus({
     accountType,
     roles,
     hasOwnedStore: storeResult.data !== null,
-    hasTeamMembership: membership !== null
+    hasTeamMembership: stores.length > 0
   });
 
   return {
     userId,
     status,
     store,
-    teamRole: storeResult.data ? "owner" : membership?.role ?? null
+    stores,
+    teamRole: selectedStore?.role ?? null
   };
 }
 
