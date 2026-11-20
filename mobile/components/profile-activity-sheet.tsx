@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 
 import {
-  Button,
   Caption,
   Card,
   Heading,
@@ -26,7 +25,7 @@ import { BROWSING_CURRENCY_QUERY_KEY, fetchBrowsingCurrencyCode } from "@/lib/co
 import { FAVORITES_QUERY_KEY } from "@/components/favorite-button";
 import { getFavorites } from "@/lib/favorites";
 import type { FavoriteKind } from "@/lib/favorites-state";
-import { fetchMyOrders, fetchCustomerOrderDetails, getOrderStatusTone, type CustomerOrder } from "@/lib/orders";
+import { fetchMyOrders, fetchCustomerOrderDetails, getOrderStatusTone,  } from "@/lib/orders";
 import { formatOrderCode } from "@/lib/orders-state";
 import { fetchMyReviews, getReviewTargetPath, type AppReview } from "@/lib/reviews";
 import { translate, type Language, useLanguage } from "@/lib/i18n";
@@ -49,16 +48,16 @@ function orderStatusLabel(status: string) {
   return translate((labels[status] ?? "orderStatusUnknown") as Parameters<typeof translate>[0]);
 }
 
-export function ProfileActivitySheet({ section }: { section: ProfileActivitySection }) {
+export function ProfileActivitySheet({ section, onNavigate }: { section: ProfileActivitySection; onNavigate: () => void }) {
   useLanguage();
   return (
     <View style={{ flex: 1, minHeight: 0 }}>
-      {section === "orders" ? <OrdersContent /> : section === "favorites" ? <FavoritesContent /> : <ReviewsContent />}
+      {section === "orders" ? <OrdersContent onNavigate={onNavigate} /> : section === "favorites" ? <FavoritesContent onNavigate={onNavigate} /> : <ReviewsContent onNavigate={onNavigate} />}
     </View>
   );
 }
 
-function OrdersContent() {
+function OrdersContent({ onNavigate }: { onNavigate: () => void }) {
   const theme = useAppTheme();
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<OrdersTab>("all");
@@ -113,6 +112,7 @@ function OrdersContent() {
             accessibilityLabel={`${translate("ordersCode")} ${code}, ${orderStatusLabel(row.status)}`}
             onPress={() => {
               void queryClient.prefetchQuery({ queryKey: ["customer-order-details", row.order.id], queryFn: ({ signal }) => fetchCustomerOrderDetails(row.order.id, signal), staleTime: 15_000 });
+              onNavigate();
               router.push({ pathname: "/orders/[orderId]", params: { orderId: row.order.id } });
             }}
             style={{ borderRadius: theme.radius.lg }}
@@ -142,7 +142,7 @@ function OrderSheetSkeleton() {
   </View>;
 }
 
-function FavoritesContent() {
+function FavoritesContent({ onNavigate }: { onNavigate: () => void }) {
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<FavoriteKind>("products");
   const currency = useQuery({ queryKey: BROWSING_CURRENCY_QUERY_KEY, queryFn: ({ signal }) => fetchBrowsingCurrencyCode(signal), staleTime: 60_000 });
@@ -205,6 +205,7 @@ function FavoritesContent() {
                 onPress={() => {
                   void queryClient.prefetchQuery({ queryKey: ["customer-product", id], queryFn: ({ signal }) => fetchProductDetails(id, signal), staleTime: 60_000 });
                   void queryClient.prefetchQuery({ queryKey: ["customer-product-offers", id], queryFn: () => fetchProductOffers(id), staleTime: 30_000 });
+                  onNavigate();
                   router.push({ pathname: "/product/[productId]", params: { productId: id } });
                 }}
               />
@@ -220,6 +221,7 @@ function FavoritesContent() {
               onPress={() => {
                 void queryClient.prefetchQuery({ queryKey: ["customer-store", id], queryFn: () => fetchStoreDetails(id), staleTime: 60_000 });
                 void queryClient.prefetchQuery({ queryKey: ["customer-store-offers", id], queryFn: ({ signal }) => fetchStoreOffers(id, signal), staleTime: 30_000 });
+                onNavigate();
                 router.push({ pathname: "/store/[storeId]", params: { storeId: id } });
               }}
               contentStyle={{ flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md, padding: designTokens.spacing.md }}
@@ -240,7 +242,7 @@ function FavoritesContent() {
   );
 }
 
-function ReviewsContent() {
+function ReviewsContent({ onNavigate }: { onNavigate: () => void }) {
   const { language } = useLanguage();
   const reviews = useQuery({ queryKey: ["my-reviews"], queryFn: ({ signal }) => fetchMyReviews(signal), retry: false });
   if (reviews.isPending) return <View style={{ flex: 1 }}><OrderSheetSkeleton /></View>;
@@ -249,19 +251,19 @@ function ReviewsContent() {
 
   return (
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: designTokens.spacing.md, paddingBottom: designTokens.spacing.xl }}>
-      {reviews.data.map((review) => <ReviewItem key={review.id} review={review} language={language} />)}
+      {reviews.data.map((review) => <ReviewItem key={review.id} review={review} language={language} onNavigate={onNavigate} />)}
     </ScrollView>
   );
 }
 
-function ReviewItem({ review, language }: { review: AppReview; language: Language }) {
+function ReviewItem({ review, language, onNavigate }: { review: AppReview; language: Language; onNavigate: () => void }) {
   const date = new Date(review.created_at);
   const dateLabel = Number.isNaN(date.getTime()) ? "" : new Intl.DateTimeFormat(language === "ar" ? "ar-DZ" : "en-DZ", { dateStyle: "medium" }).format(date);
   const target = review.target_type === "product" ? translate("myReviewsProduct") : translate("myReviewsStore");
   const status = review.status === "approved" ? translate("myReviewsApproved") : review.status === "rejected" ? translate("myReviewsRejected") : translate("myReviewsPending");
   return (
     <Card
-      onPress={() => router.push(getReviewTargetPath(review) as never)}
+      onPress={() => { onNavigate(); router.push(getReviewTargetPath(review) as never); }}
       accessibilityLabel={target}
       contentStyle={{ gap: designTokens.spacing.sm, padding: designTokens.spacing.md }}
     >
