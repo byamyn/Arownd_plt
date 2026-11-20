@@ -84,28 +84,30 @@ export function getStoreVerificationRequirements(store: StoreVerificationStore, 
   };
 }
 
-export async function fetchMyStoreVerificationOverview(storeId: string): Promise<StoreVerificationOverview> {
+export async function fetchMyStoreVerificationOverview(storeId: string, signal?: AbortSignal): Promise<StoreVerificationOverview> {
   const client = getSupabaseClient();
   const { data: auth, error: authError } = await client.auth.getUser();
   if (authError) throw authError;
   if (!auth.user) throw new Error("not_authenticated");
 
-  const { data: storeData, error: storeError } = await client
+  let storeRequest = client
     .from("stores")
     .select("id, name, logo_url, phone, region_id, secondary_region_id, commune, address_line, opening_hours, is_verified")
     .eq("id", storeId)
-    .eq("owner_id", auth.user.id)
-    .maybeSingle();
+    .eq("owner_id", auth.user.id);
+  if (signal) storeRequest = storeRequest.abortSignal(signal);
+  const { data: storeData, error: storeError } = await storeRequest.maybeSingle();
   if (storeError) throw storeError;
   if (!storeData) throw new Error("merchant_store_not_found");
 
-  const { data: requestData, error: requestError } = await client
+  let request = client
     .from("store_verification_requests")
     .select("id, status, submitted_at, reviewed_at, review_note")
     .eq("store_id", storeId)
     .order("submitted_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    .limit(1);
+  if (signal) request = request.abortSignal(signal);
+  const { data: requestData, error: requestError } = await request.maybeSingle();
   if (requestError) throw requestError;
 
   return {
