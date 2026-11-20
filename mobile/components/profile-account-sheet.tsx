@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Share, ScrollView, View } from "react-native";
+import { Image as NativeImage, Share, ScrollView, View } from "react-native";
 import * as Linking from "expo-linking";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -21,15 +21,15 @@ export type ProfileAccountSection = "delivery" | "addresses" | "invite";
 
 type DeliveryPickerItem = { id: number | string; name: string };
 
-export function ProfileAccountSheet({ section }: { section: ProfileAccountSection }) {
+export function ProfileAccountSheet({ section, onManageAvatar }: { section: ProfileAccountSection; onManageAvatar?: () => void }) {
   return (
     <View style={{ flex: 1, maxHeight: "100%", minHeight: 0, gap: designTokens.spacing.md }}>
-      {section === "delivery" ? <DeliveryContent /> : section === "addresses" ? <AddressesContent /> : <InviteContent />}
+      {section === "delivery" ? <DeliveryContent onManageAvatar={onManageAvatar} /> : section === "addresses" ? <AddressesContent /> : <InviteContent />}
     </View>
   );
 }
 
-function DeliveryContent() {
+function DeliveryContent({ onManageAvatar }: { onManageAvatar?: () => void }) {
   const { language } = useLanguage();
   const theme = useAppTheme();
   const queryClient = useQueryClient();
@@ -105,6 +105,20 @@ function DeliveryContent() {
     </View>;
   }
   return <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ gap: designTokens.spacing.md, paddingBottom: designTokens.spacing.lg }}>
+    <View style={{ flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md }}>
+      {profile.data?.avatar_url ? (
+        <NativeImage source={{ uri: profile.data.avatar_url }} style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: theme.colors.surfaceSecondary }} />
+      ) : (
+        <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: theme.colors.surfaceSecondary, alignItems: "center", justifyContent: "center" }}>
+          <Icon name="user" size={24} color={theme.colors.subtle} />
+        </View>
+      )}
+      <View style={{ flex: 1, gap: 3 }}>
+        <UiText weight="700">{translate("profileAvatarOptionsTitle")}</UiText>
+        <Caption>{translate("profileAvatarChange")}</Caption>
+      </View>
+      {onManageAvatar ? <Button label={translate("profileAvatarChange")} size="sm" variant="outline" onPress={onManageAvatar} /> : null}
+    </View>
     <Caption>{translate("deliveryProfileSubtitle")}</Caption>
     <FormLabel>{translate("fullNamePlaceholder")}</FormLabel>
     <TextField value={fullName} onChangeText={setFullName} placeholder={translate("fullNamePlaceholder")} maxLength={120} />
