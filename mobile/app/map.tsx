@@ -288,6 +288,7 @@ export default function MapScreen() {
     rerouteRequestRef.current += 1;
     routeRequestControllerRef.current?.abort();
     routeRequestControllerRef.current = null;
+    setIsStartingNavigation(false);
     setNavigation(null);
     selectedStoreIdRef.current = null;
     setSelectedStoreId(null);
@@ -354,6 +355,7 @@ export default function MapScreen() {
     rerouteRequestRef.current += 1;
     routeRequestControllerRef.current?.abort();
     routeRequestControllerRef.current = null;
+    setIsStartingNavigation(false);
     setNavigation(null);
     setNavigationError(false);
   };
