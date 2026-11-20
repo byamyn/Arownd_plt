@@ -13,7 +13,7 @@ export default function MerchantAccountSettingsScreen() {
   const theme = useAppTheme();
   const access = useQuery({
     queryKey: ["merchant-access"],
-    queryFn: fetchMerchantAccess,
+    queryFn: ({ signal }) => fetchMerchantAccess(signal),
     retry: false
   });
 
