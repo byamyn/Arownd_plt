@@ -1,4 +1,5 @@
 import * as Linking from "expo-linking";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { requestAuthCaptchaToken } from "@/lib/auth-captcha";
 
 import { getSelectedCountryCode, syncSelectedCountryCodeFromProfile } from "@/lib/country-service";
@@ -14,6 +15,7 @@ import type {
 } from "@/lib/auth-validation";
 
 const AUTH_CAPTCHA_ENABLED = process.env.EXPO_PUBLIC_AUTH_CAPTCHA_ENABLED === "true";
+const AI_TOUR_PENDING_PREFIX = "arownd:ai-tour:pending:";
 async function getAuthCaptchaToken(): Promise<string | undefined> {
   if (!AUTH_CAPTCHA_ENABLED) return undefined;
   return requestAuthCaptchaToken();
@@ -61,6 +63,7 @@ export async function signUpPersonal(input: PersonalSignupInput): Promise<boolea
   });
 
   if (error) throw error;
+  if (data.user) await AsyncStorage.setItem(AI_TOUR_PENDING_PREFIX + data.user.id, "1");
   await clearPendingInviteCode().catch(() => undefined);
   return data.session !== null;
 }
@@ -93,6 +96,7 @@ export async function signUpBusiness(input: BusinessSignupInput): Promise<boolea
   });
 
   if (error) throw error;
+  if (data.user) await AsyncStorage.setItem(AI_TOUR_PENDING_PREFIX + data.user.id, "1");
   await clearPendingInviteCode().catch(() => undefined);
   return data.session !== null;
 }
