@@ -84,7 +84,7 @@ export default function StoreDetailsScreen() {
   const { storeId } = useLocalSearchParams<{ storeId: string }>();
   const theme = useAppTheme();
   const queryClient = useQueryClient();
-  const browsingCurrency = useQuery({ queryKey: BROWSING_CURRENCY_QUERY_KEY, queryFn: fetchBrowsingCurrencyCode, staleTime: 60_000 });
+  const browsingCurrency = useQuery({ queryKey: BROWSING_CURRENCY_QUERY_KEY, queryFn: ({ signal }) => fetchBrowsingCurrencyCode(signal), staleTime: 60_000 });
   const merchantAccess = useQuery({ queryKey: ["merchant-access"], queryFn: ({ signal }) => fetchMerchantAccess(signal), retry: false, staleTime: 30_000 });
   const ownerStoreId = merchantAccess.data?.status === "merchant_ready" &&
     merchantAccess.data.store?.id === storeId ? storeId : null;
