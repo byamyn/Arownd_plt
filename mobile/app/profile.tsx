@@ -220,80 +220,23 @@ export default function ProfileScreen() {
             ) : null}
           </Card>
 
-          <Card contentStyle={styles.statsCard}>
-            <PressableSurface
-              accessibilityRole="button"
-              accessibilityLabel={translate("profileOrders")}
-              onPress={() => router.push("/orders")}
-              style={styles.statCardOuter}
-            >
-              <View style={styles.statHeader}>
-                <View style={[styles.statIcon, { backgroundColor: theme.mode === "dark" ? theme.colors.surfaceSecondary : theme.colors.surfaceMuted }]}>
-                  <Icon name="package" size={designTokens.dimensions.iconSize.sm} />
-                </View>
-                <StatCard
-                  label={translate("profileOrders")}
-                  value={orders.isPending ? "…" : orders.isError ? "—" : String(orders.data?.length ?? 0)}
-                  style={styles.stat}
-                />
-              </View>
-            </PressableSurface>
-            <View style={[styles.statsDivider, { backgroundColor: theme.colors.border }]} />
-            <PressableSurface
-              accessibilityRole="button"
-              accessibilityLabel={translate("profileFavorites")}
-              onPress={() => router.push("/favorites")}
-              style={styles.statCardOuter}
-            >
-              <View style={styles.statHeader}>
-                <View style={[styles.statIcon, { backgroundColor: theme.mode === "dark" ? theme.colors.surfaceSecondary : theme.colors.surfaceMuted }]}>
-                  <Icon name="heart" size={designTokens.dimensions.iconSize.sm} />
-                </View>
-                <StatCard
-                  label={translate("profileFavorites")}
-                  value={favorites.isPending ? "…" : favorites.isError ? "—" : String(favoriteCount)}
-                  style={styles.stat}
-                />
-              </View>
-            </PressableSurface>
-            <View style={[styles.statsDivider, { backgroundColor: theme.colors.border }]} />
-            <PressableSurface
-              accessibilityRole="button"
-              accessibilityLabel={translate("myReviewsTitle")}
-              onPress={() => router.push("/my-reviews")}
-              style={styles.statCardOuter}
-            >
-              <View style={styles.statHeader}>
-                <View style={[styles.statIcon, { backgroundColor: theme.mode === "dark" ? theme.colors.surfaceSecondary : theme.colors.surfaceMuted }]}>
-                  <Icon name="star" size={designTokens.dimensions.iconSize.sm} />
-                </View>
-                <StatCard
-                  label={translate("myReviewsTitle")}
-                  value={reviews.isPending ? "…" : reviews.isError ? "—" : String(reviews.data?.length ?? 0)}
-                  style={styles.stat}
-                />
-              </View>
-            </PressableSurface>
-          </Card>
-
           {merchantAccess.data?.status === "merchant_ready" && merchantAccess.data.store?.id ? (
-            <Card contentStyle={styles.accountLinksCard}>
-              <PressableSurface
-                accessibilityRole="button"
-                accessibilityLabel={translate("profileSwitchToStore")}
-                onPress={() => router.push("/merchant")}
-                style={styles.accountLinkRow}
-              >
-                <View style={[styles.accountLinkIcon, { backgroundColor: theme.colors.surfaceSecondary }]}>
-                  <Icon name="store" size={20} color={theme.colors.accentOnSurface} />
-                </View>
-                <View style={styles.accountLinkText}>
-                  <UiText weight="700">{translate("merchantMyStore")}</UiText>
-                  <Caption>{translate("profileSwitchToStoreHint")}</Caption>
-                </View>
-                <Icon name="chevron-left" size={18} color={theme.colors.subtle} />
-              </PressableSurface>
-            </Card>
+            <PressableSurface
+              accessibilityRole="button"
+              accessibilityLabel={translate("profileSwitchToStore")}
+              onPress={() => router.push("/merchant")}
+              style={[styles.merchantCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.accent }]}
+            >
+              <View style={[styles.merchantIcon, { backgroundColor: theme.colors.accent }]}>
+                <Icon name="store" size={24} color={theme.colors.accentForeground} />
+              </View>
+              <View style={styles.merchantText}>
+                <UiText weight="700">{translate("merchantMyStore")}</UiText>
+                <Caption>{translate("profileSwitchToStoreHint")}</Caption>
+                <UiText weight="600" style={{ color: theme.colors.accentOnSurface }}>{translate("profileSwitchToStore")}</UiText>
+              </View>
+              <Icon name="chevron-left" size={20} color={theme.colors.subtle} />
+            </PressableSurface>
           ) : null}
 
           <Card contentStyle={styles.accountLinksCard}>
@@ -486,10 +429,11 @@ const styles = StyleSheet.create({
     paddingTop: designTokens.spacing.sm,
     borderTopWidth: StyleSheet.hairlineWidth
   },
-  statsCard: { flexDirection: "row", alignItems: "stretch", paddingVertical: designTokens.spacing.md, paddingHorizontal: designTokens.spacing.xs },
-  statCardOuter: { flex: 1, minWidth: 0, justifyContent: "center", paddingHorizontal: designTokens.spacing.xs },
-  statsDivider: { width: StyleSheet.hairlineWidth, alignSelf: "stretch" },
-  statHeader: { flexDirection: "column", alignItems: "center", gap: designTokens.spacing.xs },
-  statIcon: { width: 32, height: 32, borderRadius: designTokens.radius.md, alignItems: "center", justifyContent: "center" },
-  stat: { width: "100%", minWidth: 0, padding: 0, backgroundColor: "transparent" },
+  statsGrid: { flexDirection: "row", alignItems: "stretch", gap: designTokens.spacing.sm },
+  statTile: { flex: 1, minWidth: 0, alignItems: "center", justifyContent: "center", gap: designTokens.spacing.sm, paddingHorizontal: designTokens.spacing.xs, paddingVertical: designTokens.spacing.md, borderRadius: designTokens.radius.lg, borderWidth: StyleSheet.hairlineWidth },
+  statIcon: { width: 34, height: 34, borderRadius: designTokens.radius.md, alignItems: "center", justifyContent: "center" },
+  stat: { width: "100%", minWidth: 0, padding: 0, backgroundColor: "transparent", alignItems: "center" },
+  merchantCard: { minHeight: 112, flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md, padding: designTokens.spacing.lg, borderRadius: designTokens.radius.xl, borderWidth: 1.5 },
+  merchantIcon: { width: 52, height: 52, borderRadius: designTokens.radius.lg, alignItems: "center", justifyContent: "center" },
+  merchantText: { flex: 1, minWidth: 0, gap: designTokens.spacing.xs },
 });
