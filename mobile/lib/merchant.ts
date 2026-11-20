@@ -74,7 +74,7 @@ export async function fetchMerchantAccess(signal?: AbortSignal): Promise<Merchan
   const [accountTypeResult, rolesResult, storeResult, membershipResult] = await Promise.all([
     accountTypeRequest,
     rolesRequest,
-    storeRequest.maybeSingle(),
+    storeRequest,
     membershipRequest
   ]);
 
@@ -90,22 +90,22 @@ export async function fetchMerchantAccess(signal?: AbortSignal): Promise<Merchan
     role: z.enum(["owner", "admin", "staff"]),
     store: OwnedStoreSchema
   })).parse(membershipResult.data as unknown);
+  const ownedStores = OwnedStoreSchema.array().parse(storeResult.data as unknown);
   const storeMemberships = membershipRows.map((row) => ({
     ...row.store,
     role: row.role
   }));
-  if (storeResult.data && !storeMemberships.some((item) => item.id === storeResult.data?.id)) {
-    storeMemberships.unshift({
-      ...OwnedStoreSchema.parse(storeResult.data as unknown),
-      role: "owner" as const
-    });
+  for (const ownedStore of ownedStores) {
+    if (!storeMemberships.some((item) => item.id === ownedStore.id)) {
+      storeMemberships.unshift({ ...ownedStore, role: "owner" as const });
+    }
   }
   const stores = Array.from(new Map(storeMemberships.map((item) => [item.id, item])).values());
   const preferredStoreId = await AsyncStorage.getItem(ACTIVE_MERCHANT_STORE_KEY);
   const selectedStore = selectActiveStoreMembership(
     stores,
     preferredStoreId,
-    storeResult.data?.id ?? null
+    ownedStores[0]?.id ?? null
   );
   const store = selectedStore
     ? { id: selectedStore.id, name: selectedStore.name, slug: selectedStore.slug }
@@ -114,7 +114,7 @@ export async function fetchMerchantAccess(signal?: AbortSignal): Promise<Merchan
   const status = resolveMerchantAccessStatus({
     accountType,
     roles,
-    hasOwnedStore: storeResult.data !== null,
+    hasOwnedStore: ownedStores.length > 0,
     hasTeamMembership: stores.length > 0
   });
 
