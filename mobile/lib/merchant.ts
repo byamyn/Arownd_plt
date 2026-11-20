@@ -51,10 +51,9 @@ export async function fetchMerchantAccess(signal?: AbortSignal): Promise<Merchan
   let storeRequest = client.from("stores").select("id, name, slug").eq("owner_id", userId);
   let membershipRequest = client
     .from("store_team_members")
-    .select("role, store:stores!inner(id, name, slug)")
+    .select("store_id, role, store:stores!inner(id, name, slug)")
     .eq("user_id", userId)
-    .order("created_at", { ascending: true })
-    .limit(1);
+    .order("created_at", { ascending: true });
   if (signal) {
     accountTypeRequest = accountTypeRequest.abortSignal(signal);
     rolesRequest = rolesRequest.abortSignal(signal);
@@ -66,7 +65,7 @@ export async function fetchMerchantAccess(signal?: AbortSignal): Promise<Merchan
     accountTypeRequest,
     rolesRequest,
     storeRequest.maybeSingle(),
-    membershipRequest.maybeSingle()
+    membershipRequest
   ]);
 
   if (accountTypeResult.error) throw accountTypeResult.error;
@@ -76,10 +75,12 @@ export async function fetchMerchantAccess(signal?: AbortSignal): Promise<Merchan
 
   const accountType = AccountTypeSchema.parse(accountTypeResult.data as unknown);
   const roles = RoleRowsSchema.parse(rolesResult.data as unknown).map((row) => row.role);
-  const membership = membershipResult.data as unknown as {
-    role: "owner" | "admin" | "staff";
-    store: { id: string; name: string; slug: string };
-  } | null;
+  const membershipRows = z.array(z.object({
+    store_id: z.string().uuid(),
+    role: z.enum(["owner", "admin", "staff"]),
+    store: OwnedStoreSchema
+  })).parse(membershipResult.data as unknown);
+  const membership = membershipRows.find((row) => row.store_id === storeResult.data?.id) ?? membershipRows[0] ?? null;
   const store = storeResult.data
     ? OwnedStoreSchema.parse(storeResult.data as unknown)
     : membership?.store
@@ -97,7 +98,7 @@ export async function fetchMerchantAccess(signal?: AbortSignal): Promise<Merchan
     userId,
     status,
     store,
-    teamRole: membership?.role ?? (storeResult.data ? "owner" : null)
+    teamRole: storeResult.data ? "owner" : membership?.role ?? null
   };
 }
 
