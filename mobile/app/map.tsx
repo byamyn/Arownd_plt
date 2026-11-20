@@ -83,7 +83,7 @@ export default function MapScreen() {
   const appliedBrowsingCountryRef = useRef<string | null>(null);
   const browsingCountry = useQuery({
     queryKey: ["browsing-country"],
-    queryFn: fetchMyBrowsingCountryCode,
+    queryFn: ({ signal }) => fetchMyBrowsingCountryCode(signal),
     staleTime: 30 * 60_000
   });
   const mapRef = useRef<MapRef | null>(null);
@@ -124,7 +124,7 @@ export default function MapScreen() {
 
   const localizedStyle = useQuery({
     queryKey: ["map-style", styleUrl, language],
-    queryFn: () => fetchLocalizedMapStyle(styleUrl, language),
+    queryFn: ({ signal }) => fetchLocalizedMapStyle(styleUrl, language, signal),
     staleTime: 24 * 60 * 60 * 1000,
     retry: 1
   });

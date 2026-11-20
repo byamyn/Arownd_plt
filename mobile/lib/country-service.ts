@@ -58,10 +58,13 @@ export async function saveBrowsingCountryCode(countryCode: string): Promise<void
   await AsyncStorage.setItem(BROWSING_COUNTRY_STORAGE_KEY, countryCode);
 }
 
-export async function fetchMyBrowsingCountryCode(): Promise<string> {
+export async function fetchMyBrowsingCountryCode(signal?: AbortSignal): Promise<string> {
   const { data: authData, error: authError } = await getSupabaseClient().auth.getUser();
   if (authError || !authData.user) throw new Error("NOT_AUTHENTICATED");
-  const { data, error } = await getSupabaseClient().from("profiles").select("browsing_country_code").eq("user_id", authData.user.id).single();
+  const client = getSupabaseClient();
+  let request = client.from("profiles").select("browsing_country_code").eq("user_id", authData.user.id);
+  if (signal) request = request.abortSignal(signal);
+  const { data, error } = await request.single();
   if (error) throw error;
   if (typeof data.browsing_country_code !== "string" || !/^[A-Z]{2}$/.test(data.browsing_country_code)) throw new Error("INVALID_BROWSING_COUNTRY");
   await saveBrowsingCountryCode(data.browsing_country_code);
