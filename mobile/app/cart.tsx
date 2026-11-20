@@ -33,7 +33,7 @@ export default function CartScreen() {
   const queryClient = useQueryClient();
   const cart = useQuery({ queryKey: CART_QUERY_KEY, queryFn: getCart });
   const ids = cart.data?.map((item) => item.offerId) ?? [];
-  const marketCurrency = useQuery({ queryKey: BROWSING_CURRENCY_QUERY_KEY, queryFn: fetchBrowsingCurrencyCode, staleTime: 60_000 });
+  const marketCurrency = useQuery({ queryKey: BROWSING_CURRENCY_QUERY_KEY, queryFn: ({ signal }) => fetchBrowsingCurrencyCode(signal), staleTime: 60_000 });
   const formatMarketAmount = (amount: number) => marketCurrency.data ? formatMarketPrice(amount, marketCurrency.data) : "—";
   const offers = useQuery({
     queryKey: ["customer-cart-offers", ids],
