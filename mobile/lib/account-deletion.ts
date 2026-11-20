@@ -11,19 +11,20 @@ const DeletionRequestSchema = z.object({
 
 export type AccountDeletionRequest = z.infer<typeof DeletionRequestSchema>;
 
-export async function fetchMyAccountDeletionRequest(): Promise<AccountDeletionRequest | null> {
+export async function fetchMyAccountDeletionRequest(signal?: AbortSignal): Promise<AccountDeletionRequest | null> {
   const client = getSupabaseClient();
   const { data: auth, error: authError } = await client.auth.getUser();
   if (authError) throw authError;
   if (!auth.user) throw new Error("not_authenticated");
 
-  const { data, error } = await client
+  let request = client
     .from("account_deletion_requests")
     .select("id, status, requested_at")
     .eq("user_id", auth.user.id)
     .order("requested_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    .limit(1);
+  if (signal) request = request.abortSignal(signal);
+  const { data, error } = await request.maybeSingle();
 
   if (error) throw error;
   return data ? DeletionRequestSchema.parse(data as unknown) : null;
