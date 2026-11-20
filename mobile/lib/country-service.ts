@@ -28,11 +28,13 @@ function getRelatedCurrencyCode(value: unknown): string | null {
   return typeof currencyCode === "string" && /^[A-Z]{3}$/.test(currencyCode) ? currencyCode : null;
 }
 
-export async function fetchCountries(): Promise<Country[]> {
-  const { data, error } = await getSupabaseClient()
+export async function fetchCountries(signal?: AbortSignal): Promise<Country[]> {
+  let request = getSupabaseClient()
     .from("countries")
     .select("code, name_ar, name_en, flag_emoji, currency_code, currency_name_ar, currency_name_en, is_enabled")
     .order("name_ar", { ascending: true });
+  if (signal) request = request.abortSignal(signal);
+  const { data, error } = await request;
 
   if (error) throw error;
   return CountrySchema.array().parse(data as unknown);

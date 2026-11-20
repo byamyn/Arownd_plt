@@ -26,15 +26,16 @@ export async function fetchCheckoutRegions(parentRegionId?: number | null, signa
   return fetchMyAccountRegions(parentRegionId, signal);
 }
 
-export async function fetchCheckoutProfile(): Promise<CheckoutProfile | null> {
+export async function fetchCheckoutProfile(signal?: AbortSignal): Promise<CheckoutProfile | null> {
   const { data: authData, error: authError } = await getSupabaseClient().auth.getUser();
   if (authError) throw authError;
   if (!authData.user) return null;
-  const { data, error } = await getSupabaseClient()
+  let request = getSupabaseClient()
     .from("profiles")
     .select("country_code, full_name, phone, region_id, secondary_region_id, commune")
-    .eq("user_id", authData.user.id)
-    .maybeSingle();
+    .eq("user_id", authData.user.id);
+  if (signal) request = request.abortSignal(signal);
+  const { data, error } = await request.maybeSingle();
   if (error) throw error;
   return data ? ProfileSchema.parse(data as unknown) : null;
 }

@@ -26,15 +26,17 @@ async function getCurrentUserId(): Promise<string> {
   return data.user.id;
 }
 
-export async function fetchMyAddresses(): Promise<UserAddress[]> {
+export async function fetchMyAddresses(signal?: AbortSignal): Promise<UserAddress[]> {
   const client = getSupabaseClient();
   const userId = await getCurrentUserId();
-  const { data, error } = await client
+  let request = client
     .from("user_addresses")
     .select("id, user_id, label, recipient_name, phone, country_code, region_id, secondary_region_id, region:country_regions!user_addresses_country_region_fkey(name_ar, name_fr, name_en), secondary_region:country_regions!user_addresses_country_secondary_region_fkey(name_ar, name_fr, name_en), commune, address_line, additional_info, is_default, created_at, updated_at")
     .eq("user_id", userId)
     .order("is_default", { ascending: false })
     .order("created_at", { ascending: false });
+  if (signal) request = request.abortSignal(signal);
+  const { data, error } = await request;
   if (error) throw error;
   return z.array(UserAddressRecordSchema).parse(data);
 }
