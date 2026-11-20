@@ -46,7 +46,7 @@ export default function MerchantOrderDetailsScreen() {
 
   const access = useQuery({
     queryKey: ["merchant-access"],
-    queryFn: fetchMerchantAccess,
+    queryFn: ({ signal }) => fetchMerchantAccess(signal),
     retry: false
   });
   const storeId = access.data?.store?.id ?? null;
