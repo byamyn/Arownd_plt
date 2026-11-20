@@ -36,7 +36,7 @@ describe("selectActiveStoreMembership", () => {
   });
 
   it("falls back to the owned store when the saved selection is no longer available", () => {
-    expect(selectActiveStoreMembership(stores.slice(1), "removed-store", "store-owner")?.id).toBe("store-staff");
+    expect(selectActiveStoreMembership(stores, "removed-store", "store-owner")?.id).toBe("store-owner");
   });
 
   it("uses the first membership when no owned or preferred store exists", () => {
