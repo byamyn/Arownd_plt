@@ -214,12 +214,14 @@ export default function SettingsScreen() {
             label={translate("settingsSupportTitle")}
             onPress={() => router.push("/support")}
             theme={theme}
+            styles={styles}
           />
           <SettingsRow
             icon="info"
             label={translate("settingsAboutTitle")}
             onPress={() => router.push("/about")}
             theme={theme}
+            styles={styles}
             last
           />
         </Card>
