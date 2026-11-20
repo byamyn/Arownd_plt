@@ -74,12 +74,12 @@ export default function CheckoutScreen() {
   const secondaryOptions = useQuery({ queryKey: ["checkout-regions", regionId], queryFn: ({ signal }) => fetchCheckoutRegions(regionId, signal), enabled: regionId !== null, staleTime: Infinity });
   const profile = useQuery({
     queryKey: ["checkout-profile"],
-    queryFn: fetchCheckoutProfile,
+    queryFn: ({ signal }) => fetchCheckoutProfile(signal),
     enabled: auth.data !== undefined && auth.data !== null
   });
   const savedAddresses = useQuery({
     queryKey: ["my-addresses"],
-    queryFn: fetchMyAddresses,
+    queryFn: ({ signal }) => fetchMyAddresses(signal),
     enabled: auth.data !== undefined && auth.data !== null
   });
 
