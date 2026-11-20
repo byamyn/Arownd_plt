@@ -68,7 +68,7 @@ export default function CheckoutScreen() {
     queryFn: ({ signal }) => fetchOffersByIds(offerIds, signal),
     enabled: cart.isSuccess && offerIds.length > 0
   });
-  const accountCurrency = useQuery({ queryKey: ["account-currency"], queryFn: fetchMyAccountCurrencyCode });
+  const accountCurrency = useQuery({ queryKey: ["account-currency"], queryFn: ({ signal }) => fetchMyAccountCurrencyCode(signal) });
   const formatAccountAmount = (amount: number) => accountCurrency.data ? formatMarketPrice(amount, accountCurrency.data) : "—";
   const regionOptions = useQuery({ queryKey: ["checkout-regions"], queryFn: () => fetchCheckoutRegions(), staleTime: Infinity });
   const secondaryOptions = useQuery({ queryKey: ["checkout-regions", regionId], queryFn: () => fetchCheckoutRegions(regionId), enabled: regionId !== null, staleTime: Infinity });
