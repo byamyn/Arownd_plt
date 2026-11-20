@@ -243,6 +243,23 @@ export async function searchCatalogProducts(query: string, category?: string, si
   return HomeProductSchema.array().parse(data as unknown);
 }
 
+export async function searchCatalogStores(query: string, signal?: AbortSignal): Promise<FeaturedStore[]> {
+  const normalized = query.trim().replace(/[%,().]/g, " ").replace(/\\s+/g, " ");
+  if (!normalized) return [];
+
+  let request = getSupabaseClient()
+    .from("stores")
+    .select("id, name, description, logo_url, commune, rating, is_verified")
+    .or("name.ilike.%"+normalized+"%,description.ilike.%"+normalized+"%")
+    .order("name", { ascending: true })
+    .limit(30);
+  if (signal) request = request.abortSignal(signal);
+  const { data, error } = await request;
+
+  if (error) throw error;
+  return FeaturedStoreSchema.array().parse(data as unknown);
+}
+
 export async function fetchProductDetails(productId: string, signal?: AbortSignal): Promise<ProductSummary | null> {
   let request = getSupabaseClient()
     .from("products")
