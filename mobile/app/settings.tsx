@@ -143,71 +143,62 @@ export default function SettingsScreen() {
   return (
     <CustomerScreen showNavigation={false} contentStyle={styles.screenContent}>
       <AppHeader title={translate("settingsTitle")} />
-      <Caption>{translate("settingsSubtitle")}</Caption>
-
       <View style={styles.section}>
         <Heading level={3}>{translate("settingsPreferencesTitle")}</Heading>
-        <Card contentStyle={styles.sectionContent}>
-          <SettingsRow
-            icon="map-pin"
-            label={translate("settingsBrowsingCountry")}
+        <View style={styles.preferenceGrid}>
+          <PressableSurface
+            accessibilityRole="button"
+            accessibilityLabel={translate("settingsBrowsingCountry")}
             onPress={() => openSheet("country")}
-            theme={theme}
-            styles={styles}
-          />
-          <SettingsRow
-            icon={theme.mode === "dark" ? "sun" : "moon"}
-            label={translate("settingsAppearanceHint")}
+            style={styles.preferenceCard}
+          >
+            <View style={styles.preferenceIconBadge}><Icon name="map-pin" size={18} color={theme.colors.accentForeground} /></View>
+            <View style={styles.preferenceCopy}>
+              <UiText weight="700" numberOfLines={1}>{translate("settingsBrowsingCountry")}</UiText>
+              <Caption numberOfLines={1}>{browsingCountry.data ?? "—"}</Caption>
+            </View>
+          </PressableSurface>
+          <PressableSurface
+            accessibilityRole="button"
+            accessibilityLabel={translate("settingsAppearanceTitle")}
             onPress={() => openSheet("appearance")}
-            theme={theme}
-            styles={styles}
-          />
-          <SettingsRow
-            icon="globe"
-            label={translate("settingsLanguageTitle")}
+            style={styles.preferenceCard}
+          >
+            <View style={styles.preferenceIconBadge}><Icon name={theme.mode === "dark" ? "moon" : "sun"} size={18} color={theme.colors.accentForeground} /></View>
+            <View style={styles.preferenceCopy}>
+              <UiText weight="700" numberOfLines={1}>{translate("settingsAppearanceTitle")}</UiText>
+              <Caption numberOfLines={1}>{translate(themeMode === "system" ? "settingsThemeSystem" : themeMode === "light" ? "settingsThemeLight" : "settingsThemeDark")}</Caption>
+            </View>
+          </PressableSurface>
+          <PressableSurface
+            accessibilityRole="button"
+            accessibilityLabel={translate("settingsLanguageTitle")}
             onPress={() => openSheet("language")}
-            theme={theme}
-            styles={styles}
-          />
+            style={styles.preferenceCard}
+          >
+            <View style={styles.preferenceIconBadge}><Icon name="globe" size={18} color={theme.colors.accentForeground} /></View>
+            <View style={styles.preferenceCopy}>
+              <UiText weight="700" numberOfLines={1}>{translate("settingsLanguageTitle")}</UiText>
+              <Caption numberOfLines={1}>{translate(language === "ar" ? "settingsLanguageArabic" : "settingsLanguageEnglish")}</Caption>
+            </View>
+          </PressableSurface>
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <Heading level={3}>{translate("settingsSupportSection")}</Heading>
+        <Card contentStyle={styles.sectionContent}>
           <SettingsRow
             icon="bell"
             label={translate("notificationsTitle")}
             onPress={() => router.push("/notifications")}
             theme={theme}
             styles={styles}
-            last
           />
-        </Card>
-      </View>
-
-      <View style={styles.section}>
-        <Heading level={3}>{translate("settingsPrivacyTitle")}</Heading>
-        <Card contentStyle={styles.sectionContent}>
           <SettingsRow
             icon="lock"
             label={translate("settingsPasswordChangeTitle")}
             onPress={() => openSheet("password")}
-            theme={theme}
-            styles={styles}
-          />
-          <SettingsRow
-            icon="lock"
-            label={translate("settingsPrivacyPolicy")}
-            onPress={() => router.push("/privacy")}
-            theme={theme}
-            styles={styles}
-          />
-          <SettingsRow
-            icon="info"
-            label={translate("settingsTermsOfUse")}
-            onPress={() => router.push("/terms")}
-            theme={theme}
-            styles={styles}
-          />
-          <SettingsRow
-            icon="trash-2"
-            label={translate("deleteAccountTitle")}
-            onPress={() => router.push("/delete-account")}
             theme={theme}
             styles={styles}
             last
@@ -219,36 +210,58 @@ export default function SettingsScreen() {
         <Heading level={3}>{translate("settingsSupportSection")}</Heading>
         <Card contentStyle={styles.sectionContent}>
           <SettingsRow
-            icon="info"
+            icon="headset"
             label={translate("settingsSupportTitle")}
             onPress={() => router.push("/support")}
             theme={theme}
-            styles={styles}
           />
           <SettingsRow
             icon="info"
             label={translate("settingsAboutTitle")}
             onPress={() => router.push("/about")}
             theme={theme}
-            styles={styles}
             last
           />
         </Card>
       </View>
 
-      <Button
-        label={translate("settingsSignOut")}
-        onPress={() => {
-          setSignOutError(false);
-          setSignOutConfirmOpen(true);
-        }}
-        disabled={signOutMutation.isPending}
-        variant="danger"
-        startIcon={<Icon name="log-out" size={18} />}
-        fullWidth
-        style={styles.signOutButton}
-      />
-      {signOutError ? <UiText tone="danger">{translate("settingsSignOutError")}</UiText> : null}
+      <View style={styles.section}>
+        <PressableSurface
+          accessibilityRole="button"
+          accessibilityLabel={translate("settingsPrivacyTitle")}
+          onPress={() => router.push("/privacy-security")}
+          style={styles.linkRow}
+        >
+          <View style={styles.linkLabel}>
+            <View style={styles.iconBadge}><Icon name="shield-check" size={19} color={theme.colors.accentOnSurface} /></View>
+            <View style={styles.privacyRowCopy}>
+              <UiText weight="700">{translate("settingsPrivacyTitle")}</UiText>
+              <Caption>{translate("settingsPrivacyPolicy")} · {translate("settingsTermsOfUse")}</Caption>
+            </View>
+          </View>
+          <View style={styles.rowTrailing}><Icon name="chevron-left" size={18} color={theme.colors.subtle} /></View>
+        </PressableSurface>
+      </View>
+
+      <View style={styles.section}>
+        <PressableSurface
+          accessibilityRole="button"
+          accessibilityLabel={translate("settingsSignOut")}
+          onPress={() => {
+            setSignOutError(false);
+            setSignOutConfirmOpen(true);
+          }}
+          disabled={signOutMutation.isPending}
+          style={styles.signOutRow}
+        >
+          <View style={styles.linkLabel}>
+            <Icon name="log-out" size={19} color={theme.colors.danger} />
+            <UiText tone="danger" weight="700">{translate("settingsSignOut")}</UiText>
+          </View>
+          <Icon name="chevron-left" size={18} color={theme.colors.subtle} />
+        </PressableSurface>
+        {signOutError ? <UiText tone="danger">{translate("settingsSignOutError")}</UiText> : null}
+      </View>
 
       <BottomSheet visible={activeSheet === "password"} onRequestClose={closeSheet} title={translate("settingsPasswordChangeTitle")}>
         <Caption>{translate("settingsPasswordHint")}</Caption>
@@ -483,6 +496,47 @@ function createStyles(theme: AppTheme) {
     section: {
       gap: designTokens.spacing.sm,
       marginTop: 0
+    },
+    preferenceGrid: {
+      flexDirection: "row",
+      gap: designTokens.spacing.sm
+    },
+    preferenceCard: {
+      flex: 1,
+      minWidth: 0,
+      minHeight: 112,
+      padding: designTokens.spacing.sm,
+      borderRadius: designTokens.radius.lg,
+      backgroundColor: theme.colors.surfaceSecondary,
+      justifyContent: "space-between",
+      gap: designTokens.spacing.sm
+    },
+    preferenceIconBadge: {
+      width: 34,
+      height: 34,
+      alignItems: "center",
+      justifyContent: "center",
+      borderRadius: designTokens.radius.md,
+      backgroundColor: theme.colors.accent
+    },
+    preferenceCopy: {
+      gap: designTokens.spacing.xs,
+      minWidth: 0
+    },
+    privacyRowCopy: {
+      flex: 1,
+      minWidth: 0,
+      gap: designTokens.spacing.xs
+    },
+    signOutRow: {
+      minHeight: 58,
+      paddingHorizontal: designTokens.spacing.md,
+      paddingVertical: designTokens.spacing.sm,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      borderRadius: designTokens.radius.lg,
+      backgroundColor: theme.colors.surfaceSecondary
     },
     sectionContent: {
       gap: 0,
