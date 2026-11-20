@@ -250,7 +250,7 @@ export default function CustomerHomeScreen() {
   const feedListRef = useRef<FlatList<Awaited<ReturnType<typeof fetchHomeProducts>>[number]>>(null);
   const queryClient = useQueryClient();
   const theme = useAppTheme();
-  const browsingCurrency = useQuery({ queryKey: BROWSING_CURRENCY_QUERY_KEY, queryFn: fetchBrowsingCurrencyCode, staleTime: 60_000 });
+  const browsingCurrency = useQuery({ queryKey: BROWSING_CURRENCY_QUERY_KEY, queryFn: ({ signal }) => fetchBrowsingCurrencyCode(signal), staleTime: 60_000 });
   const products = useQuery({ queryKey: ["customer-home-products"], queryFn: ({ signal }) => fetchHomeProducts(signal), staleTime: 60_000 });
 
   useEffect(() => registerHomeReselectHandler(() => {
