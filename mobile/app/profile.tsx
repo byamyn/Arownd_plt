@@ -108,7 +108,7 @@ export default function ProfileScreen() {
   });
   const merchantAccess = useQuery({
     queryKey: ["merchant-access"],
-    queryFn: fetchMerchantAccess,
+    queryFn: ({ signal }) => fetchMerchantAccess(signal),
     enabled: Boolean(user.data),
     retry: false
   });
