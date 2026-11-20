@@ -44,7 +44,7 @@ export default function MerchantStoreSettingsScreen() {
   const settings = useQuery({
     queryKey: ["merchant-store-settings", storeId],
     queryFn: ({ signal }) => fetchMyMerchantStoreSettings(storeId ?? "", signal),
-    enabled: ready,
+    enabled: ready && access.data?.teamRole === "owner",
     retry: false
   });
   const [form, setForm] = useState<MerchantStoreSettings | null>(null);
@@ -105,6 +105,7 @@ export default function MerchantStoreSettingsScreen() {
     return <Message theme={theme} label={translate("merchantStoreSettingsSaveError")} actionLabel={translate("merchantRetry")} busy={access.isFetching || regionOptions.isFetching || settings.isFetching} onAction={() => { void access.refetch(); void regionOptions.refetch(); void settings.refetch(); }} />;
   }
   if (!access.data) return <Redirect href="/login" />;
+  if (access.data.teamRole !== "owner") return <Redirect href="/merchant/orders" />;
   if (!ready || !form) return <Redirect href="/merchant" />;
 
   const selectedRegion = regionOptions.data?.regions.find((item) => item.id === form.region_id);
