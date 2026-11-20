@@ -9,7 +9,7 @@ import { CustomerMainHeader } from "@/components/customer-main-header";
 import { fetchProductDetails, fetchProductOffers, fetchStoreDetails, fetchStoreOffers, formatMarketPrice, getPrimaryImage, searchCatalogProducts, searchCatalogStores } from "@/lib/catalog";
 import { BROWSING_CURRENCY_QUERY_KEY, fetchBrowsingCurrencyCode } from "@/lib/country-service";
 import { fetchApprovedReviews } from "@/lib/reviews";
-import { translate, useLanguage } from "@/lib/i18n";
+import { translate } from "@/lib/i18n";
 import { designTokens, useAppTheme } from "@/lib/theme";
 import { Icon, SearchField, Text as UiText } from "@/components/ui";
 
@@ -17,7 +17,6 @@ const SEARCH_HISTORY_KEY = "arownd:explore-search-history";
 type SearchTab = "all" | "products" | "stores";
 
 export default function ExploreScreen() {
-  const { language } = useLanguage();
   const theme = useAppTheme();
   const queryClient = useQueryClient();
   const params = useLocalSearchParams<{ q?: string }>();
