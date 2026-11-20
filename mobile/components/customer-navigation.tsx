@@ -27,7 +27,7 @@ export function CustomerNavigation() {
   const theme = useAppTheme();
   const access = useQuery({
     queryKey: ["merchant-access"],
-    queryFn: fetchMerchantAccess,
+    queryFn: ({ signal }) => fetchMerchantAccess(signal),
     retry: false
   });
   const isMerchantReady = access.data?.status === "merchant_ready";
