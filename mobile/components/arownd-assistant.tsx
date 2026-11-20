@@ -33,6 +33,7 @@ type AssistantMessage = {
 };
 
 const TOUR_STORAGE_PREFIX = "arownd:ai-tour:v1:";
+const TOUR_PENDING_PREFIX = "arownd:ai-tour:pending:";
 const TOUR_STEPS: Record<"ar" | "en", { customer: TourStep[]; merchant: TourStep }> = {
   ar: {
     customer: [
@@ -87,6 +88,7 @@ export function ArowndAssistant() {
   const [question, setQuestion] = useState("");
   const [messages, setMessages] = useState<AssistantMessage[]>([]);
   const checkingRef = useRef(false);
+  const tourStartedRef = useRef(false);
   const currentUserRef = useRef<string | null>(null);
   const isArabic = language === "ar";
   const copy = useMemo(() => ({
@@ -113,17 +115,21 @@ export function ArowndAssistant() {
   useEffect(() => {
     let mounted = true;
     const tryStartTour = async (id: string) => {
-      if (checkingRef.current) return;
+      if (checkingRef.current || tourStartedRef.current) return;
       checkingRef.current = true;
       try {
         const key = TOUR_STORAGE_PREFIX + id;
-        const completed = await AsyncStorage.getItem(key);
-        if (!mounted || completed) return;
+        const [completed, pending] = await Promise.all([
+          AsyncStorage.getItem(key),
+          AsyncStorage.getItem(TOUR_PENDING_PREFIX + id)
+        ]);
+        if (!mounted || completed || pending !== "1") return;
         const access = await fetchMerchantAccess().catch(() => null);
         if (!mounted) return;
         if (access?.status === "merchant_setup_required") return;
         const hasMerchantSpace = access?.status === "merchant_ready";
         setMerchantTour(hasMerchantSpace);
+        tourStartedRef.current = true;
         setTourStep(0);
         if (pathname !== "/home") router.replace("/home");
       } finally {
@@ -135,6 +141,7 @@ export function ArowndAssistant() {
     const { data } = client.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_OUT") {
         currentUserRef.current = null;
+        tourStartedRef.current = false;
         setUserId(null);
         setTourStep(-1);
         setChatOpen(false);
@@ -164,8 +171,12 @@ export function ArowndAssistant() {
     void fetchMerchantAccess().then((access) => {
       if (access?.status === "merchant_ready") {
         const key = TOUR_STORAGE_PREFIX + userId;
-        void AsyncStorage.getItem(key).then((completed) => {
-          if (!completed) {
+        void Promise.all([
+          AsyncStorage.getItem(key),
+          AsyncStorage.getItem(TOUR_PENDING_PREFIX + userId)
+        ]).then(([completed, pending]) => {
+          if (!completed && pending === "1" && !tourStartedRef.current) {
+            tourStartedRef.current = true;
             setMerchantTour(true);
             setTourStep(0);
           }
@@ -175,7 +186,10 @@ export function ArowndAssistant() {
   }, [pathname, tourStep, userId]);
 
   const completeTour = () => {
-    if (userId) void AsyncStorage.setItem(TOUR_STORAGE_PREFIX + userId, "completed");
+    if (userId) {
+      void AsyncStorage.setItem(TOUR_STORAGE_PREFIX + userId, "completed");
+      void AsyncStorage.removeItem(TOUR_PENDING_PREFIX + userId);
+    }
     setTourStep(-1);
   };
   const goToStep = (index: number) => {
