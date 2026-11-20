@@ -58,7 +58,7 @@ export default function AddressesScreen() {
   const [additionalInfo, setAdditionalInfo] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
 
-  const addresses = useQuery({ queryKey: ["my-addresses"], queryFn: fetchMyAddresses });
+  const addresses = useQuery({ queryKey: ["my-addresses"], queryFn: ({ signal }) => fetchMyAddresses(signal) });
   const regionOptions = useQuery({ queryKey: ["checkout-regions"], queryFn: ({ signal }) => fetchCheckoutRegions(undefined, signal), staleTime: Infinity });
   const secondaryOptions = useQuery({ queryKey: ["checkout-regions", regionId], queryFn: ({ signal }) => fetchCheckoutRegions(regionId, signal), enabled: regionId !== null, staleTime: Infinity });
   const selectedRegion = useMemo(() => regionOptions.data?.regions.find((item) => item.id === regionId) ?? null, [regionOptions.data, regionId]);

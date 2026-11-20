@@ -17,8 +17,8 @@ export default function StoresScreen() {
   const theme = useAppTheme();
   const queryClient = useQueryClient();
   const [selectedRegionId, setSelectedRegionId] = useState<number | null>(null);
-  const browsingCountry = useQuery({ queryKey: ["browsing-country"], queryFn: fetchMyBrowsingCountryCode });
-  const regions = useQuery({ queryKey: ["customer-market-regions", browsingCountry.data], queryFn: () => fetchCountryRegions(browsingCountry.data as string), enabled: Boolean(browsingCountry.data), staleTime: 30 * 60_000 });
+  const browsingCountry = useQuery({ queryKey: ["browsing-country"], queryFn: ({ signal }) => fetchMyBrowsingCountryCode(signal) });
+  const regions = useQuery({ queryKey: ["customer-market-regions", browsingCountry.data], queryFn: ({ signal }) => fetchCountryRegions(browsingCountry.data as string, undefined, signal), enabled: Boolean(browsingCountry.data), staleTime: 30 * 60_000 });
   const stores = useQuery({
     queryKey: ["customer-stores-by-region", browsingCountry.data, selectedRegionId],
     queryFn: ({ signal }) => fetchVerifiedStoresByRegion(browsingCountry.data as string, selectedRegionId as number, signal),

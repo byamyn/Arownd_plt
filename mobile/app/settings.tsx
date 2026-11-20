@@ -48,8 +48,8 @@ export default function SettingsScreen() {
   const [signOutError, setSignOutError] = useState(false);
   const [signOutConfirmOpen, setSignOutConfirmOpen] = useState(false);
 
-  const countries = useQuery({ queryKey: ["available-countries"], queryFn: fetchCountries, enabled: activeSheet === "country" });
-  const browsingCountry = useQuery({ queryKey: ["browsing-country"], queryFn: fetchMyBrowsingCountryCode });
+  const countries = useQuery({ queryKey: ["available-countries"], queryFn: ({ signal }) => fetchCountries(signal), enabled: activeSheet === "country" });
+  const browsingCountry = useQuery({ queryKey: ["browsing-country"], queryFn: ({ signal }) => fetchMyBrowsingCountryCode(signal) });
   const browsingCountryMutation = useMutation({
     mutationFn: updateBrowsingCountryCode,
     onSuccess: async (_data, countryCode) => {
