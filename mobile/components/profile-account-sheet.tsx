@@ -29,7 +29,7 @@ export function ProfileAccountSheet({ section, onManageAvatar }: { section: Prof
   );
 }
 
-function DeliveryContent({ onManageAvatar }: { onManageAvatar?: () => void }) {
+function DeliveryContent({ onManageAvatar }: { onManageAvatar: (() => void) | undefined }) {
   const { language } = useLanguage();
   const theme = useAppTheme();
   const queryClient = useQueryClient();
