@@ -101,12 +101,18 @@ export default function MapScreen() {
   const lastRerouteAtRef = useRef(0);
   const navigationSessionRef = useRef(0);
   const rerouteRequestRef = useRef(0);
+  const routeRequestControllerRef = useRef<AbortController | null>(null);
   const selectedStoreIdRef = useRef<string | null>(null);
   const navigationRef = useRef<NavigationSession | null>(null);
   const hasAutoStartedDirectionsRef = useRef(false);
 
   navigationRef.current = navigation;
   selectedStoreIdRef.current = selectedStoreId;
+
+  useEffect(() => () => {
+    routeRequestControllerRef.current?.abort();
+    routeRequestControllerRef.current = null;
+  }, []);
 
   const stores = useQuery({
     queryKey: ["map-stores", mapViewport, requestedStoreId],
@@ -280,6 +286,8 @@ export default function MapScreen() {
 
     navigationSessionRef.current += 1;
     rerouteRequestRef.current += 1;
+    routeRequestControllerRef.current?.abort();
+    routeRequestControllerRef.current = null;
     setNavigation(null);
     selectedStoreIdRef.current = null;
     setSelectedStoreId(null);
@@ -292,20 +300,23 @@ export default function MapScreen() {
     navigationSessionRef.current = sessionId;
     rerouteRequestRef.current += 1;
     const destinationStoreId = selectedStore.id;
+    const controller = new AbortController();
+    routeRequestControllerRef.current?.abort();
+    routeRequestControllerRef.current = controller;
     setIsStartingNavigation(true);
     setNavigationError(false);
 
     try {
       const origin = await getCurrentLocation();
-      if (!origin || navigationSessionRef.current !== sessionId
+      if (!origin || controller.signal.aborted || navigationSessionRef.current !== sessionId
         || selectedStoreIdRef.current !== destinationStoreId) return;
 
       const destination: RoutePoint = {
         latitude: selectedStore.latitude,
         longitude: selectedStore.longitude
       };
-      const route = await fetchDrivingRoute(origin, destination);
-      if (navigationSessionRef.current !== sessionId
+      const route = await fetchDrivingRoute(origin, destination, controller.signal);
+      if (controller.signal.aborted || navigationSessionRef.current !== sessionId
         || selectedStoreIdRef.current !== destinationStoreId) return;
       if (route.coordinates.length < 2) throw new Error("route_geometry_missing");
 
@@ -317,13 +328,18 @@ export default function MapScreen() {
       lastRerouteAtRef.current = Date.now();
       setCameraTarget(origin);
     } catch {
-      setNavigationError(true);
-      Alert.alert(
-        translate("mapNavigationErrorTitle", language),
-        translate("mapNavigationError", language)
-      );
+      if (!controller.signal.aborted) {
+        setNavigationError(true);
+        Alert.alert(
+          translate("mapNavigationErrorTitle", language),
+          translate("mapNavigationError", language)
+        );
+      }
     } finally {
-      setIsStartingNavigation(false);
+      if (routeRequestControllerRef.current === controller) {
+        routeRequestControllerRef.current = null;
+        setIsStartingNavigation(false);
+      }
     }
   };
 
@@ -336,6 +352,8 @@ export default function MapScreen() {
   const stopNavigation = () => {
     navigationSessionRef.current += 1;
     rerouteRequestRef.current += 1;
+    routeRequestControllerRef.current?.abort();
+    routeRequestControllerRef.current = null;
     setNavigation(null);
     setNavigationError(false);
   };
@@ -365,6 +383,9 @@ export default function MapScreen() {
     rerouteRequestRef.current = requestId;
     const sourceRoute = navigation.route;
     const destinationStoreId = selectedStore?.id ?? null;
+    const controller = new AbortController();
+    routeRequestControllerRef.current?.abort();
+    routeRequestControllerRef.current = controller;
     setNavigation((current) => current ? { ...current, isRerouting: true } : current);
 
     const destination = selectedStore
@@ -381,18 +402,24 @@ export default function MapScreen() {
       && selectedStoreIdRef.current === destinationStoreId
       && navigationRef.current?.route === sourceRoute;
 
-    void fetchDrivingRoute(userPosition, destination)
+    void fetchDrivingRoute(userPosition, destination, controller.signal)
       .then((route) => {
+        if (controller.signal.aborted) return;
         if (!isRequestCurrent()) return;
         setNavigation((current) => current && current.route === sourceRoute
           ? { route, currentStepIndex: 0, isRerouting: false }
           : current);
       })
       .catch(() => {
-        if (!isRequestCurrent()) return;
+        if (controller.signal.aborted || !isRequestCurrent()) return;
         setNavigation((current) => current && current.route === sourceRoute
           ? { ...current, isRerouting: false }
           : current);
+      })
+      .finally(() => {
+        if (routeRequestControllerRef.current === controller) {
+          routeRequestControllerRef.current = null;
+        }
       });
   }, [userPosition, navigation, selectedStore]);
 
