@@ -296,6 +296,7 @@ export default function MerchantEditProductScreen() {
   }
   if (!access.data) return <Redirect href="/login" />;
   if (!ready) return <Redirect href="/merchant" />;
+  if (access.data.teamRole === "staff") return <Redirect href="/merchant/orders" />;
   if (!offerId) {
     return (
       <MessageScreen
