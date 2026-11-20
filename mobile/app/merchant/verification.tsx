@@ -26,7 +26,7 @@ export default function MerchantVerificationScreen() {
   const storeId = access.data?.store?.id ?? null;
   const overview = useQuery({
     queryKey: ["my-store-verification", storeId],
-    queryFn: () => fetchMyStoreVerificationOverview(storeId ?? ""),
+    queryFn: ({ signal }) => fetchMyStoreVerificationOverview(storeId ?? "", signal),
     enabled: Boolean(storeId),
     retry: false
   });
