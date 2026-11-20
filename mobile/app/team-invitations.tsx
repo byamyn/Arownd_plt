@@ -33,12 +33,12 @@ export default function TeamInvitationsScreen() {
 
   const accept = useMutation({
     mutationFn: acceptStoreTeamInvitation,
-    onSuccess: async () => {
+    onSuccess: async (storeId) => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["merchant-access"] }),
         queryClient.invalidateQueries({ queryKey: ["my-pending-team-invitations"] })
       ]);
-      router.replace("/merchant/orders");
+      if (storeId) router.replace("/merchant/orders");
     }
   });
 
@@ -86,6 +86,7 @@ export default function TeamInvitationsScreen() {
           ))
         )}
         {accept.isError ? <Alert description={translate("merchantTeamAcceptError")} tone="danger" /> : null}
+        {accept.isSuccess && accept.data === null ? <Alert description={translate("merchantTeamInvitationExpired")} tone="warning" /> : null}
       </ScrollView>
     </SafeAreaView>
   );
