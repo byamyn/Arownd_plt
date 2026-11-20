@@ -15,7 +15,7 @@ export default function MerchantAnalyticsScreen() {
   const { language } = useLanguage();
   const theme = useAppTheme();
   const styles = createStyles(theme);
-  const access = useQuery({ queryKey: ["merchant-access"], queryFn: fetchMerchantAccess, retry: false });
+  const access = useQuery({ queryKey: ["merchant-access"], queryFn: ({ signal }) => fetchMerchantAccess(signal), retry: false });
   const storeId = access.data?.store?.id ?? null;
   const accountCurrency = useQuery({ queryKey: ["account-currency"], queryFn: fetchMyAccountCurrencyCode, enabled: access.isSuccess && access.data?.status === "merchant_ready" });
   const ready = access.data?.status === "merchant_ready" && Boolean(storeId);
