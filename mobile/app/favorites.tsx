@@ -53,7 +53,7 @@ export default function FavoritesScreen() {
         const productResults = await Promise.all(ids.products.map(async (id) => {
           const offers = await queryClient.fetchQuery({
             queryKey: ["customer-product-offers", id],
-            queryFn: () => fetchProductOffers(id),
+            queryFn: ({ signal }) => fetchProductOffers(id, signal),
             staleTime: 30_000
           });
           const best = chooseBestProductOffer(offers);
@@ -68,7 +68,7 @@ export default function FavoritesScreen() {
         id,
         store: await queryClient.fetchQuery({
           queryKey: ["customer-store", id],
-          queryFn: () => fetchStoreDetails(id),
+          queryFn: ({ signal }) => fetchStoreDetails(id, signal),
           staleTime: 60_000
         })
       })));
@@ -145,9 +145,9 @@ export default function FavoritesScreen() {
                 imageUrl={getPrimaryImage(offer)}
                 action={<FavoriteToggle kind="products" id={id} />}
                 onPress={() => {
-                  void queryClient.prefetchQuery({ queryKey: ["customer-product", id], queryFn: () => fetchProductDetails(id), staleTime: 60_000 });
+                  void queryClient.prefetchQuery({ queryKey: ["customer-product", id], queryFn: ({ signal }) => fetchProductDetails(id, signal), staleTime: 60_000 });
                   void queryClient.prefetchQuery({ queryKey: ["customer-product-offers", id], queryFn: () => fetchProductOffers(id), staleTime: 30_000 });
-                  void queryClient.prefetchQuery({ queryKey: ["approved-reviews", "product", id], queryFn: () => fetchApprovedReviews("product", id), staleTime: 60_000 });
+                  void queryClient.prefetchQuery({ queryKey: ["approved-reviews", "product", id], queryFn: ({ signal }) => fetchApprovedReviews("product", id, signal), staleTime: 60_000 });
                   router.push({ pathname: "/product/[productId]", params: { productId: id } });
                 }}
               />
@@ -162,7 +162,7 @@ export default function FavoritesScreen() {
               style={styles.storeCard}
               onPress={() => {
                 void queryClient.prefetchQuery({ queryKey: ["customer-store", id], queryFn: () => fetchStoreDetails(id), staleTime: 60_000 });
-                void queryClient.prefetchQuery({ queryKey: ["customer-store-offers", id], queryFn: () => fetchStoreOffers(id), staleTime: 30_000 });
+                void queryClient.prefetchQuery({ queryKey: ["customer-store-offers", id], queryFn: ({ signal }) => fetchStoreOffers(id, signal), staleTime: 30_000 });
                 router.push({ pathname: "/store/[storeId]", params: { storeId: id } });
               }}
               accessibilityLabel={store.name}
