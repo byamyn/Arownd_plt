@@ -133,13 +133,19 @@ export async function fetchCustomerOrderDetails(orderId: string, signal?: AbortS
     merchantOrderIds.map((merchantOrderId) => ({ merchantOrderId, events: [] }));
 
   if (merchantOrderIds.length > 0) {
+    type TrackingRpcResult = { data: unknown; error: { message?: string } | null };
+    type TrackingRpcRequest = Promise<TrackingRpcResult> & {
+      abortSignal: (abortSignal: AbortSignal) => TrackingRpcRequest;
+    };
     const call = client.rpc.bind(client) as unknown as (
       functionName: string,
       args: { _merchant_order_ids: string[] }
-    ) => Promise<{ data: unknown; error: { message?: string } | null }>;
-    const { data, error } = await call("fetch_customer_order_tracking", {
+    ) => TrackingRpcRequest;
+    let request = call("fetch_customer_order_tracking", {
       _merchant_order_ids: merchantOrderIds
     });
+    if (signal) request = request.abortSignal(signal);
+    const { data, error } = await request;
     if (error) throw new Error(error.message ?? "order_tracking_load_failed");
 
     const BatchTrackingEventSchema = TrackingEventSchema.extend({
