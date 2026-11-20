@@ -214,7 +214,7 @@ function FavoritesContent({ onNavigate }: { onNavigate: () => void }) {
         </View>
       ) : (
         <View style={{ gap: designTokens.spacing.md }}>
-          {content.data.stores.map(({ id, store }) => (
+          {content.data.stores.map(({ id, store }) => store ? (
             <StoreCard
               key={id}
               accessibilityLabel={store.name}
@@ -235,7 +235,7 @@ function FavoritesContent({ onNavigate }: { onNavigate: () => void }) {
                 {store.rating != null ? <RatingStars value={store.rating} size={14} showValue /> : null}
               </View>
             </StoreCard>
-          ))}
+          ) : null)}
         </View>
       )}
     </ScrollView>
