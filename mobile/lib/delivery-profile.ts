@@ -16,28 +16,31 @@ const ProfileSchema = z.object({
 
 export type DeliveryProfile = z.infer<typeof ProfileSchema>;
 
-export async function fetchDeliveryProfileCommunes(regionId: number): Promise<string[]> {
+export async function fetchDeliveryProfileCommunes(regionId: number, signal?: AbortSignal): Promise<string[]> {
   if (!Number.isInteger(regionId) || regionId <= 0) throw new Error("invalid_region");
-  const { data, error } = await getSupabaseClient()
+  let request = getSupabaseClient()
     .from("stores")
     .select("commune")
     .eq("region_id", regionId)
     .not("commune", "is", null);
+  if (signal) request = request.abortSignal(signal);
+  const { data, error } = await request;
   if (error) throw error;
   return [...new Set(data.map((row) => row.commune).filter(
     (value): value is string => typeof value === "string" && value.trim().length > 0
   ))].sort((a, b) => a.localeCompare(b, "ar"));
 }
 
-export async function fetchMyDeliveryProfile(): Promise<DeliveryProfile | null> {
+export async function fetchMyDeliveryProfile(signal?: AbortSignal): Promise<DeliveryProfile | null> {
   const client = getSupabaseClient();
   const { data: auth, error: authError } = await client.auth.getUser();
   if (authError) throw authError;
   if (!auth.user) throw new Error("not_authenticated");
-  const { data, error } = await client.from("profiles")
+  let request = client.from("profiles")
     .select("country_code, full_name, avatar_url, phone, region_id, secondary_region_id, commune")
-    .eq("user_id", auth.user.id)
-    .maybeSingle();
+    .eq("user_id", auth.user.id);
+  if (signal) request = request.abortSignal(signal);
+  const { data, error } = await request.maybeSingle();
   if (error) throw error;
   return data ? ProfileSchema.parse(data as unknown) : null;
 }

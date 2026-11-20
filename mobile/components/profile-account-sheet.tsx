@@ -40,10 +40,10 @@ function DeliveryContent() {
   const [commune, setCommune] = useState("");
   const [picker, setPicker] = useState<"region" | "secondary" | "commune" | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const profile = useQuery({ queryKey: ["my-delivery-profile"], queryFn: fetchMyDeliveryProfile });
+  const profile = useQuery({ queryKey: ["my-delivery-profile"], queryFn: ({ signal }) => fetchMyDeliveryProfile(signal) });
   const regions = useQuery({ queryKey: ["checkout-regions"], queryFn: ({ signal }) => fetchCheckoutRegions(undefined, signal), staleTime: Infinity });
   const secondary = useQuery({ queryKey: ["checkout-regions", regionId], queryFn: ({ signal }) => fetchCheckoutRegions(regionId, signal), enabled: regionId !== null, staleTime: Infinity });
-  const communes = useQuery({ queryKey: ["checkout-communes", regionId], queryFn: () => fetchDeliveryProfileCommunes(regionId as number), enabled: regionId !== null, staleTime: 5 * 60 * 1000 });
+  const communes = useQuery({ queryKey: ["checkout-communes", regionId], queryFn: ({ signal }) => fetchDeliveryProfileCommunes(regionId as number, signal), enabled: regionId !== null, staleTime: 5 * 60 * 1000 });
   const [initialized, setInitialized] = useState(false);
   useEffect(() => {
     if (!profile.isSuccess || initialized) return;
@@ -140,7 +140,7 @@ function AddressesContent() {
   const [picker, setPicker] = useState<"region" | "secondary" | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<UserAddress | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const addresses = useQuery({ queryKey: ["my-addresses"], queryFn: fetchMyAddresses });
+  const addresses = useQuery({ queryKey: ["my-addresses"], queryFn: ({ signal }) => fetchMyAddresses(signal) });
   const regions = useQuery({ queryKey: ["checkout-regions"], queryFn: ({ signal }) => fetchCheckoutRegions(undefined, signal), staleTime: Infinity });
   const secondary = useQuery({ queryKey: ["checkout-regions", regionId], queryFn: ({ signal }) => fetchCheckoutRegions(regionId, signal), enabled: regionId !== null, staleTime: Infinity });
   const selectedRegion = regions.data?.regions.find((item) => item.id === regionId) ?? null;
