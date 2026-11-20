@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { resolveMerchantAccessStatus } from "@/lib/merchant-state";
+import { resolveMerchantAccessStatus, selectActiveStoreMembership } from "@/lib/merchant-state";
 
 describe("resolveMerchantAccessStatus", () => {
   it("allows merchant mode only when account type, role, and owned store agree", () => {
@@ -21,5 +21,29 @@ describe("resolveMerchantAccessStatus", () => {
   });
   it("rejects mismatched account type, role, and store ownership signals", () => {
     expect(resolveMerchantAccessStatus({ accountType: "personal", roles: ["merchant"], hasOwnedStore: true })).toBe("inconsistent");
+  });
+});
+
+describe("selectActiveStoreMembership", () => {
+  const stores = [
+    { id: "store-owner", role: "owner" as const },
+    { id: "store-staff", role: "staff" as const },
+    { id: "store-admin", role: "admin" as const }
+  ];
+
+  it("uses the explicitly selected membership when it is still available", () => {
+    expect(selectActiveStoreMembership(stores, "store-admin", "store-owner")?.id).toBe("store-admin");
+  });
+
+  it("falls back to the owned store when the saved selection is no longer available", () => {
+    expect(selectActiveStoreMembership(stores.slice(1), "removed-store", "store-owner")?.id).toBe("store-staff");
+  });
+
+  it("uses the first membership when no owned or preferred store exists", () => {
+    expect(selectActiveStoreMembership(stores.slice(1), null, null)?.id).toBe("store-staff");
+  });
+
+  it("returns null when the account has no store memberships", () => {
+    expect(selectActiveStoreMembership([], null, null)).toBeNull();
   });
 });
