@@ -125,8 +125,10 @@ export async function submitMyStoreVerificationRequest(): Promise<string> {
   return z.string().uuid().parse(data as unknown);
 }
 
-export async function fetchStoreVerificationReviewerAccess(): Promise<boolean> {
-  const { data, error } = await getSupabaseClient().rpc("is_store_verification_reviewer");
+export async function fetchStoreVerificationReviewerAccess(signal?: AbortSignal): Promise<boolean> {
+  let request = getSupabaseClient().rpc("is_store_verification_reviewer");
+  if (signal) request = request.abortSignal(signal);
+  const { data, error } = await request;
   if (error) throw error;
   return z.boolean().parse(data as unknown);
 }

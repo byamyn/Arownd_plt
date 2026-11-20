@@ -97,12 +97,12 @@ export default function ProfileScreen() {
   });
   const profile = useQuery({
     queryKey: ["my-delivery-profile"],
-    queryFn: fetchMyDeliveryProfile,
+    queryFn: ({ signal }) => fetchMyDeliveryProfile(signal),
     enabled: Boolean(user.data)
   });
   const verificationReviewer = useQuery({
     queryKey: ["store-verification-reviewer"],
-    queryFn: fetchStoreVerificationReviewerAccess,
+    queryFn: ({ signal }) => fetchStoreVerificationReviewerAccess(signal),
     enabled: Boolean(user.data),
     retry: false
   });
