@@ -213,7 +213,7 @@ export default function MerchantTeamScreen() {
                       onPress={() => setPendingAction({ type: "remove", member })}
                       style={styles.removeButton}
                     >
-                      <Icon name="user-round-x" size={18} color={theme.colors.danger} />
+                      <Icon name="trash-2" size={18} color={theme.colors.dangerText} />
                     </PressableSurface>
                   </View>
                 ) : null}
