@@ -133,13 +133,15 @@ export async function fetchStoreVerificationReviewerAccess(signal?: AbortSignal)
   return z.boolean().parse(data as unknown);
 }
 
-export async function fetchStoreVerificationQueue(): Promise<StoreVerificationQueueItem[]> {
-  const { data, error } = await getSupabaseClient()
+export async function fetchStoreVerificationQueue(signal?: AbortSignal): Promise<StoreVerificationQueueItem[]> {
+  let request = getSupabaseClient()
     .from("store_verification_requests")
     .select("id, store_id, status, submitted_at, profile_snapshot, store:stores!inner(id, name, logo_url, phone, region_id, secondary_region_id, commune, address_line, opening_hours, region:country_regions!stores_country_region_fkey(name_ar, name_fr, name_en), secondary_region:country_regions!stores_country_secondary_region_fkey(name_ar, name_fr, name_en))")
     .eq("status", "pending")
     .order("submitted_at", { ascending: true })
     .limit(100);
+  if (signal) request = request.abortSignal(signal);
+  const { data, error } = await request;
   if (error) throw error;
   return VerificationQueueItemSchema.array().parse(data as unknown);
 }

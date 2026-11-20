@@ -23,12 +23,12 @@ export default function StoreVerificationModerationScreen() {
   const [rejectionNotes, setRejectionNotes] = useState<Record<string, string>>({});
   const reviewer = useQuery({
     queryKey: ["store-verification-reviewer"],
-    queryFn: fetchStoreVerificationReviewerAccess,
+    queryFn: ({ signal }) => fetchStoreVerificationReviewerAccess(signal),
     retry: false
   });
   const queue = useQuery({
     queryKey: ["store-verification-queue"],
-    queryFn: fetchStoreVerificationQueue,
+    queryFn: ({ signal }) => fetchStoreVerificationQueue(signal),
     enabled: reviewer.data === true,
     retry: false
   });
