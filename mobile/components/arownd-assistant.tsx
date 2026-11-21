@@ -414,7 +414,7 @@ const styles = StyleSheet.create({
   modalRoot: { flex: 1 },
   keyboardContainer: { flex: 1, justifyContent: "flex-end" },
   scrim: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(0,0,0,0.42)" },
-  panel: { borderTopLeftRadius: 24, borderTopRightRadius: 24, borderWidth: 1, paddingHorizontal: 20, paddingTop: 18, gap: 18, maxHeight: "78%" },
+  panel: { borderTopLeftRadius: 24, borderTopRightRadius: 24, borderWidth: 1, paddingHorizontal: 20, paddingTop: 18, gap: 18, height: "78%", maxHeight: "78%" },
   panelHeader: { flexDirection: "row", alignItems: "center", gap: 12 },
   assistantMark: { width: 42, height: 42, borderRadius: 13, alignItems: "center", justifyContent: "center" },
   headerCopy: { flex: 1, gap: 2 },
