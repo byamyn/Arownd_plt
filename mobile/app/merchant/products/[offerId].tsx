@@ -38,7 +38,7 @@ import { getSelectableMerchantCategories, groupMerchantCategories } from "@/lib/
 import { translate, useLanguage } from "@/lib/i18n";
 import { getLocalizedMerchantCategoryLabel } from "@/lib/locale-data";
 import { designTokens, useAppTheme, type AppTheme } from "@/lib/theme";
-import { BottomSheet, AppHeader, Button, Card, ConfirmDialog, ErrorState, Icon, Image as UiImage, PageSkeleton, MediaViewer, Spinner, PressableSurface, Text as UiText, TextField } from "@/components/ui";
+import { BottomSheet, AppHeader, Button, Card, ConfirmDialog, ErrorState, Icon, Image as UiImage, PageSkeleton, MediaViewer, Spinner, PressableSurface, Text as UiText, TextField, RefreshableScrollView } from "@/components/ui";
 
 export default function MerchantEditProductScreen() {
   const { language } = useLanguage();
@@ -329,11 +329,13 @@ export default function MerchantEditProductScreen() {
         style={styles.flex}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <ScrollView
+        <RefreshableScrollView
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}
           showsVerticalScrollIndicator={false}
+          refreshing={access.isFetching || categoriesQuery.isFetching}
+          onRefresh={() => { void Promise.all([access.refetch(), categoriesQuery.refetch()]); }}
         >
           <AppHeader title={translate("merchantProductEditTitle")}/>
 
@@ -603,7 +605,7 @@ export default function MerchantEditProductScreen() {
               <UiText style={[styles.feedbackText, { color: theme.mode === "light" ? theme.colors.dangerText : theme.colors.danger }]}>{actionError}</UiText>
             </View>
           ) : null}
-        </ScrollView>
+        </RefreshableScrollView>
       </KeyboardAvoidingView>
 
       <MediaViewer
