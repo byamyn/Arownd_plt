@@ -98,7 +98,7 @@ export default function FavoritesScreen() {
 
   return (
     <CustomerScreen
-      refreshing={favorites.isFetching || content.isFetching}
+      refreshing={favorites.isFetching || browsingCurrency.isFetching || content.isFetching}
       onRefresh={() => {
         void favorites.refetch().then(() => queryClient.invalidateQueries({ queryKey: ["customer-favorites-content"] }));
       }}
