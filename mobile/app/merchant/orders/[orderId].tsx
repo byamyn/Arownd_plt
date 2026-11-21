@@ -2,7 +2,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Redirect, router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import {
-  ScrollView,
   StyleSheet,
   View
 } from "react-native";
@@ -23,7 +22,7 @@ import { readCartOptions } from "@/lib/cart-state";
 import { translate, type TranslationKey, useLanguage } from "@/lib/i18n";
 import { designTokens, useAppTheme, type AppTheme } from "@/lib/theme";
 import { getRegionDisplayName } from "@/lib/country-regions";
-import { Alert, AppHeader, Button, ConfirmDialog, ErrorState, Icon, MerchantOrderCard, MerchantStatusBadge, PriceDisplay, OrderCardSkeleton, Text as UiText, TextField, TrackingTimeline } from "@/components/ui";
+import { Alert, AppHeader, Button, ConfirmDialog, ErrorState, Icon, MerchantOrderCard, MerchantStatusBadge, PriceDisplay, OrderCardSkeleton, RefreshableScrollView, Text as UiText, TextField, TrackingTimeline } from "@/components/ui";
 
 type ConfirmAction = "reject" | "collect" | null;
 
@@ -148,7 +147,7 @@ export default function MerchantOrderDetailsScreen() {
 
   return (
     <SafeAreaView edges={["top", "left", "right"]} style={[styles.safe, { backgroundColor: theme.colors.background }]}>
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <RefreshableScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} refreshing={access.isFetching || detail.isFetching} onRefresh={() => { void Promise.all([access.refetch(), detail.refetch()]); }}>
         <AppHeader title={translate("merchantOrderDetailTitle")}/>
 
         {order.status === "delivered" ? (
@@ -275,7 +274,7 @@ export default function MerchantOrderDetailsScreen() {
         {actionError ? (
           <Alert description={translateError(actionError)} tone="danger" />
         ) : null}
-      </ScrollView>
+      </RefreshableScrollView>
 
       <ConfirmDialog
         visible={confirmAction !== null}
