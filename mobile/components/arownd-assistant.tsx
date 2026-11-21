@@ -70,6 +70,7 @@ export function ArowndAssistant() {
   const [question, setQuestion] = useState("");
   const [messages, setMessages] = useState<AssistantMessage[]>([]);
   const [isSending, setIsSending] = useState(false);
+  const [quotaRemaining, setQuotaRemaining] = useState<number | null>(null);
   const checkingRef = useRef(false);
   const tourStartedRef = useRef(false);
   const isArabic = language === "ar";
@@ -124,6 +125,7 @@ export function ArowndAssistant() {
       if (event === "SIGNED_OUT") {
         tourStartedRef.current = false;
         setUserId(null);
+        setQuotaRemaining(null);
         setTourStep(-1);
         setChatOpen(false);
         return;
@@ -206,12 +208,52 @@ export function ArowndAssistant() {
     setIsSending(true);
 
     try {
+      const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
       const { data, error } = await getSupabaseClient().functions.invoke("arownd-aide", {
-        body: { language, messages: history }
+        body: { language, messages: history, timeZone }
       });
+
+      let responseData: any = data;
+      if (error) {
+        const context = (error as { context?: Response }).context;
+        if (context && typeof context.json === "function") {
+          responseData = await context.clone().json().catch(() => null);
+        }
+      }
+
+      const quota = responseData?.quota;
+      if (typeof quota?.remaining === "number") {
+        setQuotaRemaining(Math.max(0, Math.min(50, quota.remaining)));
+      }
+
+      if (responseData?.error === "DAILY_LIMIT_REACHED") {
+        const resetAt = typeof quota?.resetAt === "string" ? new Date(quota.resetAt) : null;
+        const resetTime = resetAt && !Number.isNaN(resetAt.getTime())
+          ? new Intl.DateTimeFormat(isArabic ? "ar" : "en", {
+              hour: "2-digit",
+              minute: "2-digit",
+              timeZone
+            }).format(resetAt)
+          : null;
+        const limitMessage = isArabic
+          ? "وصلت إلى الحد اليومي البالغ 50 رسالة. تتجدد حصتك " + (resetTime ? "عند " + resetTime : "عند منتصف الليل بالتوقيت المحلي") + "."
+          : "You've reached the daily limit of 50 messages. Your quota resets " + (resetTime ? "at " + resetTime : "at local midnight") + ".";
+        setMessages((current) => [...current, { id: Date.now() + 1, role: "assistant", text: limitMessage }]);
+        return;
+      }
+
+      if (responseData?.error === "RATE_LIMITED") {
+        const retryAfter = Math.max(1, Number(responseData.retryAfterSeconds) || 60);
+        const rateMessage = isArabic
+          ? "أرسلت رسائل بسرعة كبيرة. حاول مرة أخرى بعد " + retryAfter + " ثانية."
+          : "You're sending messages too quickly. Try again in " + retryAfter + " seconds.";
+        setMessages((current) => [...current, { id: Date.now() + 1, role: "assistant", text: rateMessage }]);
+        return;
+      }
+
       if (error) throw error;
-      const answer = typeof data?.answer === "string" && data.answer.trim()
-        ? data.answer.trim()
+      const answer = typeof responseData?.answer === "string" && responseData.answer.trim()
+        ? responseData.answer.trim()
         : (isArabic ? "لم أتمكن من إعداد إجابة الآن. حاول مرة أخرى." : "I couldn't prepare an answer right now. Please try again.");
       setMessages((current) => [...current, { id: Date.now() + 1, role: "assistant", text: answer }]);
     } catch {
@@ -297,6 +339,11 @@ export function ArowndAssistant() {
             ) : (
               <View style={styles.chatContent}>
                 <UiText weight="700" style={{ fontSize: 19 }}>{copy.title}</UiText>
+                {quotaRemaining !== null ? (
+                  <UiText tone="muted" style={{ fontSize: 11 }}>
+                    {isArabic ? "المتبقي اليوم: " + quotaRemaining + " من 50 رسالة" : quotaRemaining + " of 50 messages remaining today"}
+                  </UiText>
+                ) : null}
                 <UiText style={styles.bodyCopy}>{copy.intro}</UiText>
                 {messages.map((message) => (
                   <View key={message.id} style={[styles.messageBubble, { backgroundColor: theme.colors.surfaceSecondary, alignSelf: message.role === "assistant" ? "flex-start" : "flex-end" }]}>
