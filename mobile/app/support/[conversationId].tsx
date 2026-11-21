@@ -101,8 +101,8 @@ export default function SupportConversationScreen() {
     <KeyboardAvoidingView style={styles.keyboardRoot} behavior={Platform.OS === "ios" ? "padding" : "height"}>
     <CustomerScreen
       showNavigation={false}
-      onRefresh={() => { void messages.refetch(); }}
-      refreshing={messages.isFetching}
+      onRefresh={() => { void Promise.all([auth.refetch(), conversation.refetch(), messages.refetch()]); }}
+      refreshing={auth.isFetching || conversation.isFetching || messages.isFetching}
       footer={!closed ? (
         <View style={styles.composer}>
           <View style={styles.composerRow}>
