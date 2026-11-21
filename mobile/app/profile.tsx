@@ -24,6 +24,7 @@ import { translate, useLanguage } from "@/lib/i18n";
 import { fetchMyOrders } from "@/lib/orders";
 import { getProfileDisplayName } from "@/lib/profile-state";
 import { fetchMerchantAccess } from "@/lib/merchant";
+import { fetchMyPendingStoreTeamInvitations } from "@/lib/merchant-team";
 import { fetchMyReviews } from "@/lib/reviews";
 import { getSupabaseClient } from "@/lib/supabase";
 import { fetchStoreVerificationReviewerAccess } from "@/lib/store-verification";
@@ -113,6 +114,12 @@ export default function ProfileScreen() {
     enabled: Boolean(user.data),
     retry: false
   });
+  const teamInvitations = useQuery({
+    queryKey: ["my-pending-team-invitations"],
+    queryFn: ({ signal }) => fetchMyPendingStoreTeamInvitations(signal),
+    enabled: Boolean(user.data),
+    retry: false
+  });
   const orders = useQuery({
     queryKey: ["my-orders"],
     queryFn: ({ signal }) => fetchMyOrders(signal),
@@ -175,10 +182,10 @@ export default function ProfileScreen() {
 
   return (
     <CustomerScreen
-      refreshing={user.isFetching || (Boolean(user.data) && (profile.isFetching || orders.isFetching || favorites.isFetching || reviews.isFetching))}
+      refreshing={user.isFetching || (Boolean(user.data) && (profile.isFetching || orders.isFetching || favorites.isFetching || reviews.isFetching || teamInvitations.isFetching))}
       onRefresh={() => {
         void user.refetch().then((result) => {
-          if (result.isSuccess && result.data) void Promise.all([profile.refetch(), orders.refetch(), favorites.refetch(), reviews.refetch()]);
+          if (result.isSuccess && result.data) void Promise.all([profile.refetch(), orders.refetch(), favorites.refetch(), reviews.refetch(), teamInvitations.refetch()]);
         });
       }}
     >
@@ -256,15 +263,19 @@ export default function ProfileScreen() {
           ) : null}
 
           <Card contentStyle={styles.accountLinksCard}>
-            <PressableSurface accessibilityRole="button" accessibilityLabel={translate("profileTeamInvitations")} onPress={() => router.push("/team-invitations")} style={styles.accountLinkRow}>
-              <View style={[styles.accountLinkIcon, { backgroundColor: theme.colors.surfaceSecondary }]}><Icon name="users" size={20} color={theme.colors.accentOnSurface} /></View>
-              <View style={styles.accountLinkText}>
-                <UiText weight="700">{translate("profileTeamInvitations")}</UiText>
-                <Caption>{translate("profileTeamInvitationsHint")}</Caption>
-              </View>
-              <Icon name="chevron-left" size={18} color={theme.colors.subtle} />
-            </PressableSurface>
-            <View style={[styles.accountLinkDivider, { backgroundColor: theme.colors.border }]} />
+            {teamInvitations.data && teamInvitations.data.length > 0 ? (
+              <>
+                <PressableSurface accessibilityRole="button" accessibilityLabel={translate("profileTeamInvitations")} onPress={() => router.push("/team-invitations")} style={styles.accountLinkRow}>
+                  <View style={[styles.accountLinkIcon, { backgroundColor: theme.colors.surfaceSecondary }]}><Icon name="users" size={20} color={theme.colors.accentOnSurface} /></View>
+                  <View style={styles.accountLinkText}>
+                    <UiText weight="700">{translate("profileTeamInvitations")}</UiText>
+                    <Caption>{translate("profileTeamInvitationsHint")}</Caption>
+                  </View>
+                  <Icon name="chevron-left" size={18} color={theme.colors.subtle} />
+                </PressableSurface>
+                <View style={[styles.accountLinkDivider, { backgroundColor: theme.colors.border }]} />
+              </>
+            ) : null}
             <PressableSurface accessibilityRole="button" accessibilityLabel={translate("profileAddresses")} onPress={() => setAccountSheet("addresses")} style={styles.accountLinkRow}>
               <View style={[styles.accountLinkIcon, { backgroundColor: theme.colors.surfaceSecondary }]}><Icon name="map-pin" size={20} color={theme.colors.accentOnSurface} /></View>
               <View style={styles.accountLinkText}>
