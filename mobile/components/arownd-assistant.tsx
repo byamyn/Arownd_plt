@@ -27,11 +27,12 @@ type TourStep = {
 };
 
 type AssistantLink = { label: string; route: string };
+type AssistantPart = { text: string; link?: AssistantLink };
 type AssistantMessage = {
   id: number;
   role: "user" | "assistant";
   text: string;
-  links?: AssistantLink[];
+  parts?: AssistantPart[];
 };
 
 const STATIC_ASSISTANT_ROUTES = new Set([
@@ -40,22 +41,43 @@ const STATIC_ASSISTANT_ROUTES = new Set([
   "/merchant/account-settings"
 ]);
 
-function parseAssistantLinks(value: string): { text: string; links: AssistantLink[] } {
-  const links: AssistantLink[] = [];
-  const text = value.replace(/\[([^\]]+)\]\(arownd:([^\s)]+)\)/g, (match, rawLabel: string, rawRoute: string) => {
-    const label = rawLabel.trim();
-    const route = rawRoute.trim();
+function parseAssistantLinks(value: string): { text: string; parts: AssistantPart[] } {
+  const parts: AssistantPart[] = [];
+  const expression = /\[([^\]]+)\]\(arownd:([^\s)]+)\)/g;
+  let cursor = 0;
+  let plainText = "";
+  for (const match of value.matchAll(expression)) {
+    const fullMatch = match[0];
+    const label = (match[1] ?? "").trim();
+    const route = (match[2] ?? "").trim();
+    const index = match.index ?? cursor;
     const validStatic = STATIC_ASSISTANT_ROUTES.has(route);
     const validOrder = /^\/orders\/[0-9a-f-]{36}$/i.test(route);
     const validMerchantOrder = /^\/merchant\/orders\/[0-9a-f-]{36}$/i.test(route);
     const validMerchantProduct = /^\/merchant\/products\/[0-9a-f-]{36}$/i.test(route);
-    if (!label || (!validStatic && !validOrder && !validMerchantOrder && !validMerchantProduct)) return label || match;
-    links.push({ label, route });
-    return label;
-  });
-  return { text, links };
+    if (index > cursor) {
+      const preceding = value.slice(cursor, index);
+      parts.push({ text: preceding });
+      plainText += preceding;
+    }
+    if (label && (validStatic || validOrder || validMerchantOrder || validMerchantProduct)) {
+      const link = { label, route };
+      parts.push({ text: label, link });
+      plainText += label;
+    } else {
+      parts.push({ text: label || fullMatch });
+      plainText += label || fullMatch;
+    }
+    cursor = index + fullMatch.length;
+  }
+  if (cursor < value.length) {
+    const trailing = value.slice(cursor);
+    parts.push({ text: trailing });
+    plainText += trailing;
+  }
+  if (parts.length === 0) parts.push({ text: value });
+  return { text: plainText, parts };
 }
-
 type ArowndAideResponse = {
   error?: string;
   answer?: string;
@@ -291,7 +313,7 @@ export function ArowndAssistant() {
         id: Date.now() + 1,
         role: "assistant",
         text: parsedAnswer.text,
-        links: parsedAnswer.links
+        parts: parsedAnswer.parts
       }]);
     } catch {
       setMessages((current) => [...current, {
@@ -397,21 +419,20 @@ export function ArowndAssistant() {
                   {messages.map((message) => (
                     <View key={message.id} style={[styles.messageBubble, { backgroundColor: theme.colors.surfaceSecondary, alignSelf: message.role === "assistant" ? "flex-start" : "flex-end" }]}>
                       <UiText>
-                        {message.text}
-                        {message.links?.map((link, index) => (
+                        {message.parts?.map((part, index) => part.link ? (
                           <UiText
-                            key={message.id + "-link-" + index}
+                            key={message.id + "-part-" + index}
                             accessibilityRole="link"
-                            accessibilityLabel={link.label}
+                            accessibilityLabel={part.link.label}
                             onPress={() => {
                               setChatOpen(false);
-                              router.push(link.route as never);
+                              router.push(part.link.route as never);
                             }}
                             style={{ color: theme.colors.accent, textDecorationLine: "underline", fontWeight: "700" }}
                           >
-                            {link.label}
+                            {part.text}
                           </UiText>
-                        ))}
+                        ) : <UiText key={message.id + "-part-" + index}>{part.text}</UiText>) ?? message.text}
                       </UiText>
                     </View>
                   ))}
