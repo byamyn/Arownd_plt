@@ -1738,7 +1738,7 @@ export const messages = {
     settingsSigningOut: "Signing out…",
     settingsSignOutError: "We couldn't sign you out. Please try again.",
     detailNotFound: "We could not find the requested information.",
-    profileBusiness: "Arownd Studio",
+    profileBusiness: "Arownd Business",
     profileBusinessHint: "Open Arownd Business to manage your store, products, and orders.",
     merchantEntryTitle: "Arownd Business",
     merchantEntrySubtitle: "Your account and store permissions are verified by the server before merchant tools are made available.",
