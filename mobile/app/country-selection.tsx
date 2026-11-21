@@ -35,12 +35,12 @@ export default function CountrySelectionScreen() {
       if (returnToSignup) {
         const storedCode = await getSelectedCountryCode();
         const storedCountry = availableCountries.find((country) => country.code === storedCode && country.is_enabled);
-        setSelectedCode(storedCountry?.code ?? firstEnabled?.code ?? null);
+        setSelectedCode((current) => current && availableCountries.some((country) => country.code === current && country.is_enabled) ? current : storedCountry?.code ?? firstEnabled?.code ?? null);
       } else {
         const detectedCode = await detectCountryFromIp();
         const suggested = availableCountries.find((country) => country.code === detectedCode && country.is_enabled);
         setSuggestedCode(suggested?.code ?? null);
-        setSelectedCode(suggested?.code ?? firstEnabled?.code ?? null);
+        setSelectedCode((current) => current && availableCountries.some((country) => country.code === current && country.is_enabled) ? current : suggested?.code ?? firstEnabled?.code ?? null);
       }
     } catch {
       setError(translate("countrySelectionLoadError"));
