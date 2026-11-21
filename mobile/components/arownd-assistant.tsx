@@ -27,6 +27,7 @@ type TourStep = {
 
 type AssistantMessage = {
   id: number;
+  role: "user" | "assistant";
   text: string;
   route?: string;
   routeLabel?: string;
@@ -57,26 +58,6 @@ const TOUR_STEPS: Record<"ar" | "en", { customer: TourStep[]; merchant: TourStep
   }
 };
 
-function getQuickAnswer(question: string, language: "ar" | "en"): AssistantMessage {
-  const value = question.trim().toLocaleLowerCase();
-  const routes: Array<{ terms: string[]; ar: AssistantMessage; en: AssistantMessage }> = [
-    { terms: ["إضافة منتج", "أضيف منتج", "منتجاتي", "add product", "my products", "متجري", "تاجر", "studio", "merchant"], ar: { id: 0, text: "لإدارة متجرك، افتح Arownd Studio. ستظهر لك الصفحات والإجراءات التي تسمح بها صلاحيات عضويتك.", route: "/merchant", routeLabel: "فتح Arownd Studio" }, en: { id: 0, text: "To manage your store, open Arownd Studio. The pages and actions shown there depend on your membership permissions.", route: "/merchant", routeLabel: "Open Arownd Studio" } },
-    { terms: ["بحث", "استكشاف", "منتج", "متجر", "brand", "search", "explore", "product", "store"], ar: { id: 0, text: "للبحث عن المنتجات والمتاجر والعلامات التجارية، افتح صفحة الاستكشاف واكتب ما تبحث عنه.", route: "/explore", routeLabel: "فتح الاستكشاف" }, en: { id: 0, text: "To search products, stores, and brands, open Explore and enter what you are looking for.", route: "/explore", routeLabel: "Open Explore" } },
-    { terms: ["خريطة", "موقع", "قريب", "map", "location", "nearby"], ar: { id: 0, text: "يمكنك اكتشاف المتاجر جغرافياً من صفحة الخريطة.", route: "/map", routeLabel: "فتح الخريطة" }, en: { id: 0, text: "Discover stores by location from the Map screen.", route: "/map", routeLabel: "Open Map" } },
-    { terms: ["طلب", "طلبات", "تتبع", "order", "track"], ar: { id: 0, text: "يمكنك مراجعة طلباتك من صفحة حسابي، ضمن قسم الطلبات.", route: "/profile", routeLabel: "فتح حسابي" }, en: { id: 0, text: "You can review your orders from My Account, in the Orders section.", route: "/profile", routeLabel: "Open My Account" } },
-    { terms: ["حساب", "إعدادات", "كلمة المرور", "account", "settings", "password"], ar: { id: 0, text: "تجد إدارة الحساب وإعدادات التطبيق في صفحة حسابي، ثم الإعدادات.", route: "/settings", routeLabel: "فتح الإعدادات" }, en: { id: 0, text: "Account management and app preferences are available from My Account, then Settings.", route: "/settings", routeLabel: "Open Settings" } },
-    { terms: ["متجري", "تاجر", "منتجاتي", "studio", "merchant", "my store"], ar: { id: 0, text: "تتوفر مساحة Arownd Studio للحسابات وأعضاء الفرق الذين لديهم وصول إلى متجر. افتح مساحة التاجر لعرض الخيارات المتاحة لك.", route: "/merchant", routeLabel: "فتح Arownd Studio" }, en: { id: 0, text: "Arownd Studio is available to accounts and team members with store access. Open the merchant space to see the actions available to you.", route: "/merchant", routeLabel: "Open Arownd Studio" } }
-  ];
-  const match = routes.find((item) => item.terms.some((term) => value.includes(term)));
-  if (match) return language === "ar" ? match.ar : match.en;
-  return {
-    id: 0,
-    text: language === "ar"
-      ? "لم أجد بعد إجابة موثوقة لهذا السؤال في دليل الإرشاد الأساسي. يمكنك السؤال عن البحث أو الخريطة أو الطلبات أو إعدادات الحساب. ستُربط الإجابات الذكية الشاملة بقاعدة معرفة Arownd في مرحلة ربط خدمة الذكاء الاصطناعي."
-      : "I don’t have a verified answer for that in the basic guide yet. You can ask about search, the map, orders, or account settings. Full AI answers will be connected to the Arownd knowledge base in the AI service integration phase."
-  };
-}
-
 export function ArowndAssistant() {
   const theme = useAppTheme();
   const { language } = useLanguage();
@@ -88,6 +69,7 @@ export function ArowndAssistant() {
   const [chatOpen, setChatOpen] = useState(false);
   const [question, setQuestion] = useState("");
   const [messages, setMessages] = useState<AssistantMessage[]>([]);
+  const [isSending, setIsSending] = useState(false);
   const checkingRef = useRef(false);
   const tourStartedRef = useRef(false);
   const isArabic = language === "ar";
@@ -202,17 +184,47 @@ export function ArowndAssistant() {
     setTourStep(0);
     router.replace("/home");
   };
-  const submitQuestion = () => {
+  const submitQuestion = async () => {
     const value = question.trim();
-    if (!value) return;
+    if (!value || isSending) return;
     if (value.toLocaleLowerCase().includes("الجولة") || value.toLocaleLowerCase().includes("tour")) {
       setQuestion("");
       void restartTour();
       return;
     }
-    const answer = getQuickAnswer(value, language);
-    setMessages((current) => [...current, { id: Date.now(), text: value }, { ...answer, id: Date.now() + 1 }]);
+
+    const userMessage: AssistantMessage = { id: Date.now(), role: "user", text: value };
+    const history = [
+      ...messages.slice(-10).map((message) => ({
+        role: message.role,
+        content: message.text
+      })),
+      { role: "user" as const, content: value }
+    ];
+    setMessages((current) => [...current, userMessage]);
     setQuestion("");
+    setIsSending(true);
+
+    try {
+      const { data, error } = await getSupabaseClient().functions.invoke("arownd-aide", {
+        body: { language, messages: history }
+      });
+      if (error) throw error;
+      const answer = typeof data?.answer === "string" && data.answer.trim()
+        ? data.answer.trim()
+        : (isArabic ? "لم أتمكن من إعداد إجابة الآن. حاول مرة أخرى." : "I couldn't prepare an answer right now. Please try again.");
+      setMessages((current) => [...current, { id: Date.now() + 1, role: "assistant", text: answer }]);
+    } catch {
+      setMessages((current) => [...current, {
+        id: Date.now() + 1,
+        role: "assistant",
+        text: isArabic
+          ? "تعذر الاتصال بخدمة Arownd Aide حالياً. تحقق من الاتصال وحاول مرة أخرى."
+          : "Arownd Aide is temporarily unavailable. Check your connection and try again."
+      }]);
+    } finally {
+      setIsSending(false);
+    }
   };
   const openChat = () => {
     setTourStep(-1);
@@ -287,7 +299,7 @@ export function ArowndAssistant() {
                 <UiText weight="700" style={{ fontSize: 19 }}>{copy.title}</UiText>
                 <UiText style={styles.bodyCopy}>{copy.intro}</UiText>
                 {messages.map((message) => (
-                  <View key={message.id} style={[styles.messageBubble, { backgroundColor: theme.colors.surfaceSecondary, alignSelf: message.route ? "flex-start" : "flex-end" }]}>
+                  <View key={message.id} style={[styles.messageBubble, { backgroundColor: theme.colors.surfaceSecondary, alignSelf: message.role === "assistant" ? "flex-start" : "flex-end" }]}>
                     <UiText>{message.text}</UiText>
                     {message.route && message.routeLabel ? (
                       <Pressable onPress={() => { setChatOpen(false); router.push(message.route as never); }} style={[styles.routeButton, { backgroundColor: theme.colors.accent }]}>
@@ -297,6 +309,7 @@ export function ArowndAssistant() {
                     ) : null}
                   </View>
                 ))}
+                {isSending ? <UiText tone="muted" style={{ fontSize: 12 }}>{isArabic ? "Arownd Aide يكتب..." : "Arownd Aide is responding..."}</UiText> : null}
                 <View style={styles.suggestions}>
                   {copy.suggested.map((suggestion) => (
                     <Pressable key={suggestion} onPress={() => { setQuestion(suggestion); }} style={[styles.suggestionChip, { borderColor: theme.colors.border }]}>
@@ -306,6 +319,7 @@ export function ArowndAssistant() {
                 </View>
                 <View style={[styles.inputRow, { borderColor: theme.colors.border, backgroundColor: theme.colors.background }]}>
                   <TextInput
+                    editable={!isSending}
                     value={question}
                     onChangeText={setQuestion}
                     placeholder={copy.placeholder}
@@ -315,7 +329,7 @@ export function ArowndAssistant() {
                     style={[styles.input, { color: theme.colors.foreground }]}
                     textAlign={isArabic ? "right" : "left"}
                   />
-                  <Pressable accessibilityRole="button" accessibilityLabel={copy.send} onPress={submitQuestion} style={[styles.sendButton, { backgroundColor: theme.colors.accent }]}>
+                  <Pressable disabled={isSending} accessibilityRole="button" accessibilityLabel={copy.send} onPress={submitQuestion} style={[styles.sendButton, { backgroundColor: theme.colors.accent }]}>
                     <Icon name="send" size={18} color={theme.colors.accentForeground} />
                   </Pressable>
                 </View>
