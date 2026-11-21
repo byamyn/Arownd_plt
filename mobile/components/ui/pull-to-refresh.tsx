@@ -19,6 +19,8 @@ type PullToRefreshProps = {
 export function PullToRefresh({ onRefresh, refreshing = false, disabled = false, renderContent }: PullToRefreshProps) {
   const theme = useAppTheme();
   const pull = useRef(new Animated.Value(0)).current;
+  const pulse = useRef(new Animated.Value(0)).current;
+  const pulseAnimation = useRef<Animated.CompositeAnimation | null>(null);
   const pullValue = useRef(0);
   const scrollOffset = useRef(0);
   const refreshingRef = useRef(refreshing);
@@ -31,6 +33,9 @@ export function PullToRefresh({ onRefresh, refreshing = false, disabled = false,
   const settle = () => {
     activeRef.current = false;
     observedRefreshRef.current = false;
+    pulseAnimation.current?.stop();
+    pulseAnimation.current = null;
+    pulse.setValue(0);
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     timeoutRef.current = null;
     Animated.spring(pull, { toValue: 0, useNativeDriver: true, damping: 20, stiffness: 180, mass: 0.7 }).start();
@@ -77,6 +82,11 @@ export function PullToRefresh({ onRefresh, refreshing = false, disabled = false,
       if (pullValue.current >= REFRESH_THRESHOLD) {
         activeRef.current = true;
         Animated.spring(pull, { toValue: REFRESH_THRESHOLD, useNativeDriver: true, damping: 18, stiffness: 170 }).start();
+        pulseAnimation.current = Animated.loop(Animated.sequence([
+          Animated.timing(pulse, { toValue: 1, duration: 460, useNativeDriver: true }),
+          Animated.timing(pulse, { toValue: 0, duration: 540, useNativeDriver: true })
+        ]));
+        pulseAnimation.current.start();
         try {
           configRef.current.onRefresh?.();
         } catch {
@@ -99,14 +109,17 @@ export function PullToRefresh({ onRefresh, refreshing = false, disabled = false,
   const indicatorOpacity = pull.interpolate({ inputRange: [0, 18, REFRESH_THRESHOLD], outputRange: [0, 0.55, 1], extrapolate: "clamp" });
   const indicatorScale = pull.interpolate({ inputRange: [0, REFRESH_THRESHOLD], outputRange: [0.72, 1], extrapolate: "clamp" });
   const rotate = pull.interpolate({ inputRange: [0, REFRESH_THRESHOLD], outputRange: ["-18deg", "0deg"], extrapolate: "clamp" });
+  const pulseScale = pulse.interpolate({ inputRange: [0, 1], outputRange: [1, 1.1] });
+  const pulseLift = pulse.interpolate({ inputRange: [0, 1], outputRange: [0, -5] });
 
   return (
     <View style={[styles.root, { backgroundColor: theme.colors.background }]} {...panResponder.panHandlers}>
       {onRefresh ? (
-        <Animated.View pointerEvents="none" style={[styles.indicator, { opacity: indicatorOpacity, transform: [{ scale: indicatorScale }, { rotate }] }]}>
+        <Animated.View pointerEvents="none" style={[styles.indicator, { opacity: indicatorOpacity, transform: [{ scale: indicatorScale }, { scale: pulseScale }, { translateY: pulseLift }, { rotate }] }]}>
           <Svg width={48} height={48} viewBox="516.67 -12 414.88 414.88">
             <Path d={OUTLINE} fill={theme.colors.accent} fillRule="evenodd" />
             <Circle cx={CENTER.x} cy={CENTER.y} r={CENTER.r} fill={theme.colors.background} />
+            <Circle cx={CENTER.x} cy={CENTER.y} r={CENTER.r + 13} fill="none" stroke={theme.colors.accent} strokeWidth={5} opacity={0.45} />
           </Svg>
         </Animated.View>
       ) : null}
