@@ -200,6 +200,50 @@ const PROVIDERS: Array<{ name: Provider; call: (messages: ChatMessage[]) => Prom
   { name: "openrouter", call: callOpenRouter },
 ];
 
+
+async function getAuthenticatedUserId(authorization: string): Promise<string | null> {
+  const supabaseUrl = Deno.env.get("SUPABASE_URL")?.trim();
+  const publishableKey = Deno.env.get("SUPABASE_ANON_KEY")?.trim()
+    || Deno.env.get("SUPABASE_PUBLISHABLE_KEY")?.trim();
+  if (!supabaseUrl || !publishableKey) throw new Error("supabase_auth_not_configured");
+
+  const response = await fetch(supabaseUrl + "/auth/v1/user", {
+    method: "GET",
+    headers: {
+      apikey: publishableKey,
+      Authorization: authorization,
+    },
+  });
+  if (!response.ok) return null;
+  const user: unknown = await response.json().catch(() => null);
+  return isRecord(user) && typeof user.id === "string" ? user.id : null;
+}
+
+async function callQuotaRpc(
+  functionName: "reserve_arownd_aide_request" | "release_arownd_aide_request",
+  args: Record<string, unknown>,
+): Promise<unknown> {
+  const supabaseUrl = Deno.env.get("SUPABASE_URL")?.trim();
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")?.trim();
+  if (!supabaseUrl || !serviceRoleKey) throw new Error("supabase_quota_not_configured");
+
+  const response = await fetch(supabaseUrl + "/rest/v1/rpc/" + functionName, {
+    method: "POST",
+    headers: {
+      apikey: serviceRoleKey,
+      Authorization: "Bearer " + serviceRoleKey,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(args),
+  });
+  const result: unknown = await response.json().catch(() => null);
+  if (!response.ok) {
+    console.error("[arownd-aide] Quota RPC failed", functionName, response.status);
+    throw new Error("quota_service_unavailable");
+  }
+  return result;
+}
+
 function isProviderConfigured(provider: Provider): boolean {
   if (provider === "groq") return Boolean(Deno.env.get("GROQ_API_KEY")?.trim());
   if (provider === "gemini") return Boolean(Deno.env.get("GEMINI_API_KEY")?.trim());
@@ -212,7 +256,9 @@ function isProviderConfigured(provider: Provider): boolean {
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") return jsonResponse({ error: "METHOD_NOT_ALLOWED" }, 405);
-  if (!req.headers.get("Authorization")?.startsWith("Bearer ")) {
+
+  const authorization = req.headers.get("Authorization");
+  if (!authorization?.startsWith("Bearer ")) {
     return jsonResponse({ error: "UNAUTHORIZED" }, 401);
   }
 
@@ -221,6 +267,11 @@ Deno.serve(async (req: Request) => {
     if (!isRecord(payload) || (payload.language !== "ar" && payload.language !== "en") ||
         !Array.isArray(payload.messages) || payload.messages.length === 0 || payload.messages.length > 12) {
       return jsonResponse({ error: "INVALID_REQUEST" }, 400);
+    }
+
+    const timeZone = typeof payload.timeZone === "string" ? payload.timeZone.trim() : "";
+    if (!timeZone || timeZone.length > 64) {
+      return jsonResponse({ error: "INVALID_TIME_ZONE" }, 400);
     }
 
     const messages: ChatMessage[] = [];
@@ -235,39 +286,103 @@ Deno.serve(async (req: Request) => {
       messages.push({ role: item.role, content: item.content.trim() });
     }
 
-    const system = SYSTEM_PROMPT[payload.language];
-    const providerMessages: ChatMessage[] = [
-      { role: "system", content: system },
-      ...messages,
-    ];
-
     const configured = PROVIDERS.filter((provider) => isProviderConfigured(provider.name));
     if (configured.length === 0) return jsonResponse({ error: "AI_NOT_CONFIGURED" }, 503);
 
-    const failures: string[] = [];
-    for (const provider of configured) {
-      const cooldownUntil = providerCooldowns.get(provider.name) ?? 0;
-      if (cooldownUntil > Date.now()) {
-        failures.push(provider.name + ":cooldown");
-        continue;
+    const userId = await getAuthenticatedUserId(authorization);
+    if (!userId) return jsonResponse({ error: "UNAUTHORIZED" }, 401);
+
+    const reservationValue = await callQuotaRpc("reserve_arownd_aide_request", {
+      p_user_id: userId,
+      p_timezone: timeZone,
+    });
+    if (!isRecord(reservationValue)) throw new Error("quota_invalid_response");
+
+    if (reservationValue.allowed !== true) {
+      if (reservationValue.reason === "daily_limit") {
+        return jsonResponse({
+          error: "DAILY_LIMIT_REACHED",
+          quota: {
+            used: Number(reservationValue.used ?? 50),
+            remaining: 0,
+            resetAt: reservationValue.reset_at,
+          },
+        }, 429);
       }
-      try {
-        const answer = await provider.call(providerMessages);
-        providerCooldowns.delete(provider.name);
-        return jsonResponse({ answer });
-      } catch (error) {
-        const reason = error instanceof Error ? error.message : "unknown";
-        failures.push(provider.name + ":" + reason);
-        console.warn("[arownd-aide] Provider failed", provider.name, reason);
-        if (!providerCooldowns.has(provider.name)) {
-          providerCooldowns.set(provider.name, Date.now() + 15_000);
+      if (reservationValue.reason === "rate_limit") {
+        return jsonResponse({
+          error: "RATE_LIMITED",
+          retryAfterSeconds: Number(reservationValue.retry_after_seconds ?? 60),
+          quota: {
+            used: Number(reservationValue.used ?? 0),
+            remaining: Number(reservationValue.remaining ?? 50),
+          },
+        }, 429);
+      }
+      if (reservationValue.reason === "invalid_timezone") {
+        return jsonResponse({ error: "INVALID_TIME_ZONE" }, 400);
+      }
+      return jsonResponse({ error: "UNAUTHORIZED" }, 401);
+    }
+
+    const usageDate = typeof reservationValue.usage_date === "string"
+      ? reservationValue.usage_date
+      : null;
+    if (!usageDate) throw new Error("quota_missing_usage_date");
+
+    let quotaCommitted = false;
+    try {
+      const system = SYSTEM_PROMPT[payload.language];
+      const providerMessages: ChatMessage[] = [
+        { role: "system", content: system },
+        ...messages,
+      ];
+
+      const failures: string[] = [];
+      for (const provider of configured) {
+        const cooldownUntil = providerCooldowns.get(provider.name) ?? 0;
+        if (cooldownUntil > Date.now()) {
+          failures.push(provider.name + ":cooldown");
+          continue;
+        }
+        try {
+          const answer = await provider.call(providerMessages);
+          providerCooldowns.delete(provider.name);
+          quotaCommitted = true;
+          return jsonResponse({
+            answer,
+            quota: {
+              used: Number(reservationValue.used),
+              remaining: Number(reservationValue.remaining),
+              resetAt: reservationValue.reset_at,
+            },
+          });
+        } catch (error) {
+          const reason = error instanceof Error ? error.message : "unknown";
+          failures.push(provider.name + ":" + reason);
+          console.warn("[arownd-aide] Provider failed", provider.name, reason);
+          if (!providerCooldowns.has(provider.name)) {
+            providerCooldowns.set(provider.name, Date.now() + 15_000);
+          }
+        }
+      }
+
+      console.error("[arownd-aide] All configured providers failed", failures.join(","));
+      return jsonResponse({ error: "AI_TEMPORARILY_UNAVAILABLE" }, 503);
+    } finally {
+      if (!quotaCommitted) {
+        try {
+          await callQuotaRpc("release_arownd_aide_request", {
+            p_user_id: userId,
+            p_usage_date: usageDate,
+          });
+        } catch (error) {
+          console.error("[arownd-aide] Failed to release unsuccessful request quota", error);
         }
       }
     }
-
-    console.error("[arownd-aide] All configured providers failed", failures.join(","));
+  } catch (error) {
+    console.error("[arownd-aide] Request failed", error instanceof Error ? error.message : "unknown");
     return jsonResponse({ error: "AI_TEMPORARILY_UNAVAILABLE" }, 503);
-  } catch {
-    return jsonResponse({ error: "INVALID_REQUEST" }, 400);
   }
 });
