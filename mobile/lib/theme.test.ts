@@ -4,27 +4,27 @@ import { designTokens, getAppTheme } from "./theme";
 
 describe("design system theme tokens", () => {
   it("keeps brand and base colors consistent in both modes", () => {
-    expect(designTokens.brand.accent).toBe("#FFFF00");
-    expect(getAppTheme("light").colors.accent).toBe("#FFFF00");
-    expect(getAppTheme("dark").colors.accent).toBe("#FFFF00");
-    expect(getAppTheme("light").colors.background).toBe("#FFFFFF");
-    expect(getAppTheme("dark").colors.background).toBe("#000000");
+    expect(designTokens.brand.accent).toBe("#D97757");
+    expect(getAppTheme("light").colors.accent).toBe("#D97757");
+    expect(getAppTheme("dark").colors.accent).toBe("#D97757");
+    expect(getAppTheme("light").colors.background).toBe("#FAF9F5");
+    expect(getAppTheme("dark").colors.background).toBe("#141413");
   });
 
   it("provides the approved foreground and surface colors for both modes", () => {
     const light = getAppTheme("light");
     const dark = getAppTheme("dark");
 
-    expect(light.colors.foreground).toBe("#000000");
-    expect(light.colors.accentOnSurface).toBe("#000000");
-    expect(dark.colors.accentOnSurface).toBe("#FFFF00");
-    expect(light.colors.surface).toBe("#FFFFFF");
+    expect(light.colors.foreground).toBe("#141413");
+    expect(light.colors.accentOnSurface).toBe("#141413");
+    expect(dark.colors.accentOnSurface).toBe("#D97757");
+    expect(light.colors.surface).toBe("#FAF9F5");
     expect(dark.colors.foreground).toBe("#FFFFFF");
-    expect(dark.colors.surface).toBe("#141414");
-    expect(light.colors.foregroundSecondary).toBe("#5C5C5C");
-    expect(dark.colors.foregroundSecondary).toBe("#A3A3A3");
-    expect(light.colors.inputBorder).toBe("#8A8A8A");
-    expect(dark.colors.inputBorder).toBe("#707070");
+    expect(dark.colors.surface).toBe("#1C1C19");
+    expect(light.colors.foregroundSecondary).toBe("#5C5B55");
+    expect(dark.colors.foregroundSecondary).toBe("#B0AEA5");
+    expect(light.colors.inputBorder).toBe("#8A887F");
+    expect(dark.colors.inputBorder).toBe("#77756D");
   });
 
   it("exposes consistent spacing, radius, typography and dimensions", () => {
