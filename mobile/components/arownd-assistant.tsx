@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, usePathname } from "expo-router";
 import { type ComponentRef, useEffect, useMemo, useRef, useState } from "react";
 import {
+  DeviceEventEmitter,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -377,20 +378,15 @@ export function ArowndAssistant() {
     setChatOpen(false);
   };
 
+  useEffect(() => {
+    const subscription = DeviceEventEmitter.addListener("arownd-aide:open", openChat);
+    return () => subscription.remove();
+  }, []);
+
   if (!userId) return null;
 
   return (
     <>
-      {tourStep < 0 ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={copy.title}
-          onPress={openChat}
-          style={[styles.floatingButton, { bottom: Math.max(insets.bottom, 12) + 72, backgroundColor: theme.colors.accent, end: 18 }]}
-        >
-          <ArowndMark size={25} color={theme.colors.accentForeground} />
-        </Pressable>
-      ) : null}
       <Modal
         visible={tourStep >= 0 || chatOpen}
         transparent
@@ -545,7 +541,6 @@ export function ArowndAssistant() {
 }
 
 const styles = StyleSheet.create({
-  floatingButton: { position: "absolute", width: 54, height: 54, borderRadius: 27, alignItems: "center", justifyContent: "center", zIndex: 30, elevation: 8 },
   modalRoot: { flex: 1 },
   keyboardContainer: { flex: 1, justifyContent: "flex-end" },
   scrim: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(0,0,0,0.42)" },
