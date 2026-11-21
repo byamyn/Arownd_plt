@@ -369,17 +369,16 @@ export function ArowndAssistant() {
       setIsSending(false);
     }
   };
-  const openChat = () => {
-    setTourStep(-1);
-    setChatOpen(true);
-  };
   const closeModal = () => {
     if (tourStep >= 0) completeTour();
     setChatOpen(false);
   };
 
   useEffect(() => {
-    const subscription = DeviceEventEmitter.addListener("arownd-aide:open", openChat);
+    const subscription = DeviceEventEmitter.addListener("arownd-aide:open", () => {
+      setTourStep(-1);
+      setChatOpen(true);
+    });
     return () => subscription.remove();
   }, []);
 
