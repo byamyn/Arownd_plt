@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import {
@@ -8,6 +8,7 @@ import {
   AppHeader,
   Button,
   Card,
+  RefreshableScrollView,
   Spinner,
   StatusBadge,
   Text as UiText
@@ -52,7 +53,7 @@ export default function TeamInvitationsScreen() {
 
   return (
     <SafeAreaView edges={["top", "left", "right"]} style={[styles.safe, { backgroundColor: theme.colors.background }]}>
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <RefreshableScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} refreshing={invitations.isFetching} onRefresh={() => { void invitations.refetch(); }}>
         <AppHeader title={translate("merchantTeamInvitationsTitle")} />
         {invitations.isPending ? (
           <View style={styles.center}><Spinner size="large" /></View>
@@ -89,7 +90,7 @@ export default function TeamInvitationsScreen() {
         )}
         {accept.isError ? <Alert description={translate("merchantTeamAcceptError")} tone="danger" /> : null}
         {accept.isSuccess && accept.data === null ? <Alert description={translate("merchantTeamInvitationExpired")} tone="warning" /> : null}
-      </ScrollView>
+      </RefreshableScrollView>
     </SafeAreaView>
   );
 }
