@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, type ReactNode } from "react";
 import { Animated, PanResponder, StyleSheet, View, type ScrollViewProps } from "react-native";
 import Svg, { Circle, Path } from "react-native-svg";
 
@@ -63,7 +63,7 @@ export function PullToRefresh({ onRefresh, refreshing = false, disabled = false,
     scrollOffset.current = event.nativeEvent.contentOffset.y;
   };
 
-  const panResponder = useRef(PanResponder.create({
+  const panResponder = useMemo(() => PanResponder.create({
     onStartShouldSetPanResponder: () => false,
     onMoveShouldSetPanResponderCapture: (_event, gesture) => {
       const config = configRef.current;
@@ -104,7 +104,7 @@ export function PullToRefresh({ onRefresh, refreshing = false, disabled = false,
     },
     onPanResponderTerminate: settle,
     onPanResponderTerminationRequest: () => false
-  })).current;
+  }), [pull, pulse, settle]);
 
   const indicatorOpacity = pull.interpolate({ inputRange: [0, 18, REFRESH_THRESHOLD], outputRange: [0, 0.55, 1], extrapolate: "clamp" });
   const indicatorScale = pull.interpolate({ inputRange: [0, REFRESH_THRESHOLD], outputRange: [0.72, 1], extrapolate: "clamp" });
@@ -118,7 +118,7 @@ export function PullToRefresh({ onRefresh, refreshing = false, disabled = false,
         <Animated.View pointerEvents="none" style={[styles.indicator, { opacity: indicatorOpacity, transform: [{ scale: indicatorScale }, { scale: pulseScale }, { translateY: pulseLift }, { rotate }] }]}>
           <Svg width={48} height={48} viewBox="516.67 -12 414.88 414.88">
             <Path d={OUTLINE} fill={theme.colors.accent} fillRule="evenodd" />
-            <Circle cx={CENTER.x} cy={CENTER.y} r={CENTER.r} fill={theme.colors.background} />
+            <Circle cx={CENTER.x} cy={CENTER.y} r={CENTER.r} fill={theme.colors.accent} />
             <Circle cx={CENTER.x} cy={CENTER.y} r={CENTER.r + 13} fill="none" stroke={theme.colors.accent} strokeWidth={5} opacity={0.45} />
           </Svg>
         </Animated.View>
