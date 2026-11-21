@@ -33,6 +33,13 @@ type AssistantMessage = {
   routeLabel?: string;
 };
 
+type ArowndAideResponse = {
+  error?: string;
+  answer?: string;
+  retryAfterSeconds?: number;
+  quota?: { remaining?: number; resetAt?: string };
+};
+
 const TOUR_STORAGE_PREFIX = "arownd:ai-tour:v1:";
 const TOUR_PENDING_PREFIX = "arownd:ai-tour:pending:";
 const TOUR_STEPS: Record<"ar" | "en", { customer: TourStep[]; merchant: TourStep }> = {
@@ -213,11 +220,11 @@ export function ArowndAssistant() {
         body: { language, messages: history, timeZone }
       });
 
-      let responseData: any = data;
+      let responseData: ArowndAideResponse | null = data as ArowndAideResponse | null;
       if (error) {
         const context = (error as { context?: Response }).context;
         if (context && typeof context.json === "function") {
-          responseData = await context.clone().json().catch(() => null);
+          responseData = await context.clone().json().catch(() => null) as ArowndAideResponse | null;
         }
       }
 
