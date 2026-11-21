@@ -156,11 +156,13 @@ export default function MerchantOnboardingScreen() {
         style={styles.flex}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <ScrollView
+        <RefreshableScrollView
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}
           showsVerticalScrollIndicator={false}
+          refreshing={access.isFetching || suggestedStoreName.isFetching || regionOptions.isFetching || secondaryOptions.isFetching}
+          onRefresh={() => { void Promise.all([access.refetch(), suggestedStoreName.refetch(), regionOptions.refetch(), ...(regionId !== null ? [secondaryOptions.refetch()] : [])]); }}
         >
           <AppHeader title={translate("merchantOnboardingTitle")}/>
 
@@ -386,7 +388,7 @@ export default function MerchantOnboardingScreen() {
           ) : null}
 
           <Button label={translate("merchantStoreSubmit")} onPress={() => void submit()} loading={isSubmitting} fullWidth />
-        </ScrollView>
+        </RefreshableScrollView>
       </KeyboardAvoidingView>
 
       <BottomSheet visible={regionPickerOpen} onRequestClose={() => setRegionPickerOpen(false)} title={regionPickerLevel === "primary" ? (regionOptions.data ? getRegionLevelDisplayName(regionOptions.data.selectedLevel, language) : "") : (secondaryOptions.data ? getRegionLevelDisplayName(secondaryOptions.data.selectedLevel, language) : "")} maxHeight="85%">
