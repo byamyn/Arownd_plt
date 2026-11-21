@@ -1,6 +1,5 @@
 import type { ComponentRef, PropsWithChildren, Ref } from "react";
 import {
-  RefreshControl,
   ScrollView,
   View,
   type ScrollViewProps,
@@ -8,7 +7,8 @@ import {
   type ViewStyle
 } from "react-native";
 
-import { designTokens, useAppTheme } from "@/lib/theme";
+import { designTokens } from "@/lib/theme";
+import { PullToRefresh } from "./pull-to-refresh";
 
 export type ContainerProps = PropsWithChildren<{
   style?: StyleProp<ViewStyle>;
@@ -114,7 +114,7 @@ export function AspectRatio({
 }
 
 export type ScrollAreaProps = PropsWithChildren<
-  Pick<ScrollViewProps, "horizontal" | "showsHorizontalScrollIndicator" | "showsVerticalScrollIndicator" | "onScroll" | "refreshControl" | "keyboardShouldPersistTaps" | "automaticallyAdjustKeyboardInsets"> & {
+  Pick<ScrollViewProps, "horizontal" | "showsHorizontalScrollIndicator" | "showsVerticalScrollIndicator" | "onScroll" | "keyboardShouldPersistTaps" | "automaticallyAdjustKeyboardInsets"> & {
     contentContainerStyle?: ScrollViewProps["contentContainerStyle"];
     style?: ScrollViewProps["style"];
   }
@@ -150,33 +150,29 @@ export function RefreshableScrollView({
   decelerationRate,
   onLayout
 }: RefreshableScrollViewProps) {
-  const theme = useAppTheme();
-  const indicatorColor = theme.mode === "light" ? theme.colors.foreground : theme.colors.accent;
-
   return (
-    <ScrollView
-      ref={scrollRef}
-      stickyHeaderIndices={stickyHeaderIndices}
-      pagingEnabled={pagingEnabled}
-      decelerationRate={decelerationRate}
-      onLayout={onLayout}
-      style={style}
-      contentContainerStyle={contentContainerStyle}
-      keyboardShouldPersistTaps={keyboardShouldPersistTaps}
-      automaticallyAdjustKeyboardInsets={automaticallyAdjustKeyboardInsets}
-      showsVerticalScrollIndicator={showsVerticalScrollIndicator}
-      refreshControl={onRefresh ? (
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          colors={[indicatorColor]}
-          progressBackgroundColor={theme.colors.background}
-          tintColor={indicatorColor}
-        />
-      ) : undefined}
-    >
-      {children}
-    </ScrollView>
+    <PullToRefresh
+      onRefresh={onRefresh}
+      refreshing={refreshing}
+      renderContent={(onScroll) => (
+        <ScrollView
+          ref={scrollRef}
+          stickyHeaderIndices={stickyHeaderIndices}
+          pagingEnabled={pagingEnabled}
+          decelerationRate={decelerationRate}
+          onLayout={onLayout}
+          onScroll={onScroll}
+          scrollEventThrottle={16}
+          style={[{ flex: 1 }, style]}
+          contentContainerStyle={contentContainerStyle}
+          keyboardShouldPersistTaps={keyboardShouldPersistTaps}
+          automaticallyAdjustKeyboardInsets={automaticallyAdjustKeyboardInsets}
+          showsVerticalScrollIndicator={showsVerticalScrollIndicator}
+        >
+          {children}
+        </ScrollView>
+      )}
+    />
   );
 }
 
@@ -188,7 +184,6 @@ export function ScrollArea({
   contentContainerStyle,
   style,
   onScroll,
-  refreshControl,
   keyboardShouldPersistTaps = "handled"
 }: ScrollAreaProps) {
   return (
@@ -199,7 +194,6 @@ export function ScrollArea({
       contentContainerStyle={contentContainerStyle}
       style={style}
       onScroll={onScroll}
-      refreshControl={refreshControl}
       keyboardShouldPersistTaps={keyboardShouldPersistTaps}
       automaticallyAdjustKeyboardInsets
     >
