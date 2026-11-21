@@ -243,6 +243,8 @@ export default function CheckoutScreen() {
     : (secondaryOptions.data?.regions ?? []).map((item) => ({ id: String(item.id), label: getRegionDisplayName(item, language) }));
 
   return <CustomerScreen
+    refreshing={cart.isFetching || auth.isFetching || offers.isFetching || accountCurrency.isFetching || profile.isFetching || savedAddresses.isFetching}
+    onRefresh={() => { void Promise.all([cart.refetch(), auth.refetch(), offers.refetch(), accountCurrency.refetch(), profile.refetch(), savedAddresses.refetch()]); }}
     footer={
       <Button
         label={translate("checkoutConfirm")}
