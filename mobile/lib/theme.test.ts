@@ -19,7 +19,7 @@ describe("design system theme tokens", () => {
     expect(light.colors.accentOnSurface).toBe("#141413");
     expect(dark.colors.accentOnSurface).toBe("#D97757");
     expect(light.colors.surface).toBe("#FAF9F5");
-    expect(dark.colors.foreground).toBe("#FFFFFF");
+    expect(dark.colors.foreground).toBe("#FAF9F5");
     expect(dark.colors.surface).toBe("#1C1C19");
     expect(light.colors.foregroundSecondary).toBe("#5C5B55");
     expect(dark.colors.foregroundSecondary).toBe("#B0AEA5");
