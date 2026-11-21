@@ -26,13 +26,34 @@ type TourStep = {
   route: string;
 };
 
+type AssistantLink = { label: string; route: string };
 type AssistantMessage = {
   id: number;
   role: "user" | "assistant";
   text: string;
-  route?: string;
-  routeLabel?: string;
+  links?: AssistantLink[];
 };
+
+const STATIC_ASSISTANT_ROUTES = new Set([
+  "/home", "/explore", "/map", "/profile", "/settings", "/orders",
+  "/merchant", "/merchant/orders", "/merchant/products", "/merchant/settings",
+  "/merchant/account-settings"
+]);
+
+function parseAssistantLinks(value: string): { text: string; links: AssistantLink[] } {
+  const links: AssistantLink[] = [];
+  const text = value.replace(/\[([^\]]+)\]\(arownd:([^\s)]+)\)/g, (match, rawLabel: string, rawRoute: string) => {
+    const label = rawLabel.trim();
+    const route = rawRoute.trim();
+    const validStatic = STATIC_ASSISTANT_ROUTES.has(route);
+    const validOrder = /^\/orders\/[0-9a-f-]{36}$/i.test(route);
+    const validMerchantProduct = /^\/merchant\/products\/[0-9a-f-]{36}$/i.test(route);
+    if (!label || (!validStatic && !validOrder && !validMerchantProduct)) return label || match;
+    links.push({ label, route });
+    return label;
+  });
+  return { text, links };
+}
 
 type ArowndAideResponse = {
   error?: string;
@@ -264,7 +285,13 @@ export function ArowndAssistant() {
       const answer = typeof responseData?.answer === "string" && responseData.answer.trim()
         ? responseData.answer.trim()
         : (isArabic ? "لم أتمكن من إعداد إجابة الآن. حاول مرة أخرى." : "I couldn't prepare an answer right now. Please try again.");
-      setMessages((current) => [...current, { id: Date.now() + 1, role: "assistant", text: answer }]);
+      const parsedAnswer = parseAssistantLinks(answer);
+      setMessages((current) => [...current, {
+        id: Date.now() + 1,
+        role: "assistant",
+        text: parsedAnswer.text,
+        links: parsedAnswer.links
+      }]);
     } catch {
       setMessages((current) => [...current, {
         id: Date.now() + 1,
@@ -368,13 +395,23 @@ export function ArowndAssistant() {
                   <UiText style={styles.bodyCopy}>{copy.intro}</UiText>
                   {messages.map((message) => (
                     <View key={message.id} style={[styles.messageBubble, { backgroundColor: theme.colors.surfaceSecondary, alignSelf: message.role === "assistant" ? "flex-start" : "flex-end" }]}>
-                      <UiText>{message.text}</UiText>
-                      {message.route && message.routeLabel ? (
-                        <Pressable onPress={() => { setChatOpen(false); router.push(message.route as never); }} style={[styles.routeButton, { backgroundColor: theme.colors.accent }]}>
-                          <UiText weight="700" style={{ color: theme.colors.accentForeground }}>{message.routeLabel}</UiText>
-                          <Icon name="arrow-right" size={15} color={theme.colors.accentForeground} />
-                        </Pressable>
-                      ) : null}
+                      <UiText>
+                        {message.text}
+                        {message.links?.map((link, index) => (
+                          <UiText
+                            key={message.id + "-link-" + index}
+                            accessibilityRole="link"
+                            accessibilityLabel={link.label}
+                            onPress={() => {
+                              setChatOpen(false);
+                              router.push(link.route as never);
+                            }}
+                            style={{ color: theme.colors.accent, textDecorationLine: "underline", fontWeight: "700" }}
+                          >
+                            {link.label}
+                          </UiText>
+                        ))}
+                      </UiText>
                     </View>
                   ))}
                   {isSending ? <UiText tone="muted" style={{ fontSize: 12 }}>{isArabic ? "Arownd Aide يكتب..." : "Arownd Aide is responding..."}</UiText> : null}
