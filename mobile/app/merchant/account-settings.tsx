@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { Redirect, router } from "expo-router";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { AppHeader, Card, Icon, IconButton, PressableSurface, Text as UiText } from "@/components/ui";
+import { AppHeader, Card, Icon, IconButton, PressableSurface, RefreshableScrollView, Text as UiText } from "@/components/ui";
 import { fetchMerchantAccess } from "@/lib/merchant";
 import { translate, useLanguage } from "@/lib/i18n";
 import { designTokens, useAppTheme } from "@/lib/theme";
@@ -84,7 +84,7 @@ export default function MerchantAccountSettingsScreen() {
 
   return (
     <SafeAreaView edges={["top", "left", "right"]} style={[styles.safe, { backgroundColor: theme.colors.background }]}>
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <RefreshableScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} refreshing={access.isFetching} onRefresh={() => { void access.refetch(); }}>
         <AppHeader
           title={translate("merchantAccountSettingsTitle")}        />
         <Card contentStyle={styles.linksCard}>
@@ -112,7 +112,7 @@ export default function MerchantAccountSettingsScreen() {
             </PressableSurface>
           ))}
         </Card>
-      </ScrollView>
+      </RefreshableScrollView>
     </SafeAreaView>
   );
 }
