@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, type ReactNode } from "react";
 import { Animated, PanResponder, StyleSheet, View, type ScrollViewProps } from "react-native";
 import Svg, { Circle, Path } from "react-native-svg";
 
@@ -30,7 +30,7 @@ export function PullToRefresh({ onRefresh, refreshing = false, disabled = false,
   const configRef = useRef({ onRefresh, disabled });
   configRef.current = { onRefresh, disabled };
 
-  const settle = () => {
+  const settle = useCallback(() => {
     activeRef.current = false;
     observedRefreshRef.current = false;
     pulseAnimation.current?.stop();
@@ -39,7 +39,7 @@ export function PullToRefresh({ onRefresh, refreshing = false, disabled = false,
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     timeoutRef.current = null;
     Animated.spring(pull, { toValue: 0, useNativeDriver: true, damping: 20, stiffness: 180, mass: 0.7 }).start();
-  };
+  }, [pull, pulse]);
 
   useEffect(() => {
     refreshingRef.current = refreshing;
@@ -53,7 +53,7 @@ export function PullToRefresh({ onRefresh, refreshing = false, disabled = false,
     if (observedRefreshRef.current) {
       timeoutRef.current = setTimeout(settle, 260);
     }
-  }, [refreshing]);
+  }, [refreshing, settle]);
 
   useEffect(() => () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
