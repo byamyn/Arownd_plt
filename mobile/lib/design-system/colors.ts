@@ -63,7 +63,7 @@ export const extendedThemeColors = {
   light: {
     surfaceMuted: "#E8E6DC",
     subtle: "#5C5B55",
-    accentMuted: "#B65F43",
+    accentMuted: "#A34E35",
     danger: "#DC2626",
     dangerText: "#B91C1C",
     dangerSurface: "#FEE2E2",
