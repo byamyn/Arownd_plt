@@ -79,7 +79,7 @@ export default function SupportScreen() {
   }
 
   return (
-    <CustomerScreen showNavigation={false} onRefresh={() => { void conversations.refetch(); }} refreshing={conversations.isFetching}>
+    <CustomerScreen showNavigation={false} onRefresh={() => { void Promise.all([auth.refetch(), conversations.refetch()]); }} refreshing={auth.isFetching || conversations.isFetching}>
       <SupportHeader title={translate("supportTitle")} />
       <View style={styles.hero}>
         <View style={styles.heroMark}><Icon name="message-circle" size={28} color={theme.colors.foreground} /></View>
