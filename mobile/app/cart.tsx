@@ -83,8 +83,8 @@ export default function CartScreen() {
   };
 
   return <CustomerScreen
-    refreshing={cart.isFetching || offers.isFetching}
-    onRefresh={() => { void Promise.all([cart.refetch(), offers.refetch()]); }}
+    refreshing={cart.isFetching || marketCurrency.isFetching || offers.isFetching}
+    onRefresh={() => { void Promise.all([cart.refetch(), marketCurrency.refetch(), offers.refetch()]); }}
     footer={
       <CartSummary style={style.summaryContent}>
         <View style={style.summaryRow}>
