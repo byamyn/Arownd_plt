@@ -513,7 +513,7 @@ export default function MapScreen() {
                 type="line"
                 layout={{ "line-cap": "round", "line-join": "round" }}
                 paint={{
-                  "line-color": "#246BFD",
+                  "line-color": designTokens.brand.blue,
                   "line-width": 7,
                   "line-opacity": 0.95,
                   "line-blur": 0.2
@@ -568,7 +568,7 @@ export default function MapScreen() {
               type="circle"
               filter={["has", "point_count"]}
               paint={{
-                "circle-color": "#FFFF00",
+                "circle-color": designTokens.brand.primary,
                 "circle-radius": [
                   "step", ["get", "point_count"],
                   18, 20, 21, 50, 25, 100, 29
@@ -596,7 +596,7 @@ export default function MapScreen() {
               filter={["!", ["has", "point_count"]]}
               paint={{
                 "circle-color": [
-                  "case", ["==", ["get", "selected"], true], "#FFFFFF", "#FFFF00"
+                  "case", ["==", ["get", "selected"], true], theme.colors.surface, designTokens.brand.primary
                 ],
                 "circle-radius": 18,
                 "circle-stroke-color": isDark ? "#FFFFFF" : "#171717",
@@ -624,7 +624,7 @@ export default function MapScreen() {
                 "circle-color": "#111111",
                 "circle-radius": 4,
                 "circle-translate": [12, -12],
-                "circle-stroke-color": "#FFFF00",
+                "circle-stroke-color": designTokens.brand.primary,
                 "circle-stroke-width": 1.5
               }}
             />
