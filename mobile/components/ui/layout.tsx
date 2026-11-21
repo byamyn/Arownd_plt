@@ -127,6 +127,7 @@ export type RefreshableScrollViewProps = PropsWithChildren<{
   contentContainerStyle?: ScrollViewProps["contentContainerStyle"];
   style?: ScrollViewProps["style"];
   keyboardShouldPersistTaps?: ScrollViewProps["keyboardShouldPersistTaps"];
+  keyboardDismissMode?: ScrollViewProps["keyboardDismissMode"];
   automaticallyAdjustKeyboardInsets?: ScrollViewProps["automaticallyAdjustKeyboardInsets"];
   showsVerticalScrollIndicator?: boolean;
   stickyHeaderIndices?: number[];
@@ -142,6 +143,7 @@ export function RefreshableScrollView({
   contentContainerStyle,
   style,
   keyboardShouldPersistTaps = "handled",
+  keyboardDismissMode,
   automaticallyAdjustKeyboardInsets = true,
   showsVerticalScrollIndicator = false,
   scrollRef,
@@ -166,6 +168,7 @@ export function RefreshableScrollView({
           style={[{ flex: 1 }, style]}
           contentContainerStyle={contentContainerStyle}
           keyboardShouldPersistTaps={keyboardShouldPersistTaps}
+          keyboardDismissMode={keyboardDismissMode}
           automaticallyAdjustKeyboardInsets={automaticallyAdjustKeyboardInsets}
           showsVerticalScrollIndicator={showsVerticalScrollIndicator}
         >
