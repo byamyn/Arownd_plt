@@ -486,8 +486,10 @@ export function ArowndAssistant() {
                             accessibilityRole="link"
                             accessibilityLabel={part.link.label}
                             onPress={() => {
+                              const route = part.link?.route;
+                              if (!route) return;
                               setChatOpen(false);
-                              router.push(part.link.route as never);
+                              router.push(route as never);
                             }}
                             style={{ color: theme.colors.accent, textDecorationLine: "underline", fontWeight: "700" }}
                           >
@@ -514,7 +516,7 @@ export function ArowndAssistant() {
                     style={[styles.input, { color: theme.colors.foreground }]}
                     textAlign={isArabic ? "right" : "left"}
                   />
-                  <Pressable disabled={isSending} accessibilityRole="button" accessibilityLabel={copy.send} onPress={submitQuestion} style={[styles.sendButton, { backgroundColor: theme.colors.accent }]}>
+                  <Pressable disabled={isSending} accessibilityRole="button" accessibilityLabel={copy.send} onPress={() => { void submitQuestion(); }} style={[styles.sendButton, { backgroundColor: theme.colors.accent }]}>
                     <Icon name="send" size={18} color={theme.colors.accentForeground} />
                   </Pressable>
                 </View>
