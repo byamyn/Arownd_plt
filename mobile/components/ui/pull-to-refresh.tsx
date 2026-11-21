@@ -21,6 +21,7 @@ export function PullToRefresh({ children, onRefresh, refreshing = false, getScro
   const theme = useAppTheme();
   const pull = useRef(new Animated.Value(0)).current;
   const pullValue = useRef(0);
+  const scrollOffset = useRef(0);
   const refreshingRef = useRef(refreshing);
   const activeRef = useRef(false);
   const observedRefreshRef = useRef(false);
@@ -51,7 +52,7 @@ export function PullToRefresh({ children, onRefresh, refreshing = false, getScro
     onMoveShouldSetPanResponderCapture: (_event, gesture) => {
       const config = callbackRef.current;
       return !config.disabled && Boolean(config.onRefresh) && !activeRef.current &&
-        config.getScrollOffset() <= 0 && gesture.dy > 7 && gesture.dy > Math.abs(gesture.dx) * 1.15;
+        scrollOffset.current <= 0 && gesture.dy > 7 && gesture.dy > Math.abs(gesture.dx) * 1.15;
     },
     onPanResponderGrant: () => {
       pullValue.current = 0;
@@ -68,10 +69,9 @@ export function PullToRefresh({ children, onRefresh, refreshing = false, getScro
         const run = callbackRef.current.onRefresh;
         if (run) run();
         if (!refreshingRef.current) {
-          const timer = setTimeout(() => {
+          setTimeout(() => {
             if (activeRef.current && !observedRefreshRef.current) settle();
           }, 1400);
-          setTimeout(() => clearTimeout(timer), 12_000);
         }
       } else {
         settle();
