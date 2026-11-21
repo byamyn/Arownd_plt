@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, usePathname } from "expo-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { type ComponentRef, useEffect, useMemo, useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
   Modal,
@@ -79,7 +79,7 @@ export function ArowndAssistant() {
   const [messages, setMessages] = useState<AssistantMessage[]>([]);
   const [isSending, setIsSending] = useState(false);
   const [quotaRemaining, setQuotaRemaining] = useState<number | null>(null);
-  const chatScrollRef = useRef<ScrollView | null>(null);
+  const chatScrollRef = useRef<ComponentRef<typeof ScrollView> | null>(null);
   const checkingRef = useRef(false);
   const tourStartedRef = useRef(false);
   const isArabic = language === "ar";
