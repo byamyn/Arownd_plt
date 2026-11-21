@@ -27,6 +27,7 @@ export function PullToRefresh({ onRefresh, refreshing = false, disabled = false,
   const activeRef = useRef(false);
   const observedRefreshRef = useRef(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const refreshStartedAt = useRef(0);
   const configRef = useRef({ onRefresh, disabled });
   configRef.current = { onRefresh, disabled };
 
@@ -51,7 +52,8 @@ export function PullToRefresh({ onRefresh, refreshing = false, disabled = false,
       return;
     }
     if (observedRefreshRef.current) {
-      timeoutRef.current = setTimeout(settle, 260);
+      const remaining = Math.max(0, 700 - (Date.now() - refreshStartedAt.current));
+      timeoutRef.current = setTimeout(settle, remaining + 180);
     }
   }, [refreshing, settle]);
 
@@ -81,6 +83,7 @@ export function PullToRefresh({ onRefresh, refreshing = false, disabled = false,
     onPanResponderRelease: () => {
       if (pullValue.current >= REFRESH_THRESHOLD) {
         activeRef.current = true;
+        refreshStartedAt.current = Date.now();
         Animated.spring(pull, { toValue: REFRESH_THRESHOLD, useNativeDriver: true, damping: 18, stiffness: 170 }).start();
         pulseAnimation.current = Animated.loop(Animated.sequence([
           Animated.timing(pulse, { toValue: 1, duration: 460, useNativeDriver: true }),
