@@ -39,7 +39,7 @@ import {
 import { translate, useLanguage } from "@/lib/i18n";
 import { getLocalizedMerchantCategoryLabel } from "@/lib/locale-data";
 import { designTokens, useAppTheme, type AppTheme } from "@/lib/theme";
-import { BottomSheet, AppHeader, Button, Card, ErrorState, Icon, Image as UiImage, PageSkeleton, MediaViewer, Spinner, PressableSurface, Text as UiText, TextField } from "@/components/ui";
+import { BottomSheet, AppHeader, Button, Card, ErrorState, Icon, Image as UiImage, PageSkeleton, MediaViewer, Spinner, PressableSurface, Text as UiText, TextField, RefreshableScrollView } from "@/components/ui";
 
 type ProductForm = {
   name: string;
@@ -256,11 +256,13 @@ export default function MerchantNewProductScreen() {
         style={styles.flex}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <ScrollView
+        <RefreshableScrollView
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}
           showsVerticalScrollIndicator={false}
+          refreshing={access.isFetching || categories.isFetching}
+          onRefresh={() => { void Promise.all([access.refetch(), categories.refetch()]); }}
         >
           <AppHeader title={translate("merchantProductCreateTitle")}/>
 
@@ -511,7 +513,7 @@ export default function MerchantNewProductScreen() {
 
             <Button label={translate("merchantProductCreateSubmit")} onPress={() => void submit()} loading={submitting} disabled={imagePickerBusy} fullWidth />
           </Card>
-        </ScrollView>
+        </RefreshableScrollView>
       </KeyboardAvoidingView>
 
       <MediaViewer
