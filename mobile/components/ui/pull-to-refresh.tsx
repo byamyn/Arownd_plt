@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { Animated, PanResponder, StyleSheet, View, type ScrollViewProps } from "react-native";
 import Svg, { Circle, Path } from "react-native-svg";
 
@@ -13,7 +13,7 @@ type PullToRefreshProps = {
   onRefresh?: (() => void) | undefined;
   refreshing?: boolean;
   disabled?: boolean;
-  renderContent: (onScroll: NonNullable<ScrollViewProps["onScroll"]>) => React.ReactNode;
+  renderContent: (onScroll: NonNullable<ScrollViewProps["onScroll"]>) => ReactNode;
 };
 
 export function PullToRefresh({ onRefresh, refreshing = false, disabled = false, renderContent }: PullToRefreshProps) {
@@ -62,7 +62,7 @@ export function PullToRefresh({ onRefresh, refreshing = false, disabled = false,
     onStartShouldSetPanResponder: () => false,
     onMoveShouldSetPanResponderCapture: (_event, gesture) => {
       const config = configRef.current;
-      return !config.disabled && Boolean(config.onRefresh) && !activeRef.current &&
+      return !config.disabled && Boolean(config.onRefresh) && !refreshingRef.current && !activeRef.current &&
         scrollOffset.current <= 0 && gesture.dy > 7 && gesture.dy > Math.abs(gesture.dx) * 1.15;
     },
     onPanResponderGrant: () => {
