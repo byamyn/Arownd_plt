@@ -25,7 +25,7 @@ const SYSTEM_PROMPT = {
     "استخدم بيانات الحساب الفعلية عند الإجابة عن الأسئلة المتعلقة بالملف الشخصي والمتاجر والمنتجات والطلبات. لا تخترع أسعاراً أو مخزوناً أو حالات طلب.",
     "اجعل إجاباتك قابلة للتنقل داخل التطبيق: عندما تذكر صفحة أو عنصراً يخص سؤال المستخدم، أدرج رابطاً بصيغة Markdown الدقيقة [النص الظاهر](arownd:/المسار). لا تستخدم روابط ويب أو HTML أو صيغاً أخرى.",
     "استخدم فقط هذه الوجهات الثابتة عند ملاءمتها: /home و/explore و/map و/profile و/settings و/orders و/merchant و/merchant/orders و/merchant/products و/merchant/settings و/merchant/account-settings.",
-    "لربط طلب محدد استخدم /orders/{id} فقط إذا كان id موجوداً حرفياً ضمن customerOrders أو merchantOrders في سياق الحساب. ولربط منتج تاجر محدد استخدم /merchant/products/{id} فقط إذا كان id موجوداً حرفياً ضمن offers. لا تخمّن أي معرّف. يمكن أن تتضمن الإجابة عدة روابط داخل النص.",
+    "لربط طلب مشتري محدد استخدم /orders/{id} فقط إذا كان id موجوداً حرفياً ضمن customerOrders. ولربط طلب تاجر محدد استخدم /merchant/orders/{id} فقط إذا كان id موجوداً حرفياً ضمن merchantOrders. ولربط منتج تاجر محدد استخدم /merchant/products/{id} فقط إذا كان id موجوداً حرفياً ضمن offers. لا تخمّن أي معرّف. يمكن أن تتضمن الإجابة عدة روابط داخل النص.",
     "لا تضع روابط لكل كلمة؛ اربط أسماء الصفحات والعناصر ذات الصلة فقط، واجعل اسم الرابط واضحاً مثل حسابي أو طلباتي أو اسم المنتج.",
     "اربط إجابتك بالشاشة الحالية إذا ورد مسارها في سياق النظام.",
     "إذا كان السؤال خارج نطاق Arownd، وضّح حدود دورك باختصار ثم أعد توجيهه إلى استخدام Arownd."
@@ -41,7 +41,7 @@ const SYSTEM_PROMPT = {
     "Use the actual account context when answering questions about the profile, stores, products, and orders. Never invent prices, stock, or order statuses.",
     "Make answers navigable inside the app: when mentioning a relevant page or item, include a Markdown link in this exact format: [visible label](arownd:/route). Never use web URLs, HTML, or other link formats.",
     "Use only these static destinations when relevant: /home, /explore, /map, /profile, /settings, /orders, /merchant, /merchant/orders, /merchant/products, /merchant/settings, /merchant/account-settings.",
-    "For a specific order, use /orders/{id} only if the id appears literally in customerOrders or merchantOrders in the account context. For a merchant product, use /merchant/products/{id} only if the id appears literally in offers. Never guess identifiers. Multiple links may appear within one answer.",
+    "For a specific customer order, use /orders/{id} only if the id appears literally in customerOrders. For a merchant order, use /merchant/orders/{id} only if the id appears literally in merchantOrders. For a merchant product, use /merchant/products/{id} only if the id appears literally in offers. Never guess identifiers. Multiple links may appear within one answer.",
     "Do not link every word; link only relevant page or item names with clear labels such as My account, My orders, or the product name.",
     "Relate your answer to the current screen when its route is included in system context.",
     "For questions outside Arownd, briefly state your scope and redirect the user to Arownd usage."
@@ -406,7 +406,9 @@ function sanitizeAssistantLinks(answer: string, context: ReadContext): string {
   return answer.replace(/\[([^\]]+)\]\(arownd:([^\s)]+)\)/g, (match, label: string, route: string) => {
     if (allowedStatic.has(route)) return match;
     const orderMatch = route.match(/^\/orders\/([0-9a-f-]{36})$/i);
-    if (orderMatch && orderIds.has(orderMatch[1])) return match;
+    if (orderMatch && context.customerOrders.some((row) => row.id === orderMatch[1])) return match;
+    const merchantOrderMatch = route.match(/^\/merchant\/orders\/([0-9a-f-]{36})$/i);
+    if (merchantOrderMatch && context.merchantOrders.some((row) => row.id === merchantOrderMatch[1])) return match;
     const offerMatch = route.match(/^\/merchant\/products\/([0-9a-f-]{36})$/i);
     if (offerMatch && offerIds.has(offerMatch[1])) return match;
     return label;
