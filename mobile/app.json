@@ -35,7 +35,7 @@
         "expo-notifications",
         {
           "icon": "./assets/android/notification-icon.png",
-          "color": "#FDE72A"
+          "color": "#D97757"
         }
       ],
       [
@@ -61,7 +61,7 @@
         "foregroundImage": "./assets/android/adaptive-foreground.png",
         "backgroundImage": "./assets/android/adaptive-background.png",
         "monochromeImage": "./assets/android/adaptive-monochrome.png",
-        "backgroundColor": "#0A0A0A"
+        "backgroundColor": "#141413"
       }
     },
     "extra": {
