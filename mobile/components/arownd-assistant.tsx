@@ -219,7 +219,7 @@ export function ArowndAssistant() {
     try {
       const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
       const { data, error } = await getSupabaseClient().functions.invoke("arownd-aide", {
-        body: { language, messages: history, timeZone }
+        body: { language, messages: history, timeZone, screen: pathname }
       });
 
       let responseData: ArowndAideResponse | null = data as ArowndAideResponse | null;
