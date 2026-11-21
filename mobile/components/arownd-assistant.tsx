@@ -6,6 +6,7 @@ import {
   Modal,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   TextInput,
   View
@@ -307,7 +308,11 @@ export function ArowndAssistant() {
       >
         <View style={styles.modalRoot}>
           <Pressable style={styles.scrim} onPress={closeModal} />
-          <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={[styles.panel, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border, paddingBottom: Math.max(insets.bottom, 16) + 12 }]}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            style={styles.keyboardContainer}
+          >
+            <View style={[styles.panel, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border, paddingBottom: Math.max(insets.bottom, 16) + 12 }]}>
             <View style={styles.panelHeader}>
               <View style={[styles.assistantMark, { backgroundColor: theme.colors.accent }]}>
                 <Icon name="message-circle" size={21} color={theme.colors.accentForeground} />
@@ -345,32 +350,39 @@ export function ArowndAssistant() {
               </View>
             ) : (
               <View style={styles.chatContent}>
-                <UiText weight="700" style={{ fontSize: 19 }}>{copy.title}</UiText>
-                {quotaRemaining !== null ? (
-                  <UiText tone="muted" style={{ fontSize: 11 }}>
-                    {isArabic ? "المتبقي اليوم: " + quotaRemaining + " من 50 رسالة" : quotaRemaining + " of 50 messages remaining today"}
-                  </UiText>
-                ) : null}
-                <UiText style={styles.bodyCopy}>{copy.intro}</UiText>
-                {messages.map((message) => (
-                  <View key={message.id} style={[styles.messageBubble, { backgroundColor: theme.colors.surfaceSecondary, alignSelf: message.role === "assistant" ? "flex-start" : "flex-end" }]}>
-                    <UiText>{message.text}</UiText>
-                    {message.route && message.routeLabel ? (
-                      <Pressable onPress={() => { setChatOpen(false); router.push(message.route as never); }} style={[styles.routeButton, { backgroundColor: theme.colors.accent }]}>
-                        <UiText weight="700" style={{ color: theme.colors.accentForeground }}>{message.routeLabel}</UiText>
-                        <Icon name="arrow-right" size={15} color={theme.colors.accentForeground} />
-                      </Pressable>
-                    ) : null}
-                  </View>
-                ))}
-                {isSending ? <UiText tone="muted" style={{ fontSize: 12 }}>{isArabic ? "Arownd Aide يكتب..." : "Arownd Aide is responding..."}</UiText> : null}
-                <View style={styles.suggestions}>
-                  {copy.suggested.map((suggestion) => (
-                    <Pressable key={suggestion} onPress={() => { setQuestion(suggestion); }} style={[styles.suggestionChip, { borderColor: theme.colors.border }]}>
-                      <UiText style={{ fontSize: 12 }}>{suggestion}</UiText>
-                    </Pressable>
+                <ScrollView
+                  style={styles.chatScroll}
+                  contentContainerStyle={styles.chatScrollContent}
+                  keyboardShouldPersistTaps="handled"
+                  showsVerticalScrollIndicator={false}
+                >
+                  <UiText weight="700" style={{ fontSize: 19 }}>{copy.title}</UiText>
+                  {quotaRemaining !== null ? (
+                    <UiText tone="muted" style={{ fontSize: 11 }}>
+                      {isArabic ? "المتبقي اليوم: " + quotaRemaining + " من 50 رسالة" : quotaRemaining + " of 50 messages remaining today"}
+                    </UiText>
+                  ) : null}
+                  <UiText style={styles.bodyCopy}>{copy.intro}</UiText>
+                  {messages.map((message) => (
+                    <View key={message.id} style={[styles.messageBubble, { backgroundColor: theme.colors.surfaceSecondary, alignSelf: message.role === "assistant" ? "flex-start" : "flex-end" }]}>
+                      <UiText>{message.text}</UiText>
+                      {message.route && message.routeLabel ? (
+                        <Pressable onPress={() => { setChatOpen(false); router.push(message.route as never); }} style={[styles.routeButton, { backgroundColor: theme.colors.accent }]}>
+                          <UiText weight="700" style={{ color: theme.colors.accentForeground }}>{message.routeLabel}</UiText>
+                          <Icon name="arrow-right" size={15} color={theme.colors.accentForeground} />
+                        </Pressable>
+                      ) : null}
+                    </View>
                   ))}
-                </View>
+                  {isSending ? <UiText tone="muted" style={{ fontSize: 12 }}>{isArabic ? "Arownd Aide يكتب..." : "Arownd Aide is responding..."}</UiText> : null}
+                  <View style={styles.suggestions}>
+                    {copy.suggested.map((suggestion) => (
+                      <Pressable key={suggestion} onPress={() => { setQuestion(suggestion); }} style={[styles.suggestionChip, { borderColor: theme.colors.border }]}>
+                        <UiText style={{ fontSize: 12 }}>{suggestion}</UiText>
+                      </Pressable>
+                    ))}
+                  </View>
+                </ScrollView>
                 <View style={[styles.inputRow, { borderColor: theme.colors.border, backgroundColor: theme.colors.background }]}>
                   <TextInput
                     editable={!isSending}
@@ -389,6 +401,7 @@ export function ArowndAssistant() {
                 </View>
               </View>
             )}
+            </View>
           </KeyboardAvoidingView>
         </View>
       </Modal>
@@ -398,7 +411,8 @@ export function ArowndAssistant() {
 
 const styles = StyleSheet.create({
   floatingButton: { position: "absolute", width: 54, height: 54, borderRadius: 27, alignItems: "center", justifyContent: "center", zIndex: 30, elevation: 8 },
-  modalRoot: { flex: 1, justifyContent: "flex-end" },
+  modalRoot: { flex: 1 },
+  keyboardContainer: { flex: 1, justifyContent: "flex-end" },
   scrim: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(0,0,0,0.42)" },
   panel: { borderTopLeftRadius: 24, borderTopRightRadius: 24, borderWidth: 1, paddingHorizontal: 20, paddingTop: 18, gap: 18, maxHeight: "78%" },
   panelHeader: { flexDirection: "row", alignItems: "center", gap: 12 },
@@ -413,7 +427,9 @@ const styles = StyleSheet.create({
   skipButton: { paddingVertical: 12, paddingHorizontal: 4 },
   secondaryButton: { minHeight: 44, paddingHorizontal: 14, borderWidth: 1, borderRadius: 12, alignItems: "center", justifyContent: "center" },
   primaryButton: { minHeight: 44, paddingHorizontal: 16, borderRadius: 12, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 },
-  chatContent: { gap: 14, paddingBottom: 8 },
+  chatContent: { flex: 1, minHeight: 0, gap: 14, paddingBottom: 8 },
+  chatScroll: { flex: 1, minHeight: 0 },
+  chatScrollContent: { gap: 14, paddingBottom: 8 },
   messageBubble: { maxWidth: "92%", padding: 12, borderRadius: 14, gap: 10 },
   routeButton: { minHeight: 38, paddingHorizontal: 12, borderRadius: 10, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, alignSelf: "flex-start" },
   suggestions: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
