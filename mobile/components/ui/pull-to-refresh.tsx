@@ -59,6 +59,8 @@ export function PullToRefresh({ onRefresh, refreshing = false, disabled = false,
 
   useEffect(() => () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    pulseAnimation.current?.stop();
+    pulseAnimation.current = null;
   }, []);
 
   const handleScroll: NonNullable<ScrollViewProps["onScroll"]> = (event) => {
