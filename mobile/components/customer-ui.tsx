@@ -2,7 +2,6 @@ import type { ComponentRef, ReactNode, Ref } from "react";
 import { CustomerNavigation } from "@/components/customer-navigation";
 import {
   FlatList,
-  RefreshControl,
   ScrollView,
   StyleSheet,
   View,
@@ -16,6 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { translate } from "@/lib/i18n";
 import { VerifiedBadge } from "@/components/ui/identity";
 import { designTokens, useAppTheme } from "@/lib/theme";
+import { PullToRefresh } from "@/components/ui/pull-to-refresh";
 import { Button, Caption, Heading, Icon, Image as UiImage, PriceDisplay, PressableSurface, RatingStars, RefreshableScrollView, SearchField, Text as UiText } from "@/components/ui";
 export { EmptyState, ErrorState, LoadingState, PageSkeleton } from "@/components/ui";
 
@@ -48,18 +48,22 @@ export function CustomerFlatList<T>({
   ...listProps
 }: CustomerFlatListProps<T>) {
   const theme = useAppTheme();
-  const indicatorColor = theme.mode === "light" ? theme.colors.foreground : theme.colors.accent;
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.colors.background }]}>
-      <FlatList
-        {...listProps}
-        style={styles.scroll}
-        contentContainerStyle={[styles.content, contentContainerStyle]}
-        showsVerticalScrollIndicator={false}
-        automaticallyAdjustKeyboardInsets
-        refreshControl={onRefresh ? (
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[indicatorColor]} progressBackgroundColor={theme.colors.background} tintColor={indicatorColor} />
-        ) : undefined}
+      <PullToRefresh
+        onRefresh={onRefresh}
+        refreshing={refreshing}
+        renderContent={(onScroll) => (
+          <FlatList
+            {...listProps}
+            style={styles.scroll}
+            contentContainerStyle={[styles.content, contentContainerStyle]}
+            showsVerticalScrollIndicator={false}
+            automaticallyAdjustKeyboardInsets
+            onScroll={onScroll}
+            scrollEventThrottle={16}
+          />
+        )}
       />
       {showNavigation ? <CustomerNavigation /> : null}
     </SafeAreaView>
