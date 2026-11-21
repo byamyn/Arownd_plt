@@ -296,7 +296,7 @@ export default function CustomerHomeScreen() {
       </View>
       <View style={styles.feedViewport} onLayout={handleFeedLayout}>
         <PullToRefresh
-          refreshing={products.isFetching}
+          refreshing={products.isFetching || browsingCurrency.isFetching}
           onRefresh={() => { void Promise.all([products.refetch(), browsingCurrency.refetch()]); }}
           renderContent={(onScroll) => (
             <FlatList
