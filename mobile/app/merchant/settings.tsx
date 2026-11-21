@@ -12,7 +12,7 @@ import {
   RasterSource
 } from "@maplibre/maplibre-react-native";
 
-import { BottomSheet, AppHeader, Button, Card, ErrorState, Heading, Icon, IconButton, Image as UiImage, LoadingState, PageSkeleton, PressableSurface, Text as UiText, TextField } from "@/components/ui";
+import { BottomSheet, AppHeader, Button, Card, ErrorState, Heading, Icon, IconButton, Image as UiImage, LoadingState, PageSkeleton, PressableSurface, Text as UiText, TextField, RefreshableScrollView } from "@/components/ui";
 import { fetchMerchantAccess } from "@/lib/merchant";
 import { fetchCheckoutRegions } from "@/lib/checkout";
 import { STORE_IMAGE_MAX_BYTES, uploadMerchantStoreImage, validateStoreImageAsset } from "@/lib/merchant-store-images";
@@ -297,7 +297,7 @@ export default function MerchantStoreSettingsScreen() {
   return (
     <SafeAreaView edges={["top", "left", "right", "bottom"]} style={[styles.safe, { backgroundColor: theme.colors.background }]}>
       <KeyboardAvoidingView style={styles.safe} behavior={Platform.OS === "ios" ? "padding" : "height"}>
-      <ScrollView style={styles.safe} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}>
+      <RefreshableScrollView style={styles.safe} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"} refreshing={access.isFetching || regionOptions.isFetching || (!formDirty && settings.isFetching) || secondaryOptions.isFetching} onRefresh={() => { void Promise.all([access.refetch(), regionOptions.refetch(), ...(formDirty ? [] : [settings.refetch()]), ...(form?.region_id != null ? [secondaryOptions.refetch()] : [])]); }}>
         <AppHeader
           title={translate("merchantStoreSettingsTitle")}        />
 
@@ -454,7 +454,7 @@ export default function MerchantStoreSettingsScreen() {
 
         {formError && mutation.isError ? <UiText accessibilityRole="alert" style={[styles.error, { color: theme.mode === "light" ? theme.colors.dangerText : theme.colors.danger }]}>{translate("merchantStoreSettingsSaveError")}</UiText> : null}
         {mutation.isSuccess ? <UiText style={[styles.success, { color: theme.mode === "light" ? theme.colors.successText : theme.colors.success }]}>{translate("merchantStoreSettingsSaved")}</UiText> : null}
-      </ScrollView>
+      </RefreshableScrollView>
 
       <View style={[styles.footer, { backgroundColor: theme.colors.background, borderTopColor: theme.colors.border }]}>
         <Button label={translate("merchantStoreSettingsSave")} onPress={submit} loading={mutation.isPending} disabled={imageBusy !== null || locationBusy || mutation.isPending} fullWidth />
