@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { Redirect, router } from "expo-router";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { Button, ErrorState, MetricCardSkeleton, Text as UiText } from "@/components/ui";
+import { Button, ErrorState, MetricCardSkeleton, RefreshableScrollView, Text as UiText } from "@/components/ui";
 import { fetchMerchantAccess } from "@/lib/merchant";
 import { translate, useLanguage } from "@/lib/i18n";
 import { designTokens, useAppTheme, type AppTheme } from "@/lib/theme";
@@ -52,7 +52,7 @@ export default function MerchantEntryScreen() {
   if (access.data.status === "personal" || access.data.status === "merchant_setup_required") {
     return (
       <SafeAreaView edges={["top", "left", "right"]} style={[styles.safe, { backgroundColor: theme.colors.background }]}>
-        <ScrollView contentContainerStyle={styles.entryContent}>
+        <RefreshableScrollView contentContainerStyle={styles.entryContent} refreshing={access.isFetching} onRefresh={() => { void access.refetch(); }}>
           <Button label={translate("merchantBackToProfile")} onPress={() => router.replace("/profile")} variant="ghost" size="sm" />
           <View style={[styles.entryCard, { backgroundColor: theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface, borderColor: theme.mode === "light" ? "transparent" : theme.colors.border }]}>
             <UiText style={[styles.eyebrow, { color: theme.colors.accentMuted }]}>{translate("businessTitle")}</UiText>
@@ -66,7 +66,7 @@ export default function MerchantEntryScreen() {
             </UiText>
             <Button label={translate("merchantStartOnboarding")} onPress={() => router.push("/merchant/onboarding")} fullWidth />
           </View>
-        </ScrollView>
+        </RefreshableScrollView>
       </SafeAreaView>
     );
   }
