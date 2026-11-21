@@ -37,7 +37,7 @@ const TOUR_PENDING_PREFIX = "arownd:ai-tour:pending:";
 const TOUR_STEPS: Record<"ar" | "en", { customer: TourStep[]; merchant: TourStep }> = {
   ar: {
     customer: [
-      { title: "مرحباً بك في Arownd", description: "أنا Arownd AI، مرشدك داخل التطبيق. سأرافقك للتعرف على الأقسام الأساسية، ويمكنك الانتقال بالضغط على التالي أو تخطي الجولة في أي وقت.", route: "/home" },
+      { title: "مرحباً بك في Arownd", description: "أنا Arownd Aide، مرشدك داخل التطبيق. سأرافقك للتعرف على الأقسام الأساسية، ويمكنك الانتقال بالضغط على التالي أو تخطي الجولة في أي وقت.", route: "/home" },
       { title: "الرئيسية", description: "هنا تكتشف المنتجات والمتاجر. يمكنك تصفح المنتجات، فتح تفاصيلها، والانتقال إلى المتجر الذي يعرضها.", route: "/home" },
       { title: "الاستكشاف", description: "استخدم البحث للوصول إلى المنتجات والمتاجر والعلامات التجارية. تظهر النتائج أثناء الكتابة ويمكنك فتح تفاصيل أي نتيجة.", route: "/explore" },
       { title: "الخريطة", description: "اكتشف المتاجر على الخريطة، اختر متجراً لعرض معلوماته، ويمكنك استكشاف المتاجر القريبة عند السماح بالوصول إلى الموقع.", route: "/map" },
@@ -47,7 +47,7 @@ const TOUR_STEPS: Record<"ar" | "en", { customer: TourStep[]; merchant: TourStep
   },
   en: {
     customer: [
-      { title: "Welcome to Arownd", description: "I’m Arownd AI, your in-app guide. I’ll walk you through the main sections. Press Next to continue or skip the tour at any time.", route: "/home" },
+      { title: "Welcome to Arownd", description: "I’m Arownd Aide, your in-app guide. I’ll walk you through the main sections. Press Next to continue or skip the tour at any time.", route: "/home" },
       { title: "Home", description: "Discover products and stores, browse product cards, open product details, and visit the stores offering them.", route: "/home" },
       { title: "Explore", description: "Search for products, stores, and brands. Results appear as you type, and you can open any result for more details.", route: "/explore" },
       { title: "Map", description: "Discover stores on the map, select a store to view its details, and explore nearby places when location access is allowed.", route: "/map" },
@@ -92,7 +92,7 @@ export function ArowndAssistant() {
   const tourStartedRef = useRef(false);
   const isArabic = language === "ar";
   const copy = useMemo(() => ({
-    title: "Arownd AI",
+    title: "Arownd Aide",
     close: isArabic ? "إغلاق" : "Close",
     next: isArabic ? "التالي" : "Next",
     previous: isArabic ? "السابق" : "Previous",
