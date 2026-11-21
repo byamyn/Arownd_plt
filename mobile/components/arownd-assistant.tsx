@@ -79,6 +79,7 @@ export function ArowndAssistant() {
   const [messages, setMessages] = useState<AssistantMessage[]>([]);
   const [isSending, setIsSending] = useState(false);
   const [quotaRemaining, setQuotaRemaining] = useState<number | null>(null);
+  const chatScrollRef = useRef<ScrollView | null>(null);
   const checkingRef = useRef(false);
   const tourStartedRef = useRef(false);
   const isArabic = language === "ar";
@@ -351,10 +352,12 @@ export function ArowndAssistant() {
             ) : (
               <View style={styles.chatContent}>
                 <ScrollView
+                  ref={chatScrollRef}
                   style={styles.chatScroll}
                   contentContainerStyle={styles.chatScrollContent}
                   keyboardShouldPersistTaps="handled"
                   showsVerticalScrollIndicator={false}
+                  onContentSizeChange={() => chatScrollRef.current?.scrollToEnd({ animated: true })}
                 >
                   <UiText weight="700" style={{ fontSize: 19 }}>{copy.title}</UiText>
                   {quotaRemaining !== null ? (
@@ -375,13 +378,15 @@ export function ArowndAssistant() {
                     </View>
                   ))}
                   {isSending ? <UiText tone="muted" style={{ fontSize: 12 }}>{isArabic ? "Arownd Aide يكتب..." : "Arownd Aide is responding..."}</UiText> : null}
-                  <View style={styles.suggestions}>
-                    {copy.suggested.map((suggestion) => (
-                      <Pressable key={suggestion} onPress={() => { setQuestion(suggestion); }} style={[styles.suggestionChip, { borderColor: theme.colors.border }]}>
-                        <UiText style={{ fontSize: 12 }}>{suggestion}</UiText>
-                      </Pressable>
-                    ))}
-                  </View>
+                  {messages.length === 0 ? (
+                    <View style={styles.suggestions}>
+                      {copy.suggested.map((suggestion) => (
+                        <Pressable key={suggestion} onPress={() => { setQuestion(suggestion); }} style={[styles.suggestionChip, { borderColor: theme.colors.border }]}>
+                          <UiText style={{ fontSize: 12 }}>{suggestion}</UiText>
+                        </Pressable>
+                      ))}
+                    </View>
+                  ) : null}
                 </ScrollView>
                 <View style={[styles.inputRow, { borderColor: theme.colors.border, backgroundColor: theme.colors.background }]}>
                   <TextInput
