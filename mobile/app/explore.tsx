@@ -217,8 +217,8 @@ export default function ExploreScreen() {
         />
       )}
       ListHeaderComponent={listHeader}
-      refreshing={isSearching && !searchPending && search.isFetching}
-      onRefresh={isSearching && !searchPending ? () => { void search.refetch(); } : undefined}
+      refreshing={isSearching && !searchPending && (search.isFetching || browsingCurrency.isFetching)}
+      onRefresh={isSearching && !searchPending ? () => { void Promise.all([search.refetch(), browsingCurrency.refetch()]); } : undefined}
       initialNumToRender={6}
       maxToRenderPerBatch={6}
       updateCellsBatchingPeriod={50}
