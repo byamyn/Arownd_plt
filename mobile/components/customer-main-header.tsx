@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
-import { StyleSheet, View } from "react-native";
+import { DeviceEventEmitter, Pressable, StyleSheet, View } from "react-native";
 
 import Logo from "@/components/logo";
 import { Icon, IconButton } from "@/components/ui";
@@ -34,7 +34,14 @@ export function CustomerMainHeader({ variant = "cart" }: CustomerMainHeaderProps
 
   return (
     <View style={styles.header}>
-      <Logo color={theme.colors.foreground} width={148} />
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Arownd Aide"
+        onPress={() => DeviceEventEmitter.emit("arownd-aide:open")}
+        hitSlop={8}
+      >
+        <Logo color={theme.colors.foreground} width={148} />
+      </Pressable>
       <View style={styles.actions}>
         <IconButton
           accessibilityLabel={translate("notificationsTitle") + (unreadCount > 0 ? `, ${unreadCount}` : "")}
