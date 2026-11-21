@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
-type ChatRole = "user" | "assistant";
+type ChatRole = "system" | "user" | "assistant";
 type ChatMessage = { role: ChatRole; content: string };
 type Provider = "groq" | "gemini" | "cloudflare" | "openrouter";
 
@@ -137,14 +137,14 @@ async function callGroq(messages: ChatMessage[]): Promise<string> {
 async function callGemini(messages: ChatMessage[]): Promise<string> {
   const key = Deno.env.get("GEMINI_API_KEY")?.trim();
   if (!key) throw new Error("provider_not_configured");
-  const system = messages.find((message) => message.role === "assistant" && message.content.startsWith("[SYSTEM]"));
+  const system = messages.find((message) => message.role === "system");
   const conversation = messages.filter((message) => message !== system);
   const model = Deno.env.get("GEMINI_MODEL")?.trim() || "gemini-2.5-flash";
   const payload = await fetchJson("gemini",
     "https://generativelanguage.googleapis.com/v1beta/models/" + encodeURIComponent(model) + ":generateContent",
     { "x-goog-api-key": key },
     {
-      systemInstruction: { parts: [{ text: system?.content.replace("[SYSTEM]\n", "") || "" }] },
+      systemInstruction: { parts: [{ text: system?.content || "" }] },
       contents: conversation.map((message) => ({
         role: message.role === "assistant" ? "model" : "user",
         parts: [{ text: message.content }],
@@ -161,7 +161,7 @@ async function callCloudflare(messages: ChatMessage[]): Promise<string> {
   const key = Deno.env.get("CLOUDFLARE_API_TOKEN")?.trim();
   if (!accountId || !key) throw new Error("provider_not_configured");
   const prompt = messages.map((message) =>
-    (message.role === "assistant" ? "Arownd Aide" : "User") + ":\n" + message.content
+    (message.role === "system" ? "System" : message.role === "assistant" ? "Arownd Aide" : "User") + ":\n" + message.content
   ).join("\n\n") + "\n\nArownd Aide:\n";
   const model = Deno.env.get("CLOUDFLARE_MODEL")?.trim() || "@cf/meta/llama-3.1-8b-instruct";
   const payload = await fetchJson("cloudflare",
@@ -237,7 +237,7 @@ Deno.serve(async (req: Request) => {
 
     const system = SYSTEM_PROMPT[payload.language];
     const providerMessages: ChatMessage[] = [
-      { role: "assistant", content: "[SYSTEM]\n" + system },
+      { role: "system", content: system },
       ...messages,
     ];
 
