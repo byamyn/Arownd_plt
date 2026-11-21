@@ -117,6 +117,7 @@ export function ArowndAssistant() {
   const pathname = usePathname();
   const [userId, setUserId] = useState<string | null>(null);
   const [merchantTour, setMerchantTour] = useState(false);
+  const [assistantAudience, setAssistantAudience] = useState<"personal" | "business">("personal");
   const [tourStep, setTourStep] = useState(-1);
   const [chatOpen, setChatOpen] = useState(false);
   const [question, setQuestion] = useState("");
@@ -130,23 +131,49 @@ export function ArowndAssistant() {
   const copy = useMemo(() => ({
     title: "Arownd Aide",
     close: isArabic ? "إغلاق" : "Close",
+    newChat: isArabic ? "محادثة جديدة" : "New chat",
     next: isArabic ? "التالي" : "Next",
     previous: isArabic ? "السابق" : "Previous",
     skip: isArabic ? "تخطي الجولة" : "Skip tour",
     finish: isArabic ? "إنهاء الجولة" : "Finish tour",
     progress: isArabic ? "الخطوة" : "Step",
     of: isArabic ? "من" : "of",
-    welcome: isArabic ? "مرشدك داخل Arownd" : "Your guide inside Arownd",
-    placeholder: isArabic ? "اكتب سؤالك عن Arownd..." : "Ask a question about Arownd...",
+    welcome: isArabic ? "مساعدك للتعلّم واستخدام Arownd" : "Your guide to learning and using Arownd",
+    greeting: isArabic ? "كيف يمكنني مساعدتك اليوم؟" : "How can I help you today?",
+    subtitle: isArabic ? "اسألني عمّا تريد فهمه، وسأرشدك خطوة بخطوة." : "Ask me anything you want to understand, and I’ll guide you step by step.",
+    suggestedTitle: isArabic ? "يمكنك البدء بسؤال مثل" : "You could start with",
+    placeholder: isArabic ? "اسأل Arownd Aide..." : "Ask Arownd Aide...",
     send: isArabic ? "إرسال" : "Send",
-    intro: isArabic ? "يمكنني مساعدتك في فهم أقسام التطبيق والوصول إلى الصفحات المناسبة. ما الذي تريد معرفته؟" : "I can help you understand the app and find the right pages. What would you like to know?",
-    suggested: isArabic ? ["كيف أبحث عن منتج؟", "أين أجد طلباتي؟", "كيف أكتشف المتاجر؟", "إعادة الجولة التعريفية"] : ["How do I search for a product?", "Where can I find my orders?", "How do I discover stores?", "Restart the introduction tour"]
-  }), [isArabic]);
+    suggested: assistantAudience === "business"
+      ? (isArabic
+        ? ["كيف أبدأ بإدارة متجري؟", "كيف أضيف منتجاً؟", "كيف أتعامل مع طلب جديد؟", "كيف أحسن عرض منتجاتي؟"]
+        : ["How do I manage my store?", "How do I add a product?", "How should I handle a new order?", "How can I improve my product listings?"])
+      : (isArabic
+        ? ["كيف أبحث عن منتج؟", "كيف أتابع طلبي؟", "كيف أكتشف المتاجر؟", "كيف أستخدم المفضلة؟"]
+        : ["How do I find a product?", "How do I track my order?", "How do I discover stores?", "How do I use favorites?"])
+  }), [isArabic, assistantAudience]);
   const steps = useMemo(() => {
     const localized = TOUR_STEPS[language];
     return merchantTour ? [...localized.customer, localized.merchant] : localized.customer;
   }, [language, merchantTour]);
   const activeStep = tourStep >= 0 ? steps[tourStep] : null;
+
+  useEffect(() => {
+    if (!userId) {
+      setAssistantAudience("personal");
+      return;
+    }
+    let active = true;
+    void fetchMerchantAccess().then((access) => {
+      if (!active) return;
+      setAssistantAudience(access?.status === "merchant_ready" || access?.status === "merchant_setup_required" ? "business" : "personal");
+    }).catch(() => {
+      if (active) setAssistantAudience("personal");
+    });
+    return () => {
+      active = false;
+    };
+  }, [userId]);
 
   useEffect(() => {
     let mounted = true;
@@ -239,8 +266,8 @@ export function ArowndAssistant() {
     setTourStep(0);
     router.replace("/home");
   };
-  const submitQuestion = async () => {
-    const value = question.trim();
+  const submitQuestion = async (suggestedQuestion?: string) => {
+    const value = (suggestedQuestion ?? question).trim();
     if (!value || isSending) return;
     if (value.toLocaleLowerCase().includes("الجولة") || value.toLocaleLowerCase().includes("tour")) {
       setQuestion("");
@@ -363,7 +390,7 @@ export function ArowndAssistant() {
             behavior={Platform.OS === "ios" ? "padding" : "height"}
             style={styles.keyboardContainer}
           >
-            <View style={[styles.panel, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border, paddingBottom: Math.max(insets.bottom, 16) + 12 }]}>
+            <View style={[activeStep ? styles.tourPanel : styles.panel, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border, paddingTop: activeStep ? 18 : Math.max(insets.top, 12) + 10, paddingBottom: Math.max(insets.bottom, 16) + 12 }]}>
             <View style={styles.panelHeader}>
               <View style={[styles.assistantMark, { backgroundColor: theme.colors.accent }]}>
                 <Icon name="message-circle" size={21} color={theme.colors.accentForeground} />
@@ -372,6 +399,17 @@ export function ArowndAssistant() {
                 <UiText weight="700">{copy.title}</UiText>
                 <UiText tone="muted" style={{ fontSize: 12 }}>{copy.welcome}</UiText>
               </View>
+              {!activeStep ? (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={copy.newChat}
+                  onPress={() => { setMessages([]); setQuestion(""); }}
+                  hitSlop={10}
+                  style={styles.headerAction}
+                >
+                  <Icon name="plus" size={20} color={theme.colors.foreground} />
+                </Pressable>
+              ) : null}
               <Pressable accessibilityRole="button" accessibilityLabel={copy.close} onPress={closeModal} hitSlop={10} style={styles.closeButton}>
                 <Icon name="x" size={20} color={theme.colors.foreground} />
               </Pressable>
@@ -409,15 +447,38 @@ export function ArowndAssistant() {
                   showsVerticalScrollIndicator={false}
                   onContentSizeChange={() => chatScrollRef.current?.scrollToEnd({ animated: true })}
                 >
-                  <UiText weight="700" style={{ fontSize: 19 }}>{copy.title}</UiText>
+                  {messages.length === 0 ? (
+                    <View style={styles.emptyState}>
+                      <View style={[styles.emptyMark, { backgroundColor: theme.colors.surfaceSecondary }]}>
+                        <Icon name="message-circle" size={25} color={theme.colors.accent} />
+                      </View>
+                      <UiText weight="700" style={styles.greeting}>{copy.greeting}</UiText>
+                      <UiText tone="muted" style={styles.emptySubtitle}>{copy.subtitle}</UiText>
+                      <View style={styles.suggestionSection}>
+                        <UiText tone="muted" style={styles.suggestedTitle}>{copy.suggestedTitle}</UiText>
+                        <View style={styles.suggestions}>
+                          {copy.suggested.map((suggestion) => (
+                            <Pressable
+                              key={suggestion}
+                              accessibilityRole="button"
+                              onPress={() => { void submitQuestion(suggestion); }}
+                              style={[styles.suggestionCard, { borderColor: theme.colors.border }]}
+                            >
+                              <UiText style={{ flex: 1, fontSize: 13 }}>{suggestion}</UiText>
+                              <Icon name={isArabic ? "arrow-up-left" : "arrow-up-right"} size={16} color={theme.colors.accent} />
+                            </Pressable>
+                          ))}
+                        </View>
+                      </View>
+                    </View>
+                  ) : null}
                   {quotaRemaining !== null ? (
-                    <UiText tone="muted" style={{ fontSize: 11 }}>
+                    <UiText tone="muted" style={{ fontSize: 11, textAlign: isArabic ? "right" : "left" }}>
                       {isArabic ? "المتبقي اليوم: " + quotaRemaining + " من 50 رسالة" : quotaRemaining + " of 50 messages remaining today"}
                     </UiText>
                   ) : null}
-                  <UiText style={styles.bodyCopy}>{copy.intro}</UiText>
                   {messages.map((message) => (
-                    <View key={message.id} style={[styles.messageBubble, { backgroundColor: theme.colors.surfaceSecondary, alignSelf: message.role === "assistant" ? "flex-start" : "flex-end" }]}>
+                    <View key={message.id} style={[styles.messageBubble, message.role === "assistant" ? styles.assistantMessage : styles.userMessage, message.role === "user" ? { backgroundColor: theme.colors.surfaceSecondary } : null]}>
                       <UiText>
                         {message.parts?.map((part, index) => part.link ? (
                           <UiText
@@ -437,15 +498,6 @@ export function ArowndAssistant() {
                     </View>
                   ))}
                   {isSending ? <UiText tone="muted" style={{ fontSize: 12 }}>{isArabic ? "Arownd Aide يكتب..." : "Arownd Aide is responding..."}</UiText> : null}
-                  {messages.length === 0 ? (
-                    <View style={styles.suggestions}>
-                      {copy.suggested.map((suggestion) => (
-                        <Pressable key={suggestion} onPress={() => { setQuestion(suggestion); }} style={[styles.suggestionChip, { borderColor: theme.colors.border }]}>
-                          <UiText style={{ fontSize: 12 }}>{suggestion}</UiText>
-                        </Pressable>
-                      ))}
-                    </View>
-                  ) : null}
                 </ScrollView>
                 <View style={[styles.inputRow, { borderColor: theme.colors.border, backgroundColor: theme.colors.background }]}>
                   <TextInput
@@ -456,6 +508,9 @@ export function ArowndAssistant() {
                     placeholderTextColor={theme.colors.placeholder}
                     onSubmitEditing={submitQuestion}
                     returnKeyType="send"
+                    multiline
+                    maxLength={4000}
+                    textAlignVertical="center"
                     style={[styles.input, { color: theme.colors.foreground }]}
                     textAlign={isArabic ? "right" : "left"}
                   />
@@ -478,10 +533,12 @@ const styles = StyleSheet.create({
   modalRoot: { flex: 1 },
   keyboardContainer: { flex: 1, justifyContent: "flex-end" },
   scrim: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(0,0,0,0.42)" },
-  panel: { borderTopLeftRadius: 24, borderTopRightRadius: 24, borderWidth: 1, paddingHorizontal: 20, paddingTop: 18, gap: 18, height: "78%", maxHeight: "78%" },
+  panel: { flex: 1, borderRadius: 0, borderWidth: 0, paddingHorizontal: 22, gap: 18, height: "100%", maxHeight: "100%" },
+  tourPanel: { borderTopLeftRadius: 24, borderTopRightRadius: 24, borderWidth: 1, paddingHorizontal: 20, gap: 18, height: "78%", maxHeight: "78%" },
   panelHeader: { flexDirection: "row", alignItems: "center", gap: 12 },
   assistantMark: { width: 42, height: 42, borderRadius: 13, alignItems: "center", justifyContent: "center" },
   headerCopy: { flex: 1, gap: 2 },
+  headerAction: { width: 38, height: 38, borderRadius: 12, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(128,128,128,0.10)" },
   closeButton: { width: 38, height: 38, alignItems: "center", justifyContent: "center" },
   tourContent: { gap: 12, paddingBottom: 8 },
   progressTrack: { height: 5, borderRadius: 5, overflow: "hidden" },
@@ -493,12 +550,19 @@ const styles = StyleSheet.create({
   primaryButton: { minHeight: 44, paddingHorizontal: 16, borderRadius: 12, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 },
   chatContent: { flex: 1, minHeight: 0, gap: 14, paddingBottom: 8 },
   chatScroll: { flex: 1, minHeight: 0 },
-  chatScrollContent: { gap: 14, paddingBottom: 8 },
-  messageBubble: { maxWidth: "92%", padding: 12, borderRadius: 14, gap: 10 },
-  routeButton: { minHeight: 38, paddingHorizontal: 12, borderRadius: 10, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, alignSelf: "flex-start" },
-  suggestions: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  suggestionChip: { borderWidth: 1, borderRadius: 18, paddingHorizontal: 11, paddingVertical: 8 },
-  inputRow: { minHeight: 52, borderWidth: 1, borderRadius: 16, paddingHorizontal: 10, flexDirection: "row", alignItems: "center", gap: 8 },
-  input: { flex: 1, minHeight: 44, paddingVertical: 8, fontSize: 14 },
+  chatScrollContent: { flexGrow: 1, gap: 18, paddingTop: 12, paddingBottom: 18 },
+  emptyState: { flex: 1, justifyContent: "center", alignItems: "stretch", gap: 14, paddingBottom: 18 },
+  emptyMark: { width: 52, height: 52, borderRadius: 17, alignItems: "center", justifyContent: "center", alignSelf: "center", marginBottom: 4 },
+  greeting: { fontSize: 23, lineHeight: 32, textAlign: "center" },
+  emptySubtitle: { fontSize: 14, lineHeight: 22, textAlign: "center", maxWidth: 300, alignSelf: "center" },
+  suggestionSection: { gap: 10, marginTop: 24 },
+  suggestedTitle: { fontSize: 12, fontWeight: "600" },
+  messageBubble: { maxWidth: "92%", padding: 12, borderRadius: 16, gap: 10 },
+  assistantMessage: { alignSelf: "stretch", maxWidth: "100%", paddingHorizontal: 0, paddingVertical: 4 },
+  userMessage: { alignSelf: "flex-end" },
+  suggestions: { flexDirection: "column", gap: 9 },
+  suggestionCard: { minHeight: 52, borderWidth: 1, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 12, flexDirection: "row", alignItems: "center", gap: 10 },
+  inputRow: { minHeight: 58, borderWidth: 1, borderRadius: 18, paddingHorizontal: 10, paddingVertical: 6, flexDirection: "row", alignItems: "center", gap: 8 },
+  input: { flex: 1, minHeight: 42, maxHeight: 120, paddingVertical: 8, fontSize: 14 },
   sendButton: { width: 38, height: 38, borderRadius: 12, alignItems: "center", justifyContent: "center" }
 });
