@@ -7,7 +7,7 @@ import {
   type ViewStyle
 } from "react-native";
 
-import { designTokens } from "@/lib/theme";
+import { designTokens, useAppTheme } from "@/lib/theme";
 import { PullToRefresh } from "./pull-to-refresh";
 
 export type ContainerProps = PropsWithChildren<{
