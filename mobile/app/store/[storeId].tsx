@@ -126,8 +126,8 @@ export default function StoreDetailsScreen() {
     <CustomerScreen
       contentStyle={styles.storeScreenContent}
       stickyHeaderIndices={[0, 3]}
-      refreshing={store.isFetching || (tab === "products" && offers.isFetching)}
-      onRefresh={() => { void store.refetch(); if (tab === "products") void offers.refetch(); }}
+      refreshing={store.isFetching || browsingCurrency.isFetching || merchantAccess.isFetching || (tab === "products" && offers.isFetching)}
+      onRefresh={() => { void Promise.all([store.refetch(), browsingCurrency.refetch(), merchantAccess.refetch(), ...(tab === "products" ? [offers.refetch()] : [])]); }}
     >
       <AppHeader
         title=""
