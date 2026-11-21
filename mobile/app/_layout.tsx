@@ -15,7 +15,7 @@ import { Animated, Platform, StyleSheet, Text, View } from "react-native";
 import { useEffect, useRef, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import Logo from "@/components/logo";
+import AnimatedLogo from "@/components/animated-logo";
 import { AuthCaptchaHost } from "@/components/auth-captcha-host";
 import { ArowndAssistant } from "@/components/arownd-assistant";
 import { CartFlyOverlay } from "@/components/cart-fly-overlay";
@@ -202,7 +202,7 @@ function RootLayoutContent() {
           style={[StyleSheet.absoluteFill, styles.splash, { backgroundColor: theme.colors.background }]}
         >
           <View style={styles.logo}>
-            <Logo color={theme.colors.foreground} width={220} />
+            <AnimatedLogo width={220} />
           </View>
           <View style={[styles.splashFooter, { bottom: Math.max(insets.bottom, 12) + 12 }]}>
             <Text style={[styles.splashCaption, { color: theme.colors.foreground }]}>
