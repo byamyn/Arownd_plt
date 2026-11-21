@@ -114,7 +114,7 @@ export function AspectRatio({
 }
 
 export type ScrollAreaProps = PropsWithChildren<
-  Pick<ScrollViewProps, "horizontal" | "showsHorizontalScrollIndicator" | "showsVerticalScrollIndicator" | "onScroll" | "refreshControl" | "keyboardShouldPersistTaps"> & {
+  Pick<ScrollViewProps, "horizontal" | "showsHorizontalScrollIndicator" | "showsVerticalScrollIndicator" | "onScroll" | "refreshControl" | "keyboardShouldPersistTaps" | "automaticallyAdjustKeyboardInsets"> & {
     contentContainerStyle?: ScrollViewProps["contentContainerStyle"];
     style?: ScrollViewProps["style"];
   }
@@ -127,6 +127,7 @@ export type RefreshableScrollViewProps = PropsWithChildren<{
   contentContainerStyle?: ScrollViewProps["contentContainerStyle"];
   style?: ScrollViewProps["style"];
   keyboardShouldPersistTaps?: ScrollViewProps["keyboardShouldPersistTaps"];
+  automaticallyAdjustKeyboardInsets?: ScrollViewProps["automaticallyAdjustKeyboardInsets"];
   showsVerticalScrollIndicator?: boolean;
   stickyHeaderIndices?: number[];
   pagingEnabled?: ScrollViewProps["pagingEnabled"];
@@ -141,6 +142,7 @@ export function RefreshableScrollView({
   contentContainerStyle,
   style,
   keyboardShouldPersistTaps = "handled",
+  automaticallyAdjustKeyboardInsets = true,
   showsVerticalScrollIndicator = false,
   scrollRef,
   stickyHeaderIndices,
@@ -161,6 +163,7 @@ export function RefreshableScrollView({
       style={style}
       contentContainerStyle={contentContainerStyle}
       keyboardShouldPersistTaps={keyboardShouldPersistTaps}
+      automaticallyAdjustKeyboardInsets={automaticallyAdjustKeyboardInsets}
       showsVerticalScrollIndicator={showsVerticalScrollIndicator}
       refreshControl={onRefresh ? (
         <RefreshControl
@@ -198,6 +201,7 @@ export function ScrollArea({
       onScroll={onScroll}
       refreshControl={refreshControl}
       keyboardShouldPersistTaps={keyboardShouldPersistTaps}
+      automaticallyAdjustKeyboardInsets
     >
       {children}
     </ScrollView>
