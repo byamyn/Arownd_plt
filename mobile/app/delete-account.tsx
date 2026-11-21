@@ -32,7 +32,7 @@ export default function DeleteAccountScreen() {
   const activeRequest = request.data && active ? request.data : null;
 
   return (
-    <CustomerScreen showNavigation={false} contentStyle={styles.content}>
+    <CustomerScreen showNavigation={false} contentStyle={styles.content} refreshing={request.isFetching} onRefresh={() => { void request.refetch(); }}>
       <AppHeader
         title={translate("deleteAccountTitle")}
         leading={
