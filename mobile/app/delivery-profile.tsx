@@ -182,7 +182,7 @@ export default function DeliveryProfileScreen() {
     mutation.mutate(parsed.data);
   };
 
-  return <CustomerScreen scrollRef={scrollRef} footer={<View style={styles.stickyFooter}>
+  return <CustomerScreen scrollRef={scrollRef} refreshing={profile.isFetching || communes.isFetching} onRefresh={() => { void Promise.all([profile.refetch(), ...(regionId !== null ? [communes.refetch()] : [])]); }} footer={<View style={styles.stickyFooter}>
     {mutation.isSuccess ? <View accessibilityRole="alert" style={styles.snackbar}><Icon name="circle-check" size={18} color={theme.colors.success} /><UiText tone="success" weight="700">{translate("deliveryProfileSaved")}</UiText></View> : null}
     <Button label={translate("deliveryProfileSave")} onPress={submit} loading={mutation.isPending} disabled={!hasChanges || mutation.isPending} fullWidth />
   </View>}>
