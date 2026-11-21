@@ -156,8 +156,8 @@ export default function ProductDetailsScreen() {
             <IconButton accessibilityLabel={translate("back")} onPress={() => router.back()} icon={<Icon name="chevron-down" size={22} color={theme.colors.foreground} />} />
           </View>
           <PullToRefresh
-            refreshing={product.isFetching || offers.isFetching || reviews.isFetching}
-            onRefresh={() => { void Promise.all([product.refetch(), offers.refetch(), reviews.refetch()]); }}
+            refreshing={browsingCurrency.isFetching || product.isFetching || offers.isFetching || reviews.isFetching}
+            onRefresh={() => { void Promise.all([browsingCurrency.refetch(), product.refetch(), offers.refetch(), reviews.refetch()]); }}
             renderContent={(onScroll) => (
               <ScrollView
                 style={styles.sheetScroll}
