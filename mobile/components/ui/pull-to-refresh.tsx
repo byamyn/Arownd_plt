@@ -1,4 +1,4 @@
-import { useEffect, useRef, type PropsWithChildren } from "react";
+import { useEffect, useRef } from "react";
 import { Animated, PanResponder, StyleSheet, View, type ScrollViewProps } from "react-native";
 import Svg, { Circle, Path } from "react-native-svg";
 
@@ -9,15 +9,14 @@ const CENTER = { x: 710.89, y: 237.83, r: 51.83 };
 const REFRESH_THRESHOLD = 64;
 const MAX_PULL = 112;
 
-type PullToRefreshProps = PropsWithChildren<{
+type PullToRefreshProps = {
   onRefresh?: (() => void) | undefined;
   refreshing?: boolean;
-  getScrollOffset: () => number;
-  onScroll?: ScrollViewProps["onScroll"];
   disabled?: boolean;
-}>;
+  renderContent: (onScroll: NonNullable<ScrollViewProps["onScroll"]>) => React.ReactNode;
+};
 
-export function PullToRefresh({ children, onRefresh, refreshing = false, getScrollOffset, onScroll, disabled = false }: PullToRefreshProps) {
+export function PullToRefresh({ onRefresh, refreshing = false, disabled = false, renderContent }: PullToRefreshProps) {
   const theme = useAppTheme();
   const pull = useRef(new Animated.Value(0)).current;
   const pullValue = useRef(0);
@@ -25,12 +24,15 @@ export function PullToRefresh({ children, onRefresh, refreshing = false, getScro
   const refreshingRef = useRef(refreshing);
   const activeRef = useRef(false);
   const observedRefreshRef = useRef(false);
-  const callbackRef = useRef({ onRefresh, getScrollOffset, onScroll, disabled });
-  callbackRef.current = { onRefresh, getScrollOffset, onScroll, disabled };
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const configRef = useRef({ onRefresh, disabled });
+  configRef.current = { onRefresh, disabled };
 
   const settle = () => {
     activeRef.current = false;
     observedRefreshRef.current = false;
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = null;
     Animated.spring(pull, { toValue: 0, useNativeDriver: true, damping: 20, stiffness: 180, mass: 0.7 }).start();
   };
 
@@ -39,18 +41,27 @@ export function PullToRefresh({ children, onRefresh, refreshing = false, getScro
     if (!activeRef.current) return;
     if (refreshing) {
       observedRefreshRef.current = true;
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
       return;
     }
     if (observedRefreshRef.current) {
-      const timer = setTimeout(settle, 260);
-      return () => clearTimeout(timer);
+      timeoutRef.current = setTimeout(settle, 260);
     }
   }, [refreshing]);
+
+  useEffect(() => () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+  }, []);
+
+  const handleScroll: NonNullable<ScrollViewProps["onScroll"]> = (event) => {
+    scrollOffset.current = event.nativeEvent.contentOffset.y;
+  };
 
   const panResponder = useRef(PanResponder.create({
     onStartShouldSetPanResponder: () => false,
     onMoveShouldSetPanResponderCapture: (_event, gesture) => {
-      const config = callbackRef.current;
+      const config = configRef.current;
       return !config.disabled && Boolean(config.onRefresh) && !activeRef.current &&
         scrollOffset.current <= 0 && gesture.dy > 7 && gesture.dy > Math.abs(gesture.dx) * 1.15;
     },
@@ -66,12 +77,16 @@ export function PullToRefresh({ children, onRefresh, refreshing = false, getScro
       if (pullValue.current >= REFRESH_THRESHOLD) {
         activeRef.current = true;
         Animated.spring(pull, { toValue: REFRESH_THRESHOLD, useNativeDriver: true, damping: 18, stiffness: 170 }).start();
-        const run = callbackRef.current.onRefresh;
-        if (run) run();
+        try {
+          configRef.current.onRefresh?.();
+        } catch {
+          settle();
+          return;
+        }
         if (!refreshingRef.current) {
-          setTimeout(() => {
+          timeoutRef.current = setTimeout(() => {
             if (activeRef.current && !observedRefreshRef.current) settle();
-          }, 1400);
+          }, 12_000);
         }
       } else {
         settle();
@@ -91,12 +106,12 @@ export function PullToRefresh({ children, onRefresh, refreshing = false, getScro
         <Animated.View pointerEvents="none" style={[styles.indicator, { opacity: indicatorOpacity, transform: [{ scale: indicatorScale }, { rotate }] }]}>
           <Svg width={48} height={48} viewBox="516.67 -12 414.88 414.88">
             <Path d={OUTLINE} fill={theme.colors.accent} fillRule="evenodd" />
-            <Circle cx={CENTER.x} cy={CENTER.y} r={CENTER.r} fill={theme.colors.accent} />
+            <Circle cx={CENTER.x} cy={CENTER.y} r={CENTER.r} fill={theme.colors.background} />
           </Svg>
         </Animated.View>
       ) : null}
       <Animated.View style={[styles.content, { transform: [{ translateY: pull }] }]}>
-        {typeof children === "function" ? children(onScroll) : children}
+        {renderContent(handleScroll)}
       </Animated.View>
     </View>
   );
