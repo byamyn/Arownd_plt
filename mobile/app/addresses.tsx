@@ -168,7 +168,7 @@ export default function AddressesScreen() {
   }
 
   return (
-    <CustomerScreen>
+    <CustomerScreen refreshing={addresses.isFetching || regionOptions.isFetching} onRefresh={() => { void Promise.all([addresses.refetch(), regionOptions.refetch()]); }}>
       <AppHeader
         title={translate("addressesTitle")}
         leading={<IconButton accessibilityLabel={translate("back")} onPress={() => router.back()} icon={<Icon name="arrow-right" size={20} />} variant="ghost" />}
