@@ -405,7 +405,7 @@ export function ArowndAssistant() {
                   accessibilityLabel={copy.newChat}
                   onPress={() => { setMessages([]); setQuestion(""); }}
                   hitSlop={10}
-                  style={styles.headerAction}
+                  style={[styles.headerAction, { backgroundColor: theme.colors.surfaceSecondary }]}
                 >
                   <Icon name="plus" size={20} color={theme.colors.foreground} />
                 </Pressable>
@@ -506,7 +506,7 @@ export function ArowndAssistant() {
                     onChangeText={setQuestion}
                     placeholder={copy.placeholder}
                     placeholderTextColor={theme.colors.placeholder}
-                    onSubmitEditing={submitQuestion}
+                    onSubmitEditing={() => { void submitQuestion(); }}
                     returnKeyType="send"
                     multiline
                     maxLength={4000}
@@ -538,7 +538,7 @@ const styles = StyleSheet.create({
   panelHeader: { flexDirection: "row", alignItems: "center", gap: 12 },
   assistantMark: { width: 42, height: 42, borderRadius: 13, alignItems: "center", justifyContent: "center" },
   headerCopy: { flex: 1, gap: 2 },
-  headerAction: { width: 38, height: 38, borderRadius: 12, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(128,128,128,0.10)" },
+  headerAction: { width: 38, height: 38, borderRadius: 12, alignItems: "center", justifyContent: "center" },
   closeButton: { width: 38, height: 38, alignItems: "center", justifyContent: "center" },
   tourContent: { gap: 12, paddingBottom: 8 },
   progressTrack: { height: 5, borderRadius: 5, overflow: "hidden" },
