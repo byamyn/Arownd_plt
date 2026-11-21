@@ -12,6 +12,7 @@ import {
   ErrorState,
 } from "@/components/customer-ui";
 import { Button, Caption, Icon, Image as UiImage, PriceDisplay, Text as UiText, ProductFeedSkeleton } from "@/components/ui";
+import { PullToRefresh } from "@/components/ui/pull-to-refresh";
 import { fetchHomeProducts, fetchProductDetails, fetchProductOffers, formatMarketPrice, getPrimaryImage } from "@/lib/catalog";
 import { BROWSING_CURRENCY_QUERY_KEY, fetchBrowsingCurrencyCode } from "@/lib/country-service";
 import { fetchApprovedReviews } from "@/lib/reviews";
@@ -294,7 +295,11 @@ export default function CustomerHomeScreen() {
         <CustomerMainHeader />
       </View>
       <View style={styles.feedViewport} onLayout={handleFeedLayout}>
-        <FlatList
+        <PullToRefresh
+          refreshing={products.isFetching}
+          onRefresh={() => { void Promise.all([products.refetch(), browsingCurrency.refetch()]); }}
+          renderContent={(onScroll) => (
+            <FlatList
           ref={feedListRef}
           data={products.data ?? []}
           renderItem={renderProduct}
@@ -303,8 +308,8 @@ export default function CustomerHomeScreen() {
           pagingEnabled
           decelerationRate="fast"
           showsVerticalScrollIndicator={false}
-          refreshing={products.isFetching}
-          onRefresh={() => { void products.refetch(); }}
+          onScroll={onScroll}
+          scrollEventThrottle={16}
           initialNumToRender={1}
           maxToRenderPerBatch={2}
           updateCellsBatchingPeriod={50}
@@ -316,6 +321,8 @@ export default function CustomerHomeScreen() {
             index
           }) : undefined}
           contentContainerStyle={styles.feedListContent}
+            />
+          )}
         />
       </View>
       <CustomerNavigation />
