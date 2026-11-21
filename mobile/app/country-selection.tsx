@@ -2,10 +2,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 
-import { Text as UiText } from "@/components/ui";
+import { RefreshableScrollView, Text as UiText } from "@/components/ui";
 import { detectCountryFromIp, fetchCountries, getSelectedCountryCode, saveSelectedCountryCode, type Country } from "@/lib/country-service";
 import { translate, useLanguage } from "@/lib/i18n";
-import { RefreshableScrollView } from "@/components/ui";
 import { useAppTheme } from "@/lib/theme";
 
 export default function CountrySelectionScreen() {
