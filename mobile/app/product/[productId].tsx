@@ -1,11 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { useRef, useState, type ComponentRef } from "react";
-import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 
 import { EmptyState, ErrorState } from "@/components/customer-ui";
 import { Button, Icon, IconButton, PriceDisplay, ProductImageGallery, ProductQuantitySelector, ProductVariantSelector, RatingStars, ProductCardSkeleton, Text as UiText } from "@/components/ui";
 import { FavoriteButton } from "@/components/favorite-button";
+import { PullToRefresh } from "@/components/ui/pull-to-refresh";
 import { chooseBestProductOffer, fetchProductDetails, fetchProductOffers, formatMarketPrice, getOfferVariantOptions } from "@/lib/catalog";
 import { BROWSING_CURRENCY_QUERY_KEY, fetchBrowsingCurrencyCode } from "@/lib/country-service";
 import { addToCart, CART_QUERY_KEY } from "@/lib/cart";
@@ -154,13 +155,18 @@ export default function ProductDetailsScreen() {
           <View style={styles.sheetHeader}>
             <IconButton accessibilityLabel={translate("back")} onPress={() => router.back()} icon={<Icon name="chevron-down" size={22} color={theme.colors.foreground} />} />
           </View>
-          <ScrollView
-            style={styles.sheetScroll}
-            contentContainerStyle={styles.sheetContent}
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-            refreshControl={<RefreshControl refreshing={product.isFetching || offers.isFetching || reviews.isFetching} onRefresh={() => { void Promise.all([product.refetch(), offers.refetch(), reviews.refetch()]); }} tintColor={theme.colors.accentOnSurface} />}
-          >
+          <PullToRefresh
+            refreshing={product.isFetching || offers.isFetching || reviews.isFetching}
+            onRefresh={() => { void Promise.all([product.refetch(), offers.refetch(), reviews.refetch()]); }}
+            renderContent={(onScroll) => (
+              <ScrollView
+                style={styles.sheetScroll}
+                contentContainerStyle={styles.sheetContent}
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
+                onScroll={onScroll}
+                scrollEventThrottle={16}
+              >
       <View ref={imageAnchorRef} collapsable={false} style={styles.heroWrap}>
         {imageUrl ? <ProductImageGallery images={galleryImages} selectedIndex={Math.min(selectedImageIndex, Math.max(0, galleryImages.length - 1))} accessibilityLabel={productDetails.name} onSelect={setSelectedImageIndex} imageStyle={styles.heroImage} /> : <View style={[styles.heroImage, { backgroundColor: theme.colors.surfaceMuted }]}><Icon name="image" size={42} color={theme.colors.subtle} accessibilityHidden /></View>}
         <View style={styles.favoriteOverlay}>
@@ -264,7 +270,9 @@ export default function ProductDetailsScreen() {
         {reviewsExpanded ? <ReviewPanel targetType="product" targetId={productId} /> : null}
       </View>
       <ContentReportAction targetType="product" targetId={productId} />
-          </ScrollView>
+              </ScrollView>
+            )}
+          />
           {selectedOffer ? (
             <View style={[styles.purchaseFooter, { backgroundColor: theme.colors.background, borderTopColor: theme.colors.border }]}>
               <View style={styles.footerTotal}>
