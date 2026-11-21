@@ -141,7 +141,7 @@ export default function SettingsScreen() {
   const closeSheet = () => setActiveSheet(null);
 
   return (
-    <CustomerScreen showNavigation={false} contentStyle={styles.screenContent}>
+    <CustomerScreen showNavigation={false} contentStyle={styles.screenContent} refreshing={browsingCountry.isFetching || (activeSheet === "country" && countries.isFetching)} onRefresh={() => { void browsingCountry.refetch(); if (activeSheet === "country") void countries.refetch(); }}>
       <AppHeader title={translate("settingsTitle")} />
       <View style={styles.section}>
         <Heading level={3}>{translate("settingsPreferencesTitle")}</Heading>
