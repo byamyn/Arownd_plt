@@ -139,7 +139,7 @@ async function callGemini(messages: ChatMessage[]): Promise<string> {
   if (!key) throw new Error("provider_not_configured");
   const system = messages.find((message) => message.role === "system");
   const conversation = messages.filter((message) => message !== system);
-  const model = Deno.env.get("GEMINI_MODEL")?.trim() || "gemini-2.5-flash";
+  const model = Deno.env.get("GEMINI_MODEL")?.trim() || "gemini-3.1-flash-lite";
   const payload = await fetchJson("gemini",
     "https://generativelanguage.googleapis.com/v1beta/models/" + encodeURIComponent(model) + ":generateContent",
     { "x-goog-api-key": key },
@@ -160,19 +160,19 @@ async function callCloudflare(messages: ChatMessage[]): Promise<string> {
   const accountId = Deno.env.get("CLOUDFLARE_ACCOUNT_ID")?.trim();
   const key = Deno.env.get("CLOUDFLARE_API_TOKEN")?.trim();
   if (!accountId || !key) throw new Error("provider_not_configured");
-  const prompt = messages.map((message) =>
-    (message.role === "system" ? "System" : message.role === "assistant" ? "Arownd Aide" : "User") + ":\n" + message.content
-  ).join("\n\n") + "\n\nArownd Aide:\n";
-  const model = Deno.env.get("CLOUDFLARE_MODEL")?.trim() || "@cf/meta/llama-3.1-8b-instruct";
+  const model = Deno.env.get("CLOUDFLARE_MODEL")?.trim() || "@cf/zai-org/glm-4.7-flash";
+  const modelPath = model.split("/").map((part) => encodeURIComponent(part)).join("/");
   const payload = await fetchJson("cloudflare",
-    "https://api.cloudflare.com/client/v4/accounts/" + encodeURIComponent(accountId) + "/ai/run/" + encodeURIComponent(model),
+    "https://api.cloudflare.com/client/v4/accounts/" + encodeURIComponent(accountId) + "/ai/run/" + modelPath,
     { Authorization: "Bearer " + key },
-    { prompt, max_tokens: 900, temperature: 0.4 });
-  if (!isRecord(payload) || payload.success !== true || !isRecord(payload.result) ||
-      typeof payload.result.response !== "string" || !payload.result.response.trim()) {
-    throw new Error("provider_invalid_response");
+    { messages, max_completion_tokens: 900, temperature: 0.4 });
+  if (isRecord(payload) && isRecord(payload.result) &&
+      typeof payload.result.response === "string" && payload.result.response.trim()) {
+    return payload.result.response.trim();
   }
-  return payload.result.response.trim();
+  const answer = extractOpenAiText(payload);
+  if (!answer) throw new Error("provider_invalid_response");
+  return answer;
 }
 
 async function callOpenRouter(messages: ChatMessage[]): Promise<string> {
