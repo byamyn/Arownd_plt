@@ -395,10 +395,6 @@ function sanitizeAssistantLinks(answer: string, context: ReadContext): string {
     "/merchant", "/merchant/orders", "/merchant/products", "/merchant/settings",
     "/merchant/account-settings",
   ]);
-  const orderIds = new Set([
-    ...context.customerOrders.map((row) => row.id),
-    ...context.merchantOrders.map((row) => row.id),
-  ].filter((id): id is string => typeof id === "string"));
   const offerIds = new Set(context.offers
     .map((row) => row.id)
     .filter((id): id is string => typeof id === "string"));
