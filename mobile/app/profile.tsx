@@ -200,11 +200,11 @@ export default function ProfileScreen() {
               />
               <PressableSurface
                 accessibilityRole="button"
-                accessibilityLabel={translate("profileEditDetails")}
+                accessibilityLabel={translate("addressesEdit")}
                 onPress={() => setAccountSheet("delivery")}
                 style={styles.identityEditLink}
               >
-                <UiText weight="700" style={{ color: theme.colors.accentOnSurface }}>{translate("profileEditDetails")}</UiText>
+                <UiText weight="700" style={{ color: theme.colors.accent, textDecorationLine: "underline" }}>{translate("addressesEdit")}</UiText>
               </PressableSurface>
             </View>
             {avatarPickerError || uploadAvatar.isError || removeAvatar.isError ? (
