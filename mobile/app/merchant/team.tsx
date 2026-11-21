@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Redirect, router } from "expo-router";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import {
@@ -14,6 +14,7 @@ import {
   Card,
   Icon,
   PressableSurface,
+  RefreshableScrollView,
   SegmentedControl,
   Spinner,
   StatusBadge,
@@ -171,7 +172,7 @@ export default function MerchantTeamScreen() {
 
   return (
     <SafeAreaView edges={["top", "left", "right"]} style={[styles.safe, { backgroundColor: theme.colors.background }]}>
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <RefreshableScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} refreshing={access.isFetching || members.isFetching || invitations.isFetching} onRefresh={() => { void Promise.all([access.refetch(), members.refetch(), invitations.refetch()]); }}>
         <AppHeader title={translate("merchantTeamTitle")} onBack={() => router.replace("/merchant/account-settings")} />
         <UiText style={styles.subtitle}>{translate("merchantTeamSubtitle")}</UiText>
 
@@ -275,7 +276,7 @@ export default function MerchantTeamScreen() {
           }}
           fullWidth
         />
-      </ScrollView>
+      </RefreshableScrollView>
 
       <BottomSheet visible={inviteOpen} onRequestClose={() => setInviteOpen(false)} title={translate("merchantTeamInvite")}>
         <Controller
