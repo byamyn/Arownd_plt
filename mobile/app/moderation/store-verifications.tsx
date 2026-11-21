@@ -1,10 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { AppHeader, Button, Card, ErrorState, Image as UiImage, LoadingState, Text as UiText, TextField } from "@/components/ui";
+import { AppHeader, Button, Card, ErrorState, Image as UiImage, LoadingState, RefreshableScrollView, Text as UiText, TextField } from "@/components/ui";
 import {
   fetchStoreVerificationQueue,
   fetchStoreVerificationReviewerAccess,
@@ -80,7 +80,7 @@ export default function StoreVerificationModerationScreen() {
 
   return (
     <SafeAreaView edges={["top", "left", "right"]} style={[styles.safe, { backgroundColor: theme.colors.background }]}>
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <RefreshableScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} refreshing={reviewer.isFetching || queue.isFetching} onRefresh={() => { void Promise.all([reviewer.refetch(), queue.refetch()]); }}>
         <AppHeader title={translate("verificationModerationTitle")} />
         <UiText style={[styles.subtitle, { color: theme.colors.muted }]}>
           {translate("verificationModerationSubtitle")}
@@ -163,7 +163,7 @@ export default function StoreVerificationModerationScreen() {
           variant="ghost"
           disabled={queue.isFetching || review.isPending}
         />
-      </ScrollView>
+      </RefreshableScrollView>
     </SafeAreaView>
   );
 }
