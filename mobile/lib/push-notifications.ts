@@ -4,6 +4,7 @@ import * as SecureStore from "expo-secure-store";
 import { Platform } from "react-native";
 
 import { getSupabaseClient } from "@/lib/supabase";
+import { designTokens } from "@/lib/theme";
 
 const DEVICE_TOKEN_STORAGE_KEY = "arownd.push-device-token.v1";
 const ANDROID_CHANNEL_ID = "arownd_updates";
@@ -67,7 +68,7 @@ export async function registerDeviceForPushNotifications(language: "ar" | "en"):
       name: language === "ar" ? "تحديثات Arownd" : "Arownd updates",
       importance: Notifications.AndroidImportance.MAX,
       vibrationPattern: [0, 250, 250, 250],
-      lightColor: "#FFFF00"
+      lightColor: designTokens.brand.primary
     });
   }
 
