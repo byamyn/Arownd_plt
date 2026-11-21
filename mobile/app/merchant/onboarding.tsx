@@ -29,7 +29,7 @@ import {
 import { translate, type TranslationKey, useLanguage } from "@/lib/i18n";
 import { getRegionDisplayName, getRegionLevelDisplayName } from "@/lib/country-regions";
 import { designTokens, useAppTheme, type AppTheme } from "@/lib/theme";
-import { BottomSheet, AppHeader, Button, Card, ErrorState, PageSkeleton, PressableSurface, Text as UiText, TextField } from "@/components/ui";
+import { BottomSheet, AppHeader, Button, Card, ErrorState, PageSkeleton, PressableSurface, RefreshableScrollView, Text as UiText, TextField } from "@/components/ui";
 
 export default function MerchantOnboardingScreen() {
   const { language } = useLanguage();
