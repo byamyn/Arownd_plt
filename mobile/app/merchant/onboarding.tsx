@@ -161,8 +161,8 @@ export default function MerchantOnboardingScreen() {
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}
           showsVerticalScrollIndicator={false}
-          refreshing={access.isFetching || suggestedStoreName.isFetching || regionOptions.isFetching || secondaryOptions.isFetching}
-          onRefresh={() => { void Promise.all([access.refetch(), suggestedStoreName.refetch(), regionOptions.refetch(), ...(regionId !== null ? [secondaryOptions.refetch()] : [])]); }}
+          refreshing={access.isFetching || regionOptions.isFetching || secondaryOptions.isFetching}
+          onRefresh={() => { void Promise.all([access.refetch(), regionOptions.refetch(), ...(regionId !== null ? [secondaryOptions.refetch()] : [])]); }}
         >
           <AppHeader title={translate("merchantOnboardingTitle")}/>
 
