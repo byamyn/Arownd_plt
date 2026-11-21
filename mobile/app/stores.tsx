@@ -41,8 +41,8 @@ export default function StoresScreen() {
 
   return (
     <CustomerScreen
-      refreshing={selectedRegionId === null ? regions.isFetching || browsingCountry.isFetching : stores.isFetching}
-      onRefresh={() => { void (selectedRegionId === null ? regions.refetch() : stores.refetch()); }}
+      refreshing={browsingCountry.isFetching || regions.isFetching || (selectedRegionId !== null && stores.isFetching)}
+      onRefresh={() => { void Promise.all([browsingCountry.refetch(), regions.refetch(), ...(selectedRegionId !== null ? [stores.refetch()] : [])]); }}
     >
       <AppHeader
         title={title}
