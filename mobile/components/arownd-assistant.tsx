@@ -47,8 +47,9 @@ function parseAssistantLinks(value: string): { text: string; links: AssistantLin
     const route = rawRoute.trim();
     const validStatic = STATIC_ASSISTANT_ROUTES.has(route);
     const validOrder = /^\/orders\/[0-9a-f-]{36}$/i.test(route);
+    const validMerchantOrder = /^\/merchant\/orders\/[0-9a-f-]{36}$/i.test(route);
     const validMerchantProduct = /^\/merchant\/products\/[0-9a-f-]{36}$/i.test(route);
-    if (!label || (!validStatic && !validOrder && !validMerchantProduct)) return label || match;
+    if (!label || (!validStatic && !validOrder && !validMerchantOrder && !validMerchantProduct)) return label || match;
     links.push({ label, route });
     return label;
   });
