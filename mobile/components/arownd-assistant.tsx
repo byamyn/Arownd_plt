@@ -246,7 +246,7 @@ export function ArowndAssistant() {
       >
         <View style={styles.modalRoot}>
           <Pressable style={styles.scrim} onPress={closeModal} />
-          <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={[styles.panel, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border, paddingBottom: Math.max(insets.bottom, 16) + 12 }]}>
+          <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={[styles.panel, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border, paddingBottom: Math.max(insets.bottom, 16) + 12 }]}>
             <View style={styles.panelHeader}>
               <View style={[styles.assistantMark, { backgroundColor: theme.colors.accent }]}>
                 <Icon name="message-circle" size={21} color={theme.colors.accentForeground} />
