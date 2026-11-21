@@ -12,6 +12,7 @@ import {
   View
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Svg, { Circle, Path } from "react-native-svg";
 
 import { Icon } from "@/components/ui";
 import { Text as UiText } from "@/components/ui";
@@ -19,6 +20,19 @@ import { fetchMerchantAccess } from "@/lib/merchant";
 import { getSupabaseClient } from "@/lib/supabase";
 import { useAppTheme } from "@/lib/theme";
 import { useLanguage } from "@/lib/i18n";
+
+function ArowndMark({ size, color }: { size: number; color: string }) {
+  return (
+    <Svg width={size} height={size} viewBox="516.67 -12 414.88 414.88">
+      <Path
+        d="M693.33 353.56C692.15 351.76 691.08 349.96 689.5 348.44C683.12 342.3 666.21 334.6 657.57 328.82C640.77 317.56 627.29 301.13 619.97 282.24C602.42 236.93 623.48 196.4 641.8 155.56C650.39 136.41 657.92 116.7 667.5 98.02C679.66 74.31 698.05 48.51 727.96 50.08C752.11 51.35 770.81 69.35 781.22 89.92C791.4 110.07 795.59 132.49 800.85 154.25C809.32 189.28 818.64 218.56 811.5 255.26C807.07 278.08 796.98 299.77 781.47 317.18C776.19 323.09 753.78 342.23 752.06 346.93C750.28 351.8 758.83 353.44 761.92 353.65C773.4 354.45 785.48 348.79 795.24 343.3C821.67 328.44 842.06 303.73 846.99 273.31C853.09 235.58 841.04 198.79 829.9 163.27L818.24 125.48C808.05 92.76 795.67 60.24 762.7 44.45C754.81 40.67 746.29 37.9 737.61 36.69C705.55 32.22 683.13 49.24 666.63 75.14C653.87 95.15 644.72 117.31 634.55 138.69C614.54 180.8 591.56 224.71 602.35 272.8C608.85 301.79 627.91 327.43 652.9 343.2C661.97 348.93 673.23 354.87 684.23 354.88C687.33 354.89 690.33 354.21 693.33 353.56Z"
+        fill={color}
+        fillRule="evenodd"
+      />
+      <Circle cx={710.89} cy={237.83} r={51.83} fill={color} />
+    </Svg>
+  );
+}
 
 type TourStep = {
   title: string;
@@ -374,7 +388,7 @@ export function ArowndAssistant() {
           onPress={openChat}
           style={[styles.floatingButton, { bottom: Math.max(insets.bottom, 12) + 72, backgroundColor: theme.colors.accent, end: 18 }]}
         >
-          <Icon name="message-circle" size={25} color={theme.colors.accentForeground} />
+          <ArowndMark size={25} color={theme.colors.accentForeground} />
         </Pressable>
       ) : null}
       <Modal
@@ -393,7 +407,7 @@ export function ArowndAssistant() {
             <View style={[activeStep ? styles.tourPanel : styles.panel, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border, paddingTop: activeStep ? 18 : Math.max(insets.top, 12) + 10, paddingBottom: Math.max(insets.bottom, 16) + 12 }]}>
             <View style={styles.panelHeader}>
               <View style={[styles.assistantMark, { backgroundColor: theme.colors.accent }]}>
-                <Icon name="message-circle" size={21} color={theme.colors.accentForeground} />
+                <ArowndMark size={21} color={theme.colors.accentForeground} />
               </View>
               <View style={styles.headerCopy}>
                 <UiText weight="700">{copy.title}</UiText>
@@ -450,7 +464,7 @@ export function ArowndAssistant() {
                   {messages.length === 0 ? (
                     <View style={styles.emptyState}>
                       <View style={[styles.emptyMark, { backgroundColor: theme.colors.surfaceSecondary }]}>
-                        <Icon name="message-circle" size={25} color={theme.colors.accent} />
+                        <ArowndMark size={25} color={theme.colors.accent} />
                       </View>
                       <UiText weight="700" style={styles.greeting}>{copy.greeting}</UiText>
                       <UiText tone="muted" style={styles.emptySubtitle}>{copy.subtitle}</UiText>
