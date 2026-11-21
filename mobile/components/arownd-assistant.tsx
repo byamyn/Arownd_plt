@@ -465,7 +465,7 @@ export function ArowndAssistant() {
                               style={[styles.suggestionCard, { borderColor: theme.colors.border }]}
                             >
                               <UiText style={{ flex: 1, fontSize: 13 }}>{suggestion}</UiText>
-                              <Icon name={isArabic ? "arrow-up-left" : "arrow-up-right"} size={16} color={theme.colors.accent} />
+                              <Icon name="arrow-left" size={16} color={theme.colors.accent} />
                             </Pressable>
                           ))}
                         </View>
