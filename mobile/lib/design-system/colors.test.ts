@@ -68,8 +68,8 @@ describe("design system text contrast", () => {
   });
 
   it("uses mode-specific focus colors", () => {
-    expect(getAppTheme("light").colors.focus).toBe("#000000");
-    expect(getAppTheme("dark").colors.focus).toBe("#FFFF00");
+    expect(getAppTheme("light").colors.focus).toBe("#D97757");
+    expect(getAppTheme("dark").colors.focus).toBe("#D97757");
   });
 
   it("uses the approved semantic background colors for both modes", () => {
@@ -83,31 +83,31 @@ describe("design system text contrast", () => {
     expect(extendedThemeColors.dark.infoSurface).toBe("rgba(96,165,250,0.15)");
   });
 
-  it("uses black text on the approved yellow brand surface", () => {
-    expect(brandColors.primary).toBe("#FFFF00");
+  it("uses dark text on the approved orange brand surface", () => {
+    expect(brandColors.primary).toBe("#D97757");
     expect(contrastRatio(brandColors.black, brandColors.primary)).toBeGreaterThanOrEqual(4.5);
   });
 
-  it("uses the approved monochrome light and dark surfaces", () => {
-    expect(themeColors.light.background).toBe("#FFFFFF");
-    expect(themeColors.light.foreground).toBe("#000000");
-    expect(themeColors.light.surfaceSecondary).toBe("#F5F5F5");
-    expect(themeColors.light.surfaceTertiary).toBe("#EEEEEE");
-    expect(themeColors.light.border).toBe("#E5E5E5");
+  it("uses the approved warm neutral light and dark surfaces", () => {
+    expect(themeColors.light.background).toBe("#FAF9F5");
+    expect(themeColors.light.foreground).toBe("#141413");
+    expect(themeColors.light.surfaceSecondary).toBe("#E8E6DC");
+    expect(themeColors.light.surfaceTertiary).toBe("#E1DFD5");
+    expect(themeColors.light.border).toBe("#B0AEA5");
 
-    expect(themeColors.dark.background).toBe("#000000");
-    expect(themeColors.dark.foreground).toBe("#FFFFFF");
-    expect(themeColors.dark.surface).toBe("#141414");
-    expect(themeColors.dark.surfaceTertiary).toBe("#1E1E1E");
-    expect(themeColors.dark.border).toBe("#2E2E2E");
+    expect(themeColors.dark.background).toBe("#141413");
+    expect(themeColors.dark.foreground).toBe("#FAF9F5");
+    expect(themeColors.dark.surface).toBe("#1C1C19");
+    expect(themeColors.dark.surfaceTertiary).toBe("#30302A");
+    expect(themeColors.dark.border).toBe("#4A4942");
   });
 
-  it("uses the single brand yellow and black text over primary surfaces", () => {
-    expect(brandColors.primary).toBe("#FFFF00");
+  it("uses the approved orange accent and dark text over primary surfaces", () => {
+    expect(brandColors.primary).toBe("#D97757");
     for (const mode of ["light", "dark"] as const) {
       const theme = getAppTheme(mode);
-      expect(theme.colors.accent).toBe("#FFFF00");
-      expect(theme.colors.accentForeground).toBe("#000000");
+      expect(theme.colors.accent).toBe("#D97757");
+      expect(theme.colors.accentForeground).toBe("#141413");
     }
   });
 });
