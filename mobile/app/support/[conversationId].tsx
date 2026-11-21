@@ -98,7 +98,7 @@ export default function SupportConversationScreen() {
 
   const closed = conversation.data.status === "closed";
   return (
-    <KeyboardAvoidingView style={styles.keyboardRoot} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+    <KeyboardAvoidingView style={styles.keyboardRoot} behavior={Platform.OS === "ios" ? "padding" : "height"}>
     <CustomerScreen
       showNavigation={false}
       onRefresh={() => { void messages.refetch(); }}
