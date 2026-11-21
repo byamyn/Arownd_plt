@@ -56,6 +56,7 @@ export function CustomerFlatList<T>({
         style={styles.scroll}
         contentContainerStyle={[styles.content, contentContainerStyle]}
         showsVerticalScrollIndicator={false}
+        automaticallyAdjustKeyboardInsets
         refreshControl={onRefresh ? (
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[indicatorColor]} progressBackgroundColor={theme.colors.background} tintColor={indicatorColor} />
         ) : undefined}
