@@ -49,6 +49,7 @@ export default function SettingsScreen() {
   const [signOutError, setSignOutError] = useState(false);
   const [signOutConfirmOpen, setSignOutConfirmOpen] = useState(false);
   const [accountSwitchError, setAccountSwitchError] = useState(false);
+  const [addAccountError, setAddAccountError] = useState(false);
   const [addingAccount, setAddingAccount] = useState(false);
 
   const countries = useQuery({ queryKey: ["available-countries"], queryFn: ({ signal }) => fetchCountries(signal), enabled: activeSheet === "country" });
@@ -164,12 +165,13 @@ export default function SettingsScreen() {
   const addAccount = async () => {
     setAddingAccount(true);
     setAccountSwitchError(false);
+    setAddAccountError(false);
     try {
       await saveCurrentAccountSession();
       closeSheet();
       router.push("/login");
     } catch {
-      setAccountSwitchError(true);
+      setAddAccountError(true);
     } finally {
       setAddingAccount(false);
     }
@@ -286,6 +288,7 @@ export default function SettingsScreen() {
           label={translate("settingsSwitchAccount")}
           onPress={() => {
             setAccountSwitchError(false);
+            setAddAccountError(false);
             openSheet("accounts");
           }}
           theme={theme}
@@ -359,8 +362,10 @@ export default function SettingsScreen() {
         )}
         {accountSwitchMutation.isPending ? <Caption>{translate("settingsAccountSwitching")}</Caption> : null}
         {accountSwitchError ? <UiText tone="danger">{translate("settingsAccountSwitchError")}</UiText> : null}
+        {addAccountError ? <UiText tone="danger">{translate("settingsAddAccountError")}</UiText> : null}
         <Button
           label={translate("settingsAddAccount")}
+          startIcon={<Icon name="plus" size={16} color={theme.colors.foreground} />}
           onPress={() => void addAccount()}
           loading={addingAccount}
           disabled={addingAccount || accountSwitchMutation.isPending}
