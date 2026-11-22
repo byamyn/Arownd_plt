@@ -138,6 +138,47 @@ export function InlineLink({ label, onPress }: { label: string; onPress: () => v
   );
 }
 
+export function AuthStepIndicator({ currentStep }: { currentStep: 1 | 2 }) {
+  const theme = useAppTheme();
+  const steps = [
+    { number: 1, label: translate("authStepAccountType") },
+    { number: 2, label: translate("authStepDetails") }
+  ] as const;
+
+  return (
+    <View accessibilityRole="progressbar" accessibilityLabel={translate("authStepProgress")} style={styles.stepIndicator}>
+      {steps.map((step, index) => {
+        const complete = step.number < currentStep;
+        const active = step.number === currentStep;
+        const emphasized = complete || active;
+        return (
+          <View key={step.number} style={styles.stepGroup}>
+            <View style={styles.stepItem}>
+              <View style={[
+                styles.stepNumber,
+                {
+                  backgroundColor: complete ? theme.colors.accent : "transparent",
+                  borderColor: emphasized ? theme.colors.accent : theme.colors.border
+                }
+              ]}>
+                <UiText weight="700" style={{ color: complete ? theme.colors.surface : emphasized ? theme.colors.accent : theme.colors.muted }}>
+                  {complete ? "✓" : String(step.number)}
+                </UiText>
+              </View>
+              <Caption weight={active ? "800" : "600"} style={{ color: emphasized ? theme.colors.foreground : theme.colors.muted }}>
+                {step.label}
+              </Caption>
+            </View>
+            {index === 0 ? (
+              <View style={[styles.stepConnector, { backgroundColor: currentStep === 2 ? theme.colors.accent : theme.colors.border }]} />
+            ) : null}
+          </View>
+        );
+      })}
+    </View>
+  );
+}
+
 export function PasswordStrengthMeter({ password }: { password: string }) {
   const theme = useAppTheme();
   if (!password) return null;
@@ -145,12 +186,13 @@ export function PasswordStrengthMeter({ password }: { password: string }) {
   const passwordLength = Array.from(password).length;
   const hasNumber = /\p{N}/u.test(password);
   const hasSymbol = /[\p{P}\p{S}]/u.test(password);
-  const score = [
-    passwordLength >= 8,
-    passwordLength >= 12,
-    /[a-z]/.test(password) && /[A-Z]/.test(password),
-    hasNumber && hasSymbol
-  ].filter(Boolean).length;
+  const rules = [
+    { key: "passwordRuleMin", met: passwordLength >= 8 },
+    { key: "passwordRuleLong", met: passwordLength >= 12 },
+    { key: "passwordRuleMixedCase", met: /[a-z]/.test(password) && /[A-Z]/.test(password) },
+    { key: "passwordRuleNumberSymbol", met: hasNumber && hasSymbol }
+  ] as const;
+  const score = rules.filter((rule) => rule.met).length;
   const labelKey = score <= 1
     ? "passwordStrengthWeak"
     : score === 2
@@ -181,6 +223,21 @@ export function PasswordStrengthMeter({ password }: { password: string }) {
               { backgroundColor: segment <= score ? strengthColor : theme.colors.border }
             ]}
           />
+        ))}
+      </View>
+      <View style={styles.passwordRules}>
+        {rules.map((rule) => (
+          <View key={rule.key} style={styles.passwordRule}>
+            <View style={[
+              styles.passwordRuleMark,
+              { borderColor: rule.met ? theme.colors.success : theme.colors.border, backgroundColor: rule.met ? theme.colors.success : "transparent" }
+            ]}>
+              {rule.met ? <UiText style={styles.passwordRuleCheck}>✓</UiText> : null}
+            </View>
+            <Caption style={{ color: rule.met ? theme.colors.success : theme.colors.muted }}>
+              {translate(rule.key)}
+            </Caption>
+          </View>
         ))}
       </View>
     </View>
@@ -234,9 +291,18 @@ const styles = StyleSheet.create({
   subtitle: { textAlign: "auto", marginTop: designTokens.spacing.sm },
   content: { gap: designTokens.spacing.lg },
   link: { fontSize: designTokens.typography.caption + 2 },
+  stepIndicator: { flexDirection: "row", alignItems: "center", marginBottom: designTokens.spacing.md },
+  stepGroup: { flex: 1, flexDirection: "row", alignItems: "center" },
+  stepItem: { alignItems: "center", gap: designTokens.spacing.xs, minWidth: 94 },
+  stepNumber: { width: 28, height: 28, borderRadius: designTokens.radius.pill, borderWidth: 1.5, alignItems: "center", justifyContent: "center" },
+  stepConnector: { flex: 1, height: 1, marginHorizontal: designTokens.spacing.sm },
   passwordStrength: { gap: designTokens.spacing.xs, marginTop: -designTokens.spacing.sm },
   passwordStrengthHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   passwordStrengthBars: { flexDirection: "row", gap: designTokens.spacing.xs },
   passwordStrengthBar: { flex: 1, height: 4, borderRadius: designTokens.radius.pill },
+  passwordRules: { gap: designTokens.spacing.xs, paddingTop: designTokens.spacing.xs },
+  passwordRule: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.sm },
+  passwordRuleMark: { width: 16, height: 16, borderRadius: designTokens.radius.pill, borderWidth: 1, alignItems: "center", justifyContent: "center" },
+  passwordRuleCheck: { color: "#FFFFFF", fontSize: 10, lineHeight: 12, fontWeight: "800" },
   footer: { marginTop: "auto", paddingTop: designTokens.spacing.xxl }
 });
