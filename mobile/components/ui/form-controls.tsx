@@ -9,13 +9,14 @@ import { getQuantityStepState } from "./form-controls-state";
 
 type TextFieldProps = Omit<TextInputProps, "style" | "textAlign"> & {
   textAlign?: TextInputProps["textAlign"] | "auto" | undefined;
+  focusEmphasis?: boolean | undefined;
   label?: string | undefined;
   error?: string | undefined;
   style?: StyleProp<TextStyle> | undefined;
   containerStyle?: StyleProp<ViewStyle> | undefined;
 };
 
-export function TextField({ label, error, style, containerStyle, accessibilityLabel, textAlign, onFocus, onBlur, secureTextEntry, editable = true, ...props }: TextFieldProps) {
+export function TextField({ label, error, style, containerStyle, accessibilityLabel, textAlign, onFocus, onBlur, secureTextEntry, focusEmphasis = false, editable = true, ...props }: TextFieldProps) {
   const theme = useAppTheme();
   const [focused, setFocused] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -118,6 +119,12 @@ export function TextField({ label, error, style, containerStyle, accessibilityLa
             {
               backgroundColor: theme.colors.surface,
               borderColor: error ? theme.colors.danger : focused ? theme.colors.focus : theme.colors.inputBorder,
+              borderWidth: focusEmphasis && focused ? 2 : 1,
+              shadowColor: focusEmphasis && focused ? theme.colors.focus : "transparent",
+              shadowOpacity: focusEmphasis && focused ? 0.18 : 0,
+              shadowRadius: focusEmphasis && focused ? 4 : 0,
+              shadowOffset: { width: 0, height: 0 },
+              elevation: focusEmphasis && focused ? 1 : 0,
               color: theme.colors.foreground,
               fontFamily: language === "ar" ? theme.fontFamilies.arabic : theme.fontFamilies.latin
             },
