@@ -11,9 +11,8 @@ import {
   Inter_800ExtraBold
 } from "@expo-google-fonts/inter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Animated, Platform, StyleSheet, Text, View } from "react-native";
-import { useEffect, useRef, useState } from "react";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Platform, StyleSheet, View } from "react-native";
+import { useEffect, useState } from "react";
 
 import AnimatedLogo from "@/components/animated-logo";
 import { AuthCaptchaHost } from "@/components/auth-captcha-host";
@@ -73,29 +72,9 @@ function RootLayoutContent() {
   );
   const [showSplash, setShowSplash] = useState(true);
   const theme = useAppTheme();
-  const insets = useSafeAreaInsets();
   const { language, isReady: languageReady } = useLanguage();
-  const splashDotOne = useRef(new Animated.Value(1)).current;
-  const splashDotTwo = useRef(new Animated.Value(1)).current;
-  const splashDotThree = useRef(new Animated.Value(1)).current;
   const { isReady: themeReady } = useThemePreference();
   const appReady = (fontsLoaded || Boolean(fontError)) && themeReady && languageReady;
-
-  useEffect(() => {
-    const createPulse = (value: Animated.Value) => Animated.loop(
-      Animated.sequence([
-        Animated.timing(value, { toValue: 0.2, duration: 260, useNativeDriver: true }),
-        Animated.timing(value, { toValue: 1, duration: 260, useNativeDriver: true })
-      ])
-    );
-    const pulses = Animated.stagger(150, [
-      createPulse(splashDotOne),
-      createPulse(splashDotTwo),
-      createPulse(splashDotThree)
-    ]);
-    pulses.start();
-    return () => pulses.stop();
-  }, [splashDotOne, splashDotTwo, splashDotThree]);
 
   useEffect(() => {
     if (!appReady) return;
@@ -204,14 +183,6 @@ function RootLayoutContent() {
           <View style={styles.logo}>
             <AnimatedLogo width={220} />
           </View>
-          <View style={[styles.splashFooter, { bottom: Math.max(insets.bottom, 12) + 12 }]}>
-            <Text style={[styles.splashCaption, { color: theme.colors.foreground }]}>
-              he's coming
-              <Animated.Text style={{ opacity: splashDotOne }}>.</Animated.Text>
-              <Animated.Text style={{ opacity: splashDotTwo }}>.</Animated.Text>
-              <Animated.Text style={{ opacity: splashDotThree }}>.</Animated.Text>
-            </Text>
-          </View>
         </View>
       ) : null}
     </View>
@@ -238,15 +209,4 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     transform: [{ translateY: -20 }]
   },
-  splashFooter: {
-    position: "absolute",
-    alignItems: "center",
-    justifyContent: "center"
-  },
-  splashCaption: {
-    fontSize: 12,
-    lineHeight: 18,
-    letterSpacing: 1.1,
-    fontWeight: "500"
-  }
 });
