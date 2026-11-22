@@ -282,7 +282,7 @@ export default function SettingsScreen() {
 
       <View style={styles.section}>
         <SettingsRow
-          icon="repeat"
+          icon="refresh-cw"
           label={translate("settingsSwitchAccount")}
           onPress={() => {
             setAccountSwitchError(false);
@@ -337,7 +337,7 @@ export default function SettingsScreen() {
                   style={[styles.accountOption, isCurrent && { borderColor: theme.colors.accent, backgroundColor: theme.colors.surfaceSecondary }]}
                 >
                   <View style={styles.accountAvatar}>
-                    <Icon name="user-round" size={20} color={theme.colors.accentOnSurface} />
+                    <Icon name="user" size={20} color={theme.colors.accentOnSurface} />
                   </View>
                   <View style={styles.accountOptionCopy}>
                     <UiText weight="700" numberOfLines={1}>{account.displayName}</UiText>
