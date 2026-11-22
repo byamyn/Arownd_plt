@@ -286,7 +286,7 @@ export function translateError(key: TranslationKey): string {
   return translate(key);
 }
 
-// Artwork based on the repository's root arونډ-background.svg asset.
+// Artwork based on the repository's root arownd-background.svg asset.
 // The background color is replaced at render time to follow the active app theme.
 const AUTH_BACKGROUND = `<svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844">
   <rect width="390" height="844" fill="#FAF9F5"/>
