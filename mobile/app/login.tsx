@@ -40,6 +40,7 @@ export default function LoginScreen() {
           render={({ field: { onChange, onBlur, value } }) => (
             <AuthField
               label={translate("email")}
+              icon="mail"
               value={value}
               onChangeText={onChange}
               onBlur={onBlur}
@@ -56,6 +57,7 @@ export default function LoginScreen() {
           render={({ field: { onChange, onBlur, value } }) => (
             <AuthField
               label={translate("password")}
+              icon="lock"
               value={value}
               onChangeText={onChange}
               onBlur={onBlur}
@@ -74,7 +76,6 @@ export default function LoginScreen() {
           label={isSubmitting ? translate("loginBusy") : translate("login")}
           onPress={() => void submit()}
           loading={isSubmitting}
-          startIcon={<Icon name="log-in" size={18} />}
         />
         <View style={styles.signupRow}>
           <UiText tone="muted" style={styles.secondaryText}>{translate("noAccount")}</UiText>
