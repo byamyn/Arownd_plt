@@ -18,6 +18,7 @@ import {
 import { signUpPersonal } from "@/lib/auth-service";
 import { personalSignupSchema, type PersonalSignupInput } from "@/lib/auth-validation";
 import { translate, useLanguage } from "@/lib/i18n";
+import { Text as UiText } from "@/components/ui";
 import { designTokens } from "@/lib/theme";
 import { fetchCountries, getSelectedCountryCode, type Country } from "@/lib/country-service";
 
