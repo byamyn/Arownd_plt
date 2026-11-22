@@ -8,6 +8,14 @@ import { syncSelectedCountryCodeFromProfile } from "@/lib/country-service";
 const SAVED_ACCOUNTS_KEY = "arownd:saved-accounts:v1";
 const SESSION_KEY_PREFIX = "arownd:saved-account-session:v1:";
 
+let accountStorageQueue: Promise<void> = Promise.resolve();
+
+function runSerially<T>(operation: () => Promise<T>): Promise<T> {
+  const result = accountStorageQueue.then(operation, operation);
+  accountStorageQueue = result.then(() => undefined, () => undefined);
+  return result;
+}
+
 export type SavedAccount = {
   id: string;
   email: string;
@@ -49,7 +57,7 @@ async function readSavedAccountsIndex(): Promise<SavedAccount[]> {
   }
 }
 
-export async function saveAccountSession(session: Session): Promise<void> {
+async function persistAccountSession(session: Session): Promise<void> {
   const user = session.user;
   const email = user.email?.trim();
   if (!email) return;
@@ -74,6 +82,10 @@ export async function saveAccountSession(session: Session): Promise<void> {
   await AsyncStorage.setItem(SAVED_ACCOUNTS_KEY, JSON.stringify(nextAccounts));
 }
 
+export function saveAccountSession(session: Session): Promise<void> {
+  return runSerially(() => persistAccountSession(session));
+}
+
 export async function saveCurrentAccountSession(): Promise<string | null> {
   const { data, error } = await getSupabaseClient().auth.getSession();
   if (error) throw error;
@@ -83,6 +95,7 @@ export async function saveCurrentAccountSession(): Promise<string | null> {
 }
 
 export async function getSavedAccountsSnapshot(): Promise<SavedAccountsSnapshot> {
+  await accountStorageQueue;
   const client = getSupabaseClient();
   const { data, error } = await client.auth.getSession();
   if (error) throw error;
@@ -151,11 +164,13 @@ export async function switchToSavedAccount(userId: string): Promise<void> {
   await syncSelectedCountryCodeFromProfile(userId).catch(() => undefined);
 }
 
-export async function removeSavedAccount(userId: string): Promise<void> {
-  await SecureStore.deleteItemAsync(getSessionStorageKey(userId));
-  const accounts = await readSavedAccountsIndex();
-  await AsyncStorage.setItem(
-    SAVED_ACCOUNTS_KEY,
-    JSON.stringify(accounts.filter((account) => account.id !== userId))
-  );
+export function removeSavedAccount(userId: string): Promise<void> {
+  return runSerially(async () => {
+    await SecureStore.deleteItemAsync(getSessionStorageKey(userId));
+    const accounts = await readSavedAccountsIndex();
+    await AsyncStorage.setItem(
+      SAVED_ACCOUNTS_KEY,
+      JSON.stringify(accounts.filter((account) => account.id !== userId))
+    );
+  });
 }
