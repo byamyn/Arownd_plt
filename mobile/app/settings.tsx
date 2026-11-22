@@ -366,7 +366,6 @@ export default function SettingsScreen() {
           disabled={addingAccount || accountSwitchMutation.isPending}
           fullWidth
           variant="outline"
-          color="secondary"
         />
       </BottomSheet>
 
