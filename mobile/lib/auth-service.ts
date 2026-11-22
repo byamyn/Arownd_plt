@@ -30,7 +30,7 @@ export async function signIn(input: LoginInput): Promise<void> {
   });
 
   if (error) throw error;
-  if (data.session) await saveAccountSession(data.session);
+  if (data.session) await saveAccountSession(data.session).catch(() => undefined);
   if (data.user) {
     await syncSelectedCountryCodeFromProfile(data.user.id);
   }
