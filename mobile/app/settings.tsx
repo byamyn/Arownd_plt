@@ -141,11 +141,11 @@ export default function SettingsScreen() {
   const signOutMutation = useMutation({
     mutationFn: async () => {
       const client = getSupabaseClient();
-      const { data } = await client.auth.getUser();
+      const { data } = await client.auth.getSession();
       await unregisterCurrentPushDevice();
       const { error } = await client.auth.signOut({ scope: "local" });
       if (error) throw error;
-      if (data.user) await removeSavedAccount(data.user.id).catch(() => undefined);
+      if (data.session?.user) await removeSavedAccount(data.session.user.id).catch(() => undefined);
     },
     onSuccess: async () => {
       await queryClient.clear();
