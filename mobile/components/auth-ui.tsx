@@ -302,7 +302,7 @@ const AUTH_BACKGROUND = `<svg xmlns="http://www.w3.org/2000/svg" width="390" hei
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   keyboardLayer: { flex: 1, zIndex: 1, elevation: 1 },
-  backgroundLayer: { ...StyleSheet.absoluteFillObject, zIndex: 0, elevation: 0 },
+  backgroundLayer: { ...StyleSheet.absoluteFill, zIndex: 0, elevation: 0 },
   authFieldContainer: { position: "relative" },
   authFieldInput: { paddingRight: 54 },
   authFieldIcon: { position: "absolute", right: designTokens.spacing.md, top: 0, bottom: 0, justifyContent: "center" },
