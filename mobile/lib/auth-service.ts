@@ -16,18 +16,16 @@ import type {
 
 const AUTH_CAPTCHA_ENABLED = process.env.EXPO_PUBLIC_AUTH_CAPTCHA_ENABLED === "true";
 const AI_TOUR_PENDING_PREFIX = "arownd:ai-tour:pending:";
-async function getAuthCaptchaToken(): Promise<string | undefined> {
+async function getSignupCaptchaToken(): Promise<string | undefined> {
   if (!AUTH_CAPTCHA_ENABLED) return undefined;
   return requestAuthCaptchaToken();
 }
 
 export async function signIn(input: LoginInput): Promise<void> {
   assertActionRateLimit("auth:sign-in", 1_500);
-  const captchaToken = await getAuthCaptchaToken();
   const { data, error } = await getSupabaseClient().auth.signInWithPassword({
     email: input.email,
-    password: input.password,
-    ...(captchaToken ? { options: { captchaToken } } : {})
+    password: input.password
   });
 
   if (error) throw error;
@@ -42,7 +40,7 @@ export async function signUpPersonal(input: PersonalSignupInput): Promise<boolea
   if (!countryCode) throw new Error("COUNTRY_NOT_SELECTED");
 
   const inviteCode = await getPendingInviteCode();
-  const captchaToken = await getAuthCaptchaToken();
+  const captchaToken = await getSignupCaptchaToken();
   const redirectTo = Linking.createURL("auth/callback", {
     scheme: "com.arownd.app"
   });
@@ -74,7 +72,7 @@ export async function signUpBusiness(input: BusinessSignupInput): Promise<boolea
   if (!countryCode) throw new Error("COUNTRY_NOT_SELECTED");
 
   const inviteCode = await getPendingInviteCode();
-  const captchaToken = await getAuthCaptchaToken();
+  const captchaToken = await getSignupCaptchaToken();
   const redirectTo = Linking.createURL("auth/callback", {
     scheme: "com.arownd.app"
   });
@@ -103,14 +101,12 @@ export async function signUpBusiness(input: BusinessSignupInput): Promise<boolea
 
 export async function requestPasswordRecovery(input: RecoveryInput): Promise<void> {
   assertActionRateLimit("auth:password-recovery", 60_000);
-  const captchaToken = await getAuthCaptchaToken();
   const redirectTo = Linking.createURL("reset-password", {
     scheme: "com.arownd.app"
   });
 
   const { error } = await getSupabaseClient().auth.resetPasswordForEmail(input.email, {
-    redirectTo,
-    ...(captchaToken ? { captchaToken } : {})
+    redirectTo
   });
 
   if (error) throw error;
