@@ -66,7 +66,7 @@ export function AuthCaptchaHost() {
   const tokenIssuedRef = useRef(false);
   const challengeRequiredRef = useRef(false);
   const [html, setHtml] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [interactive, setInteractive] = useState(false);
   const [loadError, setLoadError] = useState(false);
 
@@ -133,12 +133,14 @@ export function AuthCaptchaHost() {
         settlePending(new Error("AUTH_CAPTCHA_TIMEOUT"));
       }, CAPTCHA_TIMEOUT_MS);
       pendingRef.current = { resolve, reject, timeout };
-      if (widgetReadyRef.current && tokenIssuedRef.current) {
+      if (!html && !loading) {
+        void loadChallenge();
+      } else if (widgetReadyRef.current && tokenIssuedRef.current) {
         tokenIssuedRef.current = false;
         resetWidget();
       }
     });
-  }, [loadError, resetWidget, settlePending]);
+  }, [html, loadChallenge, loadError, loading, resetWidget, settlePending]);
 
   const handleMessage = useCallback((event: { nativeEvent: { data: string } }) => {
     let message: CaptchaMessage;
@@ -207,10 +209,6 @@ export function AuthCaptchaHost() {
       return false;
     }
   }, []);
-
-  useEffect(() => {
-    void loadChallenge();
-  }, [loadChallenge]);
 
   useEffect(() => registerAuthCaptchaHandler(requestCaptcha), [requestCaptcha]);
 
