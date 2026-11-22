@@ -121,6 +121,7 @@ export default function ResetPasswordScreen() {
                 onChangeText={onChange}
                 onBlur={onBlur}
                 secureTextEntry
+                icon="lock"
                 autoComplete="new-password"
                 placeholder={translate("passwordPlaceholder")}
                 error={errors.password ? translate("passwordMin") : undefined}
@@ -139,6 +140,7 @@ export default function ResetPasswordScreen() {
                 onChangeText={onChange}
                 onBlur={onBlur}
                 secureTextEntry
+                icon="lock"
                 placeholder={translate("confirmPasswordPlaceholder")}
                 error={
                   errors.confirmPassword
