@@ -50,10 +50,10 @@ export function AuthLayout({ title, subtitle, children, showBack = false }: Auth
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.colors.background }]}>
       <SvgXml
         pointerEvents="none"
-        xml={AVOCADO_WATERMARK}
-        width={220}
-        height={260}
-        style={styles.avocadoWatermark}
+        xml={AUTH_BACKGROUND.replace("#FAF9F5", theme.colors.background)}
+        width="100%"
+        height="100%"
+        style={styles.backgroundArtwork}
       />
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : "height"}>
         <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
@@ -286,11 +286,19 @@ export function translateError(key: TranslationKey): string {
   return translate(key);
 }
 
-const AVOCADO_WATERMARK = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 260"><path d="M110 12C85 12 72 42 57 72C38 111 18 150 35 190C48 222 78 246 110 246C142 246 172 222 185 190C202 150 182 111 163 72C148 42 135 12 110 12Z" fill="none" stroke="#D97757" stroke-width="9"/><ellipse cx="110" cy="158" rx="28" ry="39" fill="none" stroke="#D97757" stroke-width="8"/></svg>`;
+// Artwork based on the repository's root arونډ-background.svg asset.
+// The background color is replaced at render time to follow the active app theme.
+const AUTH_BACKGROUND = `<svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844">
+  <rect width="390" height="844" fill="#FAF9F5"/>
+  <g transform="translate(-96 -56) scale(12.5)" opacity="0.09">
+    <path d="M12 2C17 2 21 10 21 19C21 25 17 30 12 30C7 30 3 25 3 19C3 10 7 2 12 2Z" fill="none" stroke="#D97757" stroke-width="1" stroke-linejoin="round"/>
+    <circle cx="12" cy="20" r="4.5" fill="#D97757"/>
+  </g>
+</svg>`;
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  avocadoWatermark: { position: "absolute", top: 138, right: -62, opacity: 0.09 },
+  backgroundArtwork: { ...StyleSheet.absoluteFillObject },
   authFieldContainer: { position: "relative" },
   authFieldInput: { paddingRight: 54 },
   authFieldIcon: { position: "absolute", right: designTokens.spacing.md, top: 0, bottom: 0, justifyContent: "center" },
