@@ -35,7 +35,7 @@ function AccountTypeOption({
       style={[
         styles.option,
         {
-          backgroundColor: selected ? theme.colors.accent : (theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface),
+          backgroundColor: selected ? (theme.mode === "light" ? "#FBEEE8" : theme.colors.surfaceSecondary) : (theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface),
           borderColor: selected ? theme.colors.accent : (theme.mode === "light" ? "transparent" : theme.colors.border),
           borderWidth: selected ? 2 : theme.mode === "light" ? 0 : 1
         }
@@ -44,21 +44,21 @@ function AccountTypeOption({
       <View
         style={[
           styles.iconCircle,
-          { backgroundColor: "transparent" }
+          { backgroundColor: selected ? "#F7DCD1" : "transparent" }
         ]}
       >
         <Icon
           name={icon}
-          color={selected ? theme.colors.accentForeground : theme.colors.muted}
+          color={selected ? theme.colors.accent : theme.colors.muted}
           size={designTokens.dimensions.iconSize.md}
         />
       </View>
 
       <View style={styles.copy}>
-        <UiText weight={designTokens.fontWeights.extrabold} style={[styles.optionTitle, selected && { color: theme.colors.accentForeground }]}>
+        <UiText weight={designTokens.fontWeights.extrabold} style={[styles.optionTitle, { color: theme.colors.foreground }]}>
           {title}
         </UiText>
-        <UiText tone="muted" style={[styles.optionDescription, selected && { color: theme.colors.accentForeground }]}>
+        <UiText tone="muted" style={styles.optionDescription}>
           {description}
         </UiText>
       </View>
