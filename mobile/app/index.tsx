@@ -3,11 +3,11 @@ import { useEffect, useState } from "react";
 import { Redirect } from "expo-router";
 
 import { getSupabaseClient } from "@/lib/supabase";
-import { getSelectedCountryCode, syncSelectedCountryCodeFromProfile } from "@/lib/country-service";
+import { syncSelectedCountryCodeFromProfile } from "@/lib/country-service";
 import { LoadingState } from "@/components/ui";
 import { translate, useLanguage } from "@/lib/i18n";
 
-type Destination = "/country-selection" | "/login" | "/home";
+type Destination = "/login" | "/home";
 
 export default function IndexRoute() {
   useLanguage();
@@ -25,8 +25,7 @@ export default function IndexRoute() {
             if (active) setDestination("/home");
             return;
           }
-          const selectedCountryCode = await getSelectedCountryCode();
-          if (active) setDestination(selectedCountryCode ? "/login" : "/country-selection");
+          if (active) setDestination("/login");
         }
       } catch {
         if (active) setDestination("/login");
