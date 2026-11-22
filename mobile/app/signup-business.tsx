@@ -8,6 +8,7 @@ import {
   ActionButton,
   AuthField,
   AuthLayout,
+  AuthStepIndicator,
   PasswordStrengthMeter,
   FormError,
   InlineLink,
@@ -90,6 +91,7 @@ export default function BusinessSignupScreen() {
         </View>
       ) : (
         <View style={styles.form}>
+          <AuthStepIndicator currentStep={2} />
           <PressableSurface accessibilityRole="button" onPress={() => router.push({ pathname: "/country-selection", params: { returnTo: "signup-business" } })} style={styles.countrySelector}>
             <UiText tone="muted">{translate("signupAccountCountry")}</UiText>
             <UiText weight="700">{accountCountry ? accountCountry.flag_emoji + " " + (language === "ar" ? accountCountry.name_ar : accountCountry.name_en ?? accountCountry.name_ar) : translate("countryRequired")}</UiText>
