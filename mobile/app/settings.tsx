@@ -303,7 +303,7 @@ export default function SettingsScreen() {
         />
         <PressableSurface
           accessibilityRole="button"
-          accessibilityLabel={translate("settingsSignOut")}
+          accessibilityLabel={translate("settingsSignOutConfirmAction")}
           onPress={() => {
             setSignOutError(false);
             setSignOutConfirmOpen(true);
@@ -313,7 +313,7 @@ export default function SettingsScreen() {
         >
           <View style={styles.linkLabel}>
             <Icon name="log-out" size={19} color={theme.colors.danger} />
-            <UiText tone="danger" weight="700">{translate("settingsSignOut")}</UiText>
+            <UiText tone="danger" weight="700">{translate("settingsSignOutConfirmAction")}</UiText>
           </View>
           <Icon name="chevron-left" size={18} color={theme.colors.subtle} />
         </PressableSurface>
