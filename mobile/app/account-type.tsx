@@ -83,6 +83,7 @@ export default function AccountTypeScreen() {
       showBack
     >
       <View style={styles.content}>
+        <AuthStepIndicator currentStep={1} />
         <View style={styles.options}>
           <AccountTypeOption
             title={translate("personalTitle")}
