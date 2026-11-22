@@ -138,6 +138,36 @@ export function InlineLink({ label, onPress }: { label: string; onPress: () => v
   );
 }
 
+export function AuthCountrySelector({
+  label,
+  value,
+  onPress
+}: {
+  label: string;
+  value: string;
+  onPress: () => void;
+}) {
+  const theme = useAppTheme();
+
+  return (
+    <PressableSurface
+      accessibilityRole="button"
+      accessibilityLabel={`${label}: ${value}`}
+      onPress={onPress}
+      style={[
+        styles.countrySelector,
+        { backgroundColor: theme.colors.surface, borderColor: theme.colors.inputBorder }
+      ]}
+    >
+      <View style={styles.countrySelectorCopy}>
+        <Caption>{label}</Caption>
+        <UiText weight="700">{value}</UiText>
+      </View>
+      <Icon name="chevron-left" color={theme.colors.muted} size={designTokens.dimensions.iconSize.md} />
+    </PressableSurface>
+  );
+}
+
 export function AuthStepIndicator({ currentStep }: { currentStep: 1 | 2 }) {
   const theme = useAppTheme();
   const steps = [
@@ -291,6 +321,8 @@ const styles = StyleSheet.create({
   subtitle: { textAlign: "auto", marginTop: designTokens.spacing.sm },
   content: { gap: designTokens.spacing.lg },
   link: { fontSize: designTokens.typography.caption + 2 },
+  countrySelector: { minHeight: 58, paddingHorizontal: designTokens.spacing.md, borderWidth: 1, borderRadius: designTokens.radius.lg - 3, flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md },
+  countrySelectorCopy: { flex: 1, gap: designTokens.spacing.xs },
   stepIndicator: { flexDirection: "row", alignItems: "center", marginBottom: designTokens.spacing.md },
   stepGroup: { flex: 1, flexDirection: "row", alignItems: "center" },
   stepItem: { alignItems: "center", gap: designTokens.spacing.xs, minWidth: 94 },
