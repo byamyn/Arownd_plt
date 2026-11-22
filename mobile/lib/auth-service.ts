@@ -1,6 +1,7 @@
 import * as Linking from "expo-linking";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { requestAuthCaptchaToken } from "@/lib/auth-captcha";
+import { saveAccountSession } from "@/lib/saved-accounts";
 
 import { getSelectedCountryCode, syncSelectedCountryCodeFromProfile } from "@/lib/country-service";
 import { clearPendingInviteCode, getPendingInviteCode } from "@/lib/invite-service";
@@ -29,6 +30,7 @@ export async function signIn(input: LoginInput): Promise<void> {
   });
 
   if (error) throw error;
+  if (data.session) await saveAccountSession(data.session);
   if (data.user) {
     await syncSelectedCountryCodeFromProfile(data.user.id);
   }
@@ -61,6 +63,7 @@ export async function signUpPersonal(input: PersonalSignupInput): Promise<boolea
   });
 
   if (error) throw error;
+  if (data.session) await saveAccountSession(data.session);
   if (data.user) await AsyncStorage.setItem(AI_TOUR_PENDING_PREFIX + data.user.id, "1").catch(() => undefined);
   await clearPendingInviteCode().catch(() => undefined);
   return data.session !== null;
@@ -94,6 +97,7 @@ export async function signUpBusiness(input: BusinessSignupInput): Promise<boolea
   });
 
   if (error) throw error;
+  if (data.session) await saveAccountSession(data.session);
   if (data.user) await AsyncStorage.setItem(AI_TOUR_PENDING_PREFIX + data.user.id, "1");
   await clearPendingInviteCode().catch(() => undefined);
   return data.session !== null;
