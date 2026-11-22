@@ -119,7 +119,7 @@ export async function getSavedAccountsSnapshot(): Promise<SavedAccountsSnapshot>
 }
 
 export async function switchToSavedAccount(userId: string): Promise<void> {
-  const client = (await import("@/lib/supabase")).getSupabaseClient();
+  const client = getSupabaseClient();
   const { data: currentData, error: currentError } = await client.auth.getSession();
   if (currentError) throw currentError;
   if (currentData.session) await saveAccountSession(currentData.session);
@@ -149,4 +149,13 @@ export async function switchToSavedAccount(userId: string): Promise<void> {
 
   await saveAccountSession(data.session);
   await syncSelectedCountryCodeFromProfile(userId).catch(() => undefined);
+}
+
+export async function removeSavedAccount(userId: string): Promise<void> {
+  await SecureStore.deleteItemAsync(getSessionStorageKey(userId));
+  const accounts = await readSavedAccountsIndex();
+  await AsyncStorage.setItem(
+    SAVED_ACCOUNTS_KEY,
+    JSON.stringify(accounts.filter((account) => account.id !== userId))
+  );
 }
