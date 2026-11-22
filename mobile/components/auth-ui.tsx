@@ -25,6 +25,7 @@ import {
 } from "@/components/ui";
 import { translate, type TranslationKey } from "@/lib/i18n";
 import { designTokens, useAppTheme } from "@/lib/theme";
+import type { IconName } from "@/components/ui";
 
 type AuthLayoutProps = {
   title: string;
@@ -80,20 +81,28 @@ export function AuthLayout({ title, subtitle, children, showBack = false }: Auth
   );
 }
 
-type FieldProps = TextInputProps & { label: string; error?: string | undefined };
+type FieldProps = TextInputProps & { label: string; error?: string | undefined; icon?: IconName };
 
-export function AuthField({ label, error, style, ...props }: FieldProps) {
+export function AuthField({ label, error, style, icon, ...props }: FieldProps) {
   const isEmail = props.keyboardType === "email-address";
 
   return (
-    <TextField
-      {...props}
-      label={label}
-      error={error}
-      textAlign={isEmail ? "left" : "auto"}
-      autoCapitalize={isEmail ? "none" : props.autoCapitalize}
-      style={style}
-    />
+    <View style={styles.authFieldContainer}>
+      <TextField
+        {...props}
+        label={label}
+        error={error}
+        textAlign={isEmail ? "left" : "auto"}
+        autoCapitalize={isEmail ? "none" : props.autoCapitalize}
+        focusEmphasis
+        style={[styles.authFieldInput, style]}
+      />
+      {icon ? (
+        <View pointerEvents="none" style={styles.authFieldIcon}>
+          <Icon name={icon} size={19} color="#77756D" />
+        </View>
+      ) : null}
+    </View>
   );
 }
 
@@ -184,6 +193,9 @@ export function translateError(key: TranslationKey): string {
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
+  authFieldContainer: { position: "relative" },
+  authFieldInput: { paddingRight: 54 },
+  authFieldIcon: { position: "absolute", right: designTokens.spacing.md, top: 0, bottom: 0, justifyContent: "center" },
   safeArea: { flex: 1 },
   scrollContent: {
     flexGrow: 1,
