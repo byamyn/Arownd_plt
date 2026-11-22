@@ -24,10 +24,11 @@ import {
 import { translate, useLanguage } from "@/lib/i18n";
 import { resetPasswordSchema } from "@/lib/auth-validation";
 import { getSupabaseClient } from "@/lib/supabase";
+import { getSavedAccountsSnapshot, saveCurrentAccountSession, switchToSavedAccount } from "@/lib/saved-accounts";
 import { unregisterCurrentPushDevice } from "@/lib/push-notifications";
 import { BROWSING_CURRENCY_QUERY_KEY, fetchCountries, fetchMyBrowsingCountryCode, updateBrowsingCountryCode, type Country } from "@/lib/country-service";
 
-type SettingsSheet = "password" | "appearance" | "language" | "country" | null;
+type SettingsSheet = "password" | "appearance" | "language" | "country" | "accounts" | null;
 
 export default function SettingsScreen() {
   const theme = useAppTheme();
@@ -47,9 +48,17 @@ export default function SettingsScreen() {
   const [message, setMessage] = useState<string | null>(null);
   const [signOutError, setSignOutError] = useState(false);
   const [signOutConfirmOpen, setSignOutConfirmOpen] = useState(false);
+  const [accountSwitchError, setAccountSwitchError] = useState(false);
+  const [addingAccount, setAddingAccount] = useState(false);
 
   const countries = useQuery({ queryKey: ["available-countries"], queryFn: ({ signal }) => fetchCountries(signal), enabled: activeSheet === "country" });
   const browsingCountry = useQuery({ queryKey: ["browsing-country"], queryFn: ({ signal }) => fetchMyBrowsingCountryCode(signal) });
+  const savedAccounts = useQuery({
+    queryKey: ["saved-accounts"],
+    queryFn: getSavedAccountsSnapshot,
+    enabled: activeSheet === "accounts",
+    staleTime: 0
+  });
   const browsingCountryMutation = useMutation({
     mutationFn: updateBrowsingCountryCode,
     onSuccess: async (_data, countryCode) => {
@@ -119,6 +128,16 @@ export default function SettingsScreen() {
     }
   });
 
+  const accountSwitchMutation = useMutation({
+    mutationFn: switchToSavedAccount,
+    onSuccess: async () => {
+      await queryClient.clear();
+      closeSheet();
+      router.replace("/home");
+    },
+    onError: () => setAccountSwitchError(true)
+  });
+
   const signOutMutation = useMutation({
     mutationFn: async () => {
       await unregisterCurrentPushDevice();
@@ -139,6 +158,19 @@ export default function SettingsScreen() {
     if (sheet === "country") setCountrySearch("");
   };
   const closeSheet = () => setActiveSheet(null);
+  const addAccount = async () => {
+    setAddingAccount(true);
+    setAccountSwitchError(false);
+    try {
+      await saveCurrentAccountSession();
+      closeSheet();
+      router.push("/login");
+    } catch {
+      setAccountSwitchError(true);
+    } finally {
+      setAddingAccount(false);
+    }
+  };
 
   return (
     <CustomerScreen showNavigation={false} contentStyle={styles.screenContent} refreshing={browsingCountry.isFetching || (activeSheet === "country" && countries.isFetching)} onRefresh={() => { void browsingCountry.refetch(); if (activeSheet === "country") void countries.refetch(); }}>
@@ -246,6 +278,17 @@ export default function SettingsScreen() {
       </View>
 
       <View style={styles.section}>
+        <SettingsRow
+          icon="repeat"
+          label={translate("settingsSwitchAccount")}
+          onPress={() => {
+            setAccountSwitchError(false);
+            openSheet("accounts");
+          }}
+          theme={theme}
+          styles={styles}
+          last
+        />
         <PressableSurface
           accessibilityRole="button"
           accessibilityLabel={translate("settingsSignOut")}
@@ -264,6 +307,65 @@ export default function SettingsScreen() {
         </PressableSurface>
         {signOutError ? <UiText tone="danger">{translate("settingsSignOutError")}</UiText> : null}
       </View>
+
+      <BottomSheet visible={activeSheet === "accounts"} onRequestClose={closeSheet} title={translate("settingsSwitchAccount")}>
+        <Caption>{translate("settingsSwitchAccountHint")}</Caption>
+        {savedAccounts.isPending ? (
+          <Caption>{translate("stateLoading")}</Caption>
+        ) : savedAccounts.isError ? (
+          <UiText tone="danger">{translate("settingsAccountsLoadError")}</UiText>
+        ) : (
+          <View style={styles.accountList}>
+            {(savedAccounts.data?.accounts ?? []).map((account) => {
+              const isCurrent = account.id === savedAccounts.data?.currentUserId;
+              return (
+                <PressableSurface
+                  key={account.id}
+                  accessibilityRole="button"
+                  accessibilityLabel={account.email}
+                  accessibilityState={{ selected: isCurrent, disabled: isCurrent || accountSwitchMutation.isPending || addingAccount }}
+                  onPress={() => {
+                    if (!isCurrent) {
+                      setAccountSwitchError(false);
+                      accountSwitchMutation.mutate(account.id);
+                    }
+                  }}
+                  disabled={isCurrent || accountSwitchMutation.isPending || addingAccount}
+                  style={[styles.accountOption, isCurrent && { borderColor: theme.colors.accent, backgroundColor: theme.colors.surfaceSecondary }]}
+                >
+                  <View style={styles.accountAvatar}>
+                    <Icon name="user-round" size={20} color={theme.colors.accentOnSurface} />
+                  </View>
+                  <View style={styles.accountOptionCopy}>
+                    <UiText weight="700" numberOfLines={1}>{account.displayName}</UiText>
+                    <Caption numberOfLines={1}>{account.email}</Caption>
+                    {isCurrent ? <Caption style={{ color: theme.colors.success }}>{translate("settingsCurrentAccount")}</Caption> : null}
+                  </View>
+                  {isCurrent ? (
+                    <Icon name="circle-check" size={20} color={theme.colors.success} />
+                  ) : (
+                    <Icon name="chevron-left" size={18} color={theme.colors.subtle} />
+                  )}
+                </PressableSurface>
+              );
+            })}
+            {(savedAccounts.data?.accounts.length ?? 0) <= 1 ? (
+              <Caption>{translate("settingsNoSavedAccounts")}</Caption>
+            ) : null}
+          </View>
+        )}
+        {accountSwitchMutation.isPending ? <Caption>{translate("settingsAccountSwitching")}</Caption> : null}
+        {accountSwitchError ? <UiText tone="danger">{translate("settingsAccountSwitchError")}</UiText> : null}
+        <Button
+          label={translate("settingsAddAccount")}
+          onPress={() => void addAccount()}
+          loading={addingAccount}
+          disabled={addingAccount || accountSwitchMutation.isPending}
+          fullWidth
+          variant="outline"
+          color="secondary"
+        />
+      </BottomSheet>
 
       <BottomSheet visible={activeSheet === "password"} onRequestClose={closeSheet} title={translate("settingsPasswordChangeTitle")}>
         <Caption>{translate("settingsPasswordHint")}</Caption>
@@ -556,6 +658,33 @@ function createStyles(theme: AppTheme) {
       gap: designTokens.spacing.xs
     },
     countrySearch: { minHeight: designTokens.dimensions.controlHeight.md },
+    accountList: {
+      gap: designTokens.spacing.sm
+    },
+    accountOption: {
+      minHeight: 68,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: designTokens.spacing.md,
+      padding: designTokens.spacing.md,
+      borderRadius: designTokens.radius.lg,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      backgroundColor: theme.colors.surface
+    },
+    accountAvatar: {
+      width: 42,
+      height: 42,
+      alignItems: "center",
+      justifyContent: "center",
+      borderRadius: 21,
+      backgroundColor: theme.colors.surfaceSecondary
+    },
+    accountOptionCopy: {
+      flex: 1,
+      minWidth: 0,
+      gap: 2
+    },
     countryOptionCopy: { flex: 1, gap: designTokens.spacing.xs },
     strengthHeader: {
       flexDirection: "row",
