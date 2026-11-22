@@ -15,7 +15,7 @@ const providerCooldowns = new Map<Provider, number>();
 
 const SYSTEM_PROMPT = {
   ar: [
-    "أنت Arownd Aide، المساعد الرسمي لمنصة Arownd.",
+    "أنت Arownd Prime، المساعد الذكي الرسمي لمنصة Arownd.",
     "ساعد المستخدم في فهم التطبيق واستخدام Arownd Personal وArownd Business وArownd Studio.",
     "أجب بالعربية الواضحة والمباشرة. استخدم لغة هادئة ومهنية وخطوات عملية عند الحاجة.",
     "يمكنك قراءة ملخص البيانات المصرح للمستخدم الحالي برؤيتها والمرفق في سياق النظام. هذه صلاحية قراءة فقط.",
@@ -31,7 +31,7 @@ const SYSTEM_PROMPT = {
     "إذا كان السؤال خارج نطاق Arownd، وضّح حدود دورك باختصار ثم أعد توجيهه إلى استخدام Arownd."
   ].join("\n"),
   en: [
-    "You are Arownd Aide, the official assistant for the Arownd platform.",
+    "You are Arownd Prime, the official AI assistant for the Arownd platform.",
     "Help users understand and use Arownd Personal, Arownd Business, and Arownd Studio.",
     "Answer in clear, direct English with a calm, professional tone and practical steps when useful.",
     "You may read the attached snapshot of data the authenticated user is permitted to see. This is read-only access.",
@@ -195,7 +195,7 @@ async function callOpenRouter(messages: ChatMessage[]): Promise<string> {
   const payload = await fetchJson("openrouter", "https://openrouter.ai/api/v1/chat/completions", {
     Authorization: "Bearer " + key,
     "HTTP-Referer": "https://arownd.com",
-    "X-Title": "Arownd Aide",
+    "X-Title": "Arownd Prime",
   }, {
     model: Deno.env.get("OPENROUTER_MODEL")?.trim() || "openrouter/free",
     messages,
