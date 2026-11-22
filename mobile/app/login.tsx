@@ -5,7 +5,7 @@ import { Controller, useForm } from "react-hook-form";
 import { StyleSheet, View } from "react-native";
 
 import { ActionButton, AuthField, AuthLayout, FormError, InlineLink } from "@/components/auth-ui";
-import { Icon, Text as UiText } from "@/components/ui";
+import { Text as UiText } from "@/components/ui";
 import { designTokens } from "@/lib/theme";
 import { signIn } from "@/lib/auth-service";
 import { loginSchema, type LoginInput } from "@/lib/auth-validation";
