@@ -24,6 +24,12 @@ export type SavedAccount = {
   lastUsedAt: string;
 };
 
+export type StoredAccountSession = {
+  userId: string;
+  access_token: string;
+  refresh_token: string;
+};
+
 export type SavedAccountsSnapshot = {
   accounts: SavedAccount[];
   currentUserId: string | null;
@@ -76,7 +82,12 @@ async function persistAccountSession(session: Session): Promise<void> {
   };
 
   // Session tokens are stored only in the platform secure store, never in AsyncStorage.
-  await SecureStore.setItemAsync(getSessionStorageKey(user.id), JSON.stringify(session));
+  const storedSession: StoredAccountSession = {
+    userId: user.id,
+    access_token: session.access_token,
+    refresh_token: session.refresh_token
+  };
+  await SecureStore.setItemAsync(getSessionStorageKey(user.id), JSON.stringify(storedSession));
   const accounts = await readSavedAccountsIndex();
   const nextAccounts = [account, ...accounts.filter((item) => item.id !== user.id)];
   await AsyncStorage.setItem(SAVED_ACCOUNTS_KEY, JSON.stringify(nextAccounts));
@@ -112,8 +123,8 @@ export async function getSavedAccountsSnapshot(): Promise<SavedAccountsSnapshot>
     if (!rawSession) continue;
 
     try {
-      const session = JSON.parse(rawSession) as Session;
-      if (session.user?.id !== account.id || !session.access_token || !session.refresh_token) continue;
+      const session = JSON.parse(rawSession) as StoredAccountSession;
+      if (session.userId !== account.id || !session.access_token || !session.refresh_token) continue;
       accounts.push(account);
       retainedAccounts.push(account);
     } catch {
@@ -140,14 +151,14 @@ export async function switchToSavedAccount(userId: string): Promise<void> {
   const rawSession = await SecureStore.getItemAsync(getSessionStorageKey(userId));
   if (!rawSession) throw new Error("SAVED_ACCOUNT_SESSION_MISSING");
 
-  let targetSession: Session;
+  let targetSession: StoredAccountSession;
   try {
-    targetSession = JSON.parse(rawSession) as Session;
+    targetSession = JSON.parse(rawSession) as StoredAccountSession;
   } catch {
     throw new Error("SAVED_ACCOUNT_SESSION_INVALID");
   }
 
-  if (targetSession.user?.id !== userId || !targetSession.access_token || !targetSession.refresh_token) {
+  if (targetSession.userId !== userId || !targetSession.access_token || !targetSession.refresh_token) {
     throw new Error("SAVED_ACCOUNT_SESSION_INVALID");
   }
 
