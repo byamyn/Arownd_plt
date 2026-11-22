@@ -8,6 +8,7 @@ import {
   type TextInputProps
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { SvgXml } from "react-native-svg";
 import { router } from "expo-router";
 
 import Logo from "@/components/logo";
@@ -47,6 +48,13 @@ export function AuthLayout({ title, subtitle, children, showBack = false }: Auth
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.colors.background }]}>
+      <SvgXml
+        pointerEvents="none"
+        xml={AVOCADO_WATERMARK}
+        width={220}
+        height={260}
+        style={styles.avocadoWatermark}
+      />
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : "height"}>
         <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
           <View style={styles.header}>
@@ -92,7 +100,8 @@ export function AuthField({ label, error, style, icon, ...props }: FieldProps) {
         {...props}
         label={label}
         error={error}
-        textAlign={isEmail ? "left" : "auto"}
+        textAlign={isEmail || props.secureTextEntry ? "right" : "auto"}
+        writingDirection={isEmail || props.secureTextEntry ? "ltr" : props.writingDirection}
         autoCapitalize={isEmail ? "none" : props.autoCapitalize}
         focusEmphasis
         style={[styles.authFieldInput, style]}
@@ -191,8 +200,11 @@ export function translateError(key: TranslationKey): string {
   return translate(key);
 }
 
+const AVOCADO_WATERMARK = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 260"><path d="M110 12C85 12 72 42 57 72C38 111 18 150 35 190C48 222 78 246 110 246C142 246 172 222 185 190C202 150 182 111 163 72C148 42 135 12 110 12Z" fill="none" stroke="#D97757" stroke-width="9"/><ellipse cx="110" cy="158" rx="28" ry="39" fill="none" stroke="#D97757" stroke-width="8"/></svg>`;
+
 const styles = StyleSheet.create({
   flex: { flex: 1 },
+  avocadoWatermark: { position: "absolute", top: 138, right: -62, opacity: 0.09 },
   authFieldContainer: { position: "relative" },
   authFieldInput: { paddingRight: 54 },
   authFieldIcon: { position: "absolute", right: designTokens.spacing.md, top: 0, bottom: 0, justifyContent: "center" },
