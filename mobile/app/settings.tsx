@@ -51,6 +51,7 @@ export default function SettingsScreen() {
   const [accountSwitchError, setAccountSwitchError] = useState(false);
   const [addAccountError, setAddAccountError] = useState(false);
   const [addingAccount, setAddingAccount] = useState(false);
+  const [switchingAccount, setSwitchingAccount] = useState(false);
 
   const countries = useQuery({ queryKey: ["available-countries"], queryFn: ({ signal }) => fetchCountries(signal), enabled: activeSheet === "country" });
   const browsingCountry = useQuery({ queryKey: ["browsing-country"], queryFn: ({ signal }) => fetchMyBrowsingCountryCode(signal) });
@@ -129,16 +130,6 @@ export default function SettingsScreen() {
     }
   });
 
-  const accountSwitchMutation = useMutation({
-    mutationFn: switchToSavedAccount,
-    onSuccess: async () => {
-      await queryClient.clear();
-      closeSheet();
-      router.replace("/home");
-    },
-    onError: () => setAccountSwitchError(true)
-  });
-
   const signOutMutation = useMutation({
     mutationFn: async () => {
       const client = getSupabaseClient();
@@ -162,6 +153,21 @@ export default function SettingsScreen() {
     if (sheet === "country") setCountrySearch("");
   };
   const closeSheet = () => setActiveSheet(null);
+  const switchAccount = async (userId: string) => {
+    setSwitchingAccount(true);
+    setAccountSwitchError(false);
+    try {
+      await switchToSavedAccount(userId);
+      await queryClient.clear();
+      closeSheet();
+      router.replace("/home");
+    } catch {
+      setAccountSwitchError(true);
+    } finally {
+      setSwitchingAccount(false);
+    }
+  };
+
   const addAccount = async () => {
     setAddingAccount(true);
     setAccountSwitchError(false);
@@ -329,11 +335,11 @@ export default function SettingsScreen() {
                   key={account.id}
                   accessibilityRole="button"
                   accessibilityLabel={account.email}
-                  accessibilityState={{ selected: isCurrent, disabled: isCurrent || accountSwitchMutation.isPending || addingAccount }}
+                  accessibilityState={{ selected: isCurrent, disabled: isCurrent || switchingAccount || addingAccount }}
                   onPress={() => {
                     if (!isCurrent) {
                       setAccountSwitchError(false);
-                      accountSwitchMutation.mutate(account.id);
+                      void switchAccount(account.id);
                     }
                   }}
                   disabled={isCurrent || accountSwitchMutation.isPending || addingAccount}
