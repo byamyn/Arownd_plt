@@ -104,6 +104,7 @@ export default function BusinessSignupScreen() {
                 onChangeText={onChange}
                 onBlur={onBlur}
                 placeholder={translate("fullNamePlaceholder")}
+                icon="user"
                 error={errors.fullName ? translate("required") : undefined}
               />
             )}
@@ -119,6 +120,7 @@ export default function BusinessSignupScreen() {
                 onChangeText={onChange}
                 onBlur={onBlur}
                 placeholder={translate("businessNamePlaceholder")}
+                icon="store"
                 error={errors.businessName ? translate("businessNameRequired") : undefined}
               />
             )}
@@ -135,6 +137,7 @@ export default function BusinessSignupScreen() {
                 onBlur={onBlur}
                 keyboardType="email-address"
                 autoComplete="email"
+                icon="mail"
                 placeholder={translate("emailPlaceholder")}
                 error={
                   errors.email
@@ -155,6 +158,7 @@ export default function BusinessSignupScreen() {
                 onChangeText={onChange}
                 onBlur={onBlur}
                 secureTextEntry
+                icon="lock"
                 autoComplete="new-password"
                 placeholder={translate("passwordPlaceholder")}
                 error={errors.password ? translate("passwordMin") : undefined}
@@ -173,6 +177,7 @@ export default function BusinessSignupScreen() {
                 onChangeText={onChange}
                 onBlur={onBlur}
                 secureTextEntry
+                icon="lock"
                 placeholder={translate("confirmPasswordPlaceholder")}
                 error={
                   errors.confirmPassword
