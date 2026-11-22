@@ -24,7 +24,7 @@ import {
 import { translate, useLanguage } from "@/lib/i18n";
 import { resetPasswordSchema } from "@/lib/auth-validation";
 import { getSupabaseClient } from "@/lib/supabase";
-import { getSavedAccountsSnapshot, saveCurrentAccountSession, switchToSavedAccount } from "@/lib/saved-accounts";
+import { getSavedAccountsSnapshot, removeSavedAccount, saveCurrentAccountSession, switchToSavedAccount } from "@/lib/saved-accounts";
 import { unregisterCurrentPushDevice } from "@/lib/push-notifications";
 import { BROWSING_CURRENCY_QUERY_KEY, fetchCountries, fetchMyBrowsingCountryCode, updateBrowsingCountryCode, type Country } from "@/lib/country-service";
 
@@ -140,9 +140,12 @@ export default function SettingsScreen() {
 
   const signOutMutation = useMutation({
     mutationFn: async () => {
+      const client = getSupabaseClient();
+      const { data } = await client.auth.getUser();
       await unregisterCurrentPushDevice();
-      const { error } = await getSupabaseClient().auth.signOut();
+      const { error } = await client.auth.signOut({ scope: "local" });
       if (error) throw error;
+      if (data.user) await removeSavedAccount(data.user.id).catch(() => undefined);
     },
     onSuccess: async () => {
       await queryClient.clear();
