@@ -101,7 +101,6 @@ export function AuthField({ label, error, style, icon, ...props }: FieldProps) {
         label={label}
         error={error}
         textAlign={isEmail || props.secureTextEntry ? "right" : "auto"}
-        writingDirection={isEmail || props.secureTextEntry ? "ltr" : props.writingDirection}
         autoCapitalize={isEmail ? "none" : props.autoCapitalize}
         focusEmphasis
         style={[styles.authFieldInput, style]}
