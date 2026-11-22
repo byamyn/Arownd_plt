@@ -2,6 +2,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
 import type { Session } from "@supabase/supabase-js";
 
+import { getSupabaseClient } from "@/lib/supabase";
+import { syncSelectedCountryCodeFromProfile } from "@/lib/country-service";
+
 const SAVED_ACCOUNTS_KEY = "arownd:saved-accounts:v1";
 const SESSION_KEY_PREFIX = "arownd:saved-account-session:v1:";
 
@@ -72,7 +75,7 @@ export async function saveAccountSession(session: Session): Promise<void> {
 }
 
 export async function saveCurrentAccountSession(): Promise<string | null> {
-  const { data, error } = await (await import("@/lib/supabase")).getSupabaseClient().auth.getSession();
+  const { data, error } = await getSupabaseClient().auth.getSession();
   if (error) throw error;
   if (!data.session) return null;
   await saveAccountSession(data.session);
@@ -80,7 +83,7 @@ export async function saveCurrentAccountSession(): Promise<string | null> {
 }
 
 export async function getSavedAccountsSnapshot(): Promise<SavedAccountsSnapshot> {
-  const client = (await import("@/lib/supabase")).getSupabaseClient();
+  const client = getSupabaseClient();
   const { data, error } = await client.auth.getSession();
   if (error) throw error;
 
@@ -145,6 +148,5 @@ export async function switchToSavedAccount(userId: string): Promise<void> {
   }
 
   await saveAccountSession(data.session);
-  const { syncSelectedCountryCodeFromProfile } = await import("@/lib/country-service");
   await syncSelectedCountryCodeFromProfile(userId).catch(() => undefined);
 }
