@@ -20,6 +20,7 @@ import { ArowndAssistant } from "@/components/arownd-assistant";
 import { CartFlyOverlay } from "@/components/cart-fly-overlay";
 import { ThemeProvider, useAppTheme, useThemePreference } from "@/lib/design-system";
 import { getSupabaseClient } from "@/lib/supabase";
+import { saveAccountSession } from "@/lib/saved-accounts";
 import { listenForPushTokenChanges, registerDeviceForPushNotifications } from "@/lib/push-notifications";
 import { markNotificationRead } from "@/lib/notifications";
 import { getPushNotificationDestination } from "@/lib/notifications-state";
@@ -97,6 +98,9 @@ function RootLayoutContent() {
 
         if ((event === "INITIAL_SESSION" || event === "SIGNED_IN" || event === "TOKEN_REFRESHED") && session?.user) {
           queueMicrotask(() => {
+            void saveAccountSession(session).catch(() => {
+              console.warn("[auth] Could not securely save the account session.");
+            });
             if (Platform.OS === "android" && !pushTokenSubscription) {
               pushTokenSubscription = listenForPushTokenChanges();
             }
