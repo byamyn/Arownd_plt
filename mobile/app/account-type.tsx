@@ -2,7 +2,7 @@ import { router } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 
-import { AuthLayout, ActionButton } from "@/components/auth-ui";
+import { AuthLayout, ActionButton, AuthStepIndicator } from "@/components/auth-ui";
 import { Button, Icon, PressableSurface, Text as UiText } from "@/components/ui";
 import { translate, useLanguage } from "@/lib/i18n";
 import { designTokens, useAppTheme } from "@/lib/theme";
