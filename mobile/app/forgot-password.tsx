@@ -77,6 +77,7 @@ export default function ForgotPasswordScreen() {
                 onBlur={onBlur}
                 keyboardType="email-address"
                 autoComplete="email"
+                icon="mail"
                 placeholder={translate("emailPlaceholder")}
                 error={
                   errors.email
