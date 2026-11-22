@@ -48,16 +48,15 @@ export function AuthLayout({ title, subtitle, children, showBack = false }: Auth
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.colors.background }]}>
-      <KeyboardAvoidingView style={styles.keyboardLayer} behavior={Platform.OS === "ios" ? "padding" : "height"}>
+      <View pointerEvents="none" style={styles.backgroundLayer}>
         <SvgXml
-          pointerEvents="none"
           xml={AUTH_BACKGROUND.replace("#FAF9F5", theme.colors.background)}
           width="100%"
           height="100%"
-          style={styles.backgroundArtwork}
         />
+      </View>
+      <KeyboardAvoidingView style={styles.keyboardLayer} behavior={Platform.OS === "ios" ? "padding" : "height"}>
         <ScrollView
-          style={styles.contentLayer}
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
@@ -302,9 +301,8 @@ const AUTH_BACKGROUND = `<svg xmlns="http://www.w3.org/2000/svg" width="390" hei
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  keyboardLayer: { flex: 1, position: "relative" },
-  backgroundArtwork: { ...StyleSheet.absoluteFillObject, zIndex: 0, elevation: 0 },
-  contentLayer: { flex: 1, zIndex: 1, elevation: 1 },
+  keyboardLayer: { flex: 1, zIndex: 1, elevation: 1 },
+  backgroundLayer: { ...StyleSheet.absoluteFillObject, zIndex: 0, elevation: 0 },
   authFieldContainer: { position: "relative" },
   authFieldInput: { paddingRight: 54 },
   authFieldIcon: { position: "absolute", right: designTokens.spacing.md, top: 0, bottom: 0, justifyContent: "center" },
