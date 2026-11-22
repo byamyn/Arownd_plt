@@ -342,7 +342,7 @@ export default function SettingsScreen() {
                       void switchAccount(account.id);
                     }
                   }}
-                  disabled={isCurrent || accountSwitchMutation.isPending || addingAccount}
+                  disabled={isCurrent || switchingAccount || addingAccount}
                   style={[styles.accountOption, isCurrent && { borderColor: theme.colors.accent, backgroundColor: theme.colors.surfaceSecondary }]}
                 >
                   <View style={styles.accountAvatar}>
@@ -366,7 +366,7 @@ export default function SettingsScreen() {
             ) : null}
           </View>
         )}
-        {accountSwitchMutation.isPending ? <Caption>{translate("settingsAccountSwitching")}</Caption> : null}
+        {switchingAccount ? <Caption>{translate("settingsAccountSwitching")}</Caption> : null}
         {accountSwitchError ? <UiText tone="danger">{translate("settingsAccountSwitchError")}</UiText> : null}
         {addAccountError ? <UiText tone="danger">{translate("settingsAddAccountError")}</UiText> : null}
         <Button
@@ -374,7 +374,7 @@ export default function SettingsScreen() {
           startIcon={<Icon name="plus" size={16} color={theme.colors.foreground} />}
           onPress={() => void addAccount()}
           loading={addingAccount}
-          disabled={addingAccount || accountSwitchMutation.isPending}
+          disabled={addingAccount || switchingAccount}
           fullWidth
           variant="outline"
         />
