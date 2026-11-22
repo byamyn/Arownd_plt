@@ -36,7 +36,7 @@ export function CustomerMainHeader({ variant = "cart" }: CustomerMainHeaderProps
     <View style={styles.header}>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Arownd Aide"
+        accessibilityLabel="Arownd Prime"
         onPress={() => DeviceEventEmitter.emit("arownd-aide:open")}
         hitSlop={8}
       >
