@@ -39,6 +39,16 @@ export default function SupportScreen() {
     queryFn: ({ signal }) => fetchMySupportConversations(signal),
     enabled: auth.isSuccess && Boolean(auth.data)
   });
+  const disputeSupportAccess = useQuery({
+    queryKey: ["dispute-support-access", auth.data?.id],
+    queryFn: async () => {
+      const { data, error } = await getSupabaseClient().rpc("is_current_user_dispute_support");
+      if (error) throw error;
+      return data === true;
+    },
+    enabled: auth.isSuccess && Boolean(auth.data),
+    retry: false
+  });
   const openConversations = (conversations.data ?? []).filter((item) => item.status === "open");
   const closedConversations = (conversations.data ?? []).filter((item) => item.status === "closed");
 
@@ -81,6 +91,7 @@ export default function SupportScreen() {
   return (
     <CustomerScreen showNavigation={false} onRefresh={() => { void Promise.all([auth.refetch(), conversations.refetch()]); }} refreshing={auth.isFetching || conversations.isFetching}>
       <SupportHeader title={translate("supportTitle")} />
+      {disputeSupportAccess.data ? <Button label={translate("disputeSupportInboxTitle")} onPress={() => router.push("/support/disputes")} fullWidth variant="outline" /> : null}
       <View style={styles.hero}>
         <View style={styles.heroMark}><Icon name="message-circle" size={28} color={theme.colors.foreground} /></View>
         <Heading level={2}>{translate("supportHeadline")}</Heading>
