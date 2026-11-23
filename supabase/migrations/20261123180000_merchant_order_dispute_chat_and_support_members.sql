@@ -65,6 +65,110 @@ create policy merchant_order_completion_events_read_participants
     )
   );
 
+-- Support can inspect only records attached to an existing dispute.
+-- These are SELECT policies only; support receives no order mutation permissions.
+
+drop policy if exists "Customers and store team read merchant orders" on public.merchant_orders;
+create policy "Customers and store team read merchant orders"
+  on public.merchant_orders for select to authenticated
+  using (
+    customer_id = (select auth.uid())
+    or private.is_store_team_member(store_id)
+    or exists (
+      select 1 from public.merchant_order_disputes d
+      where d.merchant_order_id = merchant_orders.id
+        and (select public.is_current_user_dispute_support())
+    )
+  );
+
+drop policy if exists "Order read" on public.orders;
+create policy "Order read"
+  on public.orders for select to authenticated
+  using (
+    user_id = (select auth.uid())
+    or private.is_order_merchant(id)
+    or exists (
+      select 1 from public.merchant_order_disputes d
+      where d.order_id = orders.id
+        and (select public.is_current_user_dispute_support())
+    )
+  );
+
+drop policy if exists "Order items read" on public.order_items;
+create policy "Order items read"
+  on public.order_items for select to authenticated
+  using (
+    private.is_order_owner(order_id)
+    or private.is_store_team_member(store_id)
+    or exists (
+      select 1 from public.merchant_order_disputes d
+      where d.merchant_order_id = order_items.merchant_order_id
+        and (select public.is_current_user_dispute_support())
+    )
+  );
+
+drop policy if exists "Customers and store team read shipments" on public.shipments;
+create policy "Customers and store team read shipments"
+  on public.shipments for select to authenticated
+  using (
+    exists (
+      select 1 from public.orders o
+      where o.id = shipments.order_id
+        and o.user_id = (select auth.uid())
+    )
+    or (
+      merchant_order_id is not null
+      and exists (
+        select 1 from public.merchant_orders mo
+        where mo.id = shipments.merchant_order_id
+          and private.is_store_team_member(mo.store_id)
+      )
+    )
+    or exists (
+      select 1 from public.merchant_order_disputes d
+      where d.merchant_order_id = shipments.merchant_order_id
+        and (select public.is_current_user_dispute_support())
+    )
+  );
+
+drop policy if exists merchant_order_tracking_events_read_participants
+  on public.merchant_order_tracking_events;
+create policy merchant_order_tracking_events_read_participants
+  on public.merchant_order_tracking_events for select to authenticated
+  using (
+    exists (
+      select 1 from public.merchant_orders mo
+      where mo.id = merchant_order_tracking_events.merchant_order_id
+        and (
+          mo.customer_id = (select auth.uid())
+          or private.is_store_team_member(mo.store_id)
+        )
+    )
+    or exists (
+      select 1 from public.merchant_order_disputes d
+      where d.merchant_order_id = merchant_order_tracking_events.merchant_order_id
+        and (select public.is_current_user_dispute_support())
+    )
+  );
+
+drop policy if exists "Stores browsing country owner and team read" on public.stores;
+create policy "Stores browsing country owner and team read"
+  on public.stores for select to authenticated
+  using (
+    owner_id = (select auth.uid())
+    or (select private.is_store_team_member(stores.id))
+    or exists (
+      select 1 from public.profiles p
+      where p.user_id = (select auth.uid())
+        and p.browsing_country_code = stores.country_code
+    )
+    or exists (
+      select 1 from public.merchant_order_disputes d
+      where d.store_id = stores.id
+        and (select public.is_current_user_dispute_support())
+    )
+  );
+
 alter table public.merchant_order_completion_events
   drop constraint if exists merchant_order_completion_events_action_check;
 alter table public.merchant_order_completion_events
