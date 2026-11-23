@@ -20,7 +20,7 @@ const AUTH_CAPTCHA_ENABLED = process.env.EXPO_PUBLIC_AUTH_CAPTCHA_ENABLED === "t
 const AUTH_CAPTCHA_CUSTOM_SIGNUP = process.env.EXPO_PUBLIC_AUTH_CAPTCHA_CUSTOM_SIGNUP === "true";
 const AI_TOUR_PENDING_PREFIX = "arownd:ai-tour:pending:";
 async function getSignupCaptchaToken(): Promise<string | undefined> {
-  if (!AUTH_CAPTCHA_ENABLED) return undefined;
+  if (!AUTH_CAPTCHA_ENABLED && !AUTH_CAPTCHA_CUSTOM_SIGNUP) return undefined;
   return requestAuthCaptchaToken();
 }
 
