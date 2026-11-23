@@ -6,5 +6,8 @@ verify_jwt = false
 [functions.turnstile-challenge]
 verify_jwt = false
 
+[functions.signup-with-turnstile]
+verify_jwt = false
+
 [functions.arownd-aide]
 verify_jwt = true
