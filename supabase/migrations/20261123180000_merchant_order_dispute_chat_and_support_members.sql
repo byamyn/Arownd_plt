@@ -117,8 +117,8 @@ create policy merchant_order_dispute_messages_insert_participants
       select 1
       from public.merchant_order_disputes d
       where d.id = dispute_id
-        and d.merchant_order_id = merchant_order_id
-        and d.order_id = order_id
+        and d.merchant_order_id = merchant_order_dispute_messages.merchant_order_id
+        and d.order_id = merchant_order_dispute_messages.order_id
         and d.status <> 'resolved'
         and (
           (sender_role = 'customer' and d.customer_id = (select auth.uid()))
