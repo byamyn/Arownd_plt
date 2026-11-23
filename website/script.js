@@ -40,11 +40,18 @@ async function loadEmployees(){S.employees=await sel("team_employees","select=id
 async function loadOrg(){const [d,t]=await Promise.all([sel("team_departments","select=id,name,code,description,is_active&order=name.asc"),sel("team_teams","select=id,department_id,name,code,description,is_active&order=name.asc")]);S.departments=d||[];S.teams=t||[]}
 async function dashboard(){
  $("#dashboard-metrics").innerHTML='<div class="metric-card skeleton"></div>'.repeat(4);
- const [staff,depts,open,disputesCount,ts,logs]=await Promise.all([tally("team_employees","status=eq.active"),tally("team_departments","is_active=eq.true"),tally("team_tasks","status=in.(new,in_progress,review)"),(has("disputes.view")?tally("merchant_order_disputes","status=in.(open,in_review)"):Promise.resolve(null)),sel("team_tasks","select=id,title,status,priority,due_at&order=created_at.desc&limit=5"),has("audit.view")?sel("team_audit_logs","select=id,summary,created_at,entity_type&order=created_at.desc&limit=5"):Promise.resolve([])]);
+ const [staff,depts,open,disputesCount,ts,logs]=await Promise.all([
+  has("employees.view")?tally("team_employees","status=eq.active"):Promise.resolve(null),
+  has("org.view")?tally("team_departments","is_active=eq.true"):Promise.resolve(null),
+  has("tasks.view")?tally("team_tasks","status=in.(new,in_progress,review)"):Promise.resolve(null),
+  has("disputes.view")?tally("merchant_order_disputes","status=in.(open,in_review)"):Promise.resolve(null),
+  has("tasks.view")?sel("team_tasks","select=id,title,status,priority,due_at&order=created_at.desc&limit=5"):Promise.resolve([]),
+  has("audit.view")?sel("team_audit_logs","select=id,summary,created_at,entity_type&order=created_at.desc&limit=5"):Promise.resolve([])
+ ]);
  const m=[["الموظفون النشطون",staff,"أعضاء الفريق","♙"],["الإدارات",depts,"وحدات فعالة","▦"],["المهام المفتوحة",open,"تحتاج متابعة","✓"],["النزاعات النشطة",disputesCount,"مفتوحة أو قيد المراجعة","△"]];
  $("#dashboard-metrics").innerHTML=m.map((x,i)=>'<article class="metric-card"><div class="metric-top"><span class="metric-label">'+x[0]+'</span><span class="metric-icon '+["","blue","green","neutral"][i]+'">'+x[3]+'</span></div><strong>'+(x[1]===null?'—':x[1])+'</strong><small>'+x[2]+'</small></article>').join("");
- $("#dashboard-tasks").innerHTML=ts.length?ts.map(t=>'<div class="compact-row"><div><strong>'+esc(t.title)+'</strong><small>'+esc(L[t.status]||t.status)+' · '+esc(L[t.priority]||t.priority)+'</small></div><span class="compact-date">'+fmtDate(t.due_at)+'</span></div>').join(""):'<div class="empty-inline">لا توجد مهام مسجلة.</div>';
- $("#dashboard-activity").innerHTML=logs.length?logs.map(a=>'<div class="compact-row"><div><strong>'+esc(a.summary)+'</strong><small>'+esc(a.entity_type)+'</small></div><span class="compact-date">'+fmtTime(a.created_at)+'</span></div>').join(""):'<div class="empty-inline">لا توجد تغييرات مسجلة بعد.</div>';
+ $("#dashboard-tasks").innerHTML=!has("tasks.view")?'<div class="empty-inline">لا تملك صلاحية عرض المهام.</div>':ts.length?ts.map(t=>'<div class="compact-row"><div><strong>'+esc(t.title)+'</strong><small>'+esc(L[t.status]||t.status)+' · '+esc(L[t.priority]||t.priority)+'</small></div><span class="compact-date">'+fmtDate(t.due_at)+'</span></div>').join(""):'<div class="empty-inline">لا توجد مهام مسجلة.</div>';
+ $("#dashboard-activity").innerHTML=!has("audit.view")?'<div class="empty-inline">لا تملك صلاحية عرض سجل النشاط.</div>':logs.length?logs.map(a=>'<div class="compact-row"><div><strong>'+esc(a.summary)+'</strong><small>'+esc(a.entity_type)+'</small></div><span class="compact-date">'+fmtTime(a.created_at)+'</span></div>').join(""):'<div class="empty-inline">لا توجد تغييرات مسجلة بعد.</div>';
  $("#today-date").textContent=fmtDate(new Date());
 }
 async function employees(){
