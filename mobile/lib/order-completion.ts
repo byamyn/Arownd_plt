@@ -65,8 +65,15 @@ export async function fetchMerchantOrderCompletionData(
   if (eventsResult.error) throw eventsResult.error;
   if (disputesResult.error) throw disputesResult.error;
 
-  const events = CompletionEventSchema.array().parse(eventsResult.data as unknown);
-  const disputes = DisputeTicketSchema.array().parse(disputesResult.data as unknown);
+  return parseMerchantOrderCompletionData(eventsResult.data, disputesResult.data);
+}
+
+export function parseMerchantOrderCompletionData(
+  eventsInput: unknown,
+  disputesInput: unknown
+): MerchantOrderCompletionData {
+  const events = CompletionEventSchema.array().parse(eventsInput);
+  const disputes = DisputeTicketSchema.array().parse(disputesInput);
   const eventsByMerchantOrderId: Record<string, MerchantOrderCompletionEvent[]> = {};
   const disputesByMerchantOrderId: Record<string, MerchantOrderDisputeTicket> = {};
 
