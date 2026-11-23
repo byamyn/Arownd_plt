@@ -18,10 +18,6 @@
       "channel": "production",
       "android": {
         "buildType": "app-bundle"
-      },
-      "env": {
-        "EXPO_PUBLIC_AUTH_CAPTCHA_ENABLED": "true",
-        "EXPO_PUBLIC_AUTH_CAPTCHA_CUSTOM_SIGNUP": "true"
       }
     }
   }
