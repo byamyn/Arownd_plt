@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { getSupabaseClient } from "@/lib/supabase";
 import { assertActionRateLimit } from "@/lib/action-rate-limit";
+import { fetchMerchantOrderCompletionData } from "@/lib/order-completion";
 
 export { getOrderStatusTone, getOrderTrackingSteps } from "@/lib/orders-state";
 
@@ -29,6 +30,15 @@ const MerchantOrderSchema = z.object({
   payment_status: z.string().nullable().optional(),
   paid_amount: z.coerce.number().nullable().optional(),
   paid_at: z.string().nullable().optional(),
+  completion_status: z.enum(["pending", "disputed", "completed"]).default("pending"),
+  seller_confirmed_at: z.string().nullable().optional(),
+  seller_confirmed_by: z.string().uuid().nullable().optional(),
+  customer_confirmed_at: z.string().nullable().optional(),
+  customer_confirmed_by: z.string().uuid().nullable().optional(),
+  completed_at: z.string().nullable().optional(),
+  disputed_at: z.string().nullable().optional(),
+  dispute_opened_by: z.string().uuid().nullable().optional(),
+  dispute_reason: z.string().nullable().optional(),
   store: StoreSchema.nullable().optional(),
   items: z.array(OrderItemSchema).default([])
 }).passthrough();
@@ -84,7 +94,7 @@ export type CustomerTrackingEvent = z.infer<typeof TrackingEventSchema>;
 const ORDER_SELECT = [
   "*,",
   "items:order_items(*),",
-  "merchant_orders(id, order_id, store_id, status, subtotal, shipping_fee, quoted_at, payment_status, paid_amount, paid_at, store:stores(name, address_line, commune), items:order_items(*)),",
+  "merchant_orders(id, order_id, store_id, status, subtotal, shipping_fee, quoted_at, payment_status, paid_amount, paid_at, completion_status, seller_confirmed_at, seller_confirmed_by, customer_confirmed_at, customer_confirmed_by, completed_at, disputed_at, dispute_opened_by, dispute_reason, store:stores(name, address_line, commune), items:order_items(*)),",
   "region:country_regions!orders_country_region_fkey(name_ar, name_fr, name_en),",
   "secondary_region:country_regions!orders_country_secondary_region_fkey(name_ar, name_fr, name_en),",
   "wilaya:wilayas(name_ar, name_fr),",
@@ -110,6 +120,7 @@ export async function fetchCustomerOrderDetails(orderId: string, signal?: AbortS
   order: CustomerOrder | null;
   shipments: CustomerShipment[];
   trackingEvents: { merchantOrderId: string; events: CustomerTrackingEvent[] }[];
+  completionData: Awaited<ReturnType<typeof fetchMerchantOrderCompletionData>>;
 }> {
   const { data: auth, error: authError } = await getSupabaseClient().auth.getUser();
   if (authError) throw authError;
@@ -164,10 +175,12 @@ export async function fetchCustomerOrderDetails(orderId: string, signal?: AbortS
       entry.events = eventsByOrder.get(entry.merchantOrderId) ?? [];
     }
   }
+  const completionData = await fetchMerchantOrderCompletionData(merchantOrderIds, signal);
   return {
     order: parsedOrder,
     shipments: ShipmentSchema.array().parse(shipments as unknown),
-    trackingEvents
+    trackingEvents,
+    completionData
   };
 }
 
