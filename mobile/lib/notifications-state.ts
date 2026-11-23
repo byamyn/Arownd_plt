@@ -5,9 +5,13 @@ export function getNotificationDestination(item: AppNotification): string | null
     const notificationUrl = typeof item.data.url === "string" ? item.data.url : "";
     return /^\/support\/[0-9a-f-]{36}$/i.test(notificationUrl) ? notificationUrl : null;
   }
+  const notificationUrl = typeof item.data.url === "string" ? item.data.url : "";
+  const supportDisputeId = notificationUrl.match(/^\/support\/disputes\/([0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$/i)?.[1];
+  if (supportDisputeId) return "/support/disputes/" + supportDisputeId;
+  const disputeId = notificationUrl.match(/^\/disputes\/([0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$/i)?.[1];
+  if (disputeId) return "/disputes/" + disputeId;
   if (item.type !== "order") return null;
 
-  const notificationUrl = typeof item.data.url === "string" ? item.data.url : "";
   const merchantOrderId = notificationUrl.match(/^\/studio\/orders\/([^/?#]+)/)?.[1];
   if (merchantOrderId) {
     return "/merchant/orders/" + encodeURIComponent(merchantOrderId);
@@ -24,6 +28,11 @@ const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3
 
 export function getPushNotificationDestination(data: Record<string, unknown>): string | null {
   const notificationUrl = typeof data.url === "string" ? data.url : "";
+  const supportDisputeId = notificationUrl.match(/^\/support\/disputes\/([0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$/i)?.[1];
+  if (supportDisputeId) return "/support/disputes/" + supportDisputeId;
+  const disputeId = notificationUrl.match(/^\/disputes\/([0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$/i)?.[1];
+  if (disputeId) return "/disputes/" + disputeId;
+
   const merchantOrderId = notificationUrl.match(/^\/studio\/orders\/([0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$/i)?.[1];
   if (merchantOrderId) return "/merchant/orders/" + merchantOrderId;
 
