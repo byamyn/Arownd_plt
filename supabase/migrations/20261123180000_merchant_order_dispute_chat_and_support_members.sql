@@ -481,6 +481,9 @@ begin
   -- flow. It does not change fulfillment, prices, COD collection or payment data.
   update public.merchant_orders
   set completion_status = 'pending',
+      disputed_at = null,
+      dispute_opened_by = null,
+      dispute_reason = null,
       updated_at = now()
   where id = v_dispute.merchant_order_id
     and completion_status = 'disputed';
