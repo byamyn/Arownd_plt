@@ -123,7 +123,6 @@ create policy merchant_order_completion_events_read_participants
         and (
           mo.customer_id = (select auth.uid())
           or private.is_store_team_member(mo.store_id)
-          or public.has_role((select auth.uid()), 'admin'::public.app_role)
         )
     )
   );
