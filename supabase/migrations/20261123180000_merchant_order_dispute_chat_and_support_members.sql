@@ -128,6 +128,35 @@ create policy merchant_order_dispute_messages_insert_participants
     )
   );
 
+
+create or replace function public.current_user_merchant_order_dispute_role(_dispute_id uuid)
+returns text
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $function$
+declare
+  v_dispute public.merchant_order_disputes;
+begin
+  if auth.uid() is null then return null; end if;
+  select d.* into v_dispute
+  from public.merchant_order_disputes d
+  where d.id = _dispute_id;
+  if not found then return null; end if;
+
+  if v_dispute.customer_id = auth.uid() then return 'customer'; end if;
+  if private.is_store_team_member(v_dispute.store_id) then return 'merchant'; end if;
+  if public.is_current_user_dispute_support() then return 'support'; end if;
+  return null;
+end;
+$function$;
+
+revoke all on function public.current_user_merchant_order_dispute_role(uuid)
+  from public, anon;
+grant execute on function public.current_user_merchant_order_dispute_role(uuid)
+  to authenticated;
+
 create or replace function public.handle_merchant_order_dispute_message_insert()
 returns trigger
 language plpgsql
