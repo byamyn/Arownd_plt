@@ -9,10 +9,11 @@ const CompletionEventSchema = z.object({
   action: z.enum([
     "seller_confirmed_delivery_and_cash",
     "customer_confirmed_receipt_and_payment",
-    "customer_opened_dispute"
+    "customer_opened_dispute",
+    "support_resolved_dispute"
   ]),
   actor_id: z.string().uuid(),
-  actor_type: z.enum(["seller", "customer"]),
+  actor_type: z.enum(["seller", "customer", "support"]),
   reason: z.string().nullable(),
   created_at: z.string()
 }).passthrough();
