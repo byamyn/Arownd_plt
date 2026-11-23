@@ -55,7 +55,7 @@ export type MerchantOrderDispute = z.infer<typeof DisputeSchema>;
 export type MerchantOrderDisputeMessage = z.infer<typeof DisputeMessageSchema> & {
   attachment_url: string | null;
 };
-export type DisputeParticipantRole = "customer" | "merchant" | "support";
+export type DisputeParticipantRole = "customer" | "merchant";
 
 export async function fetchMerchantOrderDispute(
   merchantOrderId: string,
@@ -85,32 +85,13 @@ export async function fetchMerchantOrderDisputeById(
   return data ? DisputeSchema.parse(data as unknown) : null;
 }
 
-export async function fetchMerchantOrderDisputeInbox(
-  signal?: AbortSignal
-): Promise<MerchantOrderDispute[]> {
-  const { data: support, error: supportError } = await getSupabaseClient()
-    .rpc("is_current_user_dispute_support");
-  if (supportError) throw supportError;
-  if (support !== true) throw new Error("support_access_required");
-
-  let request = getSupabaseClient()
-    .from("merchant_order_disputes")
-    .select("id, merchant_order_id, order_id, store_id, customer_id, opened_by, reason, status, resolution_note, resolved_by, resolved_at, created_at, updated_at")
-    .order("updated_at", { ascending: false })
-    .limit(100);
-  if (signal) request = request.abortSignal(signal);
-  const { data, error } = await request;
-  if (error) throw error;
-  return DisputeSchema.array().parse(data as unknown);
-}
-
 export async function getMerchantOrderDisputeParticipantRole(
   disputeId: string
 ): Promise<DisputeParticipantRole | null> {
   const { data, error } = await getSupabaseClient()
     .rpc("current_user_merchant_order_dispute_role", { _dispute_id: disputeId });
   if (error) throw error;
-  return data === "customer" || data === "merchant" || data === "support" ? data : null;
+  return data === "customer" || data === "merchant" ? data : null;
 }
 
 export type MerchantOrderDisputeTimelineEvent = z.infer<typeof DisputeTimelineEventSchema>;
@@ -172,17 +153,23 @@ export async function sendMerchantOrderDisputeMessage(
   const { data: role, error: roleError } = await client
     .rpc("current_user_merchant_order_dispute_role", { _dispute_id: disputeId });
   if (roleError) throw roleError;
-  if (role !== "customer" && role !== "merchant" && role !== "support") {
+  if (role !== "customer" && role !== "merchant") {
     throw new Error("not_authorized");
   }
 
   let attachmentPath: string | null = null;
   if (attachment) {
+    if (typeof attachment.fileSize === "number" && attachment.fileSize > 10 * 1024 * 1024) {
+      throw new Error("dispute_attachment_too_large");
+    }
     const mimeType = attachment.mimeType === "image/png"
       ? "image/png"
       : attachment.mimeType === "image/webp"
         ? "image/webp"
-        : "image/jpeg";
+        : attachment.mimeType === "image/jpeg" || attachment.mimeType === "image/jpg" || !attachment.mimeType
+          ? "image/jpeg"
+          : null;
+    if (!mimeType) throw new Error("dispute_attachment_unsupported_type");
     const extension = mimeType === "image/png" ? "png" : mimeType === "image/webp" ? "webp" : "jpg";
     const blob = await fetch(attachment.uri).then(async (response) => {
       if (!response.ok) throw new Error("dispute_attachment_read_failed");
@@ -206,18 +193,6 @@ export async function sendMerchantOrderDisputeMessage(
     sender_role: role,
     message: safeMessage,
     attachment_path: attachmentPath
-  });
-  if (error) throw error;
-}
-
-export async function resolveMerchantOrderDispute(
-  disputeId: string,
-  resolutionNote: string
-): Promise<void> {
-  assertActionRateLimit("merchant-order-dispute:resolve:" + disputeId, 5_000);
-  const { error } = await getSupabaseClient().rpc("support_resolve_merchant_order_dispute", {
-    _dispute_id: disputeId,
-    _resolution_note: resolutionNote.trim()
   });
   if (error) throw error;
 }
