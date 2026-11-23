@@ -48,6 +48,23 @@ create policy merchant_order_disputes_read_participants
     or (select public.is_current_user_dispute_support())
   );
 
+drop policy if exists merchant_order_completion_events_read_participants
+  on public.merchant_order_completion_events;
+create policy merchant_order_completion_events_read_participants
+  on public.merchant_order_completion_events
+  for select to authenticated
+  using (
+    exists (
+      select 1 from public.merchant_orders mo
+      where mo.id = merchant_order_completion_events.merchant_order_id
+        and (
+          mo.customer_id = (select auth.uid())
+          or private.is_store_team_member(mo.store_id)
+          or (select public.is_current_user_dispute_support())
+        )
+    )
+  );
+
 alter table public.merchant_order_completion_events
   drop constraint if exists merchant_order_completion_events_action_check;
 alter table public.merchant_order_completion_events
