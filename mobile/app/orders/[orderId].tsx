@@ -231,8 +231,9 @@ export default function OrderDetailsScreen() {
       const subTotal = cancelled ? 0 : merchantOrder.subtotal + merchantOrder.shipping_fee;
       const completionEvents = query.data.completionData.eventsByMerchantOrderId[merchantOrder.id] ?? [];
       const disputeTicket = query.data.completionData.disputesByMerchantOrderId[merchantOrder.id];
-      const canConfirmCompletion = !cancelled && merchantOrder.completion_status === "pending" && merchantOrder.status === "delivered" && merchantOrder.payment_status === "paid" && Boolean(merchantOrder.seller_confirmed_at);
-      const canOpenDispute = !cancelled && !disputeTicket && merchantOrder.completion_status === "pending";
+      const disputeActive = Boolean(disputeTicket && disputeTicket.status !== "resolved") || merchantOrder.completion_status === "disputed";
+      const canConfirmCompletion = !cancelled && !disputeActive && merchantOrder.completion_status === "pending" && merchantOrder.status === "delivered" && merchantOrder.payment_status === "paid" && Boolean(merchantOrder.seller_confirmed_at);
+      const canOpenDispute = !cancelled && !disputeTicket && (merchantOrder.completion_status === "pending" || merchantOrder.completion_status === "disputed");
       return <View key={merchantOrder.id} style={[styles.panel, { backgroundColor: theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface }]}>
         <View style={styles.merchantHeader}>
           <UiText style={styles.sectionTitle}>{merchantOrder.store?.name ?? translate("ordersStore")}</UiText>
@@ -266,7 +267,7 @@ export default function OrderDetailsScreen() {
         <View style={styles.completionPanel}>
           <UiText style={styles.sectionTitle}>{translate("orderCompletionTitle")}</UiText>
           {merchantOrder.completion_status === "completed" ? <Alert description={translate("orderCompletionCompleted")} tone="success" /> : null}
-          {merchantOrder.completion_status === "disputed" ? <Alert title={translate("orderCompletionDisputed")} description={disputeTicket?.reason ?? merchantOrder.dispute_reason ?? translate("orderDisputeTicket")} tone="danger" /> : null}
+          {disputeActive ? <Alert title={translate("orderCompletionDisputed")} description={disputeTicket?.reason ?? merchantOrder.dispute_reason ?? translate("orderDisputeTicket")} tone="danger" /> : null}
           {merchantOrder.completion_status === "pending" && merchantOrder.seller_confirmed_at ? <Alert description={translate("orderCompletionWaitingCustomer")} tone="info" /> : null}
           {merchantOrder.completion_status === "pending" && !merchantOrder.seller_confirmed_at && !(merchantOrder.status === "delivered" && merchantOrder.payment_status === "paid") ? <Alert description={translate("orderCompletionPending")} tone="warning" /> : null}
           {merchantOrder.completion_status === "pending" && merchantOrder.status === "delivered" && merchantOrder.payment_status === "paid" && !merchantOrder.seller_confirmed_at ? <Alert description={translate("orderCompletionWaitingSeller")} tone="warning" /> : null}
