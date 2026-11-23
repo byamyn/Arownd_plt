@@ -605,6 +605,7 @@ declare
   v_order public.merchant_orders;
   v_reason text;
   v_dispute_id uuid;
+  v_dispute_status text;
 begin
   if auth.uid() is null then
     raise exception 'not_authenticated';
@@ -624,11 +625,14 @@ begin
   if v_order.customer_id <> auth.uid() then raise exception 'not_authorized'; end if;
   if v_order.completion_status = 'completed' then raise exception 'merchant_order_already_completed'; end if;
   if v_order.status = 'cancelled' then raise exception 'merchant_order_not_disputable'; end if;
-  select d.id into v_dispute_id
+  select d.id, d.status into v_dispute_id, v_dispute_status
   from public.merchant_order_disputes d
   where d.merchant_order_id = v_order.id;
 
   if found then
+    if v_dispute_status = 'resolved' then
+      raise exception 'merchant_order_dispute_already_resolved';
+    end if;
     if v_order.completion_status <> 'disputed' then
       update public.merchant_orders
       set completion_status = 'disputed',
