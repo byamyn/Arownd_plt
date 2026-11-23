@@ -89,6 +89,18 @@ create table if not exists public.merchant_order_completion_events (
 create index if not exists merchant_order_completion_events_order_idx
   on public.merchant_order_completion_events(merchant_order_id, created_at, id);
 
+-- Preserve an audit entry for seller confirmations that predate this workflow.
+insert into public.merchant_order_completion_events (
+  merchant_order_id, order_id, action, actor_id, actor_type, created_at
+)
+select
+  mo.id, mo.order_id, 'seller_confirmed_delivery_and_cash',
+  mo.seller_confirmed_by, 'seller', mo.seller_confirmed_at
+from public.merchant_orders mo
+where mo.seller_confirmed_at is not null
+  and mo.seller_confirmed_by is not null
+on conflict do nothing;
+
 alter table public.merchant_order_completion_events enable row level security;
 revoke all on public.merchant_order_completion_events from public, anon, authenticated;
 grant select on public.merchant_order_completion_events to authenticated;
@@ -113,7 +125,8 @@ create policy merchant_order_completion_events_read_participants
   );
 
 -- Capture the seller's acknowledgement from the existing, server-authorized
--- COD collection operation. Clients cannot write this audit table directly.
+-- COD collection operation. BEFORE UPDATE avoids a second row update and its
+-- unrelated activity triggers; the audit insert shares the same transaction.
 create or replace function public.capture_merchant_order_seller_confirmation()
 returns trigger
 language plpgsql
@@ -135,26 +148,15 @@ begin
       raise exception 'cod_collection_record_missing';
     end if;
 
-    update public.merchant_orders
-    set seller_confirmed_at = coalesce(seller_confirmed_at, new.paid_at, now()),
-        seller_confirmed_by = coalesce(seller_confirmed_by, v_actor_id),
-        updated_at = now()
-    where id = new.id
-      and seller_confirmed_at is null;
+    new.seller_confirmed_at := coalesce(new.seller_confirmed_at, new.paid_at, now());
+    new.seller_confirmed_by := coalesce(new.seller_confirmed_by, v_actor_id);
 
-    if not exists (
-      select 1
-      from public.merchant_order_completion_events e
-      where e.merchant_order_id = new.id
-        and e.action = 'seller_confirmed_delivery_and_cash'
-    ) then
-      insert into public.merchant_order_completion_events (
-        merchant_order_id, order_id, action, actor_id, actor_type
-      ) values (
-        new.id, new.order_id, 'seller_confirmed_delivery_and_cash',
-        v_actor_id, 'seller'
-      );
-    end if;
+    insert into public.merchant_order_completion_events (
+      merchant_order_id, order_id, action, actor_id, actor_type
+    ) values (
+      new.id, new.order_id, 'seller_confirmed_delivery_and_cash',
+      v_actor_id, 'seller'
+    );
   end if;
 
   return new;
@@ -168,7 +170,7 @@ drop trigger if exists merchant_order_capture_seller_confirmation
   on public.merchant_orders;
 
 create trigger merchant_order_capture_seller_confirmation
-after update of payment_status on public.merchant_orders
+before update of payment_status on public.merchant_orders
 for each row
 execute function public.capture_merchant_order_seller_confirmation();
 
