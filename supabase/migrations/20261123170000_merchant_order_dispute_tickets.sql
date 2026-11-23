@@ -91,6 +91,10 @@ begin
     raise exception 'merchant_order_already_completed';
   end if;
 
+  if v_order.status in ('cancelled', 'rejected') then
+    raise exception 'merchant_order_not_disputable';
+  end if;
+
   if v_order.completion_status = 'disputed' then
     return v_order;
   end if;
