@@ -6,7 +6,7 @@ import { getSupabaseClient } from "@/lib/supabase";
 import { syncSelectedCountryCodeFromProfile } from "@/lib/country-service";
 
 const SAVED_ACCOUNTS_KEY = "arownd:saved-accounts:v1";
-const SESSION_KEY_PREFIX = "arownd:saved-account-session:v1:";
+const SESSION_KEY_PREFIX = "arownd.saved-account-session.v1.";
 
 let accountStorageQueue: Promise<void> = Promise.resolve();
 
