@@ -6,7 +6,7 @@ verification for the versioned `/api/v1` route namespace.
 
 ## Environment
 
-- `SUPABASE_URL`: Supabase project URL used by the server-side Auth user lookup.
+- `SUPABASE_URL`: Supabase project URL used for Auth verification and PostgREST reads.
 - `SUPABASE_PUBLISHABLE_KEY` (or legacy `SUPABASE_ANON_KEY`): public project key.
   Never set a service-role key here or expose one to the mobile application.
 - `API_CORS_ORIGINS`: comma-separated exact browser origins permitted by CORS.
@@ -20,15 +20,26 @@ verification for the versioned `/api/v1` route namespace.
   rate limiting and source attribution.
 - `NODE_ENV=production`: enables the HSTS response header.
 
-## Authentication contract
+## Authentication and team API
 
-Health checks remain public at `/api/healthz`. New business endpoints must be
-mounted under `/api/v1`; the router applies `requireSupabaseAuth` to that namespace.
-The middleware validates bearer tokens by calling Supabase Auth's `/auth/v1/user`
-endpoint and places only the verified user ID in `res.locals.authUser`.
+Health checks remain public at `/api/healthz`. Business endpoints must be mounted
+under `/api/v1`; the router applies `requireSupabaseAuth` and the authenticated-user
+rate limiter to that namespace.
 
-The API currently has no business routes, so this guard establishes the default
-boundary for future versioned routes; it does not create business functionality.
+The authentication middleware validates bearer tokens by calling Supabase Auth's
+`/auth/v1/user` endpoint and places only the verified user ID in
+`res.locals.authUser`.
+
+Initial read-only Arownd Team endpoints:
+
+- `GET /api/v1/team/me`: active employee profile and assigned roles.
+- `GET /api/v1/team/employees`: employee directory, subject to the database
+  `employees.view` permission.
+- `GET /api/v1/team/roles`: role and permission catalogs for active team members.
+
+Team data reads are forwarded to Supabase PostgREST with the verified user's bearer
+token and the public publishable key. PostgreSQL RLS remains the authorization
+boundary; the API does not use a service-role key or trust client-supplied role claims.
 
 ## Monitoring and operational limits
 
@@ -36,5 +47,9 @@ Security events are emitted as structured Pino records. Source IPs are represent
 by a truncated SHA-256 digest; tokens, cookies, request bodies, and query strings
 are not included in security-event records.
 
-Both rate limiters are in-memory and per server process. The IP limiter applies to all `/api` traffic (except health checks); the authenticated-user limiter applies after token verification to `/api/v1`. These controls are suitable as initial single-instance safeguards, not as distributed limits across multiple replicas. A multi-instance deployment needs an upstream shared limiter or a shared store.
+Both rate limiters are in-memory and per server process. The IP limiter applies to all
+`/api` traffic (except health checks); the authenticated-user limiter applies after
+token verification to `/api/v1`. These controls are suitable as initial single-instance
+safeguards, not as distributed limits across multiple replicas. A multi-instance
+deployment needs an upstream shared limiter or a shared store.
 No external SIEM or alert-delivery integration is configured by this change.
