@@ -385,4 +385,98 @@ comment on table public.support_members is
 comment on table public.merchant_order_dispute_messages is
   'Append-only buyer, merchant and Arownd support chat for one merchant-order dispute.';
 
+
+-- Notify active support members as soon as a new dispute is opened.
+create or replace function public.customer_open_merchant_order_dispute(
+  _merchant_order_id uuid,
+  _reason text
+)
+returns public.merchant_orders
+language plpgsql
+security definer
+set search_path = ''
+as $function$
+declare
+  v_order public.merchant_orders;
+  v_reason text;
+  v_dispute_id uuid;
+begin
+  if auth.uid() is null then
+    raise exception 'not_authenticated';
+  end if;
+
+  v_reason := nullif(trim(_reason), '');
+  if v_reason is null or length(v_reason) > 1000 then
+    raise exception 'invalid_dispute_reason';
+  end if;
+
+  select mo.* into v_order
+  from public.merchant_orders mo
+  where mo.id = _merchant_order_id
+  for update;
+
+  if not found then raise exception 'merchant_order_not_found'; end if;
+  if v_order.customer_id <> auth.uid() then raise exception 'not_authorized'; end if;
+  if v_order.completion_status = 'completed' then raise exception 'merchant_order_already_completed'; end if;
+  if v_order.status = 'cancelled' then raise exception 'merchant_order_not_disputable'; end if;
+  if v_order.completion_status = 'disputed' then return v_order; end if;
+
+  insert into public.merchant_order_disputes (
+    merchant_order_id, order_id, store_id, customer_id, opened_by, reason
+  ) values (
+    v_order.id, v_order.order_id, v_order.store_id,
+    v_order.customer_id, auth.uid(), v_reason
+  ) returning id into v_dispute_id;
+
+  update public.merchant_orders
+  set completion_status = 'disputed',
+      disputed_at = now(),
+      dispute_opened_by = auth.uid(),
+      dispute_reason = v_reason,
+      updated_at = now()
+  where id = _merchant_order_id
+  returning * into v_order;
+
+  insert into public.merchant_order_completion_events (
+    merchant_order_id, order_id, action, actor_id, actor_type, reason
+  ) values (
+    v_order.id, v_order.order_id, 'customer_opened_dispute',
+    auth.uid(), 'customer', v_reason
+  );
+
+  insert into public.notifications (user_id, type, title, body, data)
+  select st.owner_id, 'order', 'تم فتح نزاع على الطلب',
+    'فتح المشتري نزاعاً على الطلب ويحتاج إلى المراجعة.',
+    jsonb_build_object(
+      'order_id', v_order.order_id,
+      'merchant_order_id', v_order.id,
+      'dispute_id', v_dispute_id,
+      'completion_status', 'disputed',
+      'url', '/disputes/' || v_dispute_id::text
+    )
+  from public.stores st
+  where st.id = v_order.store_id and st.owner_id is not null;
+
+  insert into public.notifications (user_id, type, title, body, data)
+  select sm.user_id, 'order', 'نزاع جديد يحتاج إلى المراجعة',
+    'تم فتح نزاع جديد بين المشتري والمتجر.',
+    jsonb_build_object(
+      'order_id', v_order.order_id,
+      'merchant_order_id', v_order.id,
+      'dispute_id', v_dispute_id,
+      'completion_status', 'disputed',
+      'url', '/support/disputes/' || v_dispute_id::text
+    )
+  from public.support_members sm
+  where sm.is_active = true;
+
+  return v_order;
+end;
+$function$;
+
+revoke all on function public.customer_open_merchant_order_dispute(uuid, text)
+  from public, anon;
+grant execute on function public.customer_open_merchant_order_dispute(uuid, text)
+  to authenticated;
+
 commit;
