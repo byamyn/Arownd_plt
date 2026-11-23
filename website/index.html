@@ -4,190 +4,145 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#FAF9F5">
-  <meta name="description" content="Arownd Team — مساحة إدارة المنصة والموظفين والعمليات الداخلية.">
+  <meta name="description" content="Arownd Team — الإدارة الداخلية لمنصة Arownd.">
   <title>Arownd Team — إدارة المنصة</title>
   <link rel="icon" href="arownd-app-icon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <script src="config.js" defer></script>
   <script src="script.js" defer></script>
 </head>
 <body>
-  <div class="app-shell">
+  <div id="auth-screen" class="auth-screen">
+    <div class="auth-brand"><img src="arownd-logo.svg" alt="Arownd"><span></span><b>TEAM</b></div>
+    <section class="auth-card">
+      <div class="auth-mark">A</div>
+      <p class="eyebrow">مساحة الإدارة الداخلية</p>
+      <h1 id="auth-title">تسجيل الدخول</h1>
+      <p id="auth-description" class="muted">الدخول مخصص لموظفي Arownd المعتمدين.</p>
+      <form id="login-form" class="form-stack">
+        <label>البريد الإلكتروني<input name="email" type="email" autocomplete="username" required placeholder="name@arownd.com"></label>
+        <label>كلمة المرور<input name="password" type="password" autocomplete="current-password" required minlength="8" placeholder="••••••••"></label>
+        <button class="button primary wide" type="submit">تسجيل الدخول</button>
+      </form>
+      <form id="invite-form" class="form-stack hidden">
+        <label>الاسم الكامل<input name="full_name" required maxlength="120" placeholder="الاسم الكامل"></label>
+        <label>البريد الإلكتروني<input name="email" type="email" required autocomplete="email" placeholder="البريد الذي وصلته الدعوة"></label>
+        <label>إنشاء كلمة مرور<input name="password" type="password" required minlength="8" autocomplete="new-password" placeholder="8 أحرف على الأقل"></label>
+        <button class="button primary wide" type="submit">تفعيل حساب الفريق</button>
+      </form>
+      <div id="auth-message" class="form-message" role="status" aria-live="polite"></div>
+      <div class="auth-foot"><span>وصول آمن</span><span>•</span><span>Supabase Auth</span></div>
+    </section>
+    <p class="auth-legal">Arownd Team · منصة Arownd</p>
+  </div>
+
+  <div id="app-shell" class="app-shell hidden">
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-head">
-        <a class="brand" href="#dashboard" aria-label="Arownd Team">
-          <img src="arownd-logo.svg" alt="Arownd" class="brand-logo">
-          <span class="brand-divider"></span>
-          <span class="brand-product">TEAM</span>
-        </a>
-        <button class="icon-button sidebar-close" id="sidebar-close" type="button" aria-label="إغلاق القائمة">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
-        </button>
+        <a class="brand" href="#dashboard"><img src="arownd-logo.svg" alt="Arownd"><span></span><b>TEAM</b></a>
+        <button class="icon-button mobile-only" id="sidebar-close" aria-label="إغلاق القائمة">×</button>
       </div>
-
-      <div class="workspace-switcher">
-        <span class="workspace-mark">A</span>
-        <span class="workspace-copy"><strong>Arownd Platform</strong><small>مساحة الإدارة الداخلية</small></span>
-        <svg class="chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg>
-      </div>
-
-      <div class="nav-caption">مساحة العمل</div>
-      <nav class="main-nav" aria-label="التنقل الرئيسي">
-        <button class="nav-item active" type="button" data-view="dashboard"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg><span>لوحة القيادة</span></button>
-        <button class="nav-item" type="button" data-view="employees"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>الموظفون</span></button>
-        <button class="nav-item" type="button" data-view="organization"><svg viewBox="0 0 24 24"><rect x="8" y="3" width="8" height="5" rx="1"/><rect x="2" y="16" width="8" height="5" rx="1"/><rect x="14" y="16" width="8" height="5" rx="1"/><path d="M12 8v4M6 16v-4h12v4"/></svg><span>الهيكل التنظيمي</span></button>
-        <button class="nav-item" type="button" data-view="roles"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/></svg><span>الأدوار والصلاحيات</span></button>
-        <button class="nav-item" type="button" data-view="tasks"><svg viewBox="0 0 24 24"><path d="M9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span>المهام</span></button>
-
-        <div class="nav-caption nav-caption-spaced">خدمة المنصة</div>
-        <button class="nav-item" type="button" data-view="support"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8v.5Z"/></svg><span>مركز الدعم</span></button>
-        <button class="nav-item" type="button" data-view="disputes"><svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 2.2 18a2 2 0 0 0 1.7 3h16.2a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg><span>مركز النزاعات</span></button>
-
-        <div class="nav-caption nav-caption-spaced">المتابعة والحوكمة</div>
-        <button class="nav-item" type="button" data-view="reports"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-5 5"/></svg><span>التقارير</span></button>
-        <button class="nav-item" type="button" data-view="activity"><svg viewBox="0 0 24 24"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg><span>سجل النشاط</span></button>
+      <div class="workspace"><span class="workspace-mark">A</span><span><b>Arownd Platform</b><small>مساحة الإدارة الداخلية</small></span></div>
+      <nav id="main-nav" class="main-nav" aria-label="القائمة الرئيسية">
+        <p class="nav-label">مساحة العمل</p>
+        <button class="nav-item active" data-view="dashboard" data-permission="dashboard.view"><i>▦</i>لوحة القيادة</button>
+        <button class="nav-item" data-view="employees" data-permission="employees.view"><i>♙</i>الموظفون</button>
+        <button class="nav-item" data-view="organization" data-permission="org.view"><i>⌘</i>الهيكل التنظيمي</button>
+        <button class="nav-item" data-view="roles" data-permission="roles.view"><i>◇</i>الأدوار والصلاحيات</button>
+        <button class="nav-item" data-view="tasks" data-permission="tasks.view"><i>☷</i>المهام</button>
+        <p class="nav-label spaced">خدمة المنصة</p>
+        <button class="nav-item" data-view="support" data-permission="support.view"><i>◌</i>مركز الدعم</button>
+        <button class="nav-item" data-view="disputes" data-permission="disputes.view"><i>△</i>مركز النزاعات</button>
+        <p class="nav-label spaced">المتابعة والحوكمة</p>
+        <button class="nav-item" data-view="reports" data-permission="reports.view"><i>⌁</i>التقارير</button>
+        <button class="nav-item" data-view="activity" data-permission="audit.view"><i>◷</i>سجل النشاط</button>
       </nav>
-
       <div class="sidebar-bottom">
-        <button class="nav-item" type="button" data-view="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1 1.4 1.1-1.4 2.4-1.7-.6a8 8 0 0 1-1.5.9l-.3 1.8h-2.8l-.3-1.8a8 8 0 0 1-1.5-.9l-1.7.6-1.4-2.4 1.4-1.1a8 8 0 0 1 0-1.8L6.9 12l1.4-2.4 1.7.6a8 8 0 0 1 1.5-.9l.3-1.8h2.8l.3 1.8a8 8 0 0 1 1.5.9l1.7-.6 1.4 2.4-1.4 1.1a8 8 0 0 1-.1 1.9Z"/></svg><span>الإعدادات</span></button>
-        <div class="sidebar-note"><span class="status-dot"></span><span>مساحة داخلية خاصة</span></div>
+        <button class="nav-item" data-view="settings" data-permission="settings.view"><i>⚙</i>الإعدادات</button>
+        <div class="private-note"><span></span>مساحة داخلية خاصة</div>
       </div>
     </aside>
-
-    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
-
+    <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
     <main class="main-area">
       <header class="topbar">
         <div class="topbar-start">
-          <button class="icon-button mobile-menu" id="mobile-menu" type="button" aria-label="فتح القائمة"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
-          <div class="breadcrumb"><span>Arownd Team</span><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg><strong id="breadcrumb-current">لوحة القيادة</strong></div>
+          <button class="icon-button mobile-only" id="mobile-menu" aria-label="فتح القائمة">☰</button>
+          <div class="breadcrumb"><span>Arownd Team</span><b>›</b><strong id="breadcrumb-current">لوحة القيادة</strong></div>
         </div>
         <div class="topbar-actions">
-          <label class="search-box">
-            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
-            <input id="global-search" type="search" placeholder="ابحث في مساحة العمل" aria-label="ابحث في مساحة العمل">
-            <kbd>⌘ K</kbd>
-          </label>
-          <button class="icon-button notification-button" type="button" aria-label="الإشعارات" title="الإشعارات">
-            <svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>
-            <span class="notification-dot"></span>
-          </button>
-          <div class="topbar-divider"></div>
-          <button class="account-button" type="button" aria-label="حساب المؤسس">
-            <span class="avatar avatar-founder">F</span>
-            <span class="account-copy"><strong>Founder & CEO</strong><small>مالك المنصة</small></span>
-            <svg class="chevron" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></svg>
-          </button>
+          <label class="search-box"><span>⌕</span><input id="global-search" type="search" placeholder="ابحث في هذه الصفحة"></label>
+          <div class="account-menu"><span id="user-avatar" class="avatar">A</span><span><b id="user-name">موظف Arownd</b><small id="user-role">فريق المنصة</small></span><button id="logout-button" class="text-button">خروج</button></div>
         </div>
       </header>
-
       <div class="page-content">
         <section class="view-panel active" id="view-dashboard" data-title="لوحة القيادة">
-          <div class="page-heading">
-            <div><div class="eyebrow"><span class="eyebrow-line"></span> نظرة عامة</div><h1>لوحة القيادة</h1><p>مركز متابعة وإدارة عمليات منصة Arownd.</p></div>
-            <div class="heading-meta"><span class="live-indicator"></span><span>مساحة الإدارة</span><span class="meta-separator"></span><span id="today-date"></span></div>
-          </div>
-
-          <div class="welcome-panel">
-            <div class="welcome-copy"><span class="welcome-label">AROWND PLATFORM</span><h2>مرحباً بك في مساحة إدارة المنصة.</h2><p>من هنا يمكنك متابعة الفريق، تنظيم المسؤوليات، والإشراف على عمليات Arownd.</p></div>
-            <div class="welcome-art" aria-hidden="true"><img src="arownd-app-icon.svg" alt=""></div>
-          </div>
-
-          <div class="section-title-row"><div><h2>ملخص المنصة</h2><p>ستظهر المؤشرات بعد ربط مصادر البيانات.</p></div><span class="subtle-tag">لا توجد بيانات مباشرة بعد</span></div>
-          <div class="metric-grid">
-            <article class="metric-card"><div class="metric-top"><span class="metric-icon orange"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg></span><span class="metric-label">الموظفون</span></div><strong>—</strong><small>إجمالي أعضاء الفريق</small></article>
-            <article class="metric-card"><div class="metric-top"><span class="metric-icon blue"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg></span><span class="metric-label">الإدارات</span></div><strong>—</strong><small>الوحدات التنظيمية</small></article>
-            <article class="metric-card"><div class="metric-top"><span class="metric-icon green"><svg viewBox="0 0 24 24"><path d="M9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span><span class="metric-label">المهام المفتوحة</span></div><strong>—</strong><small>المهام قيد المتابعة</small></article>
-            <article class="metric-card"><div class="metric-top"><span class="metric-icon neutral"><svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 2.2 18a2 2 0 0 0 1.7 3h16.2a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg></span><span class="metric-label">النزاعات النشطة</span></div><strong>—</strong><small>تحتاج إلى متابعة</small></article>
-          </div>
-
+          <div class="page-heading"><div><p class="eyebrow">نظرة عامة</p><h1>لوحة القيادة</h1><p class="muted">مركز متابعة وإدارة عمليات منصة Arownd.</p></div><div class="date-chip" id="today-date"></div></div>
+          <div class="welcome-panel"><div><small>AROWND PLATFORM</small><h2>إدارة موحدة لفريق المنصة.</h2><p>تابع الفريق والمهام وخدمة العملاء والنزاعات من مساحة واحدة.</p></div><img src="arownd-app-icon.svg" alt=""></div>
+          <div class="section-heading"><div><h2>ملخص المنصة</h2><p>مؤشرات محدثة من قاعدة البيانات.</p></div><button class="text-button" data-action="refresh">تحديث البيانات ↻</button></div>
+          <div id="dashboard-metrics" class="metric-grid"><div class="metric-card skeleton"></div><div class="metric-card skeleton"></div><div class="metric-card skeleton"></div><div class="metric-card skeleton"></div></div>
           <div class="dashboard-grid">
-            <section class="content-card quick-access-card"><div class="card-heading"><div><h2>الوصول السريع</h2><p>انتقل مباشرة إلى الوحدات الأساسية.</p></div></div><div class="quick-access-grid">
-              <button class="quick-link" type="button" data-view="employees"><span class="quick-icon"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/></svg></span><span><strong>إدارة الموظفين</strong><small>الملفات والدعوات</small></span><svg class="quick-arrow" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>
-              <button class="quick-link" type="button" data-view="organization"><span class="quick-icon"><svg viewBox="0 0 24 24"><rect x="8" y="3" width="8" height="5" rx="1"/><rect x="2" y="16" width="8" height="5" rx="1"/><rect x="14" y="16" width="8" height="5" rx="1"/><path d="M12 8v4M6 16v-4h12v4"/></svg></span><span><strong>الهيكل التنظيمي</strong><small>الإدارات والفرق</small></span><svg class="quick-arrow" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>
-              <button class="quick-link" type="button" data-view="roles"><span class="quick-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/></svg></span><span><strong>الأدوار والصلاحيات</strong><small>نطاقات الوصول</small></span><svg class="quick-arrow" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>
-              <button class="quick-link" type="button" data-view="tasks"><span class="quick-icon"><svg viewBox="0 0 24 24"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span><span><strong>إدارة المهام</strong><small>التكليف والمتابعة</small></span><svg class="quick-arrow" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>
-            </div></section>
-            <section class="content-card structure-card"><div class="card-heading"><div><h2>هيكل المسؤوليات</h2><p>الأدوار التشغيلية المعتمدة.</p></div><button class="text-action" type="button" data-view="roles">عرض الأدوار</button></div>
-              <div class="role-summary"><span class="role-mark founder-mark">F</span><span><strong>Founder & CEO</strong><small>القيادة والإشراف العام</small></span><span class="role-state">المالك</span></div>
-              <div class="role-connector"></div>
-              <div class="role-summary"><span class="role-mark admin-mark">01</span><span><strong>Platform Admin</strong><small>إدارة المنصة</small></span></div>
-              <div class="role-summary"><span class="role-mark care-mark">02</span><span><strong>Customer Care</strong><small>خدمة العملاء والنزاعات</small></span></div>
-              <div class="role-summary"><span class="role-mark tech-mark">03</span><span><strong>Tech Ops</strong><small>العمليات التقنية</small></span></div>
-            </section>
+            <section class="content-card"><div class="card-heading"><div><h2>آخر المهام</h2><p>المهام المسندة إلى الفريق.</p></div><button class="text-button" data-view="tasks">عرض الكل</button></div><div id="dashboard-tasks" class="compact-list"></div></section>
+            <section class="content-card"><div class="card-heading"><div><h2>النشاط الإداري</h2><p>آخر التغييرات المسجلة.</p></div><button class="text-button" data-view="activity">سجل النشاط</button></div><div id="dashboard-activity" class="compact-list"></div></section>
           </div>
-
-          <section class="content-card setup-card"><div class="setup-symbol"><svg viewBox="0 0 24 24"><path d="M12 3v18M3 12h18"/></svg></div><div class="setup-copy"><h2>ابدأ بتأسيس مساحة الفريق</h2><p>الخطوة الأولى هي إعداد الإدارات والرتب، ثم إضافة الموظفين وإسناد الأدوار المناسبة لهم.</p></div><button class="button button-primary" type="button" data-view="organization">إعداد الهيكل التنظيمي <svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button></section>
         </section>
 
         <section class="view-panel" id="view-employees" data-title="الموظفون">
-          <div class="page-heading"><div><div class="eyebrow"><span class="eyebrow-line"></span> إدارة الفريق</div><h1>الموظفون</h1><p>إدارة ملفات موظفي Arownd والدعوات وحالة الوصول.</p></div></div>
-          <div class="content-card module-intro"><span class="large-module-icon"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><div><h2>ملفات الموظفين والدعوات</h2><p>ستضم هذه الوحدة بيانات الموظف، الإدارة الرئيسية، المدير المباشر، الرتبة، الأدوار، وحالة الحساب.</p></div></div>
-          <div class="content-card empty-state"><span class="empty-icon"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/></svg></span><h2>لم تتم إضافة موظفين بعد</h2><p>ستظهر قائمة الفريق هنا بعد تجهيز آلية الدعوات وربط حسابات الموظفين.</p><span class="subtle-tag">بانتظار ربط البيانات</span></div>
+          <div class="page-heading"><div><p class="eyebrow">إدارة الفريق</p><h1>الموظفون</h1><p class="muted">ملفات الموظفين والدعوات وحالة الوصول.</p></div><button class="button primary" data-action="invite-employee" data-requires="employees.manage">+ إضافة موظف</button></div>
+          <div class="toolbar"><input id="employee-search" type="search" placeholder="ابحث بالاسم أو البريد"><select id="employee-status"><option value="">كل الحالات</option><option value="active">نشط</option><option value="invited">بانتظار التفعيل</option><option value="suspended">موقوف</option><option value="offboarded">منتهية العضوية</option></select></div>
+          <div class="content-card table-wrap"><table><thead><tr><th>الموظف</th><th>الإدارة</th><th>المسمى والرتبة</th><th>الأدوار</th><th>الحالة</th><th></th></tr></thead><tbody id="employees-table"><tr><td colspan="6" class="table-empty">جارٍ تحميل الموظفين…</td></tr></tbody></table></div>
         </section>
 
         <section class="view-panel" id="view-organization" data-title="الهيكل التنظيمي">
-          <div class="page-heading"><div><div class="eyebrow"><span class="eyebrow-line"></span> البنية الإدارية</div><h1>الهيكل التنظيمي</h1><p>تنظيم الإدارات والفرق والرتب والتبعية الإدارية.</p></div></div>
-          <div class="content-card organization-root"><span class="root-crown">F</span><strong>Founder & CEO</strong><small>المؤسس والرئيس التنفيذي</small><span class="root-note">إشراف كامل على المنصة</span></div>
-          <div class="org-branch-line"></div>
-          <div class="org-role-grid">
-            <article class="content-card org-role"><span class="role-mark admin-mark">01</span><strong>Platform Admin</strong><span>إدارة المنصة</span><p>الموظفون، الهيكل، الأدوار والإعدادات الإدارية.</p></article>
-            <article class="content-card org-role"><span class="role-mark care-mark">02</span><strong>Customer Care</strong><span>خدمة العملاء</span><p>الدعم ومتابعة النزاعات وحلّها وفق الصلاحيات.</p></article>
-            <article class="content-card org-role"><span class="role-mark tech-mark">03</span><strong>Tech Ops</strong><span>العمليات التقنية</span><p>التشغيل التقني ومتابعة المشكلات والصيانة.</p></article>
-          </div>
-          <div class="content-card ranks-card"><div class="card-heading"><div><h2>سلم الرتب الموحد</h2><p>الرتبة تحدد المستوى الوظيفي ولا تمنح صلاحيات تلقائياً.</p></div><span class="subtle-tag">موحد على مستوى Arownd</span></div><div class="rank-list"><span>Founder</span><i></i><span>Executive</span><i></i><span>Head</span><i></i><span>Lead</span><i></i><span>Senior</span><i></i><span>Specialist</span><i></i><span>Associate</span></div></div>
+          <div class="page-heading"><div><p class="eyebrow">البنية الإدارية</p><h1>الهيكل التنظيمي</h1><p class="muted">الإدارات والفرق والتبعية الإدارية.</p></div><button class="button primary" data-action="add-department" data-requires="org.manage">+ إدارة جديدة</button></div>
+          <div id="organization-content" class="organization-grid"></div>
         </section>
 
         <section class="view-panel" id="view-roles" data-title="الأدوار والصلاحيات">
-          <div class="page-heading"><div><div class="eyebrow"><span class="eyebrow-line"></span> التحكم بالوصول</div><h1>الأدوار والصلاحيات</h1><p>الأدوار تحدد المسؤوليات التشغيلية، والصلاحيات تحدد الإجراءات المسموح بها.</p></div></div>
-          <div class="role-cards">
-            <article class="content-card role-detail"><span class="role-mark admin-mark">01</span><div><span class="role-code">PLATFORM ADMIN</span><h2>Platform Admin</h2><p>إدارة المنصة</p></div><ul><li>إدارة ملفات الموظفين والدعوات</li><li>إدارة الإدارات والهيكل التنظيمي</li><li>إدارة الأدوار والصلاحيات ضمن التفويض</li><li>متابعة إعدادات المنصة وسجل النشاط</li></ul></article>
-            <article class="content-card role-detail"><span class="role-mark care-mark">02</span><div><span class="role-code">CUSTOMER CARE</span><h2>Customer Care</h2><p>خدمة العملاء والنزاعات</p></div><ul><li>متابعة محادثات الدعم</li><li>متابعة شكاوى العملاء</li><li>مراجعة النزاعات والتواصل مع الأطراف</li><li>حل النزاعات بصلاحية مستقلة</li></ul></article>
-            <article class="content-card role-detail"><span class="role-mark tech-mark">03</span><div><span class="role-code">TECH OPS</span><h2>Tech Ops</h2><p>العمليات التقنية</p></div><ul><li>متابعة المشكلات التقنية</li><li>مراقبة سلامة الخدمات</li><li>تشخيص الأعطال</li><li>متابعة العمليات والصيانة التقنية</li></ul></article>
-          </div>
-          <div class="notice-panel"><svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><p><strong>قاعدة حوكمة:</strong> لا تمنح الرتبة صلاحيات تلقائية. لا يستطيع الموظف رفع صلاحياته، ولا يحصل موظف الدعم على صلاحية تعديل الطلبات أو المبالغ أو التحصيل تلقائياً.</p></div>
+          <div class="page-heading"><div><p class="eyebrow">التحكم بالوصول</p><h1>الأدوار والصلاحيات</h1><p class="muted">الأدوار تحدد المسؤوليات، والصلاحيات تحدد ما يمكن تنفيذه.</p></div><button class="button primary" data-action="add-role" data-requires="roles.manage">+ دور جديد</button></div>
+          <div id="roles-content" class="role-grid"></div>
+          <div class="notice">الرتبة والمسمى الوظيفي لا يمنحان صلاحيات تلقائية. صلاحيات المؤسس محمية ولا يمكن تعديلها من حساب آخر.</div>
         </section>
 
         <section class="view-panel" id="view-tasks" data-title="المهام">
-          <div class="page-heading"><div><div class="eyebrow"><span class="eyebrow-line"></span> تنظيم العمل</div><h1>المهام</h1><p>إنشاء المهام وتعيين المسؤولين ومتابعة التنفيذ والمراجعة.</p></div></div>
-          <div class="content-card module-intro"><span class="large-module-icon"><svg viewBox="0 0 24 24"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span><div><h2>مساحة مهام موحدة</h2><p>عنوان ووصف، موظف مسؤول، إدارة، أولوية، موعد استحقاق، حالة وتعليقات.</p></div></div>
-          <div class="content-card empty-state"><span class="empty-icon"><svg viewBox="0 0 24 24"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span><h2>لا توجد مهام بعد</h2><p>ستظهر المهام الجديدة وحالاتها هنا بعد تفعيل وحدة المهام.</p><span class="subtle-tag">بانتظار ربط البيانات</span></div>
+          <div class="page-heading"><div><p class="eyebrow">إدارة التنفيذ</p><h1>المهام</h1><p class="muted">توزيع المسؤوليات ومتابعة الإنجاز والمواعيد.</p></div><button class="button primary" data-action="add-task" data-requires="tasks.manage">+ مهمة جديدة</button></div>
+          <div class="toolbar"><select id="task-status"><option value="">كل الحالات</option><option value="new">جديدة</option><option value="in_progress">قيد التنفيذ</option><option value="review">بانتظار المراجعة</option><option value="completed">مكتملة</option><option value="cancelled">ملغاة</option></select><select id="task-priority"><option value="">كل الأولويات</option><option value="urgent">عاجلة</option><option value="high">مرتفعة</option><option value="normal">عادية</option><option value="low">منخفضة</option></select></div>
+          <div id="tasks-list" class="task-list"></div>
         </section>
 
         <section class="view-panel" id="view-support" data-title="مركز الدعم">
-          <div class="page-heading"><div><div class="eyebrow"><span class="eyebrow-line"></span> خدمة العملاء</div><h1>مركز الدعم</h1><p>متابعة محادثات الدعم والتواصل مع العملاء من مساحة داخلية مستقلة.</p></div></div>
-          <div class="content-card module-intro"><span class="large-module-icon"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8v.5Z"/></svg></span><div><h2>محادثات العملاء</h2><p>الوحدة مخصصة لفريق Customer Care، مع الحفاظ على عضوية الدعم الحالية في النظام.</p></div></div>
-          <div class="notice-panel"><svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><p>واجهة الدعم مستقلة عن تطبيق الموبايل. صلاحيات الدعم لا تشمل تعديل تفاصيل الطلب أو المبالغ أو التحصيل.</p></div>
-          <div class="content-card empty-state"><span class="empty-icon"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8v.5Z"/></svg></span><h2>مركز الدعم جاهز للربط</h2><p>ستظهر المحادثات الحالية هنا بعد ربط الواجهة بجداول الدعم الحالية.</p><span class="subtle-tag">لا يتم إنشاء بيانات جديدة</span></div>
+          <div class="page-heading"><div><p class="eyebrow">خدمة العملاء</p><h1>مركز الدعم</h1><p class="muted">متابعة محادثات العملاء والرد عليها.</p></div></div>
+          <div id="support-list" class="content-card list-card"></div>
         </section>
 
         <section class="view-panel" id="view-disputes" data-title="مركز النزاعات">
-          <div class="page-heading"><div><div class="eyebrow"><span class="eyebrow-line"></span> تسوية النزاعات</div><h1>مركز النزاعات</h1><p>مراجعة النزاعات المفتوحة والتواصل مع الأطراف وتوثيق الحل.</p></div></div>
-          <div class="content-card module-intro"><span class="large-module-icon"><svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 2.2 18a2 2 0 0 0 1.7 3h16.2a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg></span><div><h2>إدارة النزاعات</h2><p>تعتمد الوحدة على نظام النزاعات الحالي وحالاته: open وin_review وresolved.</p></div></div>
-          <div class="notice-panel"><svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><p>فريق الدعم طرف محايد. لا يُغلق النزاع تلقائياً، ولا يستطيع أحد الطرفين إغلاقه منفرداً. لا تتغير آلية الطلب أو التحصيل.</p></div>
-          <div class="content-card empty-state"><span class="empty-icon"><svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 2.2 18a2 2 0 0 0 1.7 3h16.2a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg></span><h2>لا توجد بيانات معروضة</h2><p>سيتم عرض النزاعات المسجلة فعلياً بعد ربط الوحدة بقاعدة البيانات.</p><span class="subtle-tag">بانتظار الربط</span></div>
+          <div class="page-heading"><div><p class="eyebrow">معالجة النزاعات</p><h1>مركز النزاعات</h1><p class="muted">مراجعة النزاعات والتواصل مع الأطراف وحلها وفق الصلاحيات.</p></div></div>
+          <div class="toolbar"><select id="dispute-status"><option value="">كل الحالات</option><option value="open">مفتوح</option><option value="in_review">قيد المراجعة</option><option value="resolved">تم الحل</option></select></div>
+          <div id="disputes-list" class="content-card list-card"></div>
         </section>
 
         <section class="view-panel" id="view-reports" data-title="التقارير">
-          <div class="page-heading"><div><div class="eyebrow"><span class="eyebrow-line"></span> قياس الأداء</div><h1>التقارير</h1><p>تقارير تشغيلية وإدارية لمتابعة أداء المنصة والفريق.</p></div></div>
-          <div class="content-card empty-state"><span class="empty-icon"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-5 5"/></svg></span><h2>التقارير ستظهر هنا</h2><p>سيتم تحديد المؤشرات ومصادرها قبل بناء التقارير وربطها بالبيانات.</p><span class="subtle-tag">قيد الإعداد</span></div>
+          <div class="page-heading"><div><p class="eyebrow">المتابعة والتحليل</p><h1>التقارير</h1><p class="muted">ملخص تشغيلي لأداء الفريق والخدمات الداخلية.</p></div><button class="button secondary" data-action="export-report">تصدير CSV</button></div>
+          <div id="reports-content"></div>
         </section>
 
         <section class="view-panel" id="view-activity" data-title="سجل النشاط">
-          <div class="page-heading"><div><div class="eyebrow"><span class="eyebrow-line"></span> الحوكمة والتدقيق</div><h1>سجل النشاط</h1><p>تتبع التغييرات الإدارية وتعديلات الأدوار والصلاحيات.</p></div></div>
-          <div class="content-card empty-state"><span class="empty-icon"><svg viewBox="0 0 24 24"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg></span><h2>سجل النشاط بانتظار الربط</h2><p>سيتم تسجيل التغييرات الإدارية المهمة مع هوية المنفذ ووقت الإجراء.</p><span class="subtle-tag">قيد الإعداد</span></div>
+          <div class="page-heading"><div><p class="eyebrow">الحوكمة والشفافية</p><h1>سجل النشاط</h1><p class="muted">سجل زمني للتغييرات الإدارية والإجراءات الحساسة.</p></div></div>
+          <div id="activity-list" class="content-card list-card"></div>
         </section>
 
         <section class="view-panel" id="view-settings" data-title="الإعدادات">
-          <div class="page-heading"><div><div class="eyebrow"><span class="eyebrow-line"></span> إعداد مساحة العمل</div><h1>الإعدادات</h1><p>إعدادات Arownd Team والضوابط العامة.</p></div></div>
-          <div class="content-card settings-row"><span class="large-module-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1 1.4 1.1-1.4 2.4-1.7-.6a8 8 0 0 1-1.5.9l-.3 1.8h-2.8l-.3-1.8a8 8 0 0 1-1.5-.9l-1.7.6-1.4-2.4 1.4-1.1a8 8 0 0 1 0-1.8L6.9 12l1.4-2.4 1.7.6a8 8 0 0 1 1.5-.9l.3-1.8h2.8l.3 1.8a8 8 0 0 1 1.5.9l1.7-.6 1.4 2.4-1.4 1.1a8 8 0 0 1-.1 1.9Z"/></svg></span><div><h2>إعدادات مساحة العمل</h2><p>ستضاف إعدادات الأمان والتفضيلات بعد اعتماد سياسة الوصول النهائية.</p></div><span class="subtle-tag">قيد الإعداد</span></div>
+          <div class="page-heading"><div><p class="eyebrow">إعداد مساحة العمل</p><h1>الإعدادات</h1><p class="muted">إعدادات الجلسة والوصول.</p></div></div>
+          <div class="content-card settings-card"><div><h2>جلسة العمل</h2><p class="muted">تتم إدارة المصادقة عبر Supabase Auth. لا يتم تخزين كلمات المرور في Arownd Team.</p></div><button class="button secondary" id="settings-logout">تسجيل الخروج</button></div>
         </section>
-
         <footer class="page-footer"><span>© 2026 Arownd Team</span><span>مساحة إدارة المنصة الداخلية</span></footer>
       </div>
     </main>
   </div>
+
+  <dialog id="app-dialog" class="app-dialog"><form method="dialog" class="dialog-frame"><header class="dialog-header"><div><p class="eyebrow" id="dialog-eyebrow">Arownd Team</p><h2 id="dialog-title"></h2></div><button class="icon-button" value="cancel" aria-label="إغلاق">×</button></header><div id="dialog-content" class="dialog-content"></div></form></dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
 </body>
 </html>
