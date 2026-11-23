@@ -49,8 +49,8 @@ describe("merchant order completion response parsing", () => {
     );
 
     expect(result.eventsByMerchantOrderId[merchantOrderId]).toHaveLength(2);
-    expect(result.eventsByMerchantOrderId[merchantOrderId][1].actor_type).toBe("customer");
-    expect(result.disputesByMerchantOrderId[merchantOrderId].status).toBe("open");
+    expect(result.eventsByMerchantOrderId[merchantOrderId]?.[1]?.actor_type).toBe("customer");
+    expect(result.disputesByMerchantOrderId[merchantOrderId]?.status).toBe("open");
   });
 
   it("returns empty maps when there are no completion records", () => {
