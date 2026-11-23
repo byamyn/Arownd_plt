@@ -10,10 +10,6 @@
       "android": {
         "buildType": "apk"
       },
-      "env": {
-        "EXPO_PUBLIC_AUTH_CAPTCHA_ENABLED": "true",
-        "EXPO_PUBLIC_AUTH_CAPTCHA_CUSTOM_SIGNUP": "true"
-      },
       "autoIncrement": true
     },
     "production": {
