@@ -65,22 +65,6 @@ Deno.serve(async (request: Request) => {
   if (request.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
-  if (request.method === "GET") {
-    const publishableKeysRaw = Deno.env.get("SUPABASE_PUBLISHABLE_KEYS") ?? "";
-    let publishableKeyConfigured = false;
-    try {
-      publishableKeyConfigured = Boolean((JSON.parse(publishableKeysRaw) as Record<string, string>).default);
-    } catch {
-      publishableKeyConfigured = false;
-    }
-    return jsonResponse({
-      configured: Boolean(
-        Deno.env.get("SUPABASE_URL")?.trim() &&
-        Deno.env.get("TURNSTILE_SECRET_KEY")?.trim() &&
-        publishableKeyConfigured
-      )
-    });
-  }
   if (request.method !== "POST") {
     return jsonResponse({ error: "Method not allowed" }, 405);
   }
