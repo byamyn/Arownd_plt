@@ -60,8 +60,12 @@ create policy merchant_order_completion_events_read_participants
         and (
           mo.customer_id = (select auth.uid())
           or private.is_store_team_member(mo.store_id)
-          or (select public.is_current_user_dispute_support())
         )
+    )
+    or exists (
+      select 1 from public.merchant_order_disputes d
+      where d.merchant_order_id = merchant_order_completion_events.merchant_order_id
+        and (select public.is_current_user_dispute_support())
     )
   );
 
@@ -687,6 +691,10 @@ begin
     select stm.user_id
     from public.store_team_members stm
     where stm.store_id = v_order.store_id
+    union
+    select sm.user_id
+    from public.support_members sm
+    where sm.is_active = true
   ) recipient
   where recipient.user_id <> auth.uid();
 
