@@ -32,6 +32,21 @@ const DisputeMessageSchema = z.object({
   created_at: z.string()
 });
 
+const DisputeTimelineEventSchema = z.object({
+  id: z.string().uuid(),
+  merchant_order_id: z.string().uuid(),
+  action: z.enum([
+    "seller_confirmed_delivery_and_cash",
+    "customer_confirmed_receipt_and_payment",
+    "customer_opened_dispute",
+    "support_resolved_dispute"
+  ]),
+  actor_id: z.string().uuid(),
+  actor_type: z.enum(["seller", "customer", "support"]),
+  reason: z.string().nullable(),
+  created_at: z.string()
+});
+
 export const disputeMessageInputSchema = z.object({
   message: z.string().trim().max(4000)
 });
@@ -96,6 +111,23 @@ export async function getMerchantOrderDisputeParticipantRole(
     .rpc("current_user_merchant_order_dispute_role", { _dispute_id: disputeId });
   if (error) throw error;
   return data === "customer" || data === "merchant" || data === "support" ? data : null;
+}
+
+export type MerchantOrderDisputeTimelineEvent = z.infer<typeof DisputeTimelineEventSchema>;
+
+export async function fetchMerchantOrderDisputeTimeline(
+  merchantOrderId: string,
+  signal?: AbortSignal
+): Promise<MerchantOrderDisputeTimelineEvent[]> {
+  let request = getSupabaseClient()
+    .from("merchant_order_completion_events")
+    .select("id, merchant_order_id, action, actor_id, actor_type, reason, created_at")
+    .eq("merchant_order_id", merchantOrderId)
+    .order("created_at", { ascending: true });
+  if (signal) request = request.abortSignal(signal);
+  const { data, error } = await request;
+  if (error) throw error;
+  return DisputeTimelineEventSchema.array().parse(data as unknown);
 }
 
 export async function fetchMerchantOrderDisputeMessages(
