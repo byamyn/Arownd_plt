@@ -84,6 +84,10 @@ export default function MerchantOrderDisputeChatScreen() {
         filter: "id=eq." + disputeId
       }, () => {
         void queryClient.invalidateQueries({ queryKey: ["merchant-order-dispute", disputeId] });
+        void queryClient.invalidateQueries({ queryKey: ["merchant-order-dispute-timeline"] });
+        void queryClient.invalidateQueries({ queryKey: ["customer-order-details"] });
+        void queryClient.invalidateQueries({ queryKey: ["customer-orders"] });
+        void queryClient.invalidateQueries({ queryKey: ["merchant-order-detail"] });
       })
       .subscribe();
     return () => {
