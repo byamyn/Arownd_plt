@@ -101,6 +101,13 @@ create index if not exists merchant_order_dispute_messages_recent_idx
   on public.merchant_order_dispute_messages(dispute_id, created_at asc, id asc);
 create index if not exists merchant_order_dispute_messages_sender_idx
   on public.merchant_order_dispute_messages(sender_id, created_at desc);
+create index if not exists merchant_order_dispute_messages_merchant_order_idx
+  on public.merchant_order_dispute_messages(merchant_order_id);
+create index if not exists merchant_order_dispute_messages_order_idx
+  on public.merchant_order_dispute_messages(order_id);
+create index if not exists support_members_added_by_idx
+  on public.support_members(added_by)
+  where added_by is not null;
 
 alter table public.merchant_order_dispute_messages enable row level security;
 revoke all on public.merchant_order_dispute_messages from public, anon, authenticated;
