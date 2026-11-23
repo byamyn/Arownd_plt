@@ -92,8 +92,11 @@ create table if not exists public.merchant_order_dispute_messages (
   attachment_path text,
   created_at timestamptz not null default now(),
   constraint merchant_order_dispute_messages_content_check check (
-    (char_length(btrim(message)) between 1 and 4000)
-    or attachment_path is not null
+    char_length(btrim(message)) <= 4000
+    and (
+      char_length(btrim(message)) >= 1
+      or attachment_path is not null
+    )
   )
 );
 
