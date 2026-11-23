@@ -83,7 +83,6 @@ export async function signUpBusiness(input: BusinessSignupInput): Promise<boolea
   if (!countryCode) throw new Error("COUNTRY_NOT_SELECTED");
 
   const inviteCode = await getPendingInviteCode();
-  const captchaToken = await getSignupCaptchaToken();
   const redirectTo = Linking.createURL("auth/callback", {
     scheme: "com.arownd.app"
   });
@@ -92,7 +91,6 @@ export async function signUpBusiness(input: BusinessSignupInput): Promise<boolea
     email: input.email,
     password: input.password,
     redirectTo,
-    captchaToken,
     data: {
       full_name: input.fullName.trim(),
       account_type: "merchant",
