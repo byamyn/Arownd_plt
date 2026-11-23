@@ -343,6 +343,12 @@ begin
     raise exception 'dispute_not_found';
   end if;
 
+  -- The row lock closes the race with support resolution: a message that
+  -- waited behind the resolve transaction is rejected after it sees resolved.
+  if v_dispute.status = 'resolved' then
+    raise exception 'dispute_resolved';
+  end if;
+
   if new.sender_role = 'support' and v_dispute.status = 'open' then
     update public.merchant_order_disputes
     set status = 'in_review', updated_at = now()
