@@ -395,6 +395,10 @@ create policy merchant_order_dispute_attachments_insert
       where d.id::text = split_part(name, '/', 1)
         and d.status <> 'resolved'
         and (
+          attachment_path is null
+          or attachment_path like d.id::text || '/' || (select auth.uid())::text || '/%'
+        )
+        and (
           d.customer_id = (select auth.uid())
           or private.is_store_team_member(d.store_id)
           or (select public.is_current_user_dispute_support())
