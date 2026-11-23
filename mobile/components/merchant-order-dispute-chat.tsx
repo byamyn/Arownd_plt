@@ -9,6 +9,7 @@ import { Alert, AppHeader, Button, Caption, Icon, IconButton, PressableSurface, 
 import {
   fetchMerchantOrderDisputeById,
   fetchMerchantOrderDisputeMessages,
+  fetchMerchantOrderDisputeTimeline,
   getMerchantOrderDisputeParticipantRole,
   resolveMerchantOrderDispute,
   sendMerchantOrderDisputeMessage
@@ -52,6 +53,11 @@ export default function MerchantOrderDisputeChatScreen() {
     queryFn: ({ signal }) => fetchMerchantOrderDisputeMessages(disputeId, signal),
     enabled: Boolean(disputeId) && role.isSuccess && Boolean(role.data)
   });
+  const timeline = useQuery({
+    queryKey: ["merchant-order-dispute-timeline", dispute.data?.merchant_order_id],
+    queryFn: ({ signal }) => fetchMerchantOrderDisputeTimeline(dispute.data?.merchant_order_id ?? "", signal),
+    enabled: Boolean(dispute.data?.merchant_order_id)
+  });
 
   useEffect(() => {
     if (!disputeId || !role.data) return;
@@ -81,7 +87,7 @@ export default function MerchantOrderDisputeChatScreen() {
   }, [disputeId, role.data, queryClient]);
 
   const refresh = async () => {
-    await Promise.all([role.refetch(), dispute.refetch(), messages.refetch()]);
+    await Promise.all([role.refetch(), dispute.refetch(), messages.refetch(), timeline.refetch()]);
   };
   const sendMutation = useMutation({
     mutationFn: () => sendMerchantOrderDisputeMessage(disputeId, message, attachment),
@@ -128,10 +134,10 @@ export default function MerchantOrderDisputeChatScreen() {
     }
   };
 
-  if (role.isPending || (role.data && (dispute.isPending || messages.isPending))) {
+  if (role.isPending || (role.data && (dispute.isPending || messages.isPending)) || (dispute.data && timeline.isPending)) {
     return <CustomerScreen showNavigation={false}><AppHeader title={translate("disputeChatTitle")} /><PageSkeleton variant="details" rows={4} /></CustomerScreen>;
   }
-  if (role.isError || dispute.isError || messages.isError) {
+  if (role.isError || dispute.isError || messages.isError || timeline.isError) {
     return <CustomerScreen showNavigation={false}>
       <AppHeader title={translate("disputeChatTitle")} />
       <ErrorState title={translate("disputeLoadError")} retryLabel={translate("retry")} onRetry={() => { void refresh(); }} busy={role.isFetching || dispute.isFetching || messages.isFetching} />
@@ -211,6 +217,23 @@ export default function MerchantOrderDisputeChatScreen() {
           <UiText>{dispute.data.reason}</UiText>
           <Caption>{translate("orderDisputeOpenedAt")}: {dateLabel(dispute.data.created_at, language)}</Caption>
         </View>
+        {(timeline.data ?? []).length > 0 ? (
+          <View style={styles.timeline}>
+            <UiText weight="800">{translate("orderCompletionTitle")}</UiText>
+            {(timeline.data ?? []).map((event) => (
+              <View key={event.id} style={styles.timelineEvent}>
+                <Caption>{translate(
+                  event.action === "seller_confirmed_delivery_and_cash" ? "orderCompletionSellerEvent"
+                    : event.action === "customer_confirmed_receipt_and_payment" ? "orderCompletionCustomerEvent"
+                      : event.action === "support_resolved_dispute" ? "orderCompletionSupportResolvedEvent"
+                        : "orderCompletionDisputeEvent"
+                )}</Caption>
+                {event.reason ? <Caption>{event.reason}</Caption> : null}
+                <Caption>{dateLabel(event.created_at, language)}</Caption>
+              </View>
+            ))}
+          </View>
+        ) : null}
 
         {(messages.data ?? []).length === 0 ? <EmptyState icon="message-circle" title={translate("disputeMessagesEmpty")} /> : null}
         {(messages.data ?? []).map((item) => {
@@ -265,6 +288,8 @@ function createStyles(theme: ReturnType<typeof useAppTheme>) {
     root: { flex: 1 },
     summary: { padding: designTokens.spacing.md, borderRadius: designTokens.radius.md, backgroundColor: theme.colors.surfaceSecondary, gap: designTokens.spacing.xs },
     summaryTop: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+    timeline: { padding: designTokens.spacing.md, borderRadius: designTokens.radius.md, borderWidth: 1, borderColor: theme.colors.border, gap: designTokens.spacing.sm },
+    timelineEvent: { borderTopWidth: 1, borderTopColor: theme.colors.border, paddingTop: designTokens.spacing.sm, gap: designTokens.spacing.xs },
     message: { maxWidth: "88%", padding: designTokens.spacing.md, borderRadius: designTokens.radius.lg, gap: designTokens.spacing.xs },
     ownMessage: { alignSelf: "flex-end", borderBottomRightRadius: 4 },
     otherMessage: { alignSelf: "flex-start", borderBottomLeftRadius: 4, borderWidth: StyleSheet.hairlineWidth, borderColor: theme.colors.border },
