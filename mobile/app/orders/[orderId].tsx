@@ -66,6 +66,7 @@ function itemOptionsLabel(options: unknown): string | null {
 function completionEventLabel(action: string): string {
   if (action === "seller_confirmed_delivery_and_cash") return translate("orderCompletionSellerEvent");
   if (action === "customer_confirmed_receipt_and_payment") return translate("orderCompletionCustomerEvent");
+  if (action === "support_resolved_dispute") return translate("orderCompletionSupportResolvedEvent");
   return translate("orderCompletionDisputeEvent");
 }
 
@@ -231,7 +232,7 @@ export default function OrderDetailsScreen() {
       const completionEvents = query.data.completionData.eventsByMerchantOrderId[merchantOrder.id] ?? [];
       const disputeTicket = query.data.completionData.disputesByMerchantOrderId[merchantOrder.id];
       const canConfirmCompletion = !cancelled && merchantOrder.completion_status === "pending" && merchantOrder.status === "delivered" && merchantOrder.payment_status === "paid" && Boolean(merchantOrder.seller_confirmed_at);
-      const canOpenDispute = !cancelled && merchantOrder.completion_status === "pending";
+      const canOpenDispute = !cancelled && !disputeTicket && merchantOrder.completion_status === "pending";
       return <View key={merchantOrder.id} style={[styles.panel, { backgroundColor: theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface }]}>
         <View style={styles.merchantHeader}>
           <UiText style={styles.sectionTitle}>{merchantOrder.store?.name ?? translate("ordersStore")}</UiText>
@@ -274,6 +275,12 @@ export default function OrderDetailsScreen() {
             <UiText style={styles.meta}>{translate("orderDisputeOpenedAt")}: {dateLabel(disputeTicket.created_at, language)}</UiText>
             {disputeTicket.resolution_note ? <UiText style={styles.meta}>{disputeTicket.resolution_note}</UiText> : null}
           </View> : null}
+          {disputeTicket ? <Button
+            label={translate("disputeOpenConversation")}
+            onPress={() => router.push(("/disputes/" + disputeTicket.id) as never)}
+            variant="secondary"
+            fullWidth
+          /> : null}
           {completionEvents.map((event) => <View key={event.id} style={styles.completionEvent}>
             <UiText style={styles.meta}>{completionEventLabel(event.action)}</UiText>
             <UiText style={styles.meta}>{dateLabel(event.created_at, language)}</UiText>
