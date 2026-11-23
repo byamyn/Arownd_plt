@@ -278,6 +278,7 @@ export default function MerchantOrderDetailsScreen() {
           {order.completion_status === "completed" ? <Alert description={translate("orderCompletionCompleted")} tone="success" /> : null}
           {order.completion_status === "disputed" ? <Alert title={translate("orderCompletionDisputed")} description={disputeTicket?.reason ?? order.dispute_reason ?? translate("orderDisputeTicket")} tone="danger" /> : null}
           {order.completion_status === "pending" && order.seller_confirmed_at ? <Alert description={translate("orderCompletionWaitingCustomer")} tone="info" /> : null}
+          {order.completion_status === "pending" && !order.seller_confirmed_at && !(order.status === "delivered" && order.payment_status === "paid") ? <Alert description={translate("orderCompletionPending")} tone="warning" /> : null}
           {disputeTicket ? <View style={styles.completionEvent}>
             <InfoRow label={translate("orderDisputeTicket")} value={disputeStatusLabel(disputeTicket.status)} theme={theme} />
             <InfoRow label={translate("orderDisputeOpenedAt")} value={new Date(disputeTicket.created_at).toLocaleString(language === "ar" ? "ar-DZ-u-nu-latn" : "en-DZ-u-nu-latn")} theme={theme} />
