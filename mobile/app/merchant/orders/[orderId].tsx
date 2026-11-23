@@ -125,6 +125,7 @@ export default function MerchantOrderDetailsScreen() {
   }
 
   const order = detail.data.merchantOrder;
+  const disputeTicket = detail.data.completionData.disputesByMerchantOrderId[order.id];
   const customerOrder = order.order;
   const total = order.subtotal + order.shipping_fee;
   const canManageFulfillment = canManageMerchantOrderFulfillment(order.status) && customerOrder.status !== "cancelled";
@@ -275,12 +276,12 @@ export default function MerchantOrderDetailsScreen() {
         <MerchantOrderCard>
           <UiText style={[styles.sectionTitle, { color: theme.colors.foreground }]}>{translate("orderCompletionTitle")}</UiText>
           {order.completion_status === "completed" ? <Alert description={translate("orderCompletionCompleted")} tone="success" /> : null}
-          {order.completion_status === "disputed" ? <Alert title={translate("orderCompletionDisputed")} description={detail.data.completionData.disputesByMerchantOrderId[order.id]?.reason ?? order.dispute_reason ?? translate("orderDisputeTicket")} tone="danger" /> : null}
+          {order.completion_status === "disputed" ? <Alert title={translate("orderCompletionDisputed")} description={disputeTicket?.reason ?? order.dispute_reason ?? translate("orderDisputeTicket")} tone="danger" /> : null}
           {order.completion_status === "pending" && order.seller_confirmed_at ? <Alert description={translate("orderCompletionWaitingCustomer")} tone="info" /> : null}
-          {detail.data.completionData.disputesByMerchantOrderId[order.id] ? <View style={styles.completionEvent}>
-            <InfoRow label={translate("orderDisputeTicket")} value={disputeStatusLabel(detail.data.completionData.disputesByMerchantOrderId[order.id].status)} theme={theme} />
-            <InfoRow label={translate("orderDisputeOpenedAt")} value={new Date(detail.data.completionData.disputesByMerchantOrderId[order.id].created_at).toLocaleString(language === "ar" ? "ar-DZ-u-nu-latn" : "en-DZ-u-nu-latn")} theme={theme} />
-            {detail.data.completionData.disputesByMerchantOrderId[order.id].resolution_note ? <UiText style={[styles.mutedText, { color: theme.colors.muted }]}>{detail.data.completionData.disputesByMerchantOrderId[order.id].resolution_note}</UiText> : null}
+          {disputeTicket ? <View style={styles.completionEvent}>
+            <InfoRow label={translate("orderDisputeTicket")} value={disputeStatusLabel(disputeTicket.status)} theme={theme} />
+            <InfoRow label={translate("orderDisputeOpenedAt")} value={new Date(disputeTicket.created_at).toLocaleString(language === "ar" ? "ar-DZ-u-nu-latn" : "en-DZ-u-nu-latn")} theme={theme} />
+            {disputeTicket.resolution_note ? <UiText style={[styles.mutedText, { color: theme.colors.muted }]}>{disputeTicket.resolution_note}</UiText> : null}
           </View> : null}
           {detail.data.completionData.eventsByMerchantOrderId[order.id]?.map((event) => <View key={event.id} style={styles.completionEvent}>
             <UiText style={[styles.mutedText, { color: theme.colors.muted }]}>{completionEventLabel(event.action)}</UiText>
