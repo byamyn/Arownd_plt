@@ -129,6 +129,36 @@ create policy merchant_order_dispute_messages_insert_participants
   );
 
 
+
+create or replace function public.populate_merchant_order_dispute_message_context()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $function$
+declare
+  v_dispute public.merchant_order_disputes;
+begin
+  select d.* into v_dispute
+  from public.merchant_order_disputes d
+  where d.id = new.dispute_id;
+  if not found then raise exception 'dispute_not_found'; end if;
+
+  new.merchant_order_id := v_dispute.merchant_order_id;
+  new.order_id := v_dispute.order_id;
+  return new;
+end;
+$function$;
+
+revoke all on function public.populate_merchant_order_dispute_message_context()
+  from public, anon, authenticated;
+
+drop trigger if exists merchant_order_dispute_messages_context_before_insert
+  on public.merchant_order_dispute_messages;
+create trigger merchant_order_dispute_messages_context_before_insert
+  before insert on public.merchant_order_dispute_messages
+  for each row execute function public.populate_merchant_order_dispute_message_context();
+
 create or replace function public.current_user_merchant_order_dispute_role(_dispute_id uuid)
 returns text
 language plpgsql
