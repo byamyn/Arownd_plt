@@ -201,6 +201,7 @@ export default function MerchantOrderDisputeChatScreen() {
           title={translate("disputeChatTitle")}
           leading={<IconButton accessibilityLabel={translate("back")} onPress={() => router.back()} icon={<Icon name="arrow-right" size={22} color={theme.colors.foreground} />} variant="ghost" />}
         />
+        {isSupport ? <Button label={translate("disputeSupportInboxTitle")} onPress={() => router.replace("/support/disputes" as never)} variant="secondary" fullWidth /> : null}
         <View style={styles.summary}>
           <View style={styles.summaryTop}>
             <UiText weight="800">{translate("orderDisputeTicket")}</UiText>
@@ -213,7 +214,6 @@ export default function MerchantOrderDisputeChatScreen() {
 
         {(messages.data ?? []).length === 0 ? <EmptyState icon="message-circle" title={translate("disputeMessagesEmpty")} /> : null}
         {(messages.data ?? []).map((item) => {
-          const own = item.sender_id === role.data;
           const isOwn = item.sender_role === role.data;
           return (
             <View key={item.id} style={[styles.message, isOwn ? styles.ownMessage : styles.otherMessage, { backgroundColor: isOwn ? theme.colors.accentMuted : theme.colors.surface }]}>
