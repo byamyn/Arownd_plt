@@ -205,6 +205,10 @@ alter table public.merchant_order_completion_events
   add constraint merchant_order_completion_events_actor_type_check
   check (actor_type = any (array['seller','customer','support']));
 
+create index if not exists merchant_order_disputes_active_updated_idx
+  on public.merchant_order_disputes(updated_at desc)
+  where status in ('open', 'in_review');
+
 create table if not exists public.merchant_order_dispute_messages (
   id uuid primary key default gen_random_uuid(),
   dispute_id uuid not null references public.merchant_order_disputes(id) on delete restrict,
