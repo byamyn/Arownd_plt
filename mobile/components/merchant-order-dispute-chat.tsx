@@ -167,7 +167,7 @@ export default function MerchantOrderDisputeChatScreen() {
             ) : null}
             <View style={styles.composerRow}>
               <PressableSurface accessibilityRole="button" accessibilityLabel={translate("disputeAddAttachment")} onPress={() => { void chooseAttachment(); }} style={styles.attachButton}>
-                <Icon name="paperclip" size={19} color={theme.colors.foregroundSecondary} />
+                <Icon name="image" size={19} color={theme.colors.foregroundSecondary} />
               </PressableSurface>
               <TextInput
                 value={message}
@@ -236,7 +236,7 @@ export default function MerchantOrderDisputeChatScreen() {
               {item.message ? <UiText style={{ color: theme.colors.foreground }}>{item.message}</UiText> : null}
               {item.attachment_url ? (
                 <PressableSurface accessibilityRole="button" onPress={() => { void Linking.openURL(item.attachment_url as string); }} style={styles.attachmentLink}>
-                  <Icon name="paperclip" size={16} color={theme.colors.foreground} />
+                  <Icon name="image" size={16} color={theme.colors.foreground} />
                   <UiText style={{ color: theme.colors.foreground }}>{translate("disputeOpenAttachment")}</UiText>
                 </PressableSurface>
               ) : null}
