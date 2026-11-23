@@ -18,6 +18,12 @@ describe("notification helpers", () => {
     expect(getNotificationDestination(makeNotification({ type: "order" }))).toBeNull();
     expect(getNotificationDestination(makeNotification({ type: "order", data: { order_id: 123 } }))).toBeNull();
   });
+  it("routes dispute notifications to the correct participant or support chat", () => {
+    const id = "00000000-0000-4000-8000-000000000001";
+    expect(getNotificationDestination(makeNotification({ type: "order", data: { url: `/disputes/${id}` } }))).toBe(`/disputes/${id}`);
+    expect(getPushNotificationDestination({ url: `/disputes/${id}` })).toBe(`/disputes/${id}`);
+    expect(getPushNotificationDestination({ url: `/support/disputes/${id}` })).toBe(`/support/disputes/${id}`);
+  });
   it("accepts only known UUID-based routes from push payloads", () => {
     const id = "00000000-0000-4000-8000-000000000001";
     expect(getPushNotificationDestination({ url: `/studio/orders/${id}` })).toBe(`/merchant/orders/${id}`);
