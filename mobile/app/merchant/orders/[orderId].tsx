@@ -288,7 +288,7 @@ export default function MerchantOrderDetailsScreen() {
           {disputeTicket ? <Button
             label={translate("disputeOpenConversation")}
             onPress={() => router.push(("/disputes/" + disputeTicket.id) as never)}
-            variant="secondary"
+            variant="outline"
             fullWidth
           /> : null}
           {detail.data.completionData.eventsByMerchantOrderId[order.id]?.map((event) => <View key={event.id} style={styles.completionEvent}>
