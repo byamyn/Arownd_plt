@@ -5,13 +5,12 @@ import { useEffect, useState } from "react";
 import { KeyboardAvoidingView, Linking, Platform, StyleSheet, TextInput, Image, View } from "react-native";
 
 import { CustomerScreen, EmptyState, ErrorState, PageSkeleton } from "@/components/customer-ui";
-import { Alert, AppHeader, Button, Caption, Icon, IconButton, PressableSurface, Text as UiText, TextArea } from "@/components/ui";
+import { Alert, AppHeader, Caption, Icon, IconButton, PressableSurface, Text as UiText } from "@/components/ui";
 import {
   fetchMerchantOrderDisputeById,
   fetchMerchantOrderDisputeMessages,
   fetchMerchantOrderDisputeTimeline,
   getMerchantOrderDisputeParticipantRole,
-  resolveMerchantOrderDispute,
   sendMerchantOrderDisputeMessage
 } from "@/lib/merchant-order-disputes";
 import { getSupabaseClient } from "@/lib/supabase";
@@ -35,12 +34,20 @@ export default function MerchantOrderDisputeChatScreen() {
   const [message, setMessage] = useState("");
   const [attachment, setAttachment] = useState<ImagePicker.ImagePickerAsset | null>(null);
   const [attachmentError, setAttachmentError] = useState(false);
-  const [resolutionNote, setResolutionNote] = useState("");
 
+  const currentUser = useQuery({
+    queryKey: ["merchant-order-dispute-current-user"],
+    queryFn: async () => {
+      const { data, error } = await getSupabaseClient().auth.getUser();
+      if (error) throw error;
+      return data.user?.id ?? null;
+    },
+    staleTime: 60_000
+  });
   const role = useQuery({
     queryKey: ["merchant-order-dispute-role", disputeId],
     queryFn: () => getMerchantOrderDisputeParticipantRole(disputeId),
-    enabled: Boolean(disputeId),
+    enabled: Boolean(disputeId) && currentUser.isSuccess && Boolean(currentUser.data),
     retry: false
   });
   const dispute = useQuery({
@@ -69,7 +76,6 @@ export default function MerchantOrderDisputeChatScreen() {
       }, () => {
         void queryClient.invalidateQueries({ queryKey: ["merchant-order-dispute-messages", disputeId] });
         void queryClient.invalidateQueries({ queryKey: ["merchant-order-dispute", disputeId] });
-        void queryClient.invalidateQueries({ queryKey: ["merchant-order-dispute-inbox"] });
       })
       .subscribe();
     const disputeChannel = client.channel("merchant-order-dispute-status-" + disputeId)
@@ -87,7 +93,7 @@ export default function MerchantOrderDisputeChatScreen() {
   }, [disputeId, role.data, queryClient]);
 
   const refresh = async () => {
-    await Promise.all([role.refetch(), dispute.refetch(), messages.refetch(), timeline.refetch()]);
+    await Promise.all([currentUser.refetch(), role.refetch(), dispute.refetch(), messages.refetch(), timeline.refetch()]);
   };
   const sendMutation = useMutation({
     mutationFn: () => sendMerchantOrderDisputeMessage(disputeId, message, attachment),
@@ -102,18 +108,7 @@ export default function MerchantOrderDisputeChatScreen() {
       ]);
     }
   });
-  const resolveMutation = useMutation({
-    mutationFn: () => resolveMerchantOrderDispute(disputeId, resolutionNote),
-    onSuccess: async () => {
-      setResolutionNote("");
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["merchant-order-dispute", disputeId] }),
-        queryClient.invalidateQueries({ queryKey: ["merchant-order-dispute-inbox"] }),
-        queryClient.invalidateQueries({ queryKey: ["customer-order-details"] }),
-        queryClient.invalidateQueries({ queryKey: ["merchant-order-details"] })
-      ]);
-    }
-  });
+
 
   const chooseAttachment = async () => {
     setAttachmentError(false);
@@ -134,10 +129,10 @@ export default function MerchantOrderDisputeChatScreen() {
     }
   };
 
-  if (role.isPending || (role.data && (dispute.isPending || messages.isPending)) || (dispute.data && timeline.isPending)) {
+  if (currentUser.isPending || role.isPending || (role.data && (dispute.isPending || messages.isPending)) || (dispute.data && timeline.isPending)) {
     return <CustomerScreen showNavigation={false}><AppHeader title={translate("disputeChatTitle")} /><PageSkeleton variant="details" rows={4} /></CustomerScreen>;
   }
-  if (role.isError || dispute.isError || messages.isError || timeline.isError) {
+  if (currentUser.isError || role.isError || dispute.isError || messages.isError || timeline.isError) {
     return <CustomerScreen showNavigation={false}>
       <AppHeader title={translate("disputeChatTitle")} />
       <ErrorState title={translate("disputeLoadError")} retryLabel={translate("retry")} onRetry={() => { void refresh(); }} busy={role.isFetching || dispute.isFetching || messages.isFetching} />
@@ -150,7 +145,6 @@ export default function MerchantOrderDisputeChatScreen() {
     </CustomerScreen>;
   }
 
-  const isSupport = role.data === "support";
   const resolved = dispute.data.status === "resolved";
   const senderLabel = (senderRole: string) => senderRole === "support"
     ? translate("disputeSupport")
@@ -207,7 +201,6 @@ export default function MerchantOrderDisputeChatScreen() {
           title={translate("disputeChatTitle")}
           leading={<IconButton accessibilityLabel={translate("back")} onPress={() => router.back()} icon={<Icon name="arrow-right" size={22} color={theme.colors.foreground} />} variant="ghost" />}
         />
-        {isSupport ? <Button label={translate("disputeSupportInboxTitle")} onPress={() => router.replace("/support/disputes" as never)} variant="outline" fullWidth /> : null}
         <View style={styles.summary}>
           <View style={styles.summaryTop}>
             <UiText weight="800">{translate("orderDisputeTicket")}</UiText>
@@ -237,7 +230,7 @@ export default function MerchantOrderDisputeChatScreen() {
 
         {(messages.data ?? []).length === 0 ? <EmptyState icon="message-circle" title={translate("disputeMessagesEmpty")} /> : null}
         {(messages.data ?? []).map((item) => {
-          const isOwn = item.sender_role === role.data;
+          const isOwn = item.sender_id === currentUser.data;
           return (
             <View key={item.id} style={[styles.message, isOwn ? styles.ownMessage : styles.otherMessage, { backgroundColor: isOwn ? theme.colors.accentMuted : theme.colors.surface }]}>
               <Caption style={{ color: theme.colors.foreground }}>{senderLabel(item.sender_role)}</Caption>
@@ -256,28 +249,7 @@ export default function MerchantOrderDisputeChatScreen() {
         {resolved ? (
           <Alert title={translate("orderDisputeStatusResolved")} description={dispute.data.resolution_note ?? ""} tone="success" />
         ) : null}
-        {isSupport && !resolved ? (
-          <View style={styles.resolvePanel}>
-            <UiText weight="800">{translate("disputeResolveTitle")}</UiText>
-            <TextArea
-              value={resolutionNote}
-              onChangeText={setResolutionNote}
-              maxLength={2000}
-              minHeight={100}
-              placeholder={translate("disputeResolutionPlaceholder")}
-              accessibilityLabel={translate("disputeResolutionPlaceholder")}
-            />
-            <Button
-              label={translate("disputeResolveAction")}
-              onPress={() => resolveMutation.mutate()}
-              loading={resolveMutation.isPending}
-              disabled={!resolutionNote.trim()}
-              fullWidth
-            />
-            {resolveMutation.isError ? <UiText tone="danger">{translate("disputeResolveError")}</UiText> : null}
-            <Caption>{translate("disputeSupportScopeHint")}</Caption>
-          </View>
-        ) : null}
+
       </CustomerScreen>
     </KeyboardAvoidingView>
   );
@@ -302,6 +274,5 @@ function createStyles(theme: ReturnType<typeof useAppTheme>) {
     previewImage: { width: 84, height: 84, borderRadius: designTokens.radius.md },
     removeAttachment: { position: "absolute", top: -6, right: -6, width: 24, height: 24, borderRadius: 12, backgroundColor: theme.colors.surface, alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: theme.colors.border },
     attachmentLink: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.xs, paddingVertical: designTokens.spacing.xs },
-    resolvePanel: { borderTopWidth: 1, borderColor: theme.colors.border, paddingTop: designTokens.spacing.md, gap: designTokens.spacing.sm },
   });
 }
