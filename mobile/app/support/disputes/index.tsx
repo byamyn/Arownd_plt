@@ -3,7 +3,7 @@ import { router } from "expo-router";
 import { StyleSheet, View } from "react-native";
 
 import { CustomerScreen, EmptyState, ErrorState, PageSkeleton } from "@/components/customer-ui";
-import { AppHeader, Caption, Icon, PressableSurface, Text as UiText } from "@/components/ui";
+import { AppHeader, Caption, PressableSurface, Text as UiText } from "@/components/ui";
 import { fetchMerchantOrderDisputeInbox } from "@/lib/merchant-order-disputes";
 import { translate, useLanguage } from "@/lib/i18n";
 import { designTokens, useAppTheme } from "@/lib/theme";
