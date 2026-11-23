@@ -118,7 +118,7 @@ async function submitForm(form){
   if(form.dataset.form==="invite"){
    const token=crypto.randomUUID()+crypto.randomUUID(),hash=[...new Uint8Array(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(token)))].map(b=>b.toString(16).padStart(2,"0")).join("");
    await rpc("create_arownd_team_invitation",{_email:v.email,_full_name:v.full_name,_job_title:v.job_title||null,_rank:v.rank,_department_id:v.department_id||null,_team_id:v.team_id||null,_manager_id:v.manager_id||null,_role_ids:all("role_ids"),_invite_token_hash:hash});
-   S.lastInvite=location.origin+location.pathname+"?invite="+encodeURIComponent(token);try{await navigator.clipboard.writeText(S.lastInvite)}catch{}closeDialog();toast("تم إنشاء الدعوة ونسخ رابط التفعيل.");await showView("employees");return;
+   S.lastInvite=location.origin+location.pathname+"?invite="+encodeURIComponent(token);try{await navigator.clipboard.writeText(S.lastInvite)}catch{window.prompt("انسخ رابط تفعيل الدعوة وأرسله للموظف:",S.lastInvite)}closeDialog();toast("تم إنشاء الدعوة. رابط التفعيل جاهز للإرسال.");await showView("employees");return;
   }
   if(form.dataset.form==="department")await db("team_departments",{method:"POST",body:{name:v.name,code:v.code,description:v.description||null,created_by:S.user.id}});
   if(form.dataset.form==="team")await db("team_teams",{method:"POST",body:{department_id:v.department_id,name:v.name,code:v.code,description:v.description||null,created_by:S.user.id}});
