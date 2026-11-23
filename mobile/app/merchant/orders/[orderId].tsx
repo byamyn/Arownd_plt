@@ -55,7 +55,8 @@ export default function MerchantOrderDetailsScreen() {
     queryKey: ["merchant-order-detail", storeId, orderId],
     queryFn: ({ signal }) => fetchMerchantOrderDetails(orderId ?? "", storeId ?? "", signal),
     enabled: isReady,
-    retry: false
+    retry: false,
+    refetchInterval: 45_000
   });
 
   const merchantOrder = detail.data?.merchantOrder;
@@ -271,6 +272,23 @@ export default function MerchantOrderDetailsScreen() {
           <Alert description={`${translate("merchantCodPaid")}: ${formatMarketPrice(order.paid_amount ?? 0, customerOrder.currency_code)}`} tone="success" />
         ) : null}
 
+        <MerchantOrderCard>
+          <UiText style={[styles.sectionTitle, { color: theme.colors.foreground }]}>{translate("orderCompletionTitle")}</UiText>
+          {order.completion_status === "completed" ? <Alert description={translate("orderCompletionCompleted")} tone="success" /> : null}
+          {order.completion_status === "disputed" ? <Alert title={translate("orderCompletionDisputed")} description={detail.data.completionData.disputesByMerchantOrderId[order.id]?.reason ?? order.dispute_reason ?? translate("orderDisputeTicket")} tone="danger" /> : null}
+          {order.completion_status === "pending" && order.seller_confirmed_at ? <Alert description={translate("orderCompletionWaitingCustomer")} tone="info" /> : null}
+          {detail.data.completionData.disputesByMerchantOrderId[order.id] ? <View style={styles.completionEvent}>
+            <InfoRow label={translate("orderDisputeTicket")} value={disputeStatusLabel(detail.data.completionData.disputesByMerchantOrderId[order.id].status)} theme={theme} />
+            <InfoRow label={translate("orderDisputeOpenedAt")} value={new Date(detail.data.completionData.disputesByMerchantOrderId[order.id].created_at).toLocaleString(language === "ar" ? "ar-DZ-u-nu-latn" : "en-DZ-u-nu-latn")} theme={theme} />
+            {detail.data.completionData.disputesByMerchantOrderId[order.id].resolution_note ? <UiText style={[styles.mutedText, { color: theme.colors.muted }]}>{detail.data.completionData.disputesByMerchantOrderId[order.id].resolution_note}</UiText> : null}
+          </View> : null}
+          {detail.data.completionData.eventsByMerchantOrderId[order.id]?.map((event) => <View key={event.id} style={styles.completionEvent}>
+            <UiText style={[styles.mutedText, { color: theme.colors.muted }]}>{completionEventLabel(event.action)}</UiText>
+            <UiText style={[styles.mutedText, { color: theme.colors.muted }]}>{new Date(event.created_at).toLocaleString(language === "ar" ? "ar-DZ-u-nu-latn" : "en-DZ-u-nu-latn")}</UiText>
+            {event.reason ? <UiText style={[styles.mutedText, { color: theme.colors.muted }]}>{event.reason}</UiText> : null}
+          </View>)}
+        </MerchantOrderCard>
+
         {actionError ? (
           <Alert description={translateError(actionError)} tone="danger" />
         ) : null}
@@ -289,6 +307,18 @@ export default function MerchantOrderDetailsScreen() {
       />
     </SafeAreaView>
   );
+}
+
+function completionEventLabel(action: string): string {
+  if (action === "seller_confirmed_delivery_and_cash") return translate("orderCompletionSellerEvent");
+  if (action === "customer_confirmed_receipt_and_payment") return translate("orderCompletionCustomerEvent");
+  return translate("orderCompletionDisputeEvent");
+}
+
+function disputeStatusLabel(status: string): string {
+  if (status === "in_review") return translate("orderDisputeStatusInReview");
+  if (status === "resolved") return translate("orderDisputeStatusResolved");
+  return translate("orderDisputeStatusOpen");
 }
 
 function merchantShipmentStatusLabel(status: string): string {
@@ -392,6 +422,7 @@ function createStyles(theme: AppTheme) {
     itemInfo: { flex: 1, alignItems: "flex-start", gap: designTokens.spacing.xs },
     itemName: { fontSize: designTokens.typography.caption + 1, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
     itemPriceDisplay: { alignSelf: "flex-start" },
+    completionEvent: { borderTopWidth: 1, borderTopColor: theme.colors.border, paddingTop: designTokens.spacing.sm, gap: designTokens.spacing.xs },
     mutedText: { fontSize: designTokens.typography.caption, lineHeight: 18, textAlign: "auto" },
     totalRow: { minHeight: 38, flexDirection: "row", justifyContent: "space-between", alignItems: "center", borderTopWidth: StyleSheet.hairlineWidth, paddingTop: designTokens.spacing.sm },
     valueText: { fontSize: designTokens.typography.caption + 1, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
