@@ -53,6 +53,19 @@ describe("merchant order completion response parsing", () => {
     expect(result.disputesByMerchantOrderId[merchantOrderId]?.status).toBe("open");
   });
 
+  it("accepts the support resolution event in the append-only timeline", () => {
+    const supportEvent = makeEvent({
+      id: "00000000-0000-4000-8000-000000000012",
+      action: "support_resolved_dispute",
+      actor_id: "00000000-0000-4000-8000-000000000004",
+      actor_type: "support",
+      reason: "تم الاتفاق على الحل بين الطرفين"
+    });
+    const result = parseMerchantOrderCompletionData([supportEvent], []);
+    expect(result.eventsByMerchantOrderId[merchantOrderId]?.[0]?.actor_type).toBe("support");
+    expect(result.eventsByMerchantOrderId[merchantOrderId]?.[0]?.action).toBe("support_resolved_dispute");
+  });
+
   it("returns empty maps when there are no completion records", () => {
     expect(parseMerchantOrderCompletionData([], [])).toEqual({
       eventsByMerchantOrderId: {},
