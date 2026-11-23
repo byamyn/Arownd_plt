@@ -131,6 +131,26 @@ create policy "Customers and store team read shipments"
     )
   );
 
+drop policy if exists merchant_order_cod_collections_read_participants
+  on public.merchant_order_cod_collections;
+create policy merchant_order_cod_collections_read_participants
+  on public.merchant_order_cod_collections for select to authenticated
+  using (
+    exists (
+      select 1 from public.merchant_orders mo
+      where mo.id = merchant_order_cod_collections.merchant_order_id
+        and (
+          mo.customer_id = (select auth.uid())
+          or private.is_store_owner(mo.store_id)
+        )
+    )
+    or exists (
+      select 1 from public.merchant_order_disputes d
+      where d.merchant_order_id = merchant_order_cod_collections.merchant_order_id
+        and (select public.is_current_user_dispute_support())
+    )
+  );
+
 drop policy if exists merchant_order_tracking_events_read_participants
   on public.merchant_order_tracking_events;
 create policy merchant_order_tracking_events_read_participants
