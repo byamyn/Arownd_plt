@@ -15,7 +15,6 @@ import { Platform, StyleSheet, View } from "react-native";
 import { useEffect, useState } from "react";
 
 import AnimatedLogo from "@/components/animated-logo";
-import { AuthCaptchaHost } from "@/components/auth-captcha-host";
 import { ArowndAssistant } from "@/components/arownd-assistant";
 import { CartFlyOverlay } from "@/components/cart-fly-overlay";
 import { ThemeProvider, useAppTheme, useThemePreference } from "@/lib/design-system";
@@ -173,7 +172,6 @@ function RootLayoutContent() {
             />
           </View>
         </LocaleProvider>
-        <AuthCaptchaHost />
       </QueryClientProvider>
 
       <CartFlyOverlay />
