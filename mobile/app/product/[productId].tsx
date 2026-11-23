@@ -184,41 +184,37 @@ export default function ProductDetailsScreen() {
         </View>
       ) : null}
       <View style={styles.infoSection}>
+        {selectedOffer ? (
+          <View style={styles.storeRatingRow}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={translate("productSelectedOffer") + ": " + selectedOffer.store.name}
+              onPress={() => router.push({ pathname: "/store/[storeId]", params: { storeId: selectedOffer.store.id } })}
+              style={styles.storeCompact}
+            >
+              <Icon name="store" size={16} color={theme.colors.muted} />
+              <UiText weight="700" numberOfLines={1} style={styles.storeCompactName}>{selectedOffer.store.name}</UiText>
+              <Icon name="chevron-left" size={15} color={theme.colors.muted} />
+            </Pressable>
+            <View style={styles.ratingInfo}>
+              <RatingStars value={reviewAverage} size={14} showValue />
+              <UiText tone="muted" style={styles.reviewCount}>({reviewCount})</UiText>
+            </View>
+          </View>
+        ) : null}
         <View style={styles.productTitleRow}>
           <UiText weight="700" style={styles.productName}>{productDetails.name}</UiText>
           <View style={[styles.availabilityBadge, { backgroundColor: theme.colors.surfaceMuted }]}>
             <UiText weight="700" style={styles.availabilityStatus}>{translate(isProductAvailable ? "productAvailable" : "productUnavailable")}</UiText>
           </View>
         </View>
-        {productDetails.description?.trim() ? <UiText tone="muted" style={styles.description}>{productDetails.description.trim()}</UiText> : null}
+        {productDetails.description?.trim() ? <UiText tone="muted" style={styles.description} numberOfLines={3}>{productDetails.description.trim()}</UiText> : null}
         {selectedOffer ? (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={translate("productSelectedOffer") + ": " + selectedOffer.store.name}
-            onPress={() => router.push({ pathname: "/store/[storeId]", params: { storeId: selectedOffer.store.id } })}
-            style={styles.storeRow}
-          >
-            <View style={styles.storeIdentity}>
-              <View style={[styles.storeIcon, { backgroundColor: theme.colors.surfaceMuted }]}>
-                <Icon name="store" size={18} color={theme.colors.foreground} />
-              </View>
-              <View style={styles.storeCopy}>
-                <UiText weight="700" numberOfLines={1}>{selectedOffer.store.name}</UiText>
-              </View>
-            </View>
-            <Icon name="chevron-left" size={18} color={theme.colors.muted} />
-          </Pressable>
+          <View style={styles.priceRow}>
+            <PriceDisplay value={browsingCurrency.data ? formatMarketPrice(selectedOffer.price, browsingCurrency.data) : "—"} style={styles.priceDisplay} />
+          </View>
         ) : null}
       </View>
-      {selectedOffer ? (
-        <View style={styles.priceRatingRow}>
-          <PriceDisplay value={browsingCurrency.data ? formatMarketPrice(selectedOffer.price, browsingCurrency.data) : "—"} style={styles.priceDisplay} />
-          <View style={styles.ratingInfo}>
-            <RatingStars value={reviewAverage} size={15} showValue />
-            <UiText tone="muted" style={styles.reviewCount}>{reviewCount} · {translate("reviewsTitle")}</UiText>
-          </View>
-        </View>
-      ) : null}
 
       {selectedOffer ? (
         <View style={styles.purchaseOptions}>
@@ -315,20 +311,22 @@ const styles = StyleSheet.create({
   sheetScroll: { flex: 1 },
   sheetContent: { gap: designTokens.spacing.md, paddingHorizontal: designTokens.spacing.xl, paddingTop: designTokens.spacing.xs, paddingBottom: designTokens.spacing.xl },
   heroWrap: { position: "relative" },
-  heroImage: { height: 300, borderRadius: designTokens.radius.lg, overflow: "hidden", alignItems: "center", justifyContent: "center" },
+  heroImage: { height: 320, borderRadius: designTokens.radius.lg, overflow: "hidden", alignItems: "center", justifyContent: "center" },
   favoriteOverlay: { position: "absolute", top: designTokens.spacing.md, end: designTokens.spacing.md },
   galleryIndicator: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: designTokens.spacing.xs },
   galleryDots: { flexDirection: "row", alignItems: "center", gap: 5 },
   galleryDot: { width: 6, height: 6, borderRadius: 3 },
-  infoSection: { gap: designTokens.spacing.xs, paddingVertical: designTokens.spacing.xs },
-  productTitleRow: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", gap: designTokens.spacing.md },
-  productName: { flex: 1, fontSize: designTokens.typography.title - 2, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
-  priceDisplay: { justifyContent: "flex-end" },
-  availabilityBadge: { alignSelf: "flex-start", borderRadius: designTokens.radius.md, paddingHorizontal: designTokens.spacing.md, paddingVertical: designTokens.spacing.xs },
-  availabilityStatus: { fontSize: designTokens.typography.caption + 1, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
-  priceRatingRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: designTokens.spacing.md, paddingVertical: designTokens.spacing.xs },
-  ratingRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: designTokens.spacing.md },
-  ratingInfo: { flex: 1, flexDirection: "row", alignItems: "center", flexWrap: "wrap", gap: designTokens.spacing.sm },
+  infoSection: { gap: designTokens.spacing.sm, paddingTop: designTokens.spacing.xs, paddingBottom: designTokens.spacing.sm },
+  storeRatingRow: { minHeight: 34, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: designTokens.spacing.sm },
+  storeCompact: { flex: 1, minWidth: 0, flexDirection: "row", alignItems: "center", gap: designTokens.spacing.xs },
+  storeCompactName: { flexShrink: 1, fontSize: designTokens.typography.caption + 1 },
+  productTitleRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: designTokens.spacing.sm },
+  productName: { flex: 1, fontSize: designTokens.typography.title, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
+  priceDisplay: { justifyContent: "flex-start" },
+  priceRow: { alignItems: "flex-start", paddingTop: designTokens.spacing.xs },
+  availabilityBadge: { alignSelf: "center", borderRadius: designTokens.radius.md, paddingHorizontal: designTokens.spacing.sm, paddingVertical: designTokens.spacing.xs },
+  availabilityStatus: { fontSize: designTokens.typography.caption, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
+  ratingInfo: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.xs },
   reviewCount: { fontSize: designTokens.typography.caption },
   metadata: { flexDirection: "row", flexWrap: "wrap", gap: designTokens.spacing.md },
   metaText: { fontSize: designTokens.typography.caption + 1, textAlign: "auto" },
@@ -340,7 +338,7 @@ const styles = StyleSheet.create({
   offerInfo: { flex: 1, alignItems: "flex-start", gap: designTokens.spacing.xs },
   offerStore: { fontSize: designTokens.typography.body, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
   offerPriceDisplay: { justifyContent: "flex-start" },
-  purchaseOptions: { gap: designTokens.spacing.md, paddingVertical: designTokens.spacing.xs },
+  purchaseOptions: { gap: designTokens.spacing.sm, paddingVertical: designTokens.spacing.xs },
   storeRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: designTokens.spacing.sm, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: "rgba(127,127,127,0.22)", marginBottom: designTokens.spacing.xs },
   storeIdentity: { flex: 1, flexDirection: "row", alignItems: "center", gap: designTokens.spacing.sm },
   storeIcon: { width: 42, height: 42, borderRadius: 21, alignItems: "center", justifyContent: "center" },
