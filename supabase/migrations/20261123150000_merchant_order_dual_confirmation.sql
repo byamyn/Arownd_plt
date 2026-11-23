@@ -89,6 +89,10 @@ create table if not exists public.merchant_order_completion_events (
 create index if not exists merchant_order_completion_events_order_idx
   on public.merchant_order_completion_events(merchant_order_id, created_at, id);
 
+create unique index if not exists merchant_order_completion_events_seller_once_idx
+  on public.merchant_order_completion_events(merchant_order_id)
+  where action = 'seller_confirmed_delivery_and_cash';
+
 -- Preserve an audit entry for seller confirmations that predate this workflow.
 insert into public.merchant_order_completion_events (
   merchant_order_id, order_id, action, actor_id, actor_type, created_at
