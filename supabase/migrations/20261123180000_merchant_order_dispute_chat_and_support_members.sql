@@ -142,6 +142,10 @@ create policy merchant_order_dispute_messages_insert_participants
           or (sender_role = 'merchant' and private.is_store_team_member(d.store_id))
           or (sender_role = 'support' and (select public.is_current_user_dispute_support()))
         )
+        and (
+          attachment_path is null
+          or attachment_path like d.id::text || '/' || (select auth.uid())::text || '/%'
+        )
     )
   );
 
@@ -252,21 +256,18 @@ begin
       'dispute_id', new.dispute_id,
       'merchant_order_id', new.merchant_order_id,
       'order_id', new.order_id,
-      'url', case
-        when recipient.is_support then '/support/disputes/' || new.dispute_id::text
-        else '/disputes/' || new.dispute_id::text
-      end
+      'url', '/disputes/' || new.dispute_id::text
     )
   from (
-    select v_dispute.customer_id as user_id, false as is_support
+    select v_dispute.customer_id as user_id
     union
-    select stm.user_id, false
+    select stm.user_id
     from public.store_team_members stm
     where stm.store_id = v_dispute.store_id
     union
-    select sm.user_id, true
-    from public.support_members sm
-    where sm.is_active = true
+    select st.owner_id
+    from public.stores st
+    where st.id = v_dispute.store_id and st.owner_id is not null
   ) recipient
   where recipient.user_id <> new.sender_id;
 
@@ -412,10 +413,6 @@ create policy merchant_order_dispute_attachments_insert
       where d.id::text = split_part(name, '/', 1)
         and d.status <> 'resolved'
         and (
-          attachment_path is null
-          or attachment_path like d.id::text || '/' || (select auth.uid())::text || '/%'
-        )
-        and (
           d.customer_id = (select auth.uid())
           or private.is_store_team_member(d.store_id)
           or (select public.is_current_user_dispute_support())
@@ -423,11 +420,17 @@ create policy merchant_order_dispute_attachments_insert
     )
   );
 
-do $$
+do $
 begin
   alter publication supabase_realtime add table public.merchant_order_dispute_messages;
 exception when duplicate_object then null;
-end $$;
+end $;
+
+do $
+begin
+  alter publication supabase_realtime add table public.merchant_order_disputes;
+exception when duplicate_object then null;
+end $;
 
 alter table public.merchant_order_dispute_messages replica identity full;
 
@@ -496,7 +499,7 @@ begin
   );
 
   insert into public.notifications (user_id, type, title, body, data)
-  select st.owner_id, 'order', 'تم فتح نزاع على الطلب',
+  select recipient.user_id, 'order', 'تم فتح نزاع على الطلب',
     'فتح المشتري نزاعاً على الطلب ويحتاج إلى المراجعة.',
     jsonb_build_object(
       'order_id', v_order.order_id,
@@ -505,21 +508,16 @@ begin
       'completion_status', 'disputed',
       'url', '/disputes/' || v_dispute_id::text
     )
-  from public.stores st
-  where st.id = v_order.store_id and st.owner_id is not null;
-
-  insert into public.notifications (user_id, type, title, body, data)
-  select sm.user_id, 'order', 'نزاع جديد يحتاج إلى المراجعة',
-    'تم فتح نزاع جديد بين المشتري والمتجر.',
-    jsonb_build_object(
-      'order_id', v_order.order_id,
-      'merchant_order_id', v_order.id,
-      'dispute_id', v_dispute_id,
-      'completion_status', 'disputed',
-      'url', '/support/disputes/' || v_dispute_id::text
-    )
-  from public.support_members sm
-  where sm.is_active = true;
+  from (
+    select st.owner_id as user_id
+    from public.stores st
+    where st.id = v_order.store_id and st.owner_id is not null
+    union
+    select stm.user_id
+    from public.store_team_members stm
+    where stm.store_id = v_order.store_id
+  ) recipient
+  where recipient.user_id <> auth.uid();
 
   return v_order;
 end;
