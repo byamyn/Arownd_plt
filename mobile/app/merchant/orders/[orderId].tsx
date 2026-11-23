@@ -126,6 +126,7 @@ export default function MerchantOrderDetailsScreen() {
 
   const order = detail.data.merchantOrder;
   const disputeTicket = detail.data.completionData.disputesByMerchantOrderId[order.id];
+  const disputeActive = Boolean(disputeTicket && disputeTicket.status !== "resolved") || order.completion_status === "disputed";
   const customerOrder = order.order;
   const total = order.subtotal + order.shipping_fee;
   const canManageFulfillment = canManageMerchantOrderFulfillment(order.status) && customerOrder.status !== "cancelled";
@@ -276,7 +277,7 @@ export default function MerchantOrderDetailsScreen() {
         <MerchantOrderCard>
           <UiText style={[styles.sectionTitle, { color: theme.colors.foreground }]}>{translate("orderCompletionTitle")}</UiText>
           {order.completion_status === "completed" ? <Alert description={translate("orderCompletionCompleted")} tone="success" /> : null}
-          {order.completion_status === "disputed" ? <Alert title={translate("orderCompletionDisputed")} description={disputeTicket?.reason ?? order.dispute_reason ?? translate("orderDisputeTicket")} tone="danger" /> : null}
+          {disputeActive ? <Alert title={translate("orderCompletionDisputed")} description={disputeTicket?.reason ?? order.dispute_reason ?? translate("orderDisputeTicket")} tone="danger" /> : null}
           {order.completion_status === "pending" && order.seller_confirmed_at ? <Alert description={translate("orderCompletionWaitingCustomer")} tone="info" /> : null}
           {order.completion_status === "pending" && !order.seller_confirmed_at && order.status === "delivered" && order.payment_status === "paid" ? <Alert description={translate("orderCompletionWaitingSeller")} tone="warning" /> : null}
           {order.completion_status === "pending" && !order.seller_confirmed_at && !(order.status === "delivered" && order.payment_status === "paid") ? <Alert description={translate("orderCompletionPending")} tone="warning" /> : null}
