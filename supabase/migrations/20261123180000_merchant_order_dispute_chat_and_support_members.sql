@@ -420,17 +420,17 @@ create policy merchant_order_dispute_attachments_insert
     )
   );
 
-do $
+do $realtime$
 begin
   alter publication supabase_realtime add table public.merchant_order_dispute_messages;
 exception when duplicate_object then null;
-end $;
+end $realtime$;
 
-do $
+do $realtime$
 begin
   alter publication supabase_realtime add table public.merchant_order_disputes;
 exception when duplicate_object then null;
-end $;
+end $realtime$;
 
 alter table public.merchant_order_dispute_messages replica identity full;
 
@@ -473,13 +473,33 @@ begin
   if v_order.customer_id <> auth.uid() then raise exception 'not_authorized'; end if;
   if v_order.completion_status = 'completed' then raise exception 'merchant_order_already_completed'; end if;
   if v_order.status = 'cancelled' then raise exception 'merchant_order_not_disputable'; end if;
-  if v_order.completion_status = 'disputed' then return v_order; end if;
+  select d.id into v_dispute_id
+  from public.merchant_order_disputes d
+  where d.merchant_order_id = v_order.id;
+
+  if found then
+    if v_order.completion_status <> 'disputed' then
+      update public.merchant_orders
+      set completion_status = 'disputed',
+          disputed_at = coalesce(disputed_at, now()),
+          dispute_opened_by = coalesce(dispute_opened_by, auth.uid()),
+          dispute_reason = coalesce(nullif(trim(dispute_reason), ''), v_reason),
+          updated_at = now()
+      where id = v_order.id
+      returning * into v_order;
+    end if;
+    return v_order;
+  end if;
+
+  if v_order.completion_status = 'disputed' then
+    v_reason := coalesce(nullif(trim(v_order.dispute_reason), ''), v_reason);
+  end if;
 
   insert into public.merchant_order_disputes (
     merchant_order_id, order_id, store_id, customer_id, opened_by, reason
   ) values (
     v_order.id, v_order.order_id, v_order.store_id,
-    v_order.customer_id, auth.uid(), v_reason
+    v_order.customer_id, coalesce(v_order.dispute_opened_by, auth.uid()), v_reason
   ) returning id into v_dispute_id;
 
   update public.merchant_orders
@@ -491,12 +511,19 @@ begin
   where id = _merchant_order_id
   returning * into v_order;
 
-  insert into public.merchant_order_completion_events (
-    merchant_order_id, order_id, action, actor_id, actor_type, reason
-  ) values (
-    v_order.id, v_order.order_id, 'customer_opened_dispute',
-    auth.uid(), 'customer', v_reason
-  );
+  if not exists (
+    select 1
+    from public.merchant_order_completion_events e
+    where e.merchant_order_id = v_order.id
+      and e.action = 'customer_opened_dispute'
+  ) then
+    insert into public.merchant_order_completion_events (
+      merchant_order_id, order_id, action, actor_id, actor_type, reason
+    ) values (
+      v_order.id, v_order.order_id, 'customer_opened_dispute',
+      coalesce(v_order.dispute_opened_by, auth.uid()), 'customer', v_reason
+    );
+  end if;
 
   insert into public.notifications (user_id, type, title, body, data)
   select recipient.user_id, 'order', 'تم فتح نزاع على الطلب',
