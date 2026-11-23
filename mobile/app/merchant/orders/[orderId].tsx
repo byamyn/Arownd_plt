@@ -285,6 +285,12 @@ export default function MerchantOrderDetailsScreen() {
             <InfoRow label={translate("orderDisputeOpenedAt")} value={new Date(disputeTicket.created_at).toLocaleString(language === "ar" ? "ar-DZ-u-nu-latn" : "en-DZ-u-nu-latn")} theme={theme} />
             {disputeTicket.resolution_note ? <UiText style={[styles.mutedText, { color: theme.colors.muted }]}>{disputeTicket.resolution_note}</UiText> : null}
           </View> : null}
+          {disputeTicket ? <Button
+            label={translate("disputeOpenConversation")}
+            onPress={() => router.push(("/disputes/" + disputeTicket.id) as never)}
+            variant="secondary"
+            fullWidth
+          /> : null}
           {detail.data.completionData.eventsByMerchantOrderId[order.id]?.map((event) => <View key={event.id} style={styles.completionEvent}>
             <UiText style={[styles.mutedText, { color: theme.colors.muted }]}>{completionEventLabel(event.action)}</UiText>
             <UiText style={[styles.mutedText, { color: theme.colors.muted }]}>{new Date(event.created_at).toLocaleString(language === "ar" ? "ar-DZ-u-nu-latn" : "en-DZ-u-nu-latn")}</UiText>
@@ -315,6 +321,7 @@ export default function MerchantOrderDetailsScreen() {
 function completionEventLabel(action: string): string {
   if (action === "seller_confirmed_delivery_and_cash") return translate("orderCompletionSellerEvent");
   if (action === "customer_confirmed_receipt_and_payment") return translate("orderCompletionCustomerEvent");
+  if (action === "support_resolved_dispute") return translate("orderCompletionSupportResolvedEvent");
   return translate("orderCompletionDisputeEvent");
 }
 
