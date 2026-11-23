@@ -8,11 +8,6 @@ let activeLanguage: Language = "ar";
 export const messages = {
   ar: {
     appName: "Arownd",
-    captchaTitle: "التحقق الأمني",
-    captchaSubtitle: "أكمل التحقق للمتابعة إلى Arownd.",
-    captchaLoading: "جارٍ تحميل التحقق…",
-    captchaLoadError: "تعذّر تحميل التحقق. تحقق من اتصالك وأعد المحاولة.",
-    captchaCancel: "إلغاء التحقق",
     authEyebrow: "تسوّق عالمي بذائقة رفيعة",
     loginTitle: "أهلًا بعودتك",
     loginSubtitle: "سجّل الدخول لمتابعة رحلتك مع Arownd.",
@@ -1161,11 +1156,6 @@ export const messages = {
   },
   en: {
     appName: "Arownd",
-    captchaTitle: "Security verification",
-    captchaSubtitle: "Complete the verification to return to Arownd and continue.",
-    captchaLoading: "Loading secure verification…",
-    captchaLoadError: "Could not load verification. Check your connection and try again.",
-    captchaCancel: "Cancel verification",
     authEyebrow: "Your local shopping experience",
     loginTitle: "Welcome back",
     loginSubtitle: "Sign in to continue your Arownd experience.",
