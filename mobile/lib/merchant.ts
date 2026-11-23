@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { getSupabaseClient } from "@/lib/supabase";
 import { assertActionRateLimit } from "@/lib/action-rate-limit";
+import { fetchMerchantOrderCompletionData } from "@/lib/order-completion";
 import { fetchMyAccountRegionLevels, normalizePhoneForCallingCode } from "@/lib/country-regions";
 import { createStoreSlug, merchantStoreSchema, type MerchantStoreFormValues } from "@/lib/merchant-validation";
 import {
@@ -342,6 +343,15 @@ const MerchantOrderDetailSchema = z.object({
   payment_status: z.string(),
   paid_amount: z.coerce.number().nullable(),
   paid_at: z.string().nullable(),
+  completion_status: z.enum(["pending", "disputed", "completed"]).default("pending"),
+  seller_confirmed_at: z.string().nullable().optional(),
+  seller_confirmed_by: z.string().uuid().nullable().optional(),
+  customer_confirmed_at: z.string().nullable().optional(),
+  customer_confirmed_by: z.string().uuid().nullable().optional(),
+  completed_at: z.string().nullable().optional(),
+  disputed_at: z.string().nullable().optional(),
+  dispute_opened_by: z.string().uuid().nullable().optional(),
+  dispute_reason: z.string().nullable().optional(),
   order: z.object({
     id: z.string().uuid(),
     status: z.string(),
@@ -392,6 +402,7 @@ export type MerchantOrderDetail = {
   items: z.infer<typeof MerchantOrderItemDetailSchema>[];
   shipment: z.infer<typeof MerchantShipmentSchema> | null;
   trackingEvents: MerchantTrackingEvent[];
+  completionData: Awaited<ReturnType<typeof fetchMerchantOrderCompletionData>>;
 };
 
 export type MerchantTrackingEvent = z.infer<typeof MerchantTrackingEventSchema>;
@@ -421,7 +432,7 @@ export async function fetchMerchantOrderDetails(
 
   let merchantOrderRequest = client
     .from("merchant_orders")
-    .select("id, order_id, store_id, status, subtotal, shipping_fee, quoted_at, payment_status, paid_amount, paid_at, order:orders!inner(id, status, full_name, phone, commune, country_code, currency_code, region_id, secondary_region_id, address_line, delivery_type, payment_method, created_at, region:country_regions!orders_country_region_fkey(name_ar, name_fr, name_en), secondary_region:country_regions!orders_country_secondary_region_fkey(name_ar, name_fr, name_en), wilaya:wilayas(id, name_ar, name_fr), daira:country_regions!orders_daira_region_fkey(name_ar, name_fr))")
+    .select("id, order_id, store_id, status, subtotal, shipping_fee, quoted_at, payment_status, paid_amount, paid_at, completion_status, seller_confirmed_at, seller_confirmed_by, customer_confirmed_at, customer_confirmed_by, completed_at, disputed_at, dispute_opened_by, dispute_reason, order:orders!inner(id, status, full_name, phone, commune, country_code, currency_code, region_id, secondary_region_id, address_line, delivery_type, payment_method, created_at, region:country_regions!orders_country_region_fkey(name_ar, name_fr, name_en), secondary_region:country_regions!orders_country_secondary_region_fkey(name_ar, name_fr, name_en), wilaya:wilayas(id, name_ar, name_fr), daira:country_regions!orders_daira_region_fkey(name_ar, name_fr))")
     .eq("id", merchantOrderId)
     .eq("store_id", storeId);
   if (signal) merchantOrderRequest = merchantOrderRequest.abortSignal(signal);
@@ -431,7 +442,7 @@ export async function fetchMerchantOrderDetails(
   if (!merchantOrderData) throw new Error("merchant_order_not_found");
 
   const merchantOrder = MerchantOrderDetailSchema.parse(merchantOrderData as unknown);
-  const [itemsResult, shipmentResult, trackingEvents] = await Promise.all([
+  const [itemsResult, shipmentResult, trackingEvents, completionData] = await Promise.all([
     (() => {
       let request = client
         .from("order_items")
@@ -451,7 +462,8 @@ export async function fetchMerchantOrderDetails(
       if (signal) request = request.abortSignal(signal);
       return request.maybeSingle();
     })(),
-    fetchMerchantOrderTracking(merchantOrderId, signal)
+    fetchMerchantOrderTracking(merchantOrderId, signal),
+    fetchMerchantOrderCompletionData([merchantOrderId], signal)
   ]);
 
   if (itemsResult.error) throw itemsResult.error;
@@ -463,7 +475,8 @@ export async function fetchMerchantOrderDetails(
     shipment: shipmentResult.data
       ? MerchantShipmentSchema.parse(shipmentResult.data as unknown)
       : null,
-    trackingEvents: [...trackingEvents].sort((first, second) => Date.parse(first.created_at) - Date.parse(second.created_at))
+    trackingEvents: [...trackingEvents].sort((first, second) => Date.parse(first.created_at) - Date.parse(second.created_at)),
+    completionData
   };
 }
 
