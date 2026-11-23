@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 
 import { CustomerHeading, CustomerScreen, EmptyState, ErrorState } from "@/components/customer-ui";
-import { AppHeader, ConfirmDialog, Icon, IconButton, OrderStatusBadge as UiOrderStatusBadge, PriceDisplay, PressableSurface, Spinner, OrderCardSkeleton, Text as UiText, TrackingTimeline } from "@/components/ui";
+import { Alert, AppHeader, Button, ConfirmDialog, Icon, IconButton, OrderStatusBadge as UiOrderStatusBadge, PriceDisplay, PressableSurface, Spinner, OrderCardSkeleton, Text as UiText, TextArea, TrackingTimeline } from "@/components/ui";
 import { formatMarketPrice, formatNumber } from "@/lib/catalog";
 import { cancelMyMerchantOrder, cancelMyOrder, fetchCustomerOrderDetails, getOrderStatusTone, getOrderTrackingSteps, respondToMerchantQuote } from "@/lib/orders";
 import { canCancelLegacyOrder, canCancelMerchantOrder, formatOrderCode } from "@/lib/orders-state";
@@ -14,6 +14,7 @@ import { translate, useLanguage } from "@/lib/i18n";
 import { designTokens, useAppTheme, type AppTheme } from "@/lib/theme";
 import { getLocalizedWilayaLabel } from "@/lib/locale-data";
 import { getRegionDisplayName } from "@/lib/country-regions";
+import { confirmMerchantOrderReceiptAndPayment, openMerchantOrderDispute } from "@/lib/order-completion";
 
 const STEPS = [
   { status: "pending", title: "orderStepPending" as const, hint: "orderStepPendingHint" as const },
@@ -62,6 +63,18 @@ function itemOptionsLabel(options: unknown): string | null {
   return entries.map(([key, value]) => (key === "size" ? translate("productSizeOption") : key === "color" ? translate("productColorOption") : key) + ": " + value).join(" · ");
 }
 
+function completionEventLabel(action: string): string {
+  if (action === "seller_confirmed_delivery_and_cash") return translate("orderCompletionSellerEvent");
+  if (action === "customer_confirmed_receipt_and_payment") return translate("orderCompletionCustomerEvent");
+  return translate("orderCompletionDisputeEvent");
+}
+
+function disputeStatusLabel(status: string): string {
+  if (status === "in_review") return translate("orderDisputeStatusInReview");
+  if (status === "resolved") return translate("orderDisputeStatusResolved");
+  return translate("orderDisputeStatusOpen");
+}
+
 function dateLabel(value: string | null | undefined, language: "ar" | "en"): string {
   if (!value) return "";
   const date = new Date(value);
@@ -77,6 +90,9 @@ export default function OrderDetailsScreen() {
   const queryClient = useQueryClient();
   const [declineTarget, setDeclineTarget] = useState<string | null>(null);
   const [cancelTarget, setCancelTarget] = useState<{ type: "order" | "merchant"; id: string } | null>(null);
+  const [completionConfirmTarget, setCompletionConfirmTarget] = useState<string | null>(null);
+  const [disputeTarget, setDisputeTarget] = useState<string | null>(null);
+  const [disputeReason, setDisputeReason] = useState("");
   const quoteMutation = useMutation({
     mutationFn: (input: { merchantOrderId: string; accept: boolean }) =>
       respondToMerchantQuote(input.merchantOrderId, input.accept),
@@ -92,6 +108,23 @@ export default function OrderDetailsScreen() {
     },
     onSuccess: async () => {
       setCancelTarget(null);
+      await queryClient.invalidateQueries({ queryKey: ["customer-order-details", orderId] });
+      await queryClient.invalidateQueries({ queryKey: ["customer-orders"] });
+    }
+  });
+  const completionConfirmMutation = useMutation({
+    mutationFn: (merchantOrderId: string) => confirmMerchantOrderReceiptAndPayment(merchantOrderId),
+    onSuccess: async () => {
+      setCompletionConfirmTarget(null);
+      await queryClient.invalidateQueries({ queryKey: ["customer-order-details", orderId] });
+      await queryClient.invalidateQueries({ queryKey: ["customer-orders"] });
+    }
+  });
+  const disputeMutation = useMutation({
+    mutationFn: (input: { merchantOrderId: string; reason: string }) => openMerchantOrderDispute(input.merchantOrderId, input.reason),
+    onSuccess: async () => {
+      setDisputeTarget(null);
+      setDisputeReason("");
       await queryClient.invalidateQueries({ queryKey: ["customer-order-details", orderId] });
       await queryClient.invalidateQueries({ queryKey: ["customer-orders"] });
     }
@@ -195,6 +228,10 @@ export default function OrderDetailsScreen() {
     {merchantOrders.map((merchantOrder) => {
       const cancelled = merchantOrder.status === "cancelled" || merchantOrder.status === "rejected";
       const subTotal = cancelled ? 0 : merchantOrder.subtotal + merchantOrder.shipping_fee;
+      const completionEvents = query.data.completionData.eventsByMerchantOrderId[merchantOrder.id] ?? [];
+      const disputeTicket = query.data.completionData.disputesByMerchantOrderId[merchantOrder.id];
+      const canConfirmCompletion = !cancelled && merchantOrder.completion_status === "pending" && merchantOrder.status === "delivered" && merchantOrder.payment_status === "paid" && Boolean(merchantOrder.seller_confirmed_at);
+      const canOpenDispute = !cancelled && merchantOrder.completion_status === "pending";
       return <View key={merchantOrder.id} style={[styles.panel, { backgroundColor: theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface }]}>
         <View style={styles.merchantHeader}>
           <UiText style={styles.sectionTitle}>{merchantOrder.store?.name ?? translate("ordersStore")}</UiText>
@@ -225,6 +262,65 @@ export default function OrderDetailsScreen() {
           {merchantOrder.payment_status === "paid" && merchantOrder.paid_amount != null ? <View style={styles.totalRow}><UiText style={styles.label}>{translate("orderPaidAmount")}</UiText><UiText style={styles.label}>{formatOrderMoney(merchantOrder.paid_amount)}</UiText></View> : null}
           {merchantOrder.payment_status === "paid" && merchantOrder.paid_at ? <UiText style={styles.meta}>{translate("orderPaidAt")}: {dateLabel(merchantOrder.paid_at, language)}</UiText> : null}
         </View> : null}
+        <View style={styles.completionPanel}>
+          <UiText style={styles.sectionTitle}>{translate("orderCompletionTitle")}</UiText>
+          {merchantOrder.completion_status === "completed" ? <Alert description={translate("orderCompletionCompleted")} tone="success" /> : null}
+          {merchantOrder.completion_status === "disputed" ? <Alert title={translate("orderCompletionDisputed")} description={disputeTicket?.reason ?? merchantOrder.dispute_reason ?? translate("orderDisputeTicket")} tone="danger" /> : null}
+          {merchantOrder.completion_status === "pending" && merchantOrder.seller_confirmed_at ? <Alert description={translate("orderCompletionWaitingCustomer")} tone="info" /> : null}
+          {merchantOrder.completion_status === "pending" && merchantOrder.status === "delivered" && merchantOrder.payment_status === "paid" && !merchantOrder.seller_confirmed_at ? <Alert description={translate("orderCompletionWaitingSeller")} tone="warning" /> : null}
+          {disputeTicket ? <View style={styles.completionEvent}>
+            <UiText style={styles.meta}>{translate("orderDisputeTicket")}: {disputeStatusLabel(disputeTicket.status)}</UiText>
+            <UiText style={styles.meta}>{translate("orderDisputeOpenedAt")}: {dateLabel(disputeTicket.created_at, language)}</UiText>
+            {disputeTicket.resolution_note ? <UiText style={styles.meta}>{disputeTicket.resolution_note}</UiText> : null}
+          </View> : null}
+          {completionEvents.map((event) => <View key={event.id} style={styles.completionEvent}>
+            <UiText style={styles.meta}>{completionEventLabel(event.action)}</UiText>
+            <UiText style={styles.meta}>{dateLabel(event.created_at, language)}</UiText>
+            {event.reason ? <UiText style={styles.meta}>{event.reason}</UiText> : null}
+          </View>)}
+          {canConfirmCompletion ? <PressableSurface
+            accessibilityRole="button"
+            accessibilityLabel={translate("orderCompletionConfirm")}
+            disabled={completionConfirmMutation.isPending}
+            onPress={() => setCompletionConfirmTarget(merchantOrder.id)}
+            style={styles.completionPrimaryAction}
+          >
+            {completionConfirmMutation.isPending && completionConfirmTarget === merchantOrder.id ? <Spinner color={theme.colors.accentForeground} size="small" /> : <UiText style={styles.completionPrimaryText}>{translate("orderCompletionConfirm")}</UiText>}
+          </PressableSurface> : null}
+          {canOpenDispute && disputeTarget !== merchantOrder.id ? <PressableSurface
+            accessibilityRole="button"
+            accessibilityLabel={translate("orderDisputeOpen")}
+            disabled={disputeMutation.isPending}
+            onPress={() => { setDisputeTarget(merchantOrder.id); setDisputeReason(""); }}
+            style={styles.completionSecondaryAction}
+          >
+            <UiText style={styles.completionSecondaryText}>{translate("orderDisputeOpen")}</UiText>
+          </PressableSurface> : null}
+          {canOpenDispute && disputeTarget === merchantOrder.id ? <View style={styles.disputeForm}>
+            <TextArea
+              value={disputeReason}
+              onChangeText={setDisputeReason}
+              maxLength={1000}
+              placeholder={translate("orderDisputeReasonPlaceholder")}
+              accessibilityLabel={translate("orderDisputeReasonPlaceholder")}
+              minHeight={96}
+            />
+            <Button
+              label={translate("orderDisputeSubmit")}
+              onPress={() => {
+                if (!disputeReason.trim()) return;
+                disputeMutation.mutate({ merchantOrderId: merchantOrder.id, reason: disputeReason });
+              }}
+              loading={disputeMutation.isPending}
+              disabled={!disputeReason.trim()}
+              fullWidth
+            />
+            <PressableSurface accessibilityRole="button" onPress={() => setDisputeTarget(null)} style={styles.completionSecondaryAction}>
+              <UiText style={styles.completionSecondaryText}>{translate("back")}</UiText>
+            </PressableSurface>
+          </View> : null}
+          {completionConfirmMutation.isError || disputeMutation.isError ? <UiText style={styles.errorText}>{translate("orderCompletionActionError")}</UiText> : null}
+        </View>
         {canCancelMerchantOrder(merchantOrder.status, merchantOrder.quoted_at) ? <PressableSurface
           accessibilityLabel={translate("orderCancelStore")}
           disabled={cancelMutation.isPending}
@@ -294,6 +390,16 @@ export default function OrderDetailsScreen() {
     </PressableSurface> : null}
     {cancelMutation.isError ? <UiText style={styles.errorText}>{translate("orderCancelError")}</UiText> : null}
     <ConfirmDialog
+      visible={completionConfirmTarget !== null}
+      onRequestClose={() => setCompletionConfirmTarget(null)}
+      onConfirm={() => { if (completionConfirmTarget) completionConfirmMutation.mutate(completionConfirmTarget); }}
+      title={translate("orderCompletionConfirmTitle")}
+      description={translate("orderCompletionConfirmHint")}
+      cancelLabel={translate("back")}
+      confirmLabel={translate("orderCompletionConfirm")}
+      busy={completionConfirmMutation.isPending}
+    />
+    <ConfirmDialog
       visible={cancelTarget !== null}
       onRequestClose={() => setCancelTarget(null)}
       onConfirm={() => { if (cancelTarget) cancelMutation.mutate(cancelTarget); }}
@@ -341,6 +447,13 @@ function createStyles(theme: AppTheme) { return StyleSheet.create({
   notice: { color: theme.mode === "light" ? theme.colors.warningText : theme.colors.warning, fontSize: designTokens.typography.caption, textAlign: "auto", lineHeight: 18 },
   cancelledNotice: { color: theme.mode === "light" ? theme.colors.dangerText : theme.colors.danger, fontSize: designTokens.typography.caption, fontWeight: designTokens.fontWeights.bold, textAlign: "auto", lineHeight: 18 },
   paymentInfo: { borderTopWidth: 1, borderTopColor: theme.colors.border, paddingTop: designTokens.spacing.sm, gap: designTokens.spacing.xs },
+  completionPanel: { borderTopWidth: 1, borderTopColor: theme.colors.border, paddingTop: designTokens.spacing.md, gap: designTokens.spacing.sm },
+  completionEvent: { borderTopWidth: 1, borderTopColor: theme.colors.border, paddingTop: designTokens.spacing.sm, gap: designTokens.spacing.xs },
+  disputeForm: { gap: designTokens.spacing.sm },
+  completionPrimaryAction: { minHeight: designTokens.dimensions.controlHeight.lg, borderRadius: designTokens.radius.sm, backgroundColor: theme.colors.accent, justifyContent: "center", alignItems: "center", paddingHorizontal: designTokens.spacing.md },
+  completionPrimaryText: { color: theme.colors.accentForeground, fontSize: designTokens.typography.caption + 1, fontWeight: designTokens.fontWeights.extrabold },
+  completionSecondaryAction: { minHeight: designTokens.dimensions.controlHeight.lg, borderRadius: designTokens.radius.sm, borderWidth: 1, borderColor: theme.colors.border, justifyContent: "center", alignItems: "center", paddingHorizontal: designTokens.spacing.md },
+  completionSecondaryText: { color: theme.colors.foregroundSecondary, fontSize: designTokens.typography.caption + 1, fontWeight: designTokens.fontWeights.bold },
   paymentPaid: { color: theme.mode === "light" ? theme.colors.successText : theme.colors.success },
   paymentUnpaid: { color: theme.mode === "light" ? theme.colors.warningText : theme.colors.warning },
   recipient: { fontSize: designTokens.typography.body - 1, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
