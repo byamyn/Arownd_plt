@@ -103,8 +103,7 @@ export default function MerchantOrderDisputeChatScreen() {
       setAttachmentError(false);
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["merchant-order-dispute-messages", disputeId] }),
-        queryClient.invalidateQueries({ queryKey: ["merchant-order-dispute", disputeId] }),
-        queryClient.invalidateQueries({ queryKey: ["merchant-order-dispute-inbox"] })
+        queryClient.invalidateQueries({ queryKey: ["merchant-order-dispute", disputeId] })
       ]);
     }
   });
