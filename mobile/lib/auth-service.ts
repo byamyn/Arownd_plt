@@ -64,7 +64,8 @@ export async function signUpPersonal(input: PersonalSignupInput): Promise<boolea
     password: input.password,
     redirectTo,
     data: {
-      full_name: input.fullName.trim(),
+      username: input.username,
+      full_name: input.username,
       account_type: "personal",
       country_code: countryCode,
       ...(inviteCode ? { invite_code: inviteCode } : {})
@@ -92,7 +93,8 @@ export async function signUpBusiness(input: BusinessSignupInput): Promise<boolea
     password: input.password,
     redirectTo,
     data: {
-      full_name: input.fullName.trim(),
+      username: input.username,
+      full_name: input.username,
       account_type: "merchant",
       country_code: countryCode,
       business_name: input.businessName.trim(),
