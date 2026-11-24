@@ -109,6 +109,23 @@ describe("store pickup address requirements", () => {
     expect(isStreetAddressRequired("desk")).toBe(false);
   });
 
+  it("keeps the street address in a home-delivery idempotency identity", () => {
+    const base = {
+      items: [item("offer-1", 1, {})],
+      deliveryType: "home" as const,
+      regionId: 9,
+      secondaryRegionId: 99,
+      commune: "البليدة",
+      addressLine: "شارع 1",
+      fullName: "أحمد",
+      phone: "+213550000000"
+    };
+    expect(checkoutRequestIdentity(base)).not.toBe(checkoutRequestIdentity({
+      ...base,
+      addressLine: "شارع 2"
+    }));
+  });
+
   it("ignores a retained home address when building a store-pickup idempotency identity", () => {
     const base = {
       items: [item("offer-1", 1, {})],
