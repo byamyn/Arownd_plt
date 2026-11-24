@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#FAF9F5">
+  <meta name="description" content="الملف الشخصي على Arownd.">
+  <meta property="og:title" content="الملف الشخصي — Arownd">
+  <meta property="og:description" content="اكتشف الملف الشخصي على Arownd.">
+  <meta property="og:type" content="profile">
+  <title>الملف الشخصي — Arownd</title>
+  <link rel="icon" href="/arownd-app-icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/profile.css">
+  <script src="/config.js"></script>
+  <script src="/profile.js" defer></script>
+</head>
+<body>
+  <header class="header">
+    <a class="brand" href="/" aria-label="Arownd الرئيسية"><img src="/arownd-logo.svg" alt="Arownd"></a>
+    <a class="home-link" href="/">الصفحة الرئيسية</a>
+  </header>
+  <main class="main">
+    <section class="profile-card" aria-live="polite">
+      <div class="brand-mark">A</div>
+      <p class="eyebrow">AROWND PERSONAL</p>
+      <div id="profile-state" class="state">
+        <span class="loader" aria-hidden="true"></span>
+        <p>جارٍ تحميل الملف الشخصي…</p>
+      </div>
+      <article id="profile-content" class="profile-content hidden">
+        <div class="avatar-wrap"><img id="profile-avatar" alt="" class="avatar hidden"><span id="avatar-fallback" class="avatar-fallback">A</span></div>
+        <h1 id="profile-name"></h1>
+        <p id="profile-username" class="username"></p>
+        <p id="profile-location" class="location hidden"></p>
+        <div class="profile-actions">
+          <button id="share-profile" class="button primary" type="button">مشاركة الملف</button>
+          <a class="button secondary" href="/">اكتشف Arownd</a>
+        </div>
+      </article>
+      <p class="privacy-note"><span></span> لا تظهر هنا إلا المعلومات التي اختار صاحب الحساب إتاحتها للعامة.</p>
+    </section>
+  </main>
+  <footer>© <span id="year"></span> Arownd. جميع الحقوق محفوظة.</footer>
+</body>
+</html>
