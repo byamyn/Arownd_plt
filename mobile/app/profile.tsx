@@ -237,8 +237,8 @@ export default function ProfileScreen() {
 
           {profile.data?.username ? (
             <Card contentStyle={styles.identityCard}>
-              <Caption>{translate("usernameLinkLabel")}</Caption>
-              <UiText weight="700">arownd.vercel.app/@{profile.data.username}</UiText>
+              <Caption>{translate("username")}</Caption>
+              <UiText weight="700">@{profile.data.username}</UiText>
             </Card>
           ) : (
             <Card contentStyle={styles.identityCard}>
