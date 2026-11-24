@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
-import { Image as NativeImage, Modal, StyleSheet, View } from "react-native";
+import { Image as NativeImage, Modal, Share, StyleSheet, View } from "react-native";
 
 import { designTokens, useAppTheme } from "@/lib/theme";
 import { CustomerMainHeader } from "@/components/customer-main-header";
@@ -31,7 +31,7 @@ import { getSupabaseClient } from "@/lib/supabase";
 import { fetchStoreVerificationReviewerAccess } from "@/lib/store-verification";
 import { ProfileAccountSheet, type ProfileAccountSection } from "@/components/profile-account-sheet";
 import { ProfileActivitySheet, type ProfileActivitySection } from "@/components/profile-activity-sheet";
-import { claimMyUsername } from "@/lib/username";
+import { claimMyUsername, setMyProfileVisibility } from "@/lib/username";
 
 export default function ProfileScreen() {
   useLanguage();
@@ -55,6 +55,12 @@ export default function ProfileScreen() {
     mutationFn: claimMyUsername,
     onSuccess: async () => {
       setUsernameDraft("");
+      await queryClient.invalidateQueries({ queryKey: ["my-delivery-profile"] });
+    }
+  });
+  const profileVisibility = useMutation({
+    mutationFn: setMyProfileVisibility,
+    onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["my-delivery-profile"] });
     }
   });
@@ -236,10 +242,32 @@ export default function ProfileScreen() {
           </Card>
 
           {profile.data?.username ? (
-            <Card contentStyle={styles.identityCard}>
-              <Caption>{translate("username")}</Caption>
-              <UiText weight="700">@{profile.data.username}</UiText>
-            </Card>
+            <>
+              <Card contentStyle={styles.identityCard}>
+                <Caption>{translate("usernameLinkLabel")}</Caption>
+                <UiText weight="700">@{profile.data.username}</UiText>
+                <UiText>{"arownd.vercel.app/@" + profile.data.username}</UiText>
+                <Button
+                  label={translate("usernameShareAction")}
+                  onPress={() => void Share.share({ message: "https://arownd.vercel.app/@" + profile.data.username })}
+                />
+              </Card>
+              {profile.data.account_type === "personal" || profile.data.account_type === "merchant" ? (
+                <Card contentStyle={styles.identityCard}>
+                  <UiText weight="700">{translate("profilePublicTitle")}</UiText>
+                  <Caption>{translate("profilePublicHint")}</Caption>
+                  <Caption>{profile.data.is_public ? translate("profilePublicEnabled") : translate("profilePublicDisabled")}</Caption>
+                  <Button
+                    label={profileVisibility.isPending
+                      ? translate("usernameClaimBusy")
+                      : translate(profile.data.is_public ? "profilePublicDisable" : "profilePublicEnable")}
+                    onPress={() => profileVisibility.mutate(!profile.data?.is_public)}
+                    disabled={profileVisibility.isPending}
+                  />
+                  {profileVisibility.isError ? <Caption>{translate("usernameClaimError")}</Caption> : null}
+                </Card>
+              ) : null}
+            </>
           ) : (
             <Card contentStyle={styles.identityCard}>
               <UiText weight="700">{translate("usernameClaimTitle")}</UiText>
