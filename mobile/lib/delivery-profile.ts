@@ -8,6 +8,7 @@ const ProfileSchema = z.object({
   country_code: z.string().length(2),
   full_name: z.string().nullable().optional(),
   username: z.string().nullable().optional(),
+  username: z.string().nullable().optional(),
   avatar_url: z.string().url().nullable().optional(),
   phone: z.string().nullable().optional(),
   region_id: z.number().nullable().optional(),
