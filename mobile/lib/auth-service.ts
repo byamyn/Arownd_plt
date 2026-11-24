@@ -31,7 +31,13 @@ async function submitSignup(input: {
       data: input.data
     }
   });
-  if (error) throw error;
+  if (error) {
+    const message = error.message.toLowerCase();
+    if (message.includes("profiles_username_lower_uidx") || message.includes("username_taken") || message.includes("duplicate key")) {
+      throw new Error("USERNAME_TAKEN");
+    }
+    throw error;
+  }
   return { user: data.user, session: data.session };
 }
 
