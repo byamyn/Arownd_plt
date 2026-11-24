@@ -69,7 +69,9 @@ export default function PersonalSignupScreen() {
             ? translate("countryRequired")
             : error instanceof Error && error.message === "USERNAME_TAKEN"
               ? translate("usernameTaken")
-              : translate("genericError")
+              : error instanceof Error && error.message === "USERNAME_RESERVED"
+                ? translate("usernameReserved")
+                : translate("genericError")
       );
     }
   });
@@ -104,13 +106,17 @@ export default function PersonalSignupScreen() {
             name="username"
             render={({ field: { onChange, onBlur, value } }) => (
               <AuthField
+                autoCapitalize="none"
+                autoCorrect={false}
+                autoComplete="username"
+                textAlign="left"
                 label={translate("username")}
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
                 placeholder={translate("usernamePlaceholder")}
                 icon="user"
-                error={errors.username ? translate(errors.username.message as "required" | "usernameInvalid") : undefined}
+                error={errors.username ? translate(errors.username.message as "required" | "usernameInvalid" | "usernameReserved") : undefined}
               />
             )}
           />
