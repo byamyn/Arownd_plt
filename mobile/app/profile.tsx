@@ -250,7 +250,7 @@ export default function ProfileScreen() {
                 <Button
                   label={translate("usernameShareAction")}
                   onPress={() => void Share.share({ message: "https://arownd.vercel.app/@" + profile.data.username })}
-                  disabled={!profile.data.is_public}
+                  disabled={!profile.data?.is_public}
                 />
               </Card>
               <Card contentStyle={styles.identityCard}>
