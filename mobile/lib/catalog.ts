@@ -15,6 +15,7 @@ const ProductSummarySchema = z.object({
 const StoreSummarySchema = z.object({
   id: z.string(),
   name: z.string(),
+  slug: z.string().nullable().optional(),
   description: z.string().nullable().optional(),
   logo_url: z.string().nullable().optional(),
   cover_url: z.string().nullable().optional(),
@@ -288,7 +289,7 @@ export async function fetchProductOffers(productId: string, signal?: AbortSignal
 export async function fetchStoreDetails(storeId: string, signal?: AbortSignal): Promise<StoreDetails | null> {
   let request = getSupabaseClient()
     .from("stores")
-    .select("id, name, description, logo_url, cover_url, commune, address_line, phone, whatsapp, instagram_url, facebook_url, tiktok_url, website_url, country_code, rating, is_verified, opening_hours, latitude, longitude")
+    .select("id, name, slug, description, logo_url, cover_url, commune, address_line, phone, whatsapp, instagram_url, facebook_url, tiktok_url, website_url, country_code, rating, is_verified, opening_hours, latitude, longitude")
     .eq("id", storeId);
   if (signal) request = request.abortSignal(signal);
   const { data, error } = await request.maybeSingle();
