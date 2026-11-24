@@ -31,7 +31,7 @@ import { getSupabaseClient } from "@/lib/supabase";
 import { fetchStoreVerificationReviewerAccess } from "@/lib/store-verification";
 import { ProfileAccountSheet, type ProfileAccountSection } from "@/components/profile-account-sheet";
 import { ProfileActivitySheet, type ProfileActivitySection } from "@/components/profile-activity-sheet";
-import { claimMyUsername, setMyProfileVisibility } from "@/lib/username";
+import { claimMyUsername } from "@/lib/username";
 
 export default function ProfileScreen() {
   useLanguage();
@@ -55,12 +55,6 @@ export default function ProfileScreen() {
     mutationFn: claimMyUsername,
     onSuccess: async () => {
       setUsernameDraft("");
-      await queryClient.invalidateQueries({ queryKey: ["my-delivery-profile"] });
-    }
-  });
-  const profileVisibility = useMutation({
-    mutationFn: setMyProfileVisibility,
-    onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["my-delivery-profile"] });
     }
   });
