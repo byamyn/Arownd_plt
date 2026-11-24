@@ -25,11 +25,11 @@ begin
     raise exception 'merchant_tracking_function_not_found';
   end if;
 
-  if pg_catalog.position(old_transition in function_definition) = 0 then
+  if pg_catalog.strpos(function_definition, old_transition) = 0 then
     raise exception 'merchant_tracking_transition_definition_not_found';
   end if;
 
-  if pg_catalog.position(new_transition in function_definition) > 0 then
+  if pg_catalog.strpos(function_definition, new_transition) > 0 then
     raise exception 'merchant_tracking_transition_already_patched';
   end if;
 
