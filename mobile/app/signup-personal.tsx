@@ -71,7 +71,9 @@ export default function PersonalSignupScreen() {
               ? translate("usernameTaken")
               : error instanceof Error && error.message === "USERNAME_RESERVED"
                 ? translate("usernameReserved")
-                : translate("genericError")
+                : error instanceof Error && error.message === "USERNAME_INVALID"
+                  ? translate("usernameInvalid")
+                  : translate("genericError")
       );
     }
   });
