@@ -66,7 +66,7 @@ set full_name = excluded.full_name,
     username = excluded.username,
     updated_at = now();
 
--- Allow a merchant to control the personal page independently of store visibility.
+-- Allow every account type to control its personal page independently of business visibility.
 create or replace function public.set_my_profile_visibility(_is_public boolean)
 returns void
 language plpgsql
@@ -93,7 +93,8 @@ begin
 
   if current_type not in (
     'personal'::public.account_type,
-    'merchant'::public.account_type
+    'merchant'::public.account_type,
+    'delivery_company'::public.account_type
   ) then
     raise exception 'personal_profile_only';
   end if;
