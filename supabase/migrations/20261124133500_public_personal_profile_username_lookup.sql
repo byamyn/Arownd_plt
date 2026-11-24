@@ -1,6 +1,6 @@
 -- Public profile visibility is independent from a merchant store's visibility.
--- Every account type may publish its own personal profile independently
--- from any store or service listing.
+-- Personal and merchant accounts may publish a personal profile independently
+-- from the merchant store's visibility.
 create or replace function private.sync_public_personal_profile()
 returns trigger
 language plpgsql
@@ -17,8 +17,7 @@ begin
   if new.is_public is true
      and new.account_type in (
        'personal'::public.account_type,
-       'merchant'::public.account_type,
-       'delivery_company'::public.account_type
+       'merchant'::public.account_type
      ) then
     insert into private.public_personal_profiles (
       user_id, full_name, avatar_url, wilaya_id, commune, username, updated_at
@@ -55,8 +54,7 @@ from public.profiles
 where is_public is true
   and account_type in (
     'personal'::public.account_type,
-    'merchant'::public.account_type,
-    'delivery_company'::public.account_type
+    'merchant'::public.account_type
   )
 on conflict (user_id) do update
 set full_name = excluded.full_name,
@@ -66,7 +64,7 @@ set full_name = excluded.full_name,
     username = excluded.username,
     updated_at = now();
 
--- Allow every account type to control its personal page independently of business visibility.
+-- Allow personal and merchant accounts to control their personal page independently of store visibility.
 create or replace function public.set_my_profile_visibility(_is_public boolean)
 returns void
 language plpgsql
@@ -93,8 +91,7 @@ begin
 
   if current_type not in (
     'personal'::public.account_type,
-    'merchant'::public.account_type,
-    'delivery_company'::public.account_type
+    'merchant'::public.account_type
   ) then
     raise exception 'personal_profile_only';
   end if;
