@@ -46,3 +46,8 @@ export function checkoutRequestIdentity(input: CheckoutIdentityInput): string {
     paymentMethod: "cod"
   });
 }
+
+/** Store pickup does not require a residential delivery address. */
+export function isCheckoutAddressRequired(deliveryType: "home" | "desk"): boolean {
+  return deliveryType === "home";
+}
