@@ -31,7 +31,15 @@ async function submitSignup(input: {
       data: input.data
     }
   });
-  if (error) throw error;
+  if (error) {
+    const message = error.message.toLowerCase();
+    if (message.includes("profiles_username_lower_uidx") || message.includes("username_taken") || message.includes("duplicate key")) {
+      throw new Error("USERNAME_TAKEN");
+    }
+    if (message.includes("username_reserved")) throw new Error("USERNAME_RESERVED");
+    if (message.includes("username_invalid")) throw new Error("USERNAME_INVALID");
+    throw error;
+  }
   return { user: data.user, session: data.session };
 }
 
@@ -51,6 +59,9 @@ export async function signIn(input: LoginInput): Promise<void> {
 
 export async function signUpPersonal(input: PersonalSignupInput): Promise<boolean> {
   assertActionRateLimit("auth:sign-up", 10_000);
+  const { data: usernameAvailable, error: usernameError } = await getSupabaseClient().rpc("is_username_available", { _username: input.username });
+  if (usernameError) throw usernameError;
+  if (usernameAvailable !== true) throw new Error("USERNAME_TAKEN");
   const countryCode = await getSelectedCountryCode();
   if (!countryCode) throw new Error("COUNTRY_NOT_SELECTED");
 
@@ -64,7 +75,8 @@ export async function signUpPersonal(input: PersonalSignupInput): Promise<boolea
     password: input.password,
     redirectTo,
     data: {
-      full_name: input.fullName.trim(),
+      username: input.username,
+      full_name: input.username,
       account_type: "personal",
       country_code: countryCode,
       ...(inviteCode ? { invite_code: inviteCode } : {})
@@ -79,6 +91,9 @@ export async function signUpPersonal(input: PersonalSignupInput): Promise<boolea
 
 export async function signUpBusiness(input: BusinessSignupInput): Promise<boolean> {
   assertActionRateLimit("auth:sign-up", 10_000);
+  const { data: usernameAvailable, error: usernameError } = await getSupabaseClient().rpc("is_username_available", { _username: input.username });
+  if (usernameError) throw usernameError;
+  if (usernameAvailable !== true) throw new Error("USERNAME_TAKEN");
   const countryCode = await getSelectedCountryCode();
   if (!countryCode) throw new Error("COUNTRY_NOT_SELECTED");
 
@@ -92,7 +107,8 @@ export async function signUpBusiness(input: BusinessSignupInput): Promise<boolea
     password: input.password,
     redirectTo,
     data: {
-      full_name: input.fullName.trim(),
+      username: input.username,
+      full_name: input.username,
       account_type: "merchant",
       country_code: countryCode,
       business_name: input.businessName.trim(),

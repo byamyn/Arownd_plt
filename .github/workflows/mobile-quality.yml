@@ -7,6 +7,7 @@ on:
       - main
       - Arownd-native-v2
       - cleanup/remove-legacy-web
+      - feature/account-username
     paths:
       - "mobile/**"
       - ".github/workflows/mobile-quality.yml"

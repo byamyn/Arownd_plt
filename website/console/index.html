@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#FAF9F5">
+  <meta name="description" content="Arownd Console — مركز إدارة منصة Arownd.">
+  <title>Arownd Console — إدارة المنصة</title>
+  <link rel="icon" href="../arownd-app-icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css">
+  <script src="../config.js" defer></script>
+  <script src="../script.js" defer></script>
+</head>
+<body>
+  <div id="auth-screen" class="auth-screen">
+    <div class="auth-brand"><img src="../arownd-logo.svg" alt="Arownd"><span></span><b>CONSOLE</b></div>
+    <section class="auth-card">
+      <div class="auth-mark">A</div>
+      <p class="eyebrow">مساحة الإدارة الداخلية</p>
+      <h1 id="auth-title">تسجيل الدخول</h1>
+      <p id="auth-description" class="muted">الدخول مخصص لموظفي Arownd المعتمدين.</p>
+      <form id="login-form" class="form-stack">
+        <label>البريد الإلكتروني<input name="email" type="email" autocomplete="username" required placeholder="name@arownd.com"></label>
+        <label>كلمة المرور<input name="password" type="password" autocomplete="current-password" required minlength="8" placeholder="••••••••"></label>
+        <button class="button primary wide" type="submit">تسجيل الدخول</button>
+      </form>
+      <form id="invite-form" class="form-stack hidden">
+        <label>الاسم الكامل<input name="full_name" required maxlength="120" placeholder="الاسم الكامل"></label>
+        <label>البريد الإلكتروني<input name="email" type="email" required autocomplete="email" placeholder="البريد الذي وصلته الدعوة"></label>
+        <label>إنشاء كلمة مرور<input name="password" type="password" required minlength="8" autocomplete="new-password" placeholder="8 أحرف على الأقل"></label>
+        <button class="button primary wide" type="submit">تفعيل حساب الفريق</button><button class="text-button" id="invite-existing" type="button">لدي حساب بالفعل — تسجيل الدخول</button>
+      </form>
+      <div id="auth-message" class="form-message" role="status" aria-live="polite"></div>
+      <div class="auth-foot"><span>وصول آمن</span><span>•</span><span>Supabase Auth</span></div>
+    </section>
+    <p class="auth-legal">Arownd Console · منصة Arownd</p>
+  </div>
+
+  <div id="app-shell" class="app-shell hidden">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-head">
+        <a class="brand" href="#dashboard"><img src="../arownd-logo.svg" alt="Arownd"><span></span><b>CONSOLE</b></a>
+        <button class="icon-button mobile-only" id="sidebar-close" aria-label="إغلاق القائمة">×</button>
+      </div>
+      <div class="workspace"><span class="workspace-mark">A</span><span><b>Arownd Platform</b><small>مساحة الإدارة الداخلية</small></span></div>
+      <nav id="main-nav" class="main-nav" aria-label="القائمة الرئيسية">
+        <p class="nav-label">مساحة العمل</p>
+        <button class="nav-item active" data-view="dashboard" data-permission="dashboard.view"><i>▦</i>لوحة القيادة</button>
+        <button class="nav-item" data-view="employees" data-permission="employees.view"><i>♙</i>الموظفون</button>
+        <button class="nav-item" data-view="organization" data-permission="org.view"><i>⌘</i>الهيكل التنظيمي</button>
+        <button class="nav-item" data-view="roles" data-permission="roles.view"><i>◇</i>الأدوار والصلاحيات</button>
+        <button class="nav-item" data-view="tasks" data-permission="tasks.view"><i>☷</i>المهام</button>
+        <p class="nav-label spaced">خدمة المنصة</p>
+        <button class="nav-item" data-view="support" data-permission="support.view"><i>◌</i>مركز الدعم</button>
+        <button class="nav-item" data-view="disputes" data-permission="disputes.view"><i>△</i>مركز النزاعات</button>
+        <p class="nav-label spaced">المتابعة والحوكمة</p>
+        <button class="nav-item" data-view="reports" data-permission="reports.view"><i>⌁</i>التقارير</button>
+        <button class="nav-item" data-view="activity" data-permission="audit.view"><i>◷</i>سجل النشاط</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <button class="nav-item" data-view="settings" data-permission="settings.view"><i>⚙</i>الإعدادات</button>
+        <div class="private-note"><span></span>مساحة داخلية خاصة</div>
+      </div>
+    </aside>
+    <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
+    <main class="main-area">
+      <header class="topbar">
+        <div class="topbar-start">
+          <button class="icon-button mobile-only" id="mobile-menu" aria-label="فتح القائمة">☰</button>
+          <div class="breadcrumb"><span>Arownd Console</span><b>›</b><strong id="breadcrumb-current">لوحة القيادة</strong></div>
+        </div>
+        <div class="topbar-actions">
+          <label class="search-box"><span>⌕</span><input id="global-search" type="search" placeholder="ابحث في هذه الصفحة"></label>
+          <div class="account-menu"><span id="user-avatar" class="avatar">A</span><span><b id="user-name">موظف Arownd</b><small id="user-role">فريق المنصة</small></span><button id="logout-button" class="text-button">خروج</button></div>
+        </div>
+      </header>
+      <div class="page-content">
+        <section class="view-panel active" id="view-dashboard" data-title="لوحة القيادة">
+          <div class="page-heading"><div><p class="eyebrow">نظرة عامة</p><h1>لوحة القيادة</h1><p class="muted">مركز متابعة وإدارة عمليات منصة Arownd.</p></div><div class="date-chip" id="today-date"></div></div>
+          <div class="welcome-panel"><div><small>AROWND PLATFORM</small><h2>إدارة موحدة لفريق المنصة.</h2><p>تابع الفريق والمهام وخدمة العملاء والنزاعات من مساحة واحدة.</p></div><img src="../arownd-app-icon.svg" alt=""></div>
+          <div class="section-heading"><div><h2>ملخص المنصة</h2><p>مؤشرات محدثة من قاعدة البيانات.</p></div><button class="text-button" data-action="refresh">تحديث البيانات ↻</button></div>
+          <div id="dashboard-metrics" class="metric-grid"><div class="metric-card skeleton"></div><div class="metric-card skeleton"></div><div class="metric-card skeleton"></div><div class="metric-card skeleton"></div></div>
+          <div class="dashboard-grid">
+            <section class="content-card"><div class="card-heading"><div><h2>آخر المهام</h2><p>المهام المسندة إلى الفريق.</p></div><button class="text-button" data-view="tasks">عرض الكل</button></div><div id="dashboard-tasks" class="compact-list"></div></section>
+            <section class="content-card"><div class="card-heading"><div><h2>النشاط الإداري</h2><p>آخر التغييرات المسجلة.</p></div><button class="text-button" data-view="activity">سجل النشاط</button></div><div id="dashboard-activity" class="compact-list"></div></section>
+          </div>
+        </section>
+
+        <section class="view-panel" id="view-employees" data-title="الموظفون">
+          <div class="page-heading"><div><p class="eyebrow">إدارة الفريق</p><h1>الموظفون</h1><p class="muted">ملفات الموظفين والدعوات وحالة الوصول.</p></div><button class="button primary" data-action="invite-employee" data-requires="employees.manage">+ إضافة موظف</button></div>
+          <div class="toolbar"><input id="employee-search" type="search" placeholder="ابحث بالاسم أو البريد"><select id="employee-status"><option value="">كل الحالات</option><option value="active">نشط</option><option value="invited">بانتظار التفعيل</option><option value="suspended">موقوف</option><option value="offboarded">منتهية العضوية</option></select></div>
+          <div class="content-card table-wrap"><table><thead><tr><th>الموظف</th><th>الإدارة</th><th>المسمى والرتبة</th><th>الأدوار</th><th>الحالة</th><th></th></tr></thead><tbody id="employees-table"><tr><td colspan="6" class="table-empty">جارٍ تحميل الموظفين…</td></tr></tbody></table></div>
+        </section>
+
+        <section class="view-panel" id="view-organization" data-title="الهيكل التنظيمي">
+          <div class="page-heading"><div><p class="eyebrow">البنية الإدارية</p><h1>الهيكل التنظيمي</h1><p class="muted">الإدارات والفرق والتبعية الإدارية.</p></div><button class="button primary" data-action="add-department" data-requires="org.manage">+ إدارة جديدة</button></div>
+          <div id="organization-content" class="organization-grid"></div>
+        </section>
+
+        <section class="view-panel" id="view-roles" data-title="الأدوار والصلاحيات">
+          <div class="page-heading"><div><p class="eyebrow">التحكم بالوصول</p><h1>الأدوار والصلاحيات</h1><p class="muted">الأدوار تحدد المسؤوليات، والصلاحيات تحدد ما يمكن تنفيذه.</p></div><button class="button primary" data-action="add-role" data-requires="roles.manage">+ دور جديد</button></div>
+          <div id="roles-content" class="role-grid"></div>
+          <div class="notice">الرتبة والمسمى الوظيفي لا يمنحان صلاحيات تلقائية. صلاحيات المؤسس محمية ولا يمكن تعديلها من حساب آخر.</div>
+        </section>
+
+        <section class="view-panel" id="view-tasks" data-title="المهام">
+          <div class="page-heading"><div><p class="eyebrow">إدارة التنفيذ</p><h1>المهام</h1><p class="muted">توزيع المسؤوليات ومتابعة الإنجاز والمواعيد.</p></div><button class="button primary" data-action="add-task" data-requires="tasks.manage">+ مهمة جديدة</button></div>
+          <div class="toolbar"><select id="task-status"><option value="">كل الحالات</option><option value="new">جديدة</option><option value="in_progress">قيد التنفيذ</option><option value="review">بانتظار المراجعة</option><option value="completed">مكتملة</option><option value="cancelled">ملغاة</option></select><select id="task-priority"><option value="">كل الأولويات</option><option value="urgent">عاجلة</option><option value="high">مرتفعة</option><option value="normal">عادية</option><option value="low">منخفضة</option></select></div>
+          <div id="tasks-list" class="task-list"></div>
+        </section>
+
+        <section class="view-panel" id="view-support" data-title="مركز الدعم">
+          <div class="page-heading"><div><p class="eyebrow">خدمة العملاء</p><h1>مركز الدعم</h1><p class="muted">متابعة محادثات العملاء والرد عليها.</p></div></div>
+          <div id="support-list" class="content-card list-card"></div>
+        </section>
+
+        <section class="view-panel" id="view-disputes" data-title="مركز النزاعات">
+          <div class="page-heading"><div><p class="eyebrow">معالجة النزاعات</p><h1>مركز النزاعات</h1><p class="muted">مراجعة النزاعات والتواصل مع الأطراف وحلها وفق الصلاحيات.</p></div></div>
+          <div class="toolbar"><select id="dispute-status"><option value="">كل الحالات</option><option value="open">مفتوح</option><option value="in_review">قيد المراجعة</option><option value="resolved">تم الحل</option></select></div>
+          <div id="disputes-list" class="content-card list-card"></div>
+        </section>
+
+        <section class="view-panel" id="view-reports" data-title="التقارير">
+          <div class="page-heading"><div><p class="eyebrow">المتابعة والتحليل</p><h1>التقارير</h1><p class="muted">ملخص تشغيلي لأداء الفريق والخدمات الداخلية.</p></div><button class="button secondary" data-action="export-report">تصدير CSV</button></div>
+          <div id="reports-content"></div>
+        </section>
+
+        <section class="view-panel" id="view-activity" data-title="سجل النشاط">
+          <div class="page-heading"><div><p class="eyebrow">الحوكمة والشفافية</p><h1>سجل النشاط</h1><p class="muted">سجل زمني للتغييرات الإدارية والإجراءات الحساسة.</p></div></div>
+          <div id="activity-list" class="content-card list-card"></div>
+        </section>
+
+        <section class="view-panel" id="view-settings" data-title="الإعدادات">
+          <div class="page-heading"><div><p class="eyebrow">إعداد مساحة العمل</p><h1>الإعدادات</h1><p class="muted">إعدادات الجلسة والوصول.</p></div></div>
+          <div class="content-card settings-card"><div><h2>جلسة العمل</h2><p class="muted">تتم إدارة المصادقة عبر Supabase Auth. لا يتم تخزين كلمات المرور في Arownd Console.</p></div><button class="button secondary" id="settings-logout">تسجيل الخروج</button></div>
+        </section>
+        <footer class="page-footer"><span>© 2026 Arownd Console</span><span>مساحة إدارة المنصة الداخلية</span></footer>
+      </div>
+    </main>
+  </div>
+
+  <dialog id="app-dialog" class="app-dialog"><div class="dialog-frame"><header class="dialog-header"><div><p class="eyebrow" id="dialog-eyebrow">Arownd Console</p><h2 id="dialog-title"></h2></div><button class="icon-button" type="button" data-action="close-dialog" aria-label="إغلاق">×</button></header><div id="dialog-content" class="dialog-content"></div></dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

@@ -47,7 +47,7 @@ export default function PersonalSignupScreen() {
   } = useForm<PersonalSignupInput>({
     resolver: zodResolver(personalSignupSchema),
     defaultValues: {
-      fullName: "",
+      username: "",
       email: "",
       password: "",
       confirmPassword: ""
@@ -67,7 +67,13 @@ export default function PersonalSignupScreen() {
           ? translate("configError")
           : error instanceof Error && error.message === "COUNTRY_NOT_SELECTED"
             ? translate("countryRequired")
-            : translate("genericError")
+            : error instanceof Error && error.message === "USERNAME_TAKEN"
+              ? translate("usernameTaken")
+              : error instanceof Error && error.message === "USERNAME_RESERVED"
+                ? translate("usernameReserved")
+                : error instanceof Error && error.message === "USERNAME_INVALID"
+                  ? translate("usernameInvalid")
+                  : translate("genericError")
       );
     }
   });
@@ -99,16 +105,20 @@ export default function PersonalSignupScreen() {
           />
           <Controller
             control={control}
-            name="fullName"
+            name="username"
             render={({ field: { onChange, onBlur, value } }) => (
               <AuthField
-                label={translate("fullName")}
+                autoCapitalize="none"
+                autoCorrect={false}
+                autoComplete="username"
+                textAlign="left"
+                label={translate("username")}
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
-                placeholder={translate("fullNamePlaceholder")}
+                placeholder={translate("usernamePlaceholder")}
                 icon="user"
-                error={errors.fullName ? translate("required") : undefined}
+                error={errors.username ? translate(errors.username.message as "required" | "usernameInvalid" | "usernameReserved") : undefined}
               />
             )}
           />

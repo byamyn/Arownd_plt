@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
-import { Image as NativeImage, Modal, StyleSheet, View } from "react-native";
+import { Image as NativeImage, Modal, Share, StyleSheet, View } from "react-native";
 
 import { designTokens, useAppTheme } from "@/lib/theme";
 import { CustomerMainHeader } from "@/components/customer-main-header";
@@ -16,6 +16,7 @@ import {
   Icon,
   IdentityRow,
   PressableSurface,
+  TextField,
 } from "@/components/ui";
 import { fetchMyDeliveryProfile } from "@/lib/delivery-profile";
 import { removeMyProfileAvatar, uploadMyProfileAvatar } from "@/lib/profile-avatar";
@@ -30,6 +31,7 @@ import { getSupabaseClient } from "@/lib/supabase";
 import { fetchStoreVerificationReviewerAccess } from "@/lib/store-verification";
 import { ProfileAccountSheet, type ProfileAccountSection } from "@/components/profile-account-sheet";
 import { ProfileActivitySheet, type ProfileActivitySection } from "@/components/profile-activity-sheet";
+import { claimMyUsername, setMyProfileVisibility } from "@/lib/username";
 
 export default function ProfileScreen() {
   useLanguage();
@@ -40,6 +42,7 @@ export default function ProfileScreen() {
   const [accountSheet, setAccountSheet] = useState<ProfileAccountSection | null>(null);
   const [activitySheet, setActivitySheet] = useState<ProfileActivitySection | null>(null);
   const [selectedAvatar, setSelectedAvatar] = useState<ImagePicker.ImagePickerAsset | null>(null);
+  const [usernameDraft, setUsernameDraft] = useState("");
   const uploadAvatar = useMutation({
     mutationFn: uploadMyProfileAvatar,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["my-delivery-profile"] })
@@ -47,6 +50,19 @@ export default function ProfileScreen() {
   const removeAvatar = useMutation({
     mutationFn: removeMyProfileAvatar,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["my-delivery-profile"] })
+  });
+  const claimUsername = useMutation({
+    mutationFn: claimMyUsername,
+    onSuccess: async () => {
+      setUsernameDraft("");
+      await queryClient.invalidateQueries({ queryKey: ["my-delivery-profile"] });
+    }
+  });
+  const profileVisibility = useMutation({
+    mutationFn: setMyProfileVisibility,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["my-delivery-profile"] });
+    }
   });
   const chooseAvatar = async () => {
     setAvatarActionsOpen(false);
@@ -224,6 +240,55 @@ export default function ProfileScreen() {
               </View>
             ) : null}
           </Card>
+
+          {profile.data?.username ? (
+            <>
+              <Card contentStyle={styles.identityCard}>
+                <Caption>{translate("usernameLinkLabel")}</Caption>
+                <UiText weight="700">@{profile.data.username}</UiText>
+                <UiText>{"arownd.vercel.app/@" + profile.data.username}</UiText>
+                <Button
+                  label={translate("usernameShareAction")}
+                  onPress={() => void Share.share({ message: "https://arownd.vercel.app/@" + (profile.data?.username ?? "") })}
+                  disabled={!profile.data?.is_public}
+                />
+              </Card>
+              <Card contentStyle={styles.identityCard}>
+                  <UiText weight="700">{translate("profilePublicTitle")}</UiText>
+                  <Caption>{translate("profilePublicHint")}</Caption>
+                  <Caption>{profile.data.is_public ? translate("profilePublicEnabled") : translate("profilePublicDisabled")}</Caption>
+                  <Button
+                    label={profileVisibility.isPending
+                      ? translate("profilePublicSaving")
+                      : translate(profile.data.is_public ? "profilePublicDisable" : "profilePublicEnable")}
+                    onPress={() => profileVisibility.mutate(!profile.data?.is_public)}
+                    disabled={profileVisibility.isPending}
+                  />
+                  {profileVisibility.isError ? <Caption>{translate("profilePublicError")}</Caption> : null}
+              </Card>
+            </>
+          ) : (
+            <Card contentStyle={styles.identityCard}>
+              <UiText weight="700">{translate("usernameClaimTitle")}</UiText>
+              <Caption>{translate("usernameClaimHint")}</Caption>
+              <TextField
+                value={usernameDraft}
+                onChangeText={(value) => setUsernameDraft(value.toLowerCase())}
+                autoCapitalize="none"
+                autoCorrect={false}
+                maxLength={30}
+                placeholder={translate("usernamePlaceholder")}
+                label={translate("username")}
+                error={claimUsername.isError ? translate(claimUsername.error instanceof Error && claimUsername.error.message === "USERNAME_TAKEN" ? "usernameTaken" : claimUsername.error instanceof Error && claimUsername.error.message === "USERNAME_INVALID" ? "usernameInvalid" : claimUsername.error.message === "USERNAME_RESERVED" ? "usernameReserved" : "usernameClaimError") : undefined}
+              />
+              <Button
+                label={claimUsername.isPending ? translate("usernameClaimBusy") : translate("usernameClaimAction")}
+                onPress={() => claimUsername.mutate(usernameDraft)}
+                disabled={claimUsername.isPending || usernameDraft.length < 3}
+                fullWidth
+              />
+            </Card>
+          )}
 
           <View style={styles.statsGrid}>
             <PressableSurface accessibilityRole="button" accessibilityLabel={translate("profileOrders")} onPress={() => setActivitySheet("orders")} style={[styles.statTile, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
