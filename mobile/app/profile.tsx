@@ -348,7 +348,7 @@ export default function ProfileScreen() {
       <BottomSheet
         visible={accountSheet !== null}
         onRequestClose={() => setAccountSheet(null)}
-        title={accountSheet === "delivery" ? translate("deliveryProfileTitle") : accountSheet === "addresses" ? translate("addressesTitle") : translate("inviteTitle")}
+        title={accountSheet === "delivery" ? translate("profileEditAction") : accountSheet === "addresses" ? translate("addressesTitle") : translate("inviteTitle")}
         height="68%"
         maxHeight="94%"
       >
