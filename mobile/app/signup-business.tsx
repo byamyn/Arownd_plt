@@ -68,7 +68,9 @@ export default function BusinessSignupScreen() {
           ? translate("configError")
           : error instanceof Error && error.message === "COUNTRY_NOT_SELECTED"
             ? translate("countryRequired")
-            : translate("genericError")
+            : error instanceof Error && error.message === "USERNAME_TAKEN"
+              ? translate("usernameTaken")
+              : translate("genericError")
       );
     }
   });
