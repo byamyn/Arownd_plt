@@ -259,12 +259,12 @@ export default function ProfileScreen() {
                   <Caption>{profile.data.is_public ? translate("profilePublicEnabled") : translate("profilePublicDisabled")}</Caption>
                   <Button
                     label={profileVisibility.isPending
-                      ? translate("usernameClaimBusy")
+                      ? translate("profilePublicSaving")
                       : translate(profile.data.is_public ? "profilePublicDisable" : "profilePublicEnable")}
                     onPress={() => profileVisibility.mutate(!profile.data?.is_public)}
                     disabled={profileVisibility.isPending}
                   />
-                  {profileVisibility.isError ? <Caption>{translate("usernameClaimError")}</Caption> : null}
+                  {profileVisibility.isError ? <Caption>{translate("profilePublicError")}</Caption> : null}
                 </Card>
               ) : null}
             </>
