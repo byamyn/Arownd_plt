@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { businessSignupSchema, loginSchema, personalSignupSchema, recoverySchema, resetPasswordSchema } from "./auth-validation";
+import { businessSignupSchema, loginSchema, personalSignupSchema, recoverySchema, resetPasswordSchema, usernameSchema } from "./auth-validation";
 
 const credentials = { email: "user@example.com", password: "password123", confirmPassword: "password123" };
 
@@ -13,6 +13,10 @@ describe("auth validation", () => {
   });
   it("normalizes username casing", () => {
     expect(personalSignupSchema.parse({ ...credentials, username: "Arownd.User" }).username).toBe("arownd.user");
+  });
+  it("rejects reserved usernames", () => {
+    expect(usernameSchema.safeParse("admin").success).toBe(false);
+    expect(usernameSchema.safeParse("console").success).toBe(false);
   });
   it("rejects Arabic characters and spaces in usernames", () => {
     for (const username of ["أمين", "arownd user", "ab", "a..b", ".arownd"]) {
