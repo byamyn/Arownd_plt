@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
-import { Image as NativeImage, Modal, Share, StyleSheet, View } from "react-native";
+import { Image as NativeImage, Modal, StyleSheet, View } from "react-native";
 
 import { designTokens, useAppTheme } from "@/lib/theme";
 import { CustomerMainHeader } from "@/components/customer-main-header";
@@ -192,7 +192,6 @@ export default function ProfileScreen() {
   }
 
   const displayName = getProfileDisplayName(profile.data?.full_name, user.data.email);
-  const profileUsername = profile.data?.username;
   const favoriteCount = (favorites.data?.products.length ?? 0) + (favorites.data?.stores.length ?? 0);
 
   return (
