@@ -188,6 +188,7 @@ export default function ProfileScreen() {
   }
 
   const displayName = getProfileDisplayName(profile.data?.full_name, user.data.email);
+  const profileUsername = profile.data?.username;
   const favoriteCount = (favorites.data?.products.length ?? 0) + (favorites.data?.stores.length ?? 0);
 
   return (
@@ -223,8 +224,8 @@ export default function ProfileScreen() {
               >
                 <UiText weight="700" style={{ color: theme.colors.accent, textDecorationLine: "underline" }}>{translate("profileEditAction")}</UiText>
               </PressableSurface>
-              {profile.data?.username && profile.data.is_public ? (
-                <PressableSurface accessibilityRole="button" accessibilityLabel={translate("usernameShareAction")} onPress={() => void Share.share({ title: displayName, message: displayName + "\nhttps://arownd.vercel.app/@" + encodeURIComponent(profile.data.username ?? "") })} style={[styles.identityShareButton, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border }]}>
+              {profileUsername && profile.data?.is_public ? (
+                <PressableSurface accessibilityRole="button" accessibilityLabel={translate("usernameShareAction")} onPress={() => void Share.share({ title: displayName, message: displayName + "\nhttps://arownd.vercel.app/@" + encodeURIComponent(profileUsername) })} style={[styles.identityShareButton, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border }]}>
                   <Icon name="send" size={17} color={theme.colors.foreground} accessibilityHidden />
                 </PressableSurface>
               ) : null}
