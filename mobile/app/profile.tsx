@@ -468,7 +468,7 @@ const styles = StyleSheet.create({
   avatarModalOverlay: { flex: 1, justifyContent: "center", padding: designTokens.spacing.lg },
   avatarPreviewCard: { padding: designTokens.spacing.lg, gap: designTokens.spacing.md, alignItems: "center" },
   avatarPreviewImage: { width: 220, height: 220, borderRadius: 110, backgroundColor: "transparent" },
-  identityRow: { flexDirection: "row" },
+  identityRow: { flex: 1, minWidth: 0, flexDirection: "row" },
   accountLinksCard: { padding: 0 },
   accountLinkRow: { minHeight: 64, flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md, paddingHorizontal: designTokens.spacing.md, paddingVertical: designTokens.spacing.sm },
   accountLinkDivider: { height: StyleSheet.hairlineWidth, marginStart: 42 + designTokens.spacing.md, marginEnd: designTokens.spacing.md },
