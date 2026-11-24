@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { checkoutRequestIdentity, MAX_CHECKOUT_ITEMS, normalizeCheckoutItems } from "@/lib/checkout-state";
+import { checkoutRequestIdentity, isCheckoutAddressRequired, MAX_CHECKOUT_ITEMS, normalizeCheckoutItems } from "@/lib/checkout-state";
 import type { CartItem } from "@/lib/cart-state";
 
 const item = (offerId: string, quantity: number, options: Record<string, string>): CartItem => ({
@@ -99,5 +99,29 @@ describe("checkoutRequestIdentity", () => {
     expect(checkoutRequestIdentity(base)).not.toBe(checkoutRequestIdentity({ ...base, deliveryType: "home" }));
     expect(checkoutRequestIdentity(base)).not.toBe(checkoutRequestIdentity({ ...base, secondaryRegionId: 100 }));
     expect(checkoutRequestIdentity(base)).not.toBe(checkoutRequestIdentity({ ...base, items: [item("offer-1", 2, {})] }));
+  });
+});
+
+describe("store pickup address requirements", () => {
+  it("requires a detailed address for home delivery", () => {
+    expect(isCheckoutAddressRequired("home")).toBe(true);
+  });
+
+  it("does not require a detailed address for store pickup", () => {
+    expect(isCheckoutAddressRequired("desk")).toBe(false);
+  });
+
+  it("keeps the pickup request identity stable with an empty address", () => {
+    const pickup = {
+      items: [item("offer-1", 1, {})],
+      deliveryType: "desk" as const,
+      regionId: 9,
+      secondaryRegionId: 99,
+      commune: "البليدة",
+      addressLine: "",
+      fullName: "أحمد",
+      phone: "+213550000000"
+    };
+    expect(checkoutRequestIdentity(pickup)).toContain('"addressLine":""');
   });
 });

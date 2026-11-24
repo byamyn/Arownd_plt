@@ -29,7 +29,7 @@ import { fetchMyAccountCurrencyCode } from "@/lib/country-service";
 import { fetchMyAddresses, type UserAddress } from "@/lib/user-address";
 import { isValidAddressPhone, normalizeAddressPhone } from "@/lib/user-address-state";
 import { formatOrderCode } from "@/lib/orders-state";
-import { MAX_CHECKOUT_ITEMS } from "@/lib/checkout-state";
+import { isCheckoutAddressRequired, MAX_CHECKOUT_ITEMS } from "@/lib/checkout-state";
 
 type Picker = "region" | "secondary" | null;
 
@@ -216,7 +216,7 @@ export default function CheckoutScreen() {
       setFormError(translate("checkoutAreaInvalid"));
       return;
     }
-    if (!addressLine.trim()) {
+    if (isCheckoutAddressRequired(deliveryType) && !addressLine.trim()) {
       setFormError(translate("checkoutAddressRequired"));
       return;
     }
@@ -227,7 +227,7 @@ export default function CheckoutScreen() {
       regionId,
       secondaryRegionId,
       commune: commune.trim(),
-      addressLine: addressLine.trim(),
+      addressLine: isCheckoutAddressRequired(deliveryType) ? addressLine.trim() : "",
       fullName: fullName.trim(),
       phone: normalizedPhone
     };
@@ -322,7 +322,7 @@ export default function CheckoutScreen() {
           accessibilityRole="radio"
           accessibilityLabel={translate("checkoutStorePickup")}
           accessibilityState={{ selected: deliveryType === "desk" }}
-          onPress={() => setDeliveryType("desk")}
+          onPress={() => { setDeliveryType("desk"); setAddressLine(""); }}
           style={[styles.deliveryOption, deliveryType === "desk" && styles.deliverySelected]}
         >
           <UiText style={[styles.deliveryTitle, deliveryType === "desk" && styles.deliveryTextSelected]}>{translate("checkoutStorePickup")}</UiText>
@@ -346,8 +346,10 @@ export default function CheckoutScreen() {
       <UiText style={styles.fieldLabel}>{translate("checkoutCommune")}</UiText>
       <TextField accessibilityLabel={translate("checkoutCommune")} value={commune} onChangeText={(value) => { setFormEdited(true); setSelectedAddressId(null); setCommune(value); }} placeholder={translate("checkoutCommunePlaceholder")} style={fieldStyle} textAlign="auto" maxLength={100} editable={regionId !== null} />
 
-      <UiText style={styles.fieldLabel}>{translate("checkoutAddress")}</UiText>
-      <TextField accessibilityLabel={translate("checkoutAddress")} value={addressLine} onChangeText={(value) => { setFormEdited(true); setSelectedAddressId(null); setAddressLine(value); }} placeholder={translate("checkoutAddressPlaceholder")} style={[...fieldStyle, styles.multiline]} textAlign="auto" multiline maxLength={300} />
+      {deliveryType === "home" ? <>
+        <UiText style={styles.fieldLabel}>{translate("checkoutAddress")}</UiText>
+        <TextField accessibilityLabel={translate("checkoutAddress")} value={addressLine} onChangeText={(value) => { setFormEdited(true); setSelectedAddressId(null); setAddressLine(value); }} placeholder={translate("checkoutAddressPlaceholder")} style={[...fieldStyle, styles.multiline]} textAlign="auto" multiline maxLength={300} />
+      </> : null}
     </Card>
 
     <CheckoutSummary style={styles.summaryCard}>

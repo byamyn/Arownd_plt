@@ -2,7 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { z } from "zod";
 
 import type { CartItem } from "@/lib/cart-state";
-import { checkoutRequestIdentity, MAX_CHECKOUT_ITEMS, normalizeCheckoutItems } from "@/lib/checkout-state";
+import { checkoutRequestIdentity, isCheckoutAddressRequired, MAX_CHECKOUT_ITEMS, normalizeCheckoutItems } from "@/lib/checkout-state";
 import { fetchMyAccountRegionLevels, fetchMyAccountRegions } from "@/lib/country-regions";
 import { getSupabaseClient } from "@/lib/supabase";
 import { assertActionRateLimit } from "@/lib/action-rate-limit";
@@ -110,7 +110,8 @@ export async function submitCheckout(input: CheckoutInput): Promise<string> {
     throw new Error("invalid_secondary_region");
   }
   if (input.commune.trim().length < 2 || input.commune.trim().length > 100) throw new Error("invalid_commune");
-  if (input.addressLine.trim().length === 0 || input.addressLine.trim().length > 300) throw new Error("invalid_address");
+  if (isCheckoutAddressRequired(input.deliveryType) && input.addressLine.trim().length === 0) throw new Error("invalid_address");
+  if (input.addressLine.trim().length > 300) throw new Error("invalid_address");
   if (input.fullName.trim().length < 2 || input.fullName.trim().length > 120) throw new Error("invalid_full_name");
   if (!/^\+[1-9]\d{7,14}$/.test(input.phone.trim())) throw new Error("invalid_phone");
 
