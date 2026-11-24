@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#FAF9F5">
+  <meta name="description" content="اكتشف منتجات المتجر وأسعاره على Arownd.">
+  <meta property="og:title" content="المتجر — Arownd">
+  <meta property="og:description" content="تصفح منتجات المتجر المتاحة على Arownd.">
+  <meta property="og:type" content="website">
+  <title>المتجر — Arownd</title>
+  <link rel="icon" href="/arownd-app-icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/store.css">
+  <script src="/config.js"></script>
+  <script src="/store.js" defer></script>
+</head>
+<body>
+  <header class="header">
+    <a class="brand" href="/" aria-label="Arownd الرئيسية"><img src="/arownd-logo.svg" alt="Arownd"></a>
+    <a class="home-link" href="/">اكتشف Arownd</a>
+  </header>
+  <main class="main">
+    <section id="store-state" class="state-card" aria-live="polite">
+      <span class="loader" aria-hidden="true"></span>
+      <p>جارٍ تحميل المتجر…</p>
+    </section>
+    <div id="store-content" class="store-content hidden">
+      <section class="store-hero">
+        <div class="cover-wrap"><img id="store-cover" alt="" class="cover hidden"></div>
+        <div class="store-summary">
+          <div class="store-identity">
+            <div class="logo-wrap"><img id="store-logo" alt="" class="store-logo hidden"><span id="store-mark" class="store-mark">A</span></div>
+            <div class="store-title-wrap">
+              <div class="store-title-line"><h1 id="store-name"></h1><span id="verified" class="verified hidden">موثّق</span></div>
+              <p id="store-location" class="store-location hidden"></p>
+            </div>
+          </div>
+          <p id="store-description" class="store-description hidden"></p>
+          <div class="store-actions">
+            <a id="whatsapp-link" class="action primary hidden" target="_blank" rel="noopener noreferrer">تواصل عبر واتساب</a>
+            <a id="phone-link" class="action secondary hidden">اتصال</a>
+            <a id="map-link" class="action secondary hidden" target="_blank" rel="noopener noreferrer">الموقع</a>
+            <button id="share-store" class="action secondary" type="button">مشاركة المتجر</button>
+          </div>
+        </div>
+        <div id="store-meta" class="store-meta hidden">
+          <span id="hours"></span>
+          <span id="rating" class="hidden"></span>
+          <a id="website-link" class="hidden" target="_blank" rel="noopener noreferrer">الموقع الإلكتروني</a>
+        </div>
+      </section>
+      <section class="catalog">
+        <div class="catalog-heading">
+          <div><p class="eyebrow">CATALOG</p><h2>المنتجات المتاحة</h2></div>
+          <span id="product-count" class="product-count"></span>
+        </div>
+        <div id="products-grid" class="products-grid"></div>
+        <div id="empty-products" class="empty-products hidden">
+          <span class="empty-mark">A</span>
+          <h3>لا توجد منتجات متاحة حالياً</h3>
+          <p>لم يضف المتجر منتجات متاحة للشراء بعد.</p>
+        </div>
+      </section>
+      <section id="social-links" class="social-links hidden" aria-label="روابط المتجر"></section>
+    </div>
+  </main>
+  <footer>© <span id="year"></span> Arownd. جميع الحقوق محفوظة.</footer>
+</body>
+</html>
