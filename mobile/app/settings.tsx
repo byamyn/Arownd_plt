@@ -27,6 +27,8 @@ import { getSupabaseClient } from "@/lib/supabase";
 import { getSavedAccountsSnapshot, removeSavedAccount, saveCurrentAccountSession, switchToSavedAccount } from "@/lib/saved-accounts";
 import { unregisterCurrentPushDevice } from "@/lib/push-notifications";
 import { BROWSING_CURRENCY_QUERY_KEY, fetchCountries, fetchMyBrowsingCountryCode, updateBrowsingCountryCode, type Country } from "@/lib/country-service";
+import { fetchMyDeliveryProfile } from "@/lib/delivery-profile";
+import { setMyProfileVisibility } from "@/lib/username";
 
 type SettingsSheet = "password" | "appearance" | "language" | "country" | "accounts" | null;
 
@@ -55,6 +57,8 @@ export default function SettingsScreen() {
 
   const countries = useQuery({ queryKey: ["available-countries"], queryFn: ({ signal }) => fetchCountries(signal), enabled: activeSheet === "country" });
   const browsingCountry = useQuery({ queryKey: ["browsing-country"], queryFn: ({ signal }) => fetchMyBrowsingCountryCode(signal) });
+  const profileVisibility = useQuery({ queryKey: ["my-delivery-profile"], queryFn: ({ signal }) => fetchMyDeliveryProfile(signal), retry: false });
+  const profileVisibilityMutation = useMutation({ mutationFn: setMyProfileVisibility, onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: ["my-delivery-profile"] }); } });
   const savedAccounts = useQuery({
     queryKey: ["saved-accounts"],
     queryFn: getSavedAccountsSnapshot,
@@ -244,8 +248,17 @@ export default function SettingsScreen() {
             onPress={() => openSheet("password")}
             theme={theme}
             styles={styles}
+          />
+          <SettingsRow
+            icon="eye"
+            label={translate("profilePublicTitle") + " · " + (profileVisibility.isPending ? translate("profileVisibilityLoading") : profileVisibility.data?.is_public ? translate("profilePublicEnabled") : translate("profilePublicDisabled"))}
+            onPress={() => { if (profileVisibility.data && !profileVisibilityMutation.isPending) profileVisibilityMutation.mutate(!profileVisibility.data.is_public); }}
+            theme={theme}
+            styles={styles}
+            disabled={profileVisibility.isPending || !profileVisibility.data || profileVisibilityMutation.isPending}
             last
           />
+          {profileVisibilityMutation.isError || profileVisibility.isError ? <Caption>{translate("profilePublicError")}</Caption> : null}
         </Card>
       </View>
 
@@ -561,7 +574,8 @@ function SettingsRow({
   onPress,
   theme,
   styles,
-  last = false
+  last = false,
+  disabled = false
 }: {
   icon: IconName;
   label: string;
@@ -569,11 +583,13 @@ function SettingsRow({
   theme: AppTheme;
   styles: ReturnType<typeof createStyles>;
   last?: boolean;
+  disabled?: boolean;
 }) {
   return (
     <PressableSurface
       accessibilityRole="button"
       accessibilityLabel={label}
+      disabled={disabled}
       onPress={onPress}
       style={[styles.linkRow, last ? undefined : { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.border }]}
     >
