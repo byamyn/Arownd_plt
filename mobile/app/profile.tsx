@@ -252,7 +252,7 @@ export default function ProfileScreen() {
                 maxLength={30}
                 placeholder={translate("usernamePlaceholder")}
                 label={translate("username")}
-                error={claimUsername.isError ? translate(claimUsername.error instanceof Error && claimUsername.error.message === "USERNAME_TAKEN" ? "usernameTaken" : claimUsername.error instanceof Error && claimUsername.error.message === "USERNAME_INVALID" ? "usernameInvalid" : "usernameClaimError") : undefined}
+                error={claimUsername.isError ? translate(claimUsername.error instanceof Error && claimUsername.error.message === "USERNAME_TAKEN" ? "usernameTaken" : claimUsername.error instanceof Error && claimUsername.error.message === "USERNAME_INVALID" ? "usernameInvalid" : claimUsername.error.message === "USERNAME_RESERVED" ? "usernameReserved" : "usernameClaimError") : undefined}
               />
               <Button
                 label={claimUsername.isPending ? translate("usernameClaimBusy") : translate("usernameClaimAction")}
