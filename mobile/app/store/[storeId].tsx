@@ -133,7 +133,7 @@ export default function StoreDetailsScreen() {
         title=""
         leading={<IconButton accessibilityLabel={translate("back")} onPress={() => router.back()} icon={<Icon name="arrow-right" color={theme.colors.foreground} size={20} />} variant="ghost" />}
         trailing={<>
-          <IconButton accessibilityLabel={translate("storeShare")} onPress={() => { if (details.slug) void Share.share({ title: details.name, message: details.name + " على Arownd\nhttps://arownd.vercel.app/store/" + encodeURIComponent(details.slug) }); }} icon={<Icon name="send" color={theme.colors.foreground} size={19} />} />
+          <IconButton accessibilityLabel={translate("storeShare")} disabled={!details.slug} onPress={() => { if (details.slug) void Share.share({ title: details.name, message: translate("storeSharePrefix") + " " + details.name + "\nhttps://arownd.vercel.app/store/" + encodeURIComponent(details.slug) }); }} icon={<Icon name="send" color={theme.colors.foreground} size={19} />} />
           <FavoriteButton kind="stores" id={storeId} iconOnly />
         </>}
         style={[styles.stickyStoreHeader, { backgroundColor: theme.colors.background }]}
