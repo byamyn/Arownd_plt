@@ -246,13 +246,13 @@ export default function ProfileScreen() {
               <Caption>{translate("usernameClaimHint")}</Caption>
               <TextField
                 value={usernameDraft}
-                onChangeText={(value) => setUsernameDraft(value.toLowerCase().replace(/[^a-z0-9._-]/g, ""))}
+                onChangeText={(value) => setUsernameDraft(value.toLowerCase())}
                 autoCapitalize="none"
                 autoCorrect={false}
                 maxLength={30}
                 placeholder={translate("usernamePlaceholder")}
                 label={translate("username")}
-                error={claimUsername.isError ? translate("usernameClaimError") : undefined}
+                error={claimUsername.isError ? translate(claimUsername.error instanceof Error && claimUsername.error.message === "USERNAME_TAKEN" ? "usernameTaken" : claimUsername.error instanceof Error && claimUsername.error.message === "USERNAME_INVALID" ? "usernameInvalid" : "usernameClaimError") : undefined}
               />
               <Button
                 label={claimUsername.isPending ? translate("usernameClaimBusy") : translate("usernameClaimAction")}
