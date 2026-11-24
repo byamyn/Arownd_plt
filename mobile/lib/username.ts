@@ -16,3 +16,10 @@ export async function claimMyUsername(value: string): Promise<void> {
     throw error;
   }
 }
+
+export async function setMyProfileVisibility(isPublic: boolean): Promise<void> {
+  const { error } = await getSupabaseClient().rpc("set_my_profile_visibility", {
+    _is_public: isPublic
+  });
+  if (error) throw error;
+}
