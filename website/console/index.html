@@ -43,25 +43,25 @@
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-head">
         <a class="brand" href="#dashboard"><img src="../arownd-logo.svg" alt="Arownd"><span></span><b>CONSOLE</b></a>
-        <button class="icon-button mobile-only" id="sidebar-close" aria-label="إغلاق القائمة">×</button>
+        <button class="icon-button mobile-only" id="sidebar-close" aria-label="إغلاق القائمة"><svg aria-hidden="true"><use href="../icons.svg#x"/></svg></button>
       </div>
       <div class="workspace"><span class="workspace-mark">A</span><span><b>Arownd Platform</b><small>مساحة الإدارة الداخلية</small></span></div>
       <nav id="main-nav" class="main-nav" aria-label="القائمة الرئيسية">
         <p class="nav-label">مساحة العمل</p>
-        <button class="nav-item active" data-view="dashboard" data-permission="dashboard.view"><i>▦</i>لوحة القيادة</button>
-        <button class="nav-item" data-view="employees" data-permission="employees.view"><i>♙</i>الموظفون</button>
-        <button class="nav-item" data-view="organization" data-permission="org.view"><i>⌘</i>الهيكل التنظيمي</button>
-        <button class="nav-item" data-view="roles" data-permission="roles.view"><i>◇</i>الأدوار والصلاحيات</button>
-        <button class="nav-item" data-view="tasks" data-permission="tasks.view"><i>☷</i>المهام</button>
+        <button class="nav-item active" data-view="dashboard" data-permission="dashboard.view"><i><svg aria-hidden="true"><use href="../icons.svg#layout-grid"/></svg></i>لوحة القيادة</button>
+        <button class="nav-item" data-view="employees" data-permission="employees.view"><i><svg aria-hidden="true"><use href="../icons.svg#users"/></svg></i>الموظفون</button>
+        <button class="nav-item" data-view="organization" data-permission="org.view"><i><svg aria-hidden="true"><use href="../icons.svg#network"/></svg></i>الهيكل التنظيمي</button>
+        <button class="nav-item" data-view="roles" data-permission="roles.view"><i><svg aria-hidden="true"><use href="../icons.svg#shield-check"/></svg></i>الأدوار والصلاحيات</button>
+        <button class="nav-item" data-view="tasks" data-permission="tasks.view"><i><svg aria-hidden="true"><use href="../icons.svg#list-checks"/></svg></i>المهام</button>
         <p class="nav-label spaced">خدمة المنصة</p>
-        <button class="nav-item" data-view="support" data-permission="support.view"><i>◌</i>مركز الدعم</button>
-        <button class="nav-item" data-view="disputes" data-permission="disputes.view"><i>△</i>مركز النزاعات</button>
+        <button class="nav-item" data-view="support" data-permission="support.view"><i><svg aria-hidden="true"><use href="../icons.svg#message-circle"/></svg></i>مركز الدعم</button>
+        <button class="nav-item" data-view="disputes" data-permission="disputes.view"><i><svg aria-hidden="true"><use href="../icons.svg#triangle-alert"/></svg></i>مركز النزاعات</button>
         <p class="nav-label spaced">المتابعة والحوكمة</p>
-        <button class="nav-item" data-view="reports" data-permission="reports.view"><i>⌁</i>التقارير</button>
-        <button class="nav-item" data-view="activity" data-permission="audit.view"><i>◷</i>سجل النشاط</button>
+        <button class="nav-item" data-view="reports" data-permission="reports.view"><i><svg aria-hidden="true"><use href="../icons.svg#chart-no-axes-combined"/></svg></i>التقارير</button>
+        <button class="nav-item" data-view="activity" data-permission="audit.view"><i><svg aria-hidden="true"><use href="../icons.svg#clock"/></svg></i>سجل النشاط</button>
       </nav>
       <div class="sidebar-bottom">
-        <button class="nav-item" data-view="settings" data-permission="settings.view"><i>⚙</i>الإعدادات</button>
+        <button class="nav-item" data-view="settings" data-permission="settings.view"><i><svg aria-hidden="true"><use href="../icons.svg#settings"/></svg></i>الإعدادات</button>
         <div class="private-note"><span></span>مساحة داخلية خاصة</div>
       </div>
     </aside>
@@ -69,11 +69,11 @@
     <main class="main-area">
       <header class="topbar">
         <div class="topbar-start">
-          <button class="icon-button mobile-only" id="mobile-menu" aria-label="فتح القائمة">☰</button>
+          <button class="icon-button mobile-only" id="mobile-menu" aria-label="فتح القائمة"><svg aria-hidden="true"><use href="../icons.svg#menu"/></svg></button>
           <div class="breadcrumb"><span>Arownd Console</span><b>›</b><strong id="breadcrumb-current">لوحة القيادة</strong></div>
         </div>
         <div class="topbar-actions">
-          <label class="search-box"><span>⌕</span><input id="global-search" type="search" placeholder="ابحث في هذه الصفحة"></label>
+          <label class="search-box"><span><svg aria-hidden="true"><use href="../icons.svg#search"/></svg></span><input id="global-search" type="search" placeholder="ابحث في هذه الصفحة"></label>
           <div class="account-menu"><span id="user-avatar" class="avatar">A</span><span><b id="user-name">موظف Arownd</b><small id="user-role">فريق المنصة</small></span><button id="logout-button" class="text-button">خروج</button></div>
         </div>
       </header>
