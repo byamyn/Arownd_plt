@@ -252,8 +252,7 @@ export default function ProfileScreen() {
                   onPress={() => void Share.share({ message: "https://arownd.vercel.app/@" + profile.data.username })}
                 />
               </Card>
-              {profile.data.account_type === "personal" || profile.data.account_type === "merchant" ? (
-                <Card contentStyle={styles.identityCard}>
+              <Card contentStyle={styles.identityCard}>
                   <UiText weight="700">{translate("profilePublicTitle")}</UiText>
                   <Caption>{translate("profilePublicHint")}</Caption>
                   <Caption>{profile.data.is_public ? translate("profilePublicEnabled") : translate("profilePublicDisabled")}</Caption>
@@ -265,8 +264,7 @@ export default function ProfileScreen() {
                     disabled={profileVisibility.isPending}
                   />
                   {profileVisibility.isError ? <Caption>{translate("profilePublicError")}</Caption> : null}
-                </Card>
-              ) : null}
+              </Card>
             </>
           ) : (
             <Card contentStyle={styles.identityCard}>
