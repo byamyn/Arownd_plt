@@ -36,6 +36,8 @@ async function submitSignup(input: {
     if (message.includes("profiles_username_lower_uidx") || message.includes("username_taken") || message.includes("duplicate key")) {
       throw new Error("USERNAME_TAKEN");
     }
+    if (message.includes("username_reserved")) throw new Error("USERNAME_RESERVED");
+    if (message.includes("username_invalid")) throw new Error("USERNAME_INVALID");
     throw error;
   }
   return { user: data.user, session: data.session };
