@@ -253,27 +253,43 @@ begin
       raise exception 'invalid_account_type';
   end case;
 
-  requested_username := lower(btrim(coalesce(new.raw_user_meta_data ->> 'username', '')));
+  requested_username := nullif(
+    lower(btrim(coalesce(new.raw_user_meta_data ->> 'username', ''))),
+    ''
+  );
 
-  if char_length(requested_username) not between 3 and 30
-     or requested_username !~ '^[a-z0-9]+([._-][a-z0-9]+)*$' then
-    raise exception 'username_invalid';
-  end if;
+  -- Backward compatibility: older mobile releases send full_name but do not
+  -- know about username yet. Keep those signups working and let the user claim
+  -- an immutable Latin username later from the profile screen.
+  if requested_username is not null then
+    if char_length(requested_username) not between 3 and 30
+       or requested_username !~ '^[a-z0-9]+([._-][a-z0-9]+)*$' then
+      raise exception 'username_invalid';
+    end if;
 
-  if requested_username in (
-    'admin', 'administrator', 'api', 'auth', 'console', 'help',
-    'login', 'logout', 'profile', 'register', 'settings', 'signup',
-    'support', 'store', 'stores', 'www', 'null'
-  ) then
-    raise exception 'username_reserved';
+    if requested_username in (
+      'admin', 'administrator', 'api', 'auth', 'console', 'help',
+      'login', 'logout', 'profile', 'register', 'settings', 'signup',
+      'support', 'store', 'stores', 'www', 'null'
+    ) then
+      raise exception 'username_reserved';
+    end if;
   end if;
 
   insert into public.profiles (
     user_id, username, full_name, account_type, country_code, browsing_country_code
   )
   values (
-    new.id, requested_username, requested_username, requested_account_type,
-    requested_country_code, requested_country_code
+    new.id,
+    requested_username,
+    coalesce(
+      requested_username,
+      nullif(btrim(new.raw_user_meta_data ->> 'full_name'), ''),
+      nullif(btrim(new.raw_user_meta_data ->> 'name'), '')
+    ),
+    requested_account_type,
+    requested_country_code,
+    requested_country_code
   );
 
   insert into public.user_roles (user_id, role)
