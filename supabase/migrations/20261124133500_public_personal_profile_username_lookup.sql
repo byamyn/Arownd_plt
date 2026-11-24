@@ -1,6 +1,5 @@
--- Public profile visibility is independent from a merchant store's visibility.
--- Personal and merchant accounts may publish a personal profile independently
--- from the merchant store's visibility.
+-- Personal profile visibility is independent from merchant store visibility.
+-- Personal and merchant accounts may publish their personal profile.
 create or replace function private.sync_public_personal_profile()
 returns trigger
 language plpgsql
@@ -44,6 +43,10 @@ $function$;
 
 revoke all on function private.sync_public_personal_profile()
   from public, anon, authenticated;
+
+create index if not exists public_personal_profiles_username_idx
+  on private.public_personal_profiles (username)
+  where username is not null;
 
 -- Backfill only profiles that have explicitly enabled public visibility.
 insert into private.public_personal_profiles (
