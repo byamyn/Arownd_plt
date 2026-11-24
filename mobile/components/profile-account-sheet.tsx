@@ -120,8 +120,11 @@ function DeliveryContent({ onManageAvatar }: { onManageAvatar: (() => void) | un
       {onManageAvatar ? <Button label={translate("profileAvatarChange")} size="sm" variant="outline" onPress={onManageAvatar} /> : null}
     </View>
     <Caption>{translate("deliveryProfileSubtitle")}</Caption>
-    <FormLabel>{translate("fullNamePlaceholder")}</FormLabel>
-    <TextField value={fullName} onChangeText={setFullName} placeholder={translate("fullNamePlaceholder")} maxLength={120} />
+    <View style={{ gap: 4 }}>
+      <FormLabel>{translate("fullNamePlaceholder")}</FormLabel>
+      <UiText weight="600">{fullName || "—"}</UiText>
+      <Caption>{profile.data?.username ? `@${profile.data.username}` : ""}</Caption>
+    </View>
     <FormLabel>{translate("checkoutPhonePlaceholder")}</FormLabel>
     <TextField value={phone} onChangeText={setPhone} placeholder={translate("checkoutPhonePlaceholder")} keyboardType="phone-pad" />
     <FormLabel>{getRegionLevelDisplayName(regions.data.selectedLevel, language)}</FormLabel>
