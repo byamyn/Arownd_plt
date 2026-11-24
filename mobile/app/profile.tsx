@@ -230,7 +230,7 @@ export default function ProfileScreen() {
                 <UiText weight="700" style={{ color: theme.colors.accent, textDecorationLine: "underline" }}>{translate("profileEditAction")}</UiText>
               </PressableSurface>
               {profile.data?.username && profile.data.is_public ? (
-                <PressableSurface accessibilityRole="button" accessibilityLabel={translate("usernameShareAction")} onPress={() => void Share.share({ title: displayName, message: displayName + " على Arownd\nhttps://arownd.vercel.app/@" + encodeURIComponent(profile.data.username ?? "") })} style={[styles.identityShareButton, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border }]}>
+                <PressableSurface accessibilityRole="button" accessibilityLabel={translate("usernameShareAction")} onPress={() => void Share.share({ title: displayName, message: displayName + "\nhttps://arownd.vercel.app/@" + encodeURIComponent(profile.data.username ?? "") })} style={[styles.identityShareButton, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border }]}>
                   <Icon name="send" size={17} color={theme.colors.foreground} accessibilityHidden />
                 </PressableSurface>
               ) : null}
