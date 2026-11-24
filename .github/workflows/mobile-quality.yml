@@ -8,6 +8,7 @@ on:
       - Arownd-native-v2
       - cleanup/remove-legacy-web
       - feature/account-username
+      - fix/store-pickup-no-street-address
     paths:
       - "mobile/**"
       - ".github/workflows/mobile-quality.yml"

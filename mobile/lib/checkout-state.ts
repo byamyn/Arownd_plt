@@ -2,6 +2,10 @@ import { normalizeCartOptions, type CartItem } from "@/lib/cart-state";
 
 export const MAX_CHECKOUT_ITEMS = 30;
 
+export function isStreetAddressRequired(deliveryType: "home" | "desk"): boolean {
+  return deliveryType === "home";
+}
+
 export type CheckoutIdentityInput = {
   items: CartItem[];
   deliveryType: "home" | "desk";
@@ -40,7 +44,7 @@ export function checkoutRequestIdentity(input: CheckoutIdentityInput): string {
     regionId: input.regionId,
     secondaryRegionId: input.secondaryRegionId,
     commune: input.commune.trim(),
-    addressLine: input.addressLine.trim(),
+    addressLine: input.deliveryType === "home" ? input.addressLine.trim() : "",
     fullName: input.fullName.trim(),
     phone: input.phone.trim(),
     paymentMethod: "cod"

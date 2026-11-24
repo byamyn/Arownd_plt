@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { checkoutRequestIdentity, MAX_CHECKOUT_ITEMS, normalizeCheckoutItems } from "@/lib/checkout-state";
+import { checkoutRequestIdentity, isStreetAddressRequired, MAX_CHECKOUT_ITEMS, normalizeCheckoutItems } from "@/lib/checkout-state";
 import type { CartItem } from "@/lib/cart-state";
 
 const item = (offerId: string, quantity: number, options: Record<string, string>): CartItem => ({
@@ -99,5 +99,47 @@ describe("checkoutRequestIdentity", () => {
     expect(checkoutRequestIdentity(base)).not.toBe(checkoutRequestIdentity({ ...base, deliveryType: "home" }));
     expect(checkoutRequestIdentity(base)).not.toBe(checkoutRequestIdentity({ ...base, secondaryRegionId: 100 }));
     expect(checkoutRequestIdentity(base)).not.toBe(checkoutRequestIdentity({ ...base, items: [item("offer-1", 2, {})] }));
+  });
+});
+
+
+describe("store pickup address requirements", () => {
+  it("requires a street address for home delivery only", () => {
+    expect(isStreetAddressRequired("home")).toBe(true);
+    expect(isStreetAddressRequired("desk")).toBe(false);
+  });
+
+  it("keeps the street address in a home-delivery idempotency identity", () => {
+    const base = {
+      items: [item("offer-1", 1, {})],
+      deliveryType: "home" as const,
+      regionId: 9,
+      secondaryRegionId: 99,
+      commune: "البليدة",
+      addressLine: "شارع 1",
+      fullName: "أحمد",
+      phone: "+213550000000"
+    };
+    expect(checkoutRequestIdentity(base)).not.toBe(checkoutRequestIdentity({
+      ...base,
+      addressLine: "شارع 2"
+    }));
+  });
+
+  it("ignores a retained home address when building a store-pickup idempotency identity", () => {
+    const base = {
+      items: [item("offer-1", 1, {})],
+      deliveryType: "desk" as const,
+      regionId: 9,
+      secondaryRegionId: 99,
+      commune: "البليدة",
+      addressLine: "",
+      fullName: "أحمد",
+      phone: "+213550000000"
+    };
+    expect(checkoutRequestIdentity(base)).toBe(checkoutRequestIdentity({
+      ...base,
+      addressLine: "عنوان المنزل المحفوظ"
+    }));
   });
 });
