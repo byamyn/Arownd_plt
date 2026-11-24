@@ -31,7 +31,12 @@
     image.alt = alt || "";
   };
   const formatPrice = (value) => new Intl.NumberFormat("fr-DZ", { maximumFractionDigits: 0 }).format(Number(value) || 0);
-  const slugFromUrl = () => new URLSearchParams(location.search).get("slug") || "";
+  const slugFromUrl = () => {
+    const querySlug = new URLSearchParams(location.search).get("slug");
+    if (querySlug) return querySlug;
+    const match = location.pathname.match(/^\\/store\\/([^/]+)\\/?$/i);
+    return match ? decodeURIComponent(match[1]) : "";
+  };
   const normalizePhone = (value) => String(value || "").replace(/[^+\d]/g, "");
   const appendSocial = (container, label, value) => {
     const href = safeHttpsUrl(value);
