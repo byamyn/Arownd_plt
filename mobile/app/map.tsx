@@ -52,7 +52,7 @@ const REROUTE_COOLDOWN_MS = 15_000;
 
 // Approximate country centers used for the initial browsing-market map view.
 const BROWSING_COUNTRY_CENTERS: Record<string, RoutePoint> = {
-  DZ: { longitude: 2.6, latitude: 28.0 },
+  DZ: { longitude: 3.05, latitude: 36.75 },
   AE: { longitude: 54.0, latitude: 24.0 },
   SA: { longitude: 45.0, latitude: 24.0 },
   MA: { longitude: -7.0, latitude: 31.8 },
@@ -136,7 +136,7 @@ export default function MapScreen() {
     appliedBrowsingCountryRef.current = browsingCountry.data;
     cameraRef.current?.easeTo({
       center: [center.longitude, center.latitude],
-      zoom: 4.5,
+      zoom: browsingCountry.data === "DZ" ? 8.5 : 4.5,
       duration: 500
     });
   }, [isMapLoaded, browsingCountry.data]);
@@ -498,8 +498,8 @@ export default function MapScreen() {
                 }
               : {
                   initialViewState: {
-                    center: [2.6, 28.0] as [number, number],
-                    zoom: 4.5,
+                    center: [BROWSING_COUNTRY_CENTERS[browsingCountry.data ?? "DZ"]?.longitude ?? 3.05, BROWSING_COUNTRY_CENTERS[browsingCountry.data ?? "DZ"]?.latitude ?? 36.75] as [number, number],
+                    zoom: browsingCountry.data === "DZ" || !browsingCountry.data ? 8.5 : 4.5,
                     pitch: 0,
                     bearing: 0
                   }
