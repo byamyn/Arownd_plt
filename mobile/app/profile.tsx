@@ -20,7 +20,7 @@ import {
 } from "@/components/ui";
 import { fetchMyDeliveryProfile } from "@/lib/delivery-profile";
 import { fetchCheckoutRegions } from "@/lib/checkout";
-import { getRegionDisplayName, getRegionLevelDisplayName } from "@/lib/country-regions";
+import { getRegionDisplayName } from "@/lib/country-regions";
 import { removeMyProfileAvatar, uploadMyProfileAvatar } from "@/lib/profile-avatar";
 import { getFavorites } from "@/lib/favorites";
 import { translate, useLanguage } from "@/lib/i18n";
@@ -195,12 +195,12 @@ export default function ProfileScreen() {
   const favoriteCount = (favorites.data?.products.length ?? 0) + (favorites.data?.stores.length ?? 0);
   const profileArea = [
     profileRegions.data?.regions.find((item) => item.id === profile.data?.region_id)
-      ? `${getRegionLevelDisplayName(profileRegions.data.selectedLevel, language)}: ${getRegionDisplayName(profileRegions.data.regions.find((item) => item.id === profile.data?.region_id)!, language)}`
+      ? getRegionDisplayName(profileRegions.data.regions.find((item) => item.id === profile.data?.region_id)!, language)
       : null,
     profileSecondaryRegion.data?.regions.find((item) => item.id === profile.data?.secondary_region_id)
-      ? `${getRegionLevelDisplayName(profileSecondaryRegion.data.selectedLevel, language)}: ${getRegionDisplayName(profileSecondaryRegion.data.regions.find((item) => item.id === profile.data?.secondary_region_id)!, language)}`
+      ? getRegionDisplayName(profileSecondaryRegion.data.regions.find((item) => item.id === profile.data?.secondary_region_id)!, language)
       : null,
-    profile.data?.commune ? `${translate("checkoutCommune")}: ${profile.data.commune}` : null
+    profile.data?.commune || null
   ].filter((value): value is string => Boolean(value)).join("، ");
 
   return (
@@ -240,10 +240,20 @@ export default function ProfileScreen() {
             {avatarPickerError || uploadAvatar.isError || removeAvatar.isError ? (
               <Caption>{translate("profileAvatarError")}</Caption>
             ) : null}
-            {profile.data?.phone ? (
-              <View style={[styles.phoneRow, { borderTopColor: theme.colors.border }]}>
-                <Caption>{profile.data.phone}</Caption>
-                <Icon name="phone" size={16} />
+            {profile.data?.phone || profileArea ? (
+              <View style={[styles.phoneRow, { borderTopColor: theme.colors.border, flexWrap: "wrap", rowGap: designTokens.spacing.xs }]}>
+                {profile.data?.phone ? (
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: designTokens.spacing.xs }}>
+                    <Icon name="phone" size={16} />
+                    <Caption>{profile.data.phone}</Caption>
+                  </View>
+                ) : null}
+                {profileArea ? (
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: designTokens.spacing.xs, flexShrink: 1 }}>
+                    <Icon name="map-pin" size={16} color={theme.colors.accent} />
+                    <Caption>{profileArea}</Caption>
+                  </View>
+                ) : null}
               </View>
             ) : null}
           </Card>
