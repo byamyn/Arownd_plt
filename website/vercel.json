@@ -6,6 +6,10 @@
     {
       "source": "/@:username",
       "destination": "/profile.html?username=:username"
+    },
+    {
+      "source": "/store/:slug",
+      "destination": "/store.html?slug=:slug"
     }
   ]
 }
