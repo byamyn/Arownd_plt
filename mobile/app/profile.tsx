@@ -19,6 +19,8 @@ import {
   TextField,
 } from "@/components/ui";
 import { fetchMyDeliveryProfile } from "@/lib/delivery-profile";
+import { fetchCheckoutRegions } from "@/lib/checkout";
+import { getRegionDisplayName } from "@/lib/country-regions";
 import { removeMyProfileAvatar, uploadMyProfileAvatar } from "@/lib/profile-avatar";
 import { getFavorites } from "@/lib/favorites";
 import { translate, useLanguage } from "@/lib/i18n";
@@ -34,7 +36,7 @@ import { ProfileActivitySheet, type ProfileActivitySection } from "@/components/
 import { claimMyUsername } from "@/lib/username";
 
 export default function ProfileScreen() {
-  useLanguage();
+  const { language } = useLanguage();
   const theme = useAppTheme();
   const queryClient = useQueryClient();
   const [avatarPickerError, setAvatarPickerError] = useState(false);
@@ -112,6 +114,8 @@ export default function ProfileScreen() {
     queryFn: ({ signal }) => fetchMyDeliveryProfile(signal),
     enabled: Boolean(user.data)
   });
+  const profileRegions = useQuery({ queryKey: ["checkout-regions"], queryFn: ({ signal }) => fetchCheckoutRegions(undefined, signal), enabled: Boolean(user.data), staleTime: Infinity });
+  const profileSecondaryRegion = useQuery({ queryKey: ["checkout-regions", profile.data?.region_id], queryFn: ({ signal }) => fetchCheckoutRegions(profile.data?.region_id, signal), enabled: Boolean(user.data && profile.data?.region_id), staleTime: Infinity });
   const verificationReviewer = useQuery({
     queryKey: ["store-verification-reviewer"],
     queryFn: ({ signal }) => fetchStoreVerificationReviewerAccess(signal),
