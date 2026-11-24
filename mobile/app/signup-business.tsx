@@ -47,7 +47,7 @@ export default function BusinessSignupScreen() {
   } = useForm<BusinessSignupInput>({
     resolver: zodResolver(businessSignupSchema),
     defaultValues: {
-      fullName: "",
+      username: "",
       businessName: "",
       email: "",
       password: "",
@@ -100,16 +100,16 @@ export default function BusinessSignupScreen() {
           />
           <Controller
             control={control}
-            name="fullName"
+            name="username"
             render={({ field: { onChange, onBlur, value } }) => (
               <AuthField
-                label={translate("fullName")}
+                label={translate("username")}
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
-                placeholder={translate("fullNamePlaceholder")}
+                placeholder={translate("usernamePlaceholder")}
                 icon="user"
-                error={errors.fullName ? translate("required") : undefined}
+                error={errors.username ? translate(errors.username.message as "required" | "usernameInvalid") : undefined}
               />
             )}
           />
