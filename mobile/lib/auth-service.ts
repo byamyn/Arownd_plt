@@ -51,6 +51,9 @@ export async function signIn(input: LoginInput): Promise<void> {
 
 export async function signUpPersonal(input: PersonalSignupInput): Promise<boolean> {
   assertActionRateLimit("auth:sign-up", 10_000);
+  const { data: usernameAvailable, error: usernameError } = await getSupabaseClient().rpc("is_username_available", { _username: input.username });
+  if (usernameError) throw usernameError;
+  if (usernameAvailable !== true) throw new Error("USERNAME_TAKEN");
   const countryCode = await getSelectedCountryCode();
   if (!countryCode) throw new Error("COUNTRY_NOT_SELECTED");
 
@@ -80,6 +83,9 @@ export async function signUpPersonal(input: PersonalSignupInput): Promise<boolea
 
 export async function signUpBusiness(input: BusinessSignupInput): Promise<boolean> {
   assertActionRateLimit("auth:sign-up", 10_000);
+  const { data: usernameAvailable, error: usernameError } = await getSupabaseClient().rpc("is_username_available", { _username: input.username });
+  if (usernameError) throw usernameError;
+  if (usernameAvailable !== true) throw new Error("USERNAME_TAKEN");
   const countryCode = await getSelectedCountryCode();
   if (!countryCode) throw new Error("COUNTRY_NOT_SELECTED");
 
