@@ -8,7 +8,7 @@ const ProfileSchema = z.object({
   country_code: z.string().length(2),
   full_name: z.string().nullable().optional(),
   username: z.string().nullable().optional(),
-  account_type: z.enum(["personal", "merchant", "delivery_company"]),
+  account_type: z.enum(["personal", "merchant"]),
   is_public: z.boolean(),
   avatar_url: z.string().url().nullable().optional(),
   phone: z.string().nullable().optional(),
