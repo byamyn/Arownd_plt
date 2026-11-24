@@ -236,11 +236,6 @@ export default function ProfileScreen() {
               >
                 <UiText weight="700" style={{ color: theme.colors.accent, textDecorationLine: "underline" }}>{translate("profileEditAction")}</UiText>
               </PressableSurface>
-              {profileUsername && profile.data?.is_public ? (
-                <PressableSurface accessibilityRole="button" accessibilityLabel={translate("usernameShareAction")} onPress={() => void Share.share({ title: displayName, message: displayName + "\nhttps://arownd.vercel.app/@" + encodeURIComponent(profileUsername) })} style={[styles.identityShareButton, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border }]}>
-                  <Icon name="send" size={17} color={theme.colors.foreground} accessibilityHidden />
-                </PressableSurface>
-              ) : null}
             </View>
             {avatarPickerError || uploadAvatar.isError || removeAvatar.isError ? (
               <Caption>{translate("profileAvatarError")}</Caption>
@@ -475,7 +470,6 @@ const styles = StyleSheet.create({
   identityCard: { padding: designTokens.spacing.lg, gap: designTokens.spacing.md },
   identityHeader: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.sm },
   identityEditLink: { minHeight: 40, justifyContent: "center", paddingHorizontal: designTokens.spacing.sm },
-  identityShareButton: { width: 38, height: 38, borderRadius: designTokens.radius.md, borderWidth: StyleSheet.hairlineWidth, alignItems: "center", justifyContent: "center" },
   avatarOption: { minHeight: 52, borderRadius: designTokens.radius.md, paddingHorizontal: designTokens.spacing.md, flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md },
   avatarModalOverlay: { flex: 1, justifyContent: "center", padding: designTokens.spacing.lg },
   avatarPreviewCard: { padding: designTokens.spacing.lg, gap: designTokens.spacing.md, alignItems: "center" },
