@@ -10,8 +10,10 @@ const passwordSchema = z
   .string()
   .min(8, "passwordMin");
 
+const usernameSchema = z.string().trim().toLowerCase().regex(/^[a-z0-9]+(?:[._-][a-z0-9]+)*$/, "usernameInvalid").min(3, "usernameInvalid").max(30, "usernameInvalid");
+
 const signupBaseSchema = z.object({
-  fullName: z.string().trim().min(2, "required"),
+  username: usernameSchema,
   email: emailSchema,
   password: passwordSchema,
   confirmPassword: z.string().min(1, "required")
