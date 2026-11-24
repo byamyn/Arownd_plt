@@ -223,12 +223,17 @@ export default function ProfileScreen() {
               />
               <PressableSurface
                 accessibilityRole="button"
-                accessibilityLabel={translate("addressesEdit")}
+                accessibilityLabel={translate("profileEditAction")}
                 onPress={() => setAccountSheet("delivery")}
                 style={styles.identityEditLink}
               >
-                <UiText weight="700" style={{ color: theme.colors.accent, textDecorationLine: "underline" }}>{translate("addressesEdit")}</UiText>
+                <UiText weight="700" style={{ color: theme.colors.accent, textDecorationLine: "underline" }}>{translate("profileEditAction")}</UiText>
               </PressableSurface>
+              {profile.data?.username && profile.data.is_public ? (
+                <PressableSurface accessibilityRole="button" accessibilityLabel={translate("usernameShareAction")} onPress={() => void Share.share({ title: displayName, message: displayName + " على Arownd\nhttps://arownd.vercel.app/@" + encodeURIComponent(profile.data.username ?? "") })} style={[styles.identityShareButton, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border }]}>
+                  <Icon name="send" size={17} color={theme.colors.foreground} accessibilityHidden />
+                </PressableSurface>
+              ) : null}
             </View>
             {avatarPickerError || uploadAvatar.isError || removeAvatar.isError ? (
               <Caption>{translate("profileAvatarError")}</Caption>
@@ -241,54 +246,14 @@ export default function ProfileScreen() {
             ) : null}
           </Card>
 
-          {profile.data?.username ? (
-            <>
-              <Card contentStyle={styles.identityCard}>
-                <Caption>{translate("usernameLinkLabel")}</Caption>
-                <UiText weight="700">@{profile.data.username}</UiText>
-                <UiText>{"arownd.vercel.app/@" + profile.data.username}</UiText>
-                <Button
-                  label={translate("usernameShareAction")}
-                  onPress={() => void Share.share({ message: "https://arownd.vercel.app/@" + (profile.data?.username ?? "") })}
-                  disabled={!profile.data?.is_public}
-                />
-              </Card>
-              <Card contentStyle={styles.identityCard}>
-                  <UiText weight="700">{translate("profilePublicTitle")}</UiText>
-                  <Caption>{translate("profilePublicHint")}</Caption>
-                  <Caption>{profile.data.is_public ? translate("profilePublicEnabled") : translate("profilePublicDisabled")}</Caption>
-                  <Button
-                    label={profileVisibility.isPending
-                      ? translate("profilePublicSaving")
-                      : translate(profile.data.is_public ? "profilePublicDisable" : "profilePublicEnable")}
-                    onPress={() => profileVisibility.mutate(!profile.data?.is_public)}
-                    disabled={profileVisibility.isPending}
-                  />
-                  {profileVisibility.isError ? <Caption>{translate("profilePublicError")}</Caption> : null}
-              </Card>
-            </>
-          ) : (
+          {!profile.data?.username ? (
             <Card contentStyle={styles.identityCard}>
               <UiText weight="700">{translate("usernameClaimTitle")}</UiText>
               <Caption>{translate("usernameClaimHint")}</Caption>
-              <TextField
-                value={usernameDraft}
-                onChangeText={(value) => setUsernameDraft(value.toLowerCase())}
-                autoCapitalize="none"
-                autoCorrect={false}
-                maxLength={30}
-                placeholder={translate("usernamePlaceholder")}
-                label={translate("username")}
-                error={claimUsername.isError ? translate(claimUsername.error instanceof Error && claimUsername.error.message === "USERNAME_TAKEN" ? "usernameTaken" : claimUsername.error instanceof Error && claimUsername.error.message === "USERNAME_INVALID" ? "usernameInvalid" : claimUsername.error.message === "USERNAME_RESERVED" ? "usernameReserved" : "usernameClaimError") : undefined}
-              />
-              <Button
-                label={claimUsername.isPending ? translate("usernameClaimBusy") : translate("usernameClaimAction")}
-                onPress={() => claimUsername.mutate(usernameDraft)}
-                disabled={claimUsername.isPending || usernameDraft.length < 3}
-                fullWidth
-              />
+              <TextField value={usernameDraft} onChangeText={(value) => setUsernameDraft(value.toLowerCase())} autoCapitalize="none" autoCorrect={false} maxLength={30} placeholder={translate("usernamePlaceholder")} label={translate("username")} error={claimUsername.isError ? translate(claimUsername.error instanceof Error && claimUsername.error.message === "USERNAME_TAKEN" ? "usernameTaken" : claimUsername.error instanceof Error && claimUsername.error.message === "USERNAME_INVALID" ? "usernameInvalid" : claimUsername.error.message === "USERNAME_RESERVED" ? "usernameReserved" : "usernameClaimError") : undefined} />
+              <Button label={claimUsername.isPending ? translate("usernameClaimBusy") : translate("usernameClaimAction")} onPress={() => claimUsername.mutate(usernameDraft)} disabled={claimUsername.isPending || usernameDraft.length < 3} fullWidth />
             </Card>
-          )}
+          ) : null}
 
           <View style={styles.statsGrid}>
             <PressableSurface accessibilityRole="button" accessibilityLabel={translate("profileOrders")} onPress={() => setActivitySheet("orders")} style={[styles.statTile, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
@@ -503,6 +468,7 @@ const styles = StyleSheet.create({
   identityCard: { padding: designTokens.spacing.lg, gap: designTokens.spacing.md },
   identityHeader: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.sm },
   identityEditLink: { minHeight: 40, justifyContent: "center", paddingHorizontal: designTokens.spacing.sm },
+  identityShareButton: { width: 38, height: 38, borderRadius: designTokens.radius.md, borderWidth: StyleSheet.hairlineWidth, alignItems: "center", justifyContent: "center" },
   avatarOption: { minHeight: 52, borderRadius: designTokens.radius.md, paddingHorizontal: designTokens.spacing.md, flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md },
   avatarModalOverlay: { flex: 1, justifyContent: "center", padding: designTokens.spacing.lg },
   avatarPreviewCard: { padding: designTokens.spacing.lg, gap: designTokens.spacing.md, alignItems: "center" },
