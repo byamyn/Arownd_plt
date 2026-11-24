@@ -11,9 +11,8 @@ export async function claimMyUsername(value: string): Promise<void> {
     if (message.includes("profiles_username_lower_uidx") || message.includes("duplicate key")) {
       throw new Error("USERNAME_TAKEN");
     }
-    if (message.includes("username_invalid") || message.includes("username_reserved")) {
-      throw new Error("USERNAME_INVALID");
-    }
+    if (message.includes("username_invalid")) throw new Error("USERNAME_INVALID");
+    if (message.includes("username_reserved")) throw new Error("USERNAME_RESERVED");
     throw error;
   }
 }
