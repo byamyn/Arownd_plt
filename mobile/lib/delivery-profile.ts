@@ -60,7 +60,6 @@ export async function saveMyDeliveryProfile(input: DeliveryProfileInput): Promis
   }
   const phone = normalizePhoneForCallingCode(parsed.phone, regionContext.callingCode);
   const { data, error } = await client.from("profiles").update({
-    full_name: parsed.full_name,
     phone,
     region_id: parsed.region_id,
     secondary_region_id: parsed.secondary_region_id,
