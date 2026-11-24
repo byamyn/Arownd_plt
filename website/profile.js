@@ -1,16 +1,15 @@
 (() => {
   "use strict";
   const config = window.AROWND_TEAM_CONFIG || {};
-  const api = String(config.supabaseUrl || "").replace(/\\/+$/, "");
+  const api = String(config.supabaseUrl || "").replace(/\/+$/, "");
   const key = config.supabasePublishableKey || "";
   const $ = (selector) => document.querySelector(selector);
   const state = $("#profile-state");
   const content = $("#profile-content");
-  const escText = (node, value) => { node.textContent = value || ""; };
   const usernameFromUrl = () => {
     const queryName = new URLSearchParams(location.search).get("username");
     if (queryName) return queryName;
-    const match = location.pathname.match(/^\\/@([a-z0-9]+(?:[._-][a-z0-9]+)*)\\/?$/i);
+    const match = location.pathname.match(/^\/@([a-z0-9]+(?:[._-][a-z0-9]+)*)\/?$/i);
     return match ? match[1] : "";
   };
   const showState = (message) => {
@@ -45,12 +44,10 @@
         showState("هذا الملف الشخصي غير متاح للعامة.");
         return;
       }
-      escText($("#profile-name"), profile.full_name || profile.username);
-      escText($("#profile-username"), "@" + profile.username);
-      const locationParts = [profile.commune].filter(Boolean);
-      if (profile.wilaya_id) locationParts.push("الجزائر");
-      if (locationParts.length) {
-        escText($("#profile-location"), locationParts.join("، "));
+      $("#profile-name").textContent = profile.full_name || profile.username;
+      $("#profile-username").textContent = "@" + profile.username;
+      if (profile.commune) {
+        $("#profile-location").textContent = profile.commune;
         $("#profile-location").classList.remove("hidden");
       }
       const avatar = $("#profile-avatar");
@@ -60,10 +57,16 @@
         try {
           const parsed = new URL(profile.avatar_url);
           if (parsed.protocol === "https:") {
+            avatar.addEventListener("load", () => {
+              avatar.classList.remove("hidden");
+              fallback.classList.add("hidden");
+            }, { once: true });
+            avatar.addEventListener("error", () => {
+              avatar.classList.add("hidden");
+              fallback.classList.remove("hidden");
+            }, { once: true });
             avatar.src = parsed.href;
             avatar.alt = profile.username + " profile image";
-            avatar.addEventListener("load", () => { avatar.classList.remove("hidden"); fallback.classList.add("hidden"); }, { once: true });
-            avatar.addEventListener("error", () => { avatar.classList.add("hidden"); fallback.classList.remove("hidden"); }, { once: true });
           }
         } catch { /* Keep the neutral avatar fallback. */ }
       }
@@ -71,7 +74,11 @@
       $("#share-profile").addEventListener("click", async () => {
         const url = location.origin + "/@" + profile.username;
         if (navigator.share) {
-          try { await navigator.share({ title: "@" + profile.username + " — Arownd", url }); } catch (error) { if (error?.name !== "AbortError") await copyLink(url); }
+          try {
+            await navigator.share({ title: "@" + profile.username + " — Arownd", url });
+          } catch (error) {
+            if (error?.name !== "AbortError") await copyLink(url);
+          }
         } else {
           await copyLink(url);
         }
@@ -86,7 +93,7 @@
     try {
       await navigator.clipboard.writeText(url);
       $("#share-profile").textContent = "تم نسخ الرابط";
-      setTimeout(() => { $("#share-profile").textContent = "مشاركة الملف"; }, 1800);
+      window.setTimeout(() => { $("#share-profile").textContent = "مشاركة الملف"; }, 1800);
     } catch {
       window.prompt("انسخ رابط الملف الشخصي:", url);
     }
