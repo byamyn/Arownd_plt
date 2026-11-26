@@ -5,13 +5,13 @@ import { ScrollView, StyleSheet, View } from "react-native";
 
 import {
   Caption,
-  Card,
   Heading,
   Icon,
   Image,
   OrderCard,
   OrderStatusBadge,
   PriceDisplay,
+  PressableSurface,
   RatingStars,
   SegmentedControl,
   StatusBadge,
@@ -250,7 +250,7 @@ function ReviewsContent({ onNavigate }: { onNavigate: () => void }) {
   if (reviews.data.length === 0) return <EmptyState icon="star" title={translate("myReviewsEmpty")} hint={translate("myReviewsEmptyHint")} />;
 
   return (
-    <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: designTokens.spacing.md, paddingBottom: designTokens.spacing.xl }}>
+    <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: 0, paddingBottom: designTokens.spacing.xl }}>
       {reviews.data.map((review) => <ReviewItem key={review.id} review={review} language={language} onNavigate={onNavigate} />)}
     </ScrollView>
   );
@@ -261,21 +261,25 @@ function ReviewItem({ review, language, onNavigate }: { review: AppReview; langu
   const dateLabel = Number.isNaN(date.getTime()) ? "" : new Intl.DateTimeFormat(language === "ar" ? "ar-DZ" : "en-DZ", { dateStyle: "medium" }).format(date);
   const target = review.target_type === "product" ? translate("myReviewsProduct") : translate("myReviewsStore");
   const status = review.status === "approved" ? translate("myReviewsApproved") : review.status === "rejected" ? translate("myReviewsRejected") : translate("myReviewsPending");
+  const theme = useAppTheme();
   return (
-    <Card
-      onPress={() => { onNavigate(); router.push(getReviewTargetPath(review) as never); }}
+    <PressableSurface
+      accessibilityRole="button"
       accessibilityLabel={target}
-      contentStyle={{ gap: designTokens.spacing.sm, padding: designTokens.spacing.md }}
+      onPress={() => { onNavigate(); router.push(getReviewTargetPath(review) as never); }}
+      style={{ paddingVertical: designTokens.spacing.md, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.divider }}
     >
-      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: designTokens.spacing.sm }}>
-        <UiText weight="700">{target}</UiText>
-        <RatingStars value={review.rating} size={15} showValue />
+      <View style={{ gap: designTokens.spacing.sm }}>
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: designTokens.spacing.sm }}>
+          <UiText weight="700">{target}</UiText>
+          <RatingStars value={review.rating} size={15} showValue />
+        </View>
+        {review.comment ? <UiText>{review.comment}</UiText> : null}
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: theme.colors.divider, paddingTop: designTokens.spacing.sm }}>
+          <StatusBadge label={status} tone={review.status === "rejected" ? "danger" : review.status === "approved" ? "success" : "warning"} />
+          <Caption>{dateLabel}</Caption>
+        </View>
       </View>
-      {review.comment ? <UiText>{review.comment}</UiText> : null}
-      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: "rgba(128,128,128,0.25)", paddingTop: designTokens.spacing.sm }}>
-        <StatusBadge label={status} tone={review.status === "rejected" ? "danger" : review.status === "approved" ? "success" : "warning"} />
-        <Caption>{dateLabel}</Caption>
-      </View>
-    </Card>
+    </PressableSurface>
   );
 }
