@@ -166,12 +166,11 @@ export function distanceToRouteMeters(position: RoutePoint, route: RoutePoint[])
     return onlyPoint ? distanceBetweenCoordinates(position, onlyPoint) : Number.POSITIVE_INFINITY;
   }
 
-  const stride = Math.max(1, Math.floor(route.length / 160));
   let nearest = Number.POSITIVE_INFINITY;
 
-  for (let index = 0; index < route.length - 1; index += stride) {
+  for (let index = 0; index < route.length - 1; index += 1) {
     const start = route[index];
-    const end = route[Math.min(index + stride, route.length - 1)];
+    const end = route[index + 1];
     if (start && end) {
       nearest = Math.min(nearest, distanceToSegmentMeters(position, start, end));
     }
@@ -180,10 +179,67 @@ export function distanceToRouteMeters(position: RoutePoint, route: RoutePoint[])
   return nearest;
 }
 
+export function getRemainingRouteCoordinates(
+  route: RoutePoint[],
+  position: RoutePoint
+): RoutePoint[] {
+  if (route.length < 2) return route;
+
+  let travelled = 0;
+  let bestDistance = Number.POSITIVE_INFINITY;
+  let bestIndex = 0;
+  let bestFraction = 0;
+
+  for (let index = 0; index < route.length - 1; index += 1) {
+    const start = route[index];
+    const end = route[index + 1];
+    if (!start || !end) continue;
+    const projection = projectPointToSegment(position, start, end);
+    if (projection.distance < bestDistance) {
+      bestDistance = projection.distance;
+      bestIndex = index;
+      bestFraction = projection.fraction;
+    }
+  }
+
+  const start = route[bestIndex];
+  const end = route[bestIndex + 1];
+  if (!start || !end) return route;
+
+  const projectedPoint = {
+    longitude: start.longitude + (end.longitude - start.longitude) * bestFraction,
+    latitude: start.latitude + (end.latitude - start.latitude) * bestFraction
+  };
+  return [
+    projectedPoint,
+    ...route.slice(bestIndex + 1)
+  ];
+}
+
 export function getRemainingRouteMetrics(
   route: DrivingRoute,
-  currentStepIndex: number
+  currentStepIndex: number,
+  position?: RoutePoint | null
 ): { distance: number; duration: number } {
+  if (position && route.coordinates.length >= 2) {
+    const routeLength = route.coordinates.slice(1).reduce((total, point, index) => {
+      const previous = route.coordinates[index];
+      return total + (previous ? distanceBetweenCoordinates(previous, point) : 0);
+    }, 0);
+    if (routeLength > 0) {
+      const remainingCoordinates = getRemainingRouteCoordinates(route.coordinates, position);
+      const remainingLength = remainingCoordinates.slice(1).reduce((total, point, index) => {
+        const previous = remainingCoordinates[index];
+        return total + (previous ? distanceBetweenCoordinates(previous, point) : 0);
+      }, 0);
+      const remainingRatio = Math.max(0, Math.min(1, remainingLength / routeLength));
+      return {
+        distance: route.distance * remainingRatio,
+        duration: route.duration * remainingRatio
+      };
+    }
+  }
+
   const remainingSteps = route.steps.slice(Math.max(0, currentStepIndex));
   if (remainingSteps.length === 0) return { distance: 0, duration: 0 };
   return remainingSteps.reduce(
