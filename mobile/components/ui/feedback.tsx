@@ -13,7 +13,7 @@ import {
 
 import { designTokens, useAppTheme } from "@/lib/theme";
 import { translate } from "@/lib/i18n";
-import { Icon } from "./icon";
+import { Icon, type IconName } from "./icon";
 import { Text as UiText } from "./typography";
 
 export type FeedbackTone = "info" | "success" | "warning" | "danger";
