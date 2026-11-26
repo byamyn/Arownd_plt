@@ -106,8 +106,8 @@ export default function CountrySelectionScreen() {
                     style={[
                       styles.country,
                       {
-                        backgroundColor: selected ? theme.colors.surfaceSecondary : theme.colors.surface,
-                        borderColor: selected ? theme.colors.foreground : theme.colors.border,
+                        backgroundColor: selected ? theme.colors.surfaceSecondary : "transparent",
+                        borderColor: "transparent",\n                        borderBottomColor: theme.colors.divider,
                         opacity: enabled ? 1 : 0.55,
                         flexDirection: isRTL ? "row-reverse" : "row"
                       }
