@@ -225,7 +225,7 @@ export function ProfileSettingsSection() {
       <View style={styles.section}>
         <Heading level={3}>{translate("settingsSupportSection")}</Heading>
         <Card contentStyle={styles.sectionContent}>
-          <SettingsRow icon="shield" label={translate("settingsPrivacyPolicy")} onPress={() => router.push("/privacy-security")} theme={theme} styles={styles} language={language} />
+          <SettingsRow icon="lock" label={translate("settingsPrivacyPolicy")} onPress={() => router.push("/privacy-security")} theme={theme} styles={styles} language={language} />
           <SettingsRow icon="message-circle" label={translate("settingsSupportTitle")} onPress={() => router.push("/support")} theme={theme} styles={styles} language={language} />
           <SettingsRow icon="info" label={translate("settingsAboutTitle")} onPress={() => router.push("/about")} theme={theme} styles={styles} language={language} />
           <PressableSurface accessibilityRole="button" accessibilityLabel={translate("settingsSignOutConfirmAction")} onPress={() => { setSignOutError(false); setSignOutConfirmOpen(true); }} disabled={signOutMutation.isPending} style={styles.signOutRow}>
