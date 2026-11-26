@@ -7,7 +7,6 @@ import {
   Alert,
   AppHeader,
   Button,
-  Card,
   RefreshableScrollView,
   Spinner,
   StatusBadge,
@@ -63,10 +62,10 @@ export default function TeamInvitationsScreen() {
             tone="warning"
           />
         ) : invitations.data.length === 0 ? (
-          <Card><UiText style={styles.secondaryText}>{translate("merchantTeamNoInvitations")}</UiText></Card>
+          <UiText style={styles.secondaryText}>{translate("merchantTeamNoInvitations")}</UiText>
         ) : (
           invitations.data.map((invitation) => (
-            <Card key={invitation.invitation_id} contentStyle={styles.invitationCard}>
+            <View key={invitation.invitation_id} style={styles.invitationCard}>
               <View style={styles.invitationHeader}>
                 <View style={styles.storeDetails}>
                   <UiText weight="700">{invitation.store_name}</UiText>
@@ -85,7 +84,7 @@ export default function TeamInvitationsScreen() {
                 disabled={accept.isPending}
                 fullWidth
               />
-            </Card>
+            </View>
           ))
         )}
         {accept.isError ? <Alert description={translate("merchantTeamAcceptError")} tone="danger" /> : null}
@@ -100,7 +99,7 @@ function createStyles(theme: ReturnType<typeof useAppTheme>) {
     safe: { flex: 1 },
     content: { padding: designTokens.spacing.xl, paddingBottom: designTokens.spacing.xxl, gap: designTokens.spacing.lg },
     center: { minHeight: 160, alignItems: "center", justifyContent: "center" },
-    invitationCard: { gap: designTokens.spacing.md },
+    invitationCard: { gap: designTokens.spacing.md, paddingVertical: designTokens.spacing.md, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.divider },
     invitationHeader: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.sm },
     storeDetails: { flex: 1, minWidth: 0, gap: 3 },
     secondaryText: { color: theme.colors.muted, fontSize: theme.typography.caption, lineHeight: 19 }
