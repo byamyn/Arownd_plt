@@ -167,7 +167,7 @@ export default function CheckoutScreen() {
         <UiText selectable style={[styles.orderId, { color: theme.colors.foreground }]}>{formatOrderCode(createdOrderId)}</UiText>
         <UiText style={styles.hint}>{translate("checkoutDeliveryAfterNote")}</UiText>
         <Button label={translate("checkoutBackHome")} onPress={() => router.replace("/home")} fullWidth />
-      </View>
+      </Card>
     </CustomerScreen>;
   }
 
@@ -350,7 +350,7 @@ export default function CheckoutScreen() {
         <UiText style={styles.fieldLabel}>{translate("checkoutAddress")}</UiText>
         <TextField accessibilityLabel={translate("checkoutAddress")} value={addressLine} onChangeText={(value) => { setFormEdited(true); setSelectedAddressId(null); setAddressLine(value); }} placeholder={translate("checkoutAddressPlaceholder")} style={[...fieldStyle, styles.multiline]} textAlign="auto" multiline maxLength={300} />
       </> : null}
-    </Card>
+    </View>
 
     <CheckoutSummary style={styles.summaryCard}>
       <UiText style={styles.sectionTitle}>{translate("checkoutSummary")}</UiText>
@@ -391,7 +391,7 @@ export default function CheckoutScreen() {
         </View>
         <Icon name="circle-check" size={20} color={theme.colors.success} accessibilityHidden />
       </View>
-    </Card>
+    </View>
 
     {formError ? <UiText accessibilityRole="alert" style={styles.errorText}>{formError}</UiText> : null}
     <Modal visible={picker !== null} transparent animationType="slide" onRequestClose={() => setPicker(null)}>
