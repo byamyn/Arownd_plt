@@ -5,7 +5,6 @@ import { Text as UiText } from "./typography";
 
 import { designTokens, useAppTheme } from "@/lib/theme";
 import { QuantityStepper, TextField } from "./form-controls";
-import { Card } from "./cards";
 import { RadioGroup, type RadioOption } from "./forms";
 import { StatusBadge, type StatusBadgeTone } from "./extended";
 
@@ -105,11 +104,13 @@ export function ProductQuantitySelector({
 }
 
 export function CartSummary({ children, style }: { children: ReactNode; style?: StyleProp<ViewStyle> }) {
-  return <Card contentStyle={style}>{children}</Card>;
+  const theme = useAppTheme();
+  return <View style={[{ gap: designTokens.spacing.md, paddingTop: designTokens.spacing.md, borderTopWidth: 1, borderTopColor: theme.colors.divider }, style]}>{children}</View>;
 }
 
 export function CheckoutSummary({ children, style }: { children: ReactNode; style?: StyleProp<ViewStyle> }) {
-  return <Card contentStyle={style}>{children}</Card>;
+  const theme = useAppTheme();
+  return <View style={[{ gap: designTokens.spacing.md, paddingVertical: designTokens.spacing.md, borderTopWidth: 1, borderBottomWidth: 1, borderColor: theme.colors.divider }, style]}>{children}</View>;
 }
 
 export function CouponInput({
