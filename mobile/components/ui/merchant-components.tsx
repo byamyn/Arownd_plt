@@ -25,7 +25,7 @@ export function MerchantOrderCard(props: CardProps) {
 
 export function MerchantProductRow({ children, leading, trailing, style }: { children: ReactNode; leading?: ReactNode; trailing?: ReactNode; style?: StyleProp<ViewStyle> }) {
   const theme = useAppTheme();
-  return <View style={[{ minHeight: 72, flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md, paddingVertical: designTokens.spacing.sm, borderBottomWidth: 1, borderBottomColor: theme.colors.border }, style]}>{leading}<View style={{ flex: 1 }}>{children}</View>{trailing}</View>;
+  return <View style={[{ minHeight: 72, flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md, paddingVertical: designTokens.spacing.sm, borderBottomWidth: 1, borderBottomColor: theme.colors.divider }, style]}>{leading}<View style={{ flex: 1 }}>{children}</View>{trailing}</View>;
 }
 
 export function MerchantOnboardingStep({
@@ -64,7 +64,7 @@ export function BusinessHours({
   return (
     <View style={[{ gap: designTokens.spacing.sm }, style]}>
       {rows.map((row) => (
-        <View key={row.key} style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: designTokens.spacing.md, paddingVertical: designTokens.spacing.xs, borderBottomWidth: 1, borderBottomColor: theme.colors.border }}>
+        <View key={row.key} style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: designTokens.spacing.md, paddingVertical: designTokens.spacing.xs, borderBottomWidth: 1, borderBottomColor: theme.colors.divider }}>
           <UiText style={{ color: theme.colors.foreground, fontSize: theme.typography.body }}>{row.dayLabel}</UiText>
           <UiText style={{ color: theme.colors.muted, fontSize: theme.typography.caption, fontVariant: ["tabular-nums"] }}>{row.hoursLabel}</UiText>
         </View>
