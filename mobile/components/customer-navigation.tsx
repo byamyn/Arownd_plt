@@ -83,10 +83,10 @@ export function CustomerNavigation() {
           key: tab.id,
           label: translate(tab.label),
           icon: (
-            <View style={{ width: 30, height: 30, alignItems: "center", justifyContent: "center" }}>
+            <View style={{ width: 26, height: 26, alignItems: "center", justifyContent: "center" }}>
               <Icon
                 name={tab.icon}
-                size={22}
+                size={20}
                 color={selected ? theme.colors.accentForeground : theme.colors.muted}
                 fill="none"
                 strokeWidth={selected ? 2.1 : 1.8}
