@@ -391,7 +391,7 @@ export default function MerchantOnboardingScreen() {
         </RefreshableScrollView>
       </KeyboardAvoidingView>
 
-      <BottomSheet visible={regionPickerOpen} onRequestClose={() => setRegionPickerOpen(false)} title={regionPickerLevel === "primary" ? (regionOptions.data ? getRegionLevelDisplayName(regionOptions.data.selectedLevel, language) : "") : (secondaryOptions.data ? getRegionLevelDisplayName(secondaryOptions.data.selectedLevel, language) : "")} maxHeight="85%">
+      <BottomSheet visible={regionPickerOpen} onRequestClose={() => setRegionPickerOpen(false)} title={regionPickerLevel === "primary" ? (regionOptions.data ? getRegionLevelDisplayName(regionOptions.data.selectedLevel, language) : "") : (secondaryOptions.data ? getRegionLevelDisplayName(secondaryOptions.data.selectedLevel, language) : "")} maxHeight="85%" scrollable={false}>
             <ScrollView keyboardShouldPersistTaps="handled">
               {(regionPickerLevel === "primary" ? (regionOptions.data?.regions ?? []) : (secondaryOptions.data?.regions ?? [])).map((region) => (
                 <PressableSurface key={region.id} onPress={() => {
