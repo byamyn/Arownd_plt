@@ -81,7 +81,7 @@ export function CartButton({
 
 export function CartItem({ children, style }: { children: ReactNode; style?: StyleProp<ViewStyle> }) {
   const theme = useAppTheme();
-  return <View style={[{ flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md, paddingVertical: designTokens.spacing.md, borderBottomWidth: 1, borderBottomColor: theme.colors.border }, style]}>{children}</View>;
+  return <View style={[{ flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md, paddingVertical: designTokens.spacing.md, borderBottomWidth: 1, borderBottomColor: theme.colors.divider }, style]}>{children}</View>;
 }
 
 export function ProductQuantitySelector({
