@@ -217,7 +217,7 @@ export function StoreTile({ name, description, logoUrl, commune, rating, verifie
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
-  screenHeader: { paddingHorizontal: designTokens.spacing.xl, paddingTop: designTokens.spacing.sm, paddingBottom: designTokens.spacing.sm },
+  screenHeader: { paddingHorizontal: designTokens.spacing.xl, paddingTop: designTokens.spacing.xs, paddingBottom: designTokens.spacing.xs },
   scroll: { flex: 1 },
   footer: { paddingHorizontal: designTokens.spacing.xl, paddingTop: designTokens.spacing.sm, paddingBottom: designTokens.spacing.sm, borderTopWidth: StyleSheet.hairlineWidth },
   content: { paddingHorizontal: designTokens.spacing.xl, paddingTop: designTokens.spacing.sm, paddingBottom: designTokens.spacing.xxl, gap: designTokens.spacing.xxl },
