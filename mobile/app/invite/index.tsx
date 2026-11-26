@@ -10,7 +10,6 @@ import {
   BadgeText,
   Button,
   Caption,
-  Card,
   Heading,
   Icon,
   IconButton,
@@ -95,7 +94,7 @@ export default function InviteScreen() {
             </View>
           </View>
 
-          <Card contentStyle={styles.codeCard}>
+          <View style={styles.codeSection}>
             <Caption>{translate("inviteCodeLabel")}</Caption>
             <UiText weight="800" style={styles.codeText}>{formatInviteCode(invite.data.code)}</UiText>
             <Button
@@ -107,7 +106,7 @@ export default function InviteScreen() {
                 void share(`${translate("inviteShareCodeMessage")}\n${formatInviteCode(invite.data.code)}\n${inviteLink}`);
               }}
             />
-          </Card>
+          </View>
 
           <View style={styles.linkSection}>
             <Caption>{translate("inviteLinkLabel")}</Caption>
@@ -185,7 +184,7 @@ function createStyles(theme: ReturnType<typeof useAppTheme>) {
       justifyContent: "center",
       backgroundColor: theme.colors.accentMuted
     },
-    codeCard: { padding: designTokens.spacing.lg, gap: designTokens.spacing.md },
+    codeSection: { paddingVertical: designTokens.spacing.md, gap: designTokens.spacing.sm, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.divider },
     codeText: {
       color: theme.colors.foreground,
       fontSize: 23,
@@ -196,12 +195,9 @@ function createStyles(theme: ReturnType<typeof useAppTheme>) {
     },
     linkSection: { gap: designTokens.spacing.sm },
     linkRow: {
-      minHeight: 52,
-      borderWidth: 1,
-      borderColor: theme.colors.border,
-      borderRadius: theme.radius.md,
-      backgroundColor: theme.colors.surface,
-      paddingHorizontal: designTokens.spacing.md,
+      minHeight: 44,
+      paddingVertical: designTokens.spacing.xs,
+      paddingHorizontal: 0,
       flexDirection: "row",
       alignItems: "center",
       gap: designTokens.spacing.sm
