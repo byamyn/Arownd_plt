@@ -18,7 +18,7 @@ import { translate, type Language, type TranslationKey, useLanguage } from "@/li
 import { getLocalizedWilayaLabel } from "@/lib/locale-data";
 import type { MerchantDashboardOrder } from "@/lib/merchant-dashboard-state";
 import { designTokens, useAppTheme, type AppTheme } from "@/lib/theme";
-import { RefreshableScrollView, AppHeader, Button, Card, ErrorState, FilterBar, FilterChip, Icon, IconButton, OrderCardSkeleton, MerchantOrderCard, MerchantStatusBadge, PriceDisplay, Text as UiText } from "@/components/ui";
+import { RefreshableScrollView, AppHeader, Button, ErrorState, FilterBar, FilterChip, Icon, IconButton, OrderCardSkeleton, MerchantOrderCard, MerchantStatusBadge, PriceDisplay, Text as UiText } from "@/components/ui";
 
 type OrderFilter = "all" | "pending" | "quoted" | "confirmed" | "shipped" | "delivered" | "cancelled" | "rejected";
 
@@ -175,7 +175,7 @@ export default function MerchantOrdersScreen() {
         </View>
 
         {visibleOrders.length === 0 ? (
-          <Card contentStyle={styles.emptyCard}>
+          <View style={styles.emptyState}>
             <UiText style={[styles.emptyTitle, { color: theme.colors.foreground }]}>
               {filter === "all"
                 ? translate("merchantOrdersEmpty")
@@ -184,7 +184,7 @@ export default function MerchantOrdersScreen() {
             <UiText style={[styles.subtitle, { color: theme.colors.muted }]}>
               {filter === "all" ? translate("merchantOrdersEmptyHint") : translate("merchantOrdersFilterEmpty")}
             </UiText>
-          </Card>
+          </View>
         ) : (
           <View style={styles.orderList}>
             {visibleOrders.map((order) => (
@@ -355,14 +355,14 @@ function createStyles(theme: AppTheme) {
     customerName: { fontSize: designTokens.typography.body - 1, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
     orderMeta: { fontSize: designTokens.typography.caption, textAlign: "auto", lineHeight: 18 },
     quantityText: { fontSize: designTokens.typography.caption - 1, fontWeight: designTokens.fontWeights.semibold, textAlign: "auto" },
-    orderFooter: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingTop: designTokens.spacing.md, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: theme.colors.border },
+    orderFooter: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingTop: designTokens.spacing.md, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: theme.colors.divider },
     priceBlock: { gap: designTokens.spacing.xs, alignItems: "flex-start" },
     deliveryBlock: { gap: designTokens.spacing.xs, alignItems: "flex-end" },
     metaLabel: { fontSize: designTokens.typography.caption - 1, fontWeight: designTokens.fontWeights.medium },
     orderPrice: { alignSelf: "flex-start" },
     deliveryType: { fontSize: designTokens.typography.caption, fontWeight: designTokens.fontWeights.bold },
     orderAction: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.xs, alignSelf: "flex-start", paddingTop: designTokens.spacing.xs },
-    emptyCard: { padding: designTokens.spacing.xl, gap: designTokens.spacing.sm, alignItems: "flex-start" },
+    emptyState: { paddingVertical: designTokens.spacing.lg, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.divider, gap: designTokens.spacing.sm, alignItems: "flex-start" },
     emptyTitle: { fontSize: designTokens.typography.body - 1, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
     limitHint: { fontSize: designTokens.typography.caption - 1, lineHeight: 16, textAlign: "auto", paddingHorizontal: designTokens.spacing.xs }
   });
