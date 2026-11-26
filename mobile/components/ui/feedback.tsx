@@ -382,7 +382,8 @@ export function BottomSheet({
   children,
   closeIcon = "x",
   maxHeight = "85%",
-  height
+  height,
+  scrollable = true
 }: {
   visible: boolean;
   onRequestClose: () => void;
@@ -391,6 +392,7 @@ export function BottomSheet({
   closeIcon?: IconName;
   maxHeight?: ViewStyle["maxHeight"];
   height?: ViewStyle["height"];
+  scrollable?: boolean;
 }) {
   const theme = useAppTheme();
   const insets = useSafeAreaInsets();
@@ -431,15 +433,18 @@ export function BottomSheet({
             <View style={{ width: 44, height: 44 }} />
           </View>
           <View style={{ height: 1, backgroundColor: theme.colors.divider }} />
-          <ScrollView
-            style={{ flexShrink: 1 }}
-            contentContainerStyle={{ flexGrow: 1, gap: designTokens.spacing.md, paddingBottom: designTokens.spacing.xs }}
-            keyboardShouldPersistTaps="handled"
-            nestedScrollEnabled
-            showsVerticalScrollIndicator={false}
-          >
-            {children}
-          </ScrollView>
+          {scrollable ? (
+            <ScrollView
+              style={{ flexShrink: 1 }}
+              contentContainerStyle={{ flexGrow: 1, gap: designTokens.spacing.md, paddingBottom: designTokens.spacing.xs }}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+            >
+              {children}
+            </ScrollView>
+          ) : (
+            <View style={{ flexShrink: 1, gap: designTokens.spacing.md }}>{children}</View>
+          )}
         </View>
       </KeyboardAvoidingView>
     </Modal>
