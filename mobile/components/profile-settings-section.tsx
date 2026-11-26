@@ -245,14 +245,13 @@ export function ProfileSettingsSection() {
 
       <View style={styles.section}>
         <Card contentStyle={styles.sectionContent}>
-        <PressableSurface accessibilityRole="button" accessibilityLabel={translate("settingsSignOutConfirmAction")} onPress={() => { setSignOutError(false); setSignOutConfirmOpen(true); }} disabled={signOutMutation.isPending} style={styles.signOutRow}>
-          <View style={styles.linkLabel}>
-            <Icon name="log-out" size={19} color={theme.colors.danger} />
-            <UiText tone="danger" weight="700">{translate("settingsSignOutConfirmAction")}</UiText>
-          </View>
-          <Icon name="chevron-right" size={18} color={theme.colors.subtle} />
-        </PressableSurface>
-        {signOutError ? <UiText tone="danger">{translate("settingsSignOutError")}</UiText> : null}
+          <PressableSurface accessibilityRole="button" accessibilityLabel={translate("settingsSignOutConfirmAction")} onPress={() => { setSignOutError(false); setSignOutConfirmOpen(true); }} disabled={signOutMutation.isPending} style={styles.signOutRow}>
+            <View style={styles.linkLabel}>
+              <Icon name="log-out" size={19} color={theme.colors.danger} />
+              <UiText tone="danger" weight="700">{translate("settingsSignOutConfirmAction")}</UiText>
+            </View>
+          </PressableSurface>
+          {signOutError ? <UiText tone="danger">{translate("settingsSignOutError")}</UiText> : null}
         </Card>
       </View>
 
