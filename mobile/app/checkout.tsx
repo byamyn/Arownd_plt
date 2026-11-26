@@ -167,7 +167,7 @@ export default function CheckoutScreen() {
         <UiText selectable style={[styles.orderId, { color: theme.colors.foreground }]}>{formatOrderCode(createdOrderId)}</UiText>
         <UiText style={styles.hint}>{translate("checkoutDeliveryAfterNote")}</UiText>
         <Button label={translate("checkoutBackHome")} onPress={() => router.replace("/home")} fullWidth />
-      </Card>
+      </View>
     </CustomerScreen>;
   }
 
@@ -261,7 +261,7 @@ export default function CheckoutScreen() {
     />
     <UiText style={styles.fieldHint}>{translate("checkoutSubtitle")}</UiText>
 
-    <Card style={styles.sectionCard} contentStyle={styles.section}>
+    <View style={styles.sectionGroup}>
       <UiText style={styles.sectionTitle}>{translate("checkoutContactTitle")}</UiText>
       <PressableSurface accessibilityLabel={translate("deliveryProfileManage")} onPress={() => router.push("/delivery-profile")} hitSlop={8}>
         <UiText style={styles.retryText}>{translate("deliveryProfileManage")}</UiText>
@@ -381,7 +381,7 @@ export default function CheckoutScreen() {
       {deliveryType === "home" ? <UiText style={styles.fieldHint}>{translate("checkoutFinalTotalPending")}</UiText> : null}
     </CheckoutSummary>
 
-    <Card style={styles.sectionCard} contentStyle={styles.paymentSection}>
+    <View style={styles.paymentGroup}>
       <UiText style={styles.sectionTitle}>{translate("checkoutPaymentTitle")}</UiText>
       <View style={styles.paymentMethod}>
         <Icon name="wallet" size={24} color={theme.colors.accentMuted} accessibilityHidden />
@@ -432,7 +432,7 @@ function createStyles(theme: AppTheme) { return StyleSheet.create({
   sectionCard: { borderRadius: designTokens.radius.xl },
   section: { padding: designTokens.spacing.lg, gap: designTokens.spacing.md },
   summaryCard: { padding: designTokens.spacing.lg, gap: designTokens.spacing.md },
-  paymentSection: { padding: designTokens.spacing.lg, gap: designTokens.spacing.md },
+  paymentGroup: { paddingVertical: designTokens.spacing.lg, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.divider, gap: designTokens.spacing.md },
   paymentMethod: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md },
   paymentInfo: { flex: 1, gap: designTokens.spacing.xs, alignItems: "flex-start" },
   paymentTitle: { color: theme.colors.foreground, fontSize: designTokens.typography.body, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
