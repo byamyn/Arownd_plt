@@ -111,6 +111,23 @@ describe("store pickup address requirements", () => {
     expect(isCheckoutAddressRequired("desk")).toBe(false);
   });
 
+  it("ignores a retained home address when creating a store-pickup idempotency identity", () => {
+    const pickup = {
+      items: [item("offer-1", 1, {})],
+      deliveryType: "desk" as const,
+      regionId: 9,
+      secondaryRegionId: 99,
+      commune: "البليدة",
+      addressLine: "",
+      fullName: "أحمد",
+      phone: "+213550000000"
+    };
+    expect(checkoutRequestIdentity(pickup)).toBe(checkoutRequestIdentity({
+      ...pickup,
+      addressLine: "عنوان المنزل المحفوظ"
+    }));
+  });
+
   it("keeps the pickup request identity stable with an empty address", () => {
     const pickup = {
       items: [item("offer-1", 1, {})],

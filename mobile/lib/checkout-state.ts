@@ -40,7 +40,7 @@ export function checkoutRequestIdentity(input: CheckoutIdentityInput): string {
     regionId: input.regionId,
     secondaryRegionId: input.secondaryRegionId,
     commune: input.commune.trim(),
-    addressLine: input.addressLine.trim(),
+    addressLine: input.deliveryType === "home" ? input.addressLine.trim() : "",
     fullName: input.fullName.trim(),
     phone: input.phone.trim(),
     paymentMethod: "cod"
