@@ -203,15 +203,17 @@ function createStyles(theme: AppTheme) {
     productCard: { width: "100%" },
     storeList: { gap: 0 },
     storeCard: {
-      backgroundColor: theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface,
-      borderColor: theme.mode === "light" ? "transparent" : theme.colors.border,
-      borderRadius: designTokens.radius.xl
+      backgroundColor: "transparent",
+      borderColor: "transparent",
+      borderRadius: 0
     },
     storeContent: {
       flexDirection: "row",
       alignItems: "center",
       gap: designTokens.spacing.md,
-      padding: designTokens.spacing.md
+      paddingVertical: designTokens.spacing.md,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: theme.colors.divider
     },
     storeInfo: {
       flex: 1,
