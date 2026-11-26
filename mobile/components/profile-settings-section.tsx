@@ -226,9 +226,9 @@ export function ProfileSettingsSection() {
           <SettingsRow icon="user" label={translate("settingsAccount")} onPress={() => openSheet("account")} theme={theme} styles={styles} language={language} />
           <SettingsRow icon="map-pin" label={translate("settingsLocationAddresses")} description={translate("locationAddressesSubtitle")} onPress={() => openSheet("location-addresses")} theme={theme} styles={styles} language={language} />
           <SettingsRow icon="gift" label={translate("profileInvite")} description={translate("profileInviteHint")} onPress={() => openSheet("invite")} theme={theme} styles={styles} language={language} />
-          <SettingsRow icon="map-pin" label={translate("settingsBrowsingCountry")} description={browsingCountry.data ?? "—"} onPress={() => openSheet("country")} theme={theme} styles={styles} language={language} />
-          <SettingsRow icon={theme.mode === "dark" ? "moon" : "sun"} label={translate("settingsAppearanceTitle")} description={translate(themeMode === "system" ? "settingsThemeSystem" : themeMode === "light" ? "settingsThemeLight" : "settingsThemeDark")} onPress={() => openSheet("appearance")} theme={theme} styles={styles} language={language} />
-          <SettingsRow icon="globe" label={translate("settingsLanguageTitle")} description={translate(language === "ar" ? "settingsLanguageArabic" : "settingsLanguageEnglish")} onPress={() => openSheet("language")} theme={theme} styles={styles} language={language} />
+          <SettingsRow icon="globe" label={translate("settingsBrowsingCountry")} description={browsingCountry.data ?? "—"} onPress={() => openSheet("country")} theme={theme} styles={styles} language={language} />
+          <SettingsRow icon="palette" label={translate("settingsAppearanceTitle")} description={translate(themeMode === "system" ? "settingsThemeSystem" : themeMode === "light" ? "settingsThemeLight" : "settingsThemeDark")} onPress={() => openSheet("appearance")} theme={theme} styles={styles} language={language} />
+          <SettingsRow icon="languages" label={translate("settingsLanguageTitle")} description={translate(language === "ar" ? "settingsLanguageArabic" : "settingsLanguageEnglish")} onPress={() => openSheet("language")} theme={theme} styles={styles} language={language} />
         </Card>
       </View>
 
@@ -263,7 +263,7 @@ export function ProfileSettingsSection() {
           {profileVisibility.data?.phone ? <SettingsInfoRow icon="phone" label={translate("checkoutPhoneLabel")} value={profileVisibility.data.phone} theme={theme} styles={styles} /> : null}
           <SettingsRow icon="lock" label={translate("settingsPasswordChangeTitle")} onPress={() => openSheet("password")} theme={theme} styles={styles} language={language} />
           <SettingsRow icon="eye" label={translate("profilePublicTitle")} description={profileVisibility.isPending ? translate("profileVisibilityLoading") : profileVisibility.data?.is_public ? translate("profilePublicEnabled") : translate("profilePublicDisabled")} onPress={() => { if (profileVisibility.data && !profileVisibilityMutation.isPending) profileVisibilityMutation.mutate(!profileVisibility.data.is_public); }} theme={theme} styles={styles} language={language} disabled={profileVisibility.isPending || !profileVisibility.data || profileVisibilityMutation.isPending} />
-          <SettingsRow icon="refresh-cw" label={translate("settingsSwitchAccount")} onPress={() => { setAccountSwitchError(false); setAddAccountError(false); openSheet("accounts"); }} theme={theme} styles={styles} language={language} />
+          <SettingsRow icon="users" label={translate("settingsSwitchAccount")} onPress={() => { setAccountSwitchError(false); setAddAccountError(false); openSheet("accounts"); }} theme={theme} styles={styles} language={language} />
           <PressableSurface accessibilityRole="button" accessibilityLabel={translate("settingsSignOutConfirmAction")} onPress={() => { setSignOutError(false); setSignOutConfirmOpen(true); }} disabled={signOutMutation.isPending} style={styles.signOutRow}>
             <View style={styles.linkLabel}><Icon name="log-out" size={19} color={theme.colors.danger} /><UiText tone="danger" weight="700">{translate("settingsSignOutConfirmAction")}</UiText></View>
           </PressableSurface>
