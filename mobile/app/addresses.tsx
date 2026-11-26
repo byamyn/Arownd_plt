@@ -221,7 +221,7 @@ export default function AddressesScreen() {
         </SwipeToDelete>
       ))}
 
-      <BottomSheet visible={editor !== null && !regionPickerOpen && !secondaryPickerOpen} onRequestClose={() => setEditor(null)} title={translate(editor?.address ? "addressesEditTitle" : "addressesAddTitle")} maxHeight="92%">
+      <BottomSheet visible={editor !== null && !regionPickerOpen && !secondaryPickerOpen} onRequestClose={() => setEditor(null)} title={translate(editor?.address ? "addressesEditTitle" : "addressesAddTitle")} maxHeight="92%" scrollable={false}>
             <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.formContent}>
 
               <FormLabel>{translate("addressesType")}</FormLabel>
@@ -264,7 +264,7 @@ export default function AddressesScreen() {
             </ScrollView>
       </BottomSheet>
 
-      <BottomSheet visible={regionPickerOpen} onRequestClose={() => setRegionPickerOpen(false)} title={regionOptions.data ? getRegionLevelDisplayName(regionOptions.data.selectedLevel, language) : ""} maxHeight="78%">
+      <BottomSheet visible={regionPickerOpen} onRequestClose={() => setRegionPickerOpen(false)} title={regionOptions.data ? getRegionLevelDisplayName(regionOptions.data.selectedLevel, language) : ""} maxHeight="78%" scrollable={false}>
         <ScrollView>
           {(regionOptions.data?.regions ?? []).map((item) => <PressableSurface key={item.id} onPress={() => {
             setRegionId(item.id);
@@ -277,7 +277,7 @@ export default function AddressesScreen() {
         </ScrollView>
       </BottomSheet>
 
-      <BottomSheet visible={secondaryPickerOpen} onRequestClose={() => setSecondaryPickerOpen(false)} title={secondaryOptions.data ? getRegionLevelDisplayName(secondaryOptions.data.selectedLevel, language) : ""} maxHeight="78%">
+      <BottomSheet visible={secondaryPickerOpen} onRequestClose={() => setSecondaryPickerOpen(false)} title={secondaryOptions.data ? getRegionLevelDisplayName(secondaryOptions.data.selectedLevel, language) : ""} maxHeight="78%" scrollable={false}>
         {secondaryOptions.isPending ? <PageSkeleton variant="list" rows={3} /> : null}
         {secondaryOptions.isError ? <UiText tone="danger">{translate("checkoutDairaLoadError")}</UiText> : null}
         <ScrollView>
