@@ -40,6 +40,7 @@ export const themeColors = {
     foregroundSecondary: "#5C5B55",
     foregroundMuted: "#5C5B55",
     border: "#B0AEA5",
+    divider: "#E8E6DC",
     input: "#E8E6DC",
     inputBorder: "#8A887F",
     focus: "#D97757"
@@ -53,6 +54,7 @@ export const themeColors = {
     foregroundSecondary: "#B0AEA5",
     foregroundMuted: "#B0AEA5",
     border: "#4A4942",
+    divider: "#30302A",
     input: "#252520",
     inputBorder: "#77756D",
     focus: "#D97757"
