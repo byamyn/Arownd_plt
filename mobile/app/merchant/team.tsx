@@ -11,7 +11,6 @@ import {
   AppHeader,
   BottomSheet,
   Button,
-  Card,
   Icon,
   PressableSurface,
   RefreshableScrollView,
