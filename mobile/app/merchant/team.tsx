@@ -189,7 +189,7 @@ export default function MerchantTeamScreen() {
         {members.isPending ? (
           <View style={styles.center}><Spinner /></View>
         ) : members.data?.length ? (
-          <Card contentStyle={styles.listCard}>
+          <View style={styles.listCard}>
             {members.data.map((member, index) => (
               <View key={member.user_id} style={[styles.member, index > 0 && styles.memberDivider]}>
                 <View style={styles.memberTop}>
@@ -230,9 +230,9 @@ export default function MerchantTeamScreen() {
                 ) : null}
               </View>
             ))}
-          </Card>
+          </View>
         ) : (
-          <Card><UiText style={styles.secondaryText}>{translate("merchantTeamEmpty")}</UiText></Card>
+          <UiText style={styles.secondaryText}>{translate("merchantTeamEmpty")}</UiText>
         )}
 
         <View style={styles.sectionHeader}>
@@ -265,7 +265,7 @@ export default function MerchantTeamScreen() {
             })}
           </Card>
         ) : (
-          <Card><UiText style={styles.secondaryText}>{translate("merchantTeamInvitationsEmpty")}</UiText></Card>
+          <UiText style={styles.secondaryText}>{translate("merchantTeamInvitationsEmpty")}</UiText>
         )}
 
         <Button
@@ -361,9 +361,9 @@ function createStyles(theme: ReturnType<typeof useAppTheme>) {
     content: { padding: designTokens.spacing.xl, paddingBottom: designTokens.spacing.xxl, gap: designTokens.spacing.lg },
     subtitle: { color: theme.colors.muted, fontSize: theme.typography.caption + 1, lineHeight: 20 },
     sectionHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: designTokens.spacing.sm },
-    listCard: { padding: 0, gap: 0 },
+    listCard: { gap: 0 },
     member: { padding: designTokens.spacing.md, gap: designTokens.spacing.md },
-    memberDivider: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: theme.colors.border },
+    memberDivider: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: theme.colors.divider },
     memberTop: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.sm },
     memberIdentity: { flex: 1, minWidth: 0, gap: 3 },
     secondaryText: { color: theme.colors.muted, fontSize: theme.typography.caption, lineHeight: 18 },
