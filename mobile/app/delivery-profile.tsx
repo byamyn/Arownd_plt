@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState, type ComponentRef } from "react";
 import { Modal, ScrollView, StyleSheet, View } from "react-native";
 
 import { PageSkeleton, CustomerScreen, ErrorState } from "@/components/customer-ui";
-import { AppHeader, Button, Card, Caption, FormLabel, Icon, IconButton, PressableSurface, Spinner, Text as UiText, TextField } from "@/components/ui";
+import { AppHeader, Button, Caption, FormLabel, Icon, IconButton, PressableSurface, Spinner, Text as UiText, TextField } from "@/components/ui";
 import { fetchCheckoutRegions } from "@/lib/checkout";
 import { fetchDeliveryProfileCommunes, fetchMyDeliveryProfile, saveMyDeliveryProfile } from "@/lib/delivery-profile";
 import { DeliveryProfileSchema, type DeliveryProfileInput } from "@/lib/delivery-profile-state";
@@ -188,7 +188,7 @@ export default function DeliveryProfileScreen() {
   </View>}>
     <AppHeader title={translate("deliveryProfileTitle")} leading={<IconButton accessibilityLabel={translate("back")} onPress={() => router.back()} icon={<Icon name="arrow-right" size={20} />} variant="ghost" />} />
     <Caption>{translate("deliveryProfileSubtitle")}</Caption>
-    <Card style={styles.panel} contentStyle={{ gap: designTokens.spacing.md, padding: designTokens.spacing.lg }}>
+    <View style={styles.formSection}>
       <View ref={(node) => { fieldRefs.current.full_name = node; }}>
         <FormLabel>{translate("fullNamePlaceholder")}</FormLabel>
         <TextField accessibilityLabel={translate("fullNamePlaceholder")} value={fullName} onChangeText={(value) => { setFullName(value); clearSaveFeedback("full_name"); }} maxLength={120} placeholder={translate("fullNamePlaceholder")} style={fieldStyle} textAlign="right" error={fieldErrors.full_name} />
@@ -238,7 +238,7 @@ export default function DeliveryProfileScreen() {
       {communes.isError ? <UiText tone="danger">{translate("deliveryProfileCommunesError")}</UiText> : null}
       </View>
       {formError ? <UiText tone="danger">{formError}</UiText> : null}
-    </Card>
+    </View>
     <Caption>{translate("deliveryProfileDefaultAreaNote")}</Caption>
     <Modal visible={picker !== null} transparent animationType="fade" onRequestClose={() => setPicker(null)}>
       <View style={styles.backdrop}>
