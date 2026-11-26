@@ -238,7 +238,7 @@ export function ProfileSettingsSection() {
         </Card>
       </View>
 
-      <BottomSheet visible={activeSheet === "account"} onRequestClose={closeSheet} title={translate("settingsAccount")} height="82%" maxHeight="94%">
+      <BottomSheet visible={activeSheet === "account"} onRequestClose={closeSheet} title={translate("settingsAccount")} closeIcon="chevron-right" height="82%" maxHeight="94%">
         <View style={styles.accountHero}>
           <View style={styles.accountAvatarWrap}>
             {profileVisibility.data?.avatar_url ? <NativeImage source={{ uri: profileVisibility.data.avatar_url }} style={styles.accountHeroAvatar} /> : <View style={[styles.accountHeroAvatar, styles.accountHeroPlaceholder]}><Icon name="user" size={34} color={theme.colors.subtle} /></View>}
