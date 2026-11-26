@@ -199,6 +199,7 @@ export async function fetchDrivingRoute(
   if (selfHostedRoutingUrl) {
     return fetchValhallaRoute(selfHostedRoutingUrl, origin, destination, signal);
   }
+  if (!__DEV__) throw new Error("routing_service_not_configured");
 
   // Temporary development fallback only. Production builds must set EXPO_PUBLIC_ROUTING_URL.
   const coordinates = [
