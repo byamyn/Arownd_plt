@@ -171,24 +171,41 @@ export type MapStoreViewport = {
 
 export async function fetchMapStoresInBounds(
   viewport: MapStoreViewport,
+  countryCode: string,
   includeStoreId?: string | null,
   signal?: AbortSignal
 ): Promise<MapStore[]> {
-  let request = getSupabaseClient().rpc("fetch_map_stores_in_view", {
-    p_west: viewport.west,
-    p_south: viewport.south,
-    p_east: viewport.east,
-    p_north: viewport.north,
-    p_center_lat: viewport.centerLatitude,
-    p_center_long: viewport.centerLongitude,
-    p_include_store_id: includeStoreId ?? null,
-    p_limit: 1000
-  });
-  if (signal) request = request.abortSignal(signal);
-  const { data, error } = await request;
+  if (!/^[A-Z]{2}$/.test(countryCode)) throw new Error("INVALID_BROWSING_COUNTRY");
 
-  if (error) throw error;
-  return MapStoreSchema.array().parse(data as unknown);
+  const pageSize = 1000;
+  const storesById = new Map<string, MapStore>();
+  let offset = 0;
+
+  while (true) {
+    let request = getSupabaseClient().rpc("fetch_map_stores_in_view", {
+      p_west: viewport.west,
+      p_south: viewport.south,
+      p_east: viewport.east,
+      p_north: viewport.north,
+      p_center_lat: viewport.centerLatitude,
+      p_center_long: viewport.centerLongitude,
+      p_include_store_id: includeStoreId ?? null,
+      p_limit: pageSize,
+      p_country_code: countryCode,
+      p_offset: offset
+    });
+    if (signal) request = request.abortSignal(signal);
+    const { data, error } = await request;
+
+    if (error) throw error;
+    const page = MapStoreSchema.array().parse(data as unknown);
+    for (const store of page) storesById.set(store.id, store);
+
+    if (page.length < pageSize) break;
+    offset += pageSize;
+  }
+
+  return [...storesById.values()];
 }
 
 export async function fetchFeaturedStores(signal?: AbortSignal): Promise<FeaturedStore[]> {
