@@ -93,7 +93,7 @@ export function ReviewPanel({ targetType, targetId }: { targetType: "product" | 
         <Button label={translate("login")} onPress={() => router.push("/login")} fullWidth />
       ) : null}
       {reviews.data?.length ? reviews.data.map(item => (
-        <View key={item.id} style={[styles.review, { borderTopColor: theme.colors.border }]}>
+        <View key={item.id} style={[styles.review, { borderTopColor: theme.colors.divider }]}>
           <View style={styles.reviewHeader}>
             <UiText style={[styles.caption, { color: theme.colors.muted }]}>{new Intl.DateTimeFormat("ar-DZ", { dateStyle: "medium" }).format(new Date(item.created_at))}</UiText>
             <RatingStars value={item.rating} size={16} />
