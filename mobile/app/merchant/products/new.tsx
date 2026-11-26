@@ -532,7 +532,7 @@ export default function MerchantNewProductScreen() {
         ) : null}
       </MediaViewer>
 
-      <BottomSheet visible={categoryPickerOpen} onRequestClose={() => setCategoryPickerOpen(false)} title={translate("merchantProductChooseCategory")} maxHeight="85%">
+      <BottomSheet visible={categoryPickerOpen} onRequestClose={() => setCategoryPickerOpen(false)} title={translate("merchantProductChooseCategory")} maxHeight="85%" scrollable={false}>
             <ScrollView contentContainerStyle={styles.categoryList}>
               {categoryGroups.map((group) => (
                 <View key={group.parent.id} style={styles.categoryGroup}>
