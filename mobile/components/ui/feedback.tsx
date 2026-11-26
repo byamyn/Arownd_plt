@@ -376,6 +376,7 @@ export function BottomSheet({
   onRequestClose,
   title,
   children,
+  closeIcon = "x",
   maxHeight = "85%",
   height
 }: {
@@ -383,6 +384,7 @@ export function BottomSheet({
   onRequestClose: () => void;
   title: string;
   children: ReactNode;
+  closeIcon?: IconName;
   maxHeight?: ViewStyle["maxHeight"];
   height?: ViewStyle["height"];
 }) {
@@ -401,7 +403,7 @@ export function BottomSheet({
               hitSlop={8}
               style={{ width: 44, height: 44, alignItems: "center", justifyContent: "center" }}
             >
-              <Icon name="x" size={20} color={theme.colors.foreground} accessibilityHidden />
+              <Icon name={closeIcon} size={20} color={theme.colors.foreground} accessibilityHidden />
             </Pressable>
             <View pointerEvents="none" style={{ position: "absolute", start: 52, end: 52, alignItems: "center", justifyContent: "center" }}>
               <UiText accessibilityRole="header" numberOfLines={1} style={{ color: theme.colors.foreground, fontSize: theme.typography.body, fontWeight: theme.fontWeights.extrabold, textAlign: "center" }}>{title}</UiText>
