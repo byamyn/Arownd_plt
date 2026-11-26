@@ -4,7 +4,7 @@ import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { AppHeader, Button, Card, ErrorState, Image as UiImage, LoadingState, RefreshableScrollView, Text as UiText, TextField } from "@/components/ui";
+import { AppHeader, Button, ErrorState, Image as UiImage, LoadingState, RefreshableScrollView, Text as UiText, TextField } from "@/components/ui";
 import {
   fetchStoreVerificationQueue,
   fetchStoreVerificationReviewerAccess,
@@ -155,7 +155,7 @@ export default function StoreVerificationModerationScreen() {
                 style={styles.actionButton}
               />
             </View>
-          </Card>
+          </View>
         ))}
         <Button
           label={translate("merchantRetry")}
@@ -214,7 +214,8 @@ function createStyles(theme: AppTheme) {
     content: { padding: designTokens.spacing.lg, paddingBottom: designTokens.spacing.xl, gap: designTokens.spacing.md },
     subtitle: { fontSize: designTokens.typography.caption + 1, lineHeight: 20, textAlign: "auto" },
     count: { fontSize: designTokens.typography.body, fontWeight: designTokens.fontWeights.bold },
-    requestRow: { paddingVertical: designTokens.spacing.lg, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.divider, gap: designTokens.spacing.md },\n    emptyState: { paddingVertical: designTokens.spacing.lg },
+    requestRow: { paddingVertical: designTokens.spacing.lg, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.divider, gap: designTokens.spacing.md },
+    emptyState: { paddingVertical: designTokens.spacing.lg },
     storeHeader: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md },
     logo: { width: 64, height: 64, borderRadius: designTokens.radius.md },
     storeInfo: { flex: 1, gap: 4 },
@@ -223,7 +224,6 @@ function createStyles(theme: AppTheme) {
     noteInput: { minHeight: 82, textAlignVertical: "top" },
     actions: { flexDirection: "row", gap: designTokens.spacing.sm },
     actionButton: { flex: 1 },
-    emptyCard: { padding: designTokens.spacing.lg },
     emptyTitle: { fontSize: designTokens.typography.body, fontWeight: designTokens.fontWeights.bold, textAlign: "auto" },
     error: { fontSize: designTokens.typography.caption, textAlign: "auto" }
   });
