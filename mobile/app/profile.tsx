@@ -228,14 +228,6 @@ export default function ProfileScreen() {
                 avatarSize={64}
                 style={styles.identityRow}
               />
-              <PressableSurface
-                accessibilityRole="button"
-                accessibilityLabel={translate("profileEditAction")}
-                onPress={() => setAccountSheet("delivery")}
-                style={styles.identityEditLink}
-              >
-                <UiText weight="700" style={{ color: theme.colors.accent, textDecorationLine: "underline" }}>{translate("profileEditAction")}</UiText>
-              </PressableSurface>
             </View>
             {avatarPickerError || uploadAvatar.isError || removeAvatar.isError ? (
               <Caption>{translate("profileAvatarError")}</Caption>
@@ -318,23 +310,6 @@ export default function ProfileScreen() {
                 <View style={[styles.accountLinkDivider, { backgroundColor: theme.colors.border }]} />
               </>
             ) : null}
-            <PressableSurface accessibilityRole="button" accessibilityLabel={translate("profileAddresses")} onPress={() => setAccountSheet("addresses")} style={styles.accountLinkRow}>
-              <View style={[styles.accountLinkIcon, { backgroundColor: theme.colors.surfaceSecondary }]}><Icon name="map-pin" size={20} color={theme.colors.accentOnSurface} /></View>
-              <View style={styles.accountLinkText}>
-                <UiText weight="700">{translate("profileAddresses")}</UiText>
-                <Caption>{translate("profileAddressesHint")}</Caption>
-              </View>
-              <Icon name="chevron-left" size={18} color={theme.colors.subtle} />
-            </PressableSurface>
-            <View style={[styles.accountLinkDivider, { backgroundColor: theme.colors.border }]} />
-            <PressableSurface accessibilityRole="button" accessibilityLabel={translate("profileInvite")} onPress={() => setAccountSheet("invite")} style={styles.accountLinkRow}>
-              <View style={[styles.accountLinkIcon, { backgroundColor: theme.colors.surfaceSecondary }]}><Icon name="gift" size={20} color={theme.colors.accentOnSurface} /></View>
-              <View style={styles.accountLinkText}>
-                <UiText weight="700">{translate("profileInvite")}</UiText>
-                <Caption>{translate("profileInviteHint")}</Caption>
-              </View>
-              <Icon name="chevron-left" size={18} color={theme.colors.subtle} />
-            </PressableSurface>
           </Card>
 
 
