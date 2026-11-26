@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
   retry: { fontWeight: "700", padding: 8 },
   suggestion: { fontSize: 13, fontWeight: "600" },
   list: { gap: 10 },
-  country: { minHeight: 76, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.divider, paddingHorizontal: 14, paddingVertical: 12, flexDirection: "row", alignItems: "center", gap: 12 },
+  country: { minHeight: 76, borderBottomWidth: StyleSheet.hairlineWidth, paddingHorizontal: 14, paddingVertical: 12, flexDirection: "row", alignItems: "center", gap: 12 },
   flag: { fontSize: 28 },
   countryDetails: { flex: 1, gap: 4 },
   countryName: { fontSize: 15, fontWeight: "700" },
