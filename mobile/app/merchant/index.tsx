@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Redirect, router } from "expo-router";
 import { StyleSheet, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";\nimport { StyleSheet } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Button, ErrorState, MetricCardSkeleton, RefreshableScrollView, Text as UiText } from "@/components/ui";
 import { fetchMerchantAccess } from "@/lib/merchant";
