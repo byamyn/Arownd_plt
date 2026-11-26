@@ -39,7 +39,7 @@ import {
 import { translate, useLanguage } from "@/lib/i18n";
 import { getLocalizedMerchantCategoryLabel } from "@/lib/locale-data";
 import { designTokens, useAppTheme, type AppTheme } from "@/lib/theme";
-import { BottomSheet, AppHeader, Button, Card, ErrorState, Icon, Image as UiImage, PageSkeleton, MediaViewer, Spinner, PressableSurface, Text as UiText, TextField, RefreshableScrollView } from "@/components/ui";
+import { BottomSheet, AppHeader, Button, ErrorState, Icon, Image as UiImage, PageSkeleton, MediaViewer, Spinner, PressableSurface, Text as UiText, TextField, RefreshableScrollView } from "@/components/ui";
 
 type ProductForm = {
   name: string;
@@ -266,7 +266,7 @@ export default function MerchantNewProductScreen() {
         >
           <AppHeader title={translate("merchantProductCreateTitle")}/>
 
-          <Card contentStyle={styles.card}>
+          <View style={styles.formSection}>
             <View style={styles.sectionHeader}>
               <View style={styles.sectionTitles}>
                 <UiText style={[styles.sectionTitle, { color: theme.colors.foreground }]}>
@@ -350,7 +350,7 @@ export default function MerchantNewProductScreen() {
                 <UiText style={[styles.errorText, { color: theme.mode === "light" ? theme.colors.dangerText : theme.colors.danger }]}>{imageError}</UiText>
               </View>
             ) : null}
-          </Card>
+          </View>
 
           <Card contentStyle={styles.card}>
             <FormField label={translate("merchantProductNameLabel")} hint={translate("merchantProductNameHint")} error={fieldErrors.name} theme={theme}>
@@ -512,7 +512,7 @@ export default function MerchantNewProductScreen() {
             ) : null}
 
             <Button label={translate("merchantProductCreateSubmit")} onPress={() => void submit()} loading={submitting} disabled={imagePickerBusy} fullWidth />
-          </Card>
+          </View>
         </RefreshableScrollView>
       </KeyboardAvoidingView>
 
@@ -692,7 +692,7 @@ function createStyles(theme: AppTheme) {
     eyebrow: { fontSize: designTokens.typography.caption - 1, fontWeight: designTokens.fontWeights.extrabold },
     title: { width: "100%", fontSize: designTokens.typography.display - 4, lineHeight: 33, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
     subtitle: { width: "100%", fontSize: designTokens.typography.caption + 1, lineHeight: 20, textAlign: "auto" },
-    card: { padding: designTokens.spacing.lg, gap: designTokens.spacing.xl },
+    formSection: { paddingVertical: designTokens.spacing.lg, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.divider, gap: designTokens.spacing.xl },
     row: { flexDirection: "row", gap: designTokens.spacing.md },
     half: { flex: 1 },
     field: { gap: designTokens.spacing.xs },
