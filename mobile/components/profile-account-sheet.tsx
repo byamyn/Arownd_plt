@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Image as NativeImage, Share, ScrollView, View } from "react-native";
+import { Share, ScrollView, View } from "react-native";
 import * as Linking from "expo-linking";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -17,24 +17,53 @@ import { getRegionDisplayName, getRegionLevelDisplayName, normalizePhoneForCalli
 import { translate, useLanguage } from "@/lib/i18n";
 import { designTokens, useAppTheme } from "@/lib/theme";
 
-export type ProfileAccountSection = "delivery" | "addresses" | "invite";
+export type ProfileAccountSection = "delivery" | "addresses" | "invite" | "location-addresses";
 
 type DeliveryPickerItem = { id: number | string; name: string };
 
-export function ProfileAccountSheet({ section, onManageAvatar }: { section: ProfileAccountSection; onManageAvatar?: () => void }) {
+export function ProfileAccountSheet({ section }: { section: ProfileAccountSection; onManageAvatar?: () => void }) {
+  const { language } = useLanguage();
+  const [locationSection, setLocationSection] = useState<"overview" | "delivery" | "addresses">("overview");
+
   return (
     <View style={{ flex: 1, maxHeight: "100%", minHeight: 0, gap: designTokens.spacing.md }}>
-      {section === "delivery" ? <DeliveryContent onManageAvatar={onManageAvatar} /> : section === "addresses" ? <AddressesContent /> : <InviteContent />}
+      {section === "location-addresses" ? (
+        locationSection === "overview" ? (
+          <View style={{ gap: designTokens.spacing.md }}>
+            <Caption>{translate("locationAddressesSubtitle")}</Caption>
+            <PressableSurface accessibilityRole="button" onPress={() => setLocationSection("delivery")} style={{ flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md, padding: designTokens.spacing.md, borderRadius: designTokens.radius.lg, borderWidth: 1, borderColor: designTokens.colors?.border }}>
+              <Icon name="map-pin" size={22} />
+              <View style={{ flex: 1, gap: 3 }}>
+                <UiText weight="700">{translate("locationAddressesGeographic")}</UiText>
+                <Caption>{translate("locationAddressesGeographicHint")}</Caption>
+              </View>
+              <Icon name={language === "ar" ? "chevron-left" : "chevron-right"} size={18} />
+            </PressableSurface>
+            <PressableSurface accessibilityRole="button" onPress={() => setLocationSection("addresses")} style={{ flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md, padding: designTokens.spacing.md, borderRadius: designTokens.radius.lg, borderWidth: 1, borderColor: designTokens.colors?.border }}>
+              <Icon name="map" size={22} />
+              <View style={{ flex: 1, gap: 3 }}>
+                <UiText weight="700">{translate("locationAddressesDelivery")}</UiText>
+                <Caption>{translate("locationAddressesDeliveryHint")}</Caption>
+              </View>
+              <Icon name={language === "ar" ? "chevron-left" : "chevron-right"} size={18} />
+            </PressableSurface>
+          </View>
+        ) : (
+          <View style={{ flex: 1, minHeight: 0, gap: designTokens.spacing.md }}>
+            <Button label={translate("back")} variant="ghost" onPress={() => setLocationSection("overview")} />
+            <Heading level={3}>{translate(locationSection === "delivery" ? "locationAddressesGeographic" : "locationAddressesDelivery")}</Heading>
+            {locationSection === "delivery" ? <DeliveryContent /> : <AddressesContent />}
+          </View>
+        )
+      ) : section === "delivery" ? <DeliveryContent /> : section === "addresses" ? <AddressesContent /> : <InviteContent />}
     </View>
   );
 }
 
-function DeliveryContent({ onManageAvatar }: { onManageAvatar: (() => void) | undefined }) {
+function DeliveryContent() {
   const { language } = useLanguage();
   const theme = useAppTheme();
   const queryClient = useQueryClient();
-  const [fullName, setFullName] = useState("");
-  const [phone, setPhone] = useState("");
   const [regionId, setRegionId] = useState<number | null>(null);
   const [secondaryRegionId, setSecondaryRegionId] = useState<number | null>(null);
   const [commune, setCommune] = useState("");
@@ -47,8 +76,6 @@ function DeliveryContent({ onManageAvatar }: { onManageAvatar: (() => void) | un
   const [initialized, setInitialized] = useState(false);
   useEffect(() => {
     if (!profile.isSuccess || initialized) return;
-    setFullName(profile.data?.full_name ?? "");
-    setPhone(profile.data?.phone ?? "");
     setRegionId(profile.data?.region_id ?? null);
     setSecondaryRegionId(profile.data?.secondary_region_id ?? null);
     setCommune(profile.data?.commune ?? "");
@@ -67,9 +94,10 @@ function DeliveryContent({ onManageAvatar }: { onManageAvatar: (() => void) | un
   });
   const submit = () => {
     if (!regions.data) return;
-    if (fullName.trim().length < 2 || fullName.trim().length > 120) { setError(translate("deliveryProfileNameError")); return; }
+    const fullName = profile.data?.full_name?.trim() ?? "";
+    if (fullName.length < 2 || fullName.length > 120) { setError(translate("deliveryProfileNameError")); return; }
     let normalizedPhone = "";
-    try { normalizedPhone = normalizePhoneForCallingCode(phone, regions.data.callingCode); }
+    try { normalizedPhone = normalizePhoneForCallingCode(profile.data?.phone ?? "", regions.data.callingCode); }
     catch { setError(translate("deliveryProfilePhoneError")); return; }
     if (regionId === null) { setError(translate("deliveryProfileRegionError")); return; }
     if (regions.data.levels[1]?.is_required && secondaryRegionId === null) { setError(translate("deliveryProfileSecondaryRegionError")); return; }
@@ -95,7 +123,7 @@ function DeliveryContent({ onManageAvatar }: { onManageAvatar: (() => void) | un
       <ScrollView keyboardShouldPersistTaps="handled">
         {items.map((item) => <PressableSurface key={String(item.id)} onPress={() => {
           if (picker === "region") { setRegionId(Number(item.id)); setSecondaryRegionId(null); setCommune(""); }
-          else if (picker === "secondary") setSecondaryRegionId(Number(item.id));
+          else if (picker === "secondary") { setSecondaryRegionId(Number(item.id)); setCommune(""); }
           else setCommune(item.name);
           setPicker(null);
         }} style={{ paddingVertical: 13, borderBottomWidth: 1, borderBottomColor: theme.colors.border }}>
@@ -105,28 +133,7 @@ function DeliveryContent({ onManageAvatar }: { onManageAvatar: (() => void) | un
     </View>;
   }
   return <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ gap: designTokens.spacing.md, paddingBottom: designTokens.spacing.lg }}>
-    <View style={{ flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md }}>
-      {profile.data?.avatar_url ? (
-        <NativeImage source={{ uri: profile.data.avatar_url }} style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: theme.colors.surfaceSecondary }} />
-      ) : (
-        <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: theme.colors.surfaceSecondary, alignItems: "center", justifyContent: "center" }}>
-          <Icon name="user" size={24} color={theme.colors.subtle} />
-        </View>
-      )}
-      <View style={{ flex: 1, gap: 3 }}>
-        <UiText weight="700">{translate("profileAvatarOptionsTitle")}</UiText>
-        <Caption>{translate("profileAvatarChange")}</Caption>
-      </View>
-      {onManageAvatar ? <Button label={translate("profileAvatarChange")} size="sm" variant="outline" onPress={onManageAvatar} /> : null}
-    </View>
-    <Caption>{translate("deliveryProfileSubtitle")}</Caption>
-    <View style={{ gap: 4 }}>
-      <FormLabel>{translate("fullNamePlaceholder")}</FormLabel>
-      <UiText weight="600">{fullName || "—"}</UiText>
-      <Caption>{profile.data?.username ? `@${profile.data.username}` : ""}</Caption>
-    </View>
-    <FormLabel>{translate("checkoutPhonePlaceholder")}</FormLabel>
-    <TextField value={phone} onChangeText={setPhone} placeholder={translate("checkoutPhonePlaceholder")} keyboardType="phone-pad" />
+    <Caption>{translate("locationAddressesGeographicHint")}</Caption>
     <FormLabel>{getRegionLevelDisplayName(regions.data.selectedLevel, language)}</FormLabel>
     <Button label={selectedRegion ? getRegionDisplayName(selectedRegion, language) : getRegionLevelDisplayName(regions.data.selectedLevel, language)} variant="outline" onPress={() => setPicker("region")} fullWidth />
     {regions.data.levels[1] ? <>
