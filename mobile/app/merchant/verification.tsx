@@ -3,7 +3,7 @@ import { Redirect, router } from "expo-router";
 import { StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { AppHeader, Button, Card, ErrorState, LoadingState, PressableSurface, RefreshableScrollView, Text as UiText } from "@/components/ui";
+import { AppHeader, Button, ErrorState, LoadingState, PressableSurface, RefreshableScrollView, Text as UiText } from "@/components/ui";
 import { fetchMerchantAccess } from "@/lib/merchant";
 import {
   fetchMyStoreVerificationOverview,
@@ -64,7 +64,7 @@ export default function MerchantVerificationScreen() {
           {translate("verificationMerchantSubtitle")}
         </UiText>
 
-        <Card contentStyle={styles.statusCard}>
+        <View style={styles.statusSection}>
           <UiText style={[styles.statusTitle, { color: theme.colors.foreground }]}>
             {approved
               ? translate("verificationStatusApproved")
@@ -95,9 +95,9 @@ export default function MerchantVerificationScreen() {
               <UiText style={[styles.statusHint, { color: theme.colors.muted }]}>{latestRequest.review_note}</UiText>
             </View>
           ) : null}
-        </Card>
+        </View>
 
-        <Card contentStyle={styles.requirementsCard}>
+        <View style={styles.requirementsSection}>
           <UiText style={[styles.sectionTitle, { color: theme.colors.foreground }]}>
             {translate("verificationRequirementsTitle")}
           </UiText>
@@ -112,13 +112,13 @@ export default function MerchantVerificationScreen() {
           <PressableSurface
             accessibilityRole="button"
             onPress={() => router.push("/merchant/settings")}
-            style={[styles.settingsLink, { borderColor: theme.colors.border }]}
+            style={[styles.settingsLink, { borderColor: theme.colors.divider }]}
           >
             <UiText style={[styles.settingsLinkText, { color: theme.colors.accentMuted }]}>
               {translate("verificationEditStoreDetails")}
             </UiText>
           </PressableSurface>
-        </Card>
+        </View>
 
         {submit.isError ? (
           <UiText style={[styles.error, { color: theme.colors.danger }]}>
@@ -190,12 +190,12 @@ function createStyles(theme: AppTheme) {
     safe: { flex: 1 },
     content: { padding: designTokens.spacing.xl, paddingBottom: designTokens.spacing.xxl, gap: designTokens.spacing.lg },
     subtitle: { fontSize: designTokens.typography.caption + 1, lineHeight: 20, textAlign: "auto" },
-    statusCard: { gap: designTokens.spacing.md, borderWidth: StyleSheet.hairlineWidth, borderColor: theme.colors.border },
+    statusSection: { paddingVertical: designTokens.spacing.lg, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.divider, gap: designTokens.spacing.md },
     statusTitle: { fontSize: designTokens.typography.body + 1, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
     statusHint: { fontSize: designTokens.typography.caption + 1, lineHeight: 20, textAlign: "auto" },
     reviewNote: { padding: designTokens.spacing.md, borderRadius: designTokens.radius.sm, gap: 4 },
     reviewNoteTitle: { fontSize: designTokens.typography.caption, fontWeight: designTokens.fontWeights.bold, textAlign: "auto" },
-    requirementsCard: { gap: designTokens.spacing.lg, borderWidth: StyleSheet.hairlineWidth, borderColor: theme.colors.border },
+    requirementsSection: { paddingVertical: designTokens.spacing.lg, gap: designTokens.spacing.lg },
     sectionTitle: { fontSize: designTokens.typography.body, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
     settingsLink: { borderWidth: StyleSheet.hairlineWidth, borderRadius: designTokens.radius.sm, padding: designTokens.spacing.md, alignItems: "center" },
     settingsLinkText: { fontSize: designTokens.typography.caption + 1, fontWeight: designTokens.fontWeights.bold },
