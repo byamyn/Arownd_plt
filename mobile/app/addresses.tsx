@@ -8,7 +8,6 @@ import {
   AppHeader,
   Button,
   BottomSheet,
-  Card,
   Caption,
   ConfirmDialog,
   Heading,
@@ -188,14 +187,14 @@ export default function AddressesScreen() {
       />
 
       {addresses.data.length === 0 ? (
-        <Card style={styles.addressCard} contentStyle={{ alignItems: "center", paddingVertical: designTokens.spacing.xxl }}>
+        <View style={styles.emptyAddresses}>
           <Icon name="map-pin" size={30} color={theme.colors.muted} />
           <Heading level={3}>{translate("addressesEmpty")}</Heading>
           <Caption align="center">{translate("addressesEmptyHint")}</Caption>
-        </Card>
+        </View>
       ) : addresses.data.map((address) => (
         <SwipeToDelete key={address.id} deleteLabel={translate("addressesDelete")} onDelete={() => setDeleteTarget(address)}>
-        <Card style={styles.addressCard} contentStyle={styles.addressCardContent}>
+        <View style={styles.addressCard}>
           <View style={styles.cardHeader}>
             <UiText weight="800">
               {translate(address.label === "home" ? "addressesHome" : address.label === "work" ? "addressesWork" : "addressesOther")}
@@ -218,7 +217,7 @@ export default function AddressesScreen() {
             <Action label={translate("addressesEdit")} onPress={() => openEditor(address)} />
             <Action label={translate("addressesDelete")} onPress={() => setDeleteTarget(address)} danger />
           </View>
-        </Card>
+        </View>
         </SwipeToDelete>
       ))}
 
@@ -407,14 +406,14 @@ function Action({
 function createStyles(theme: AppTheme) {
   return StyleSheet.create({
     addressCard: {
-      backgroundColor: theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface,
-      borderColor: theme.mode === "light" ? "transparent" : theme.colors.border,
-      borderRadius: theme.radius.xl
+      backgroundColor: "transparent",
+      borderColor: "transparent",
+      borderRadius: 0,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: theme.colors.divider,
+      paddingVertical: designTokens.spacing.md
     },
-    addressCardContent: {
-      gap: designTokens.spacing.md,
-      padding: designTokens.spacing.lg
-    },
+    emptyAddresses: { alignItems: "center", paddingVertical: designTokens.spacing.xxl, gap: designTokens.spacing.sm },
     cardHeader: {
       flexDirection: "row",
       justifyContent: "space-between",
@@ -428,7 +427,7 @@ function createStyles(theme: AppTheme) {
       marginTop: designTokens.spacing.xs,
       paddingTop: designTokens.spacing.md,
       borderTopWidth: StyleSheet.hairlineWidth,
-      borderTopColor: theme.colors.border
+      borderTopColor: theme.colors.divider
     },
     formContent: { gap: designTokens.spacing.md, paddingBottom: designTokens.spacing.lg },
     field: { gap: designTokens.spacing.xs, marginBottom: designTokens.spacing.xs },
