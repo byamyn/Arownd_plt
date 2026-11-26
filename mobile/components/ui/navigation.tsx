@@ -27,7 +27,7 @@ export function AppHeader({
   const shouldShowBackButton = showBackButton || Boolean(leading);
 
   return (
-    <View style={[styles.header, { gap: theme.spacing.md }, style]}>
+    <View style={[styles.header, { gap: theme.spacing.sm }, style]}>
       {shouldShowBackButton ? (
         <Pressable
           accessibilityRole="button"
@@ -124,13 +124,13 @@ export function SegmentedControl({
 
 const styles = StyleSheet.create({
   backButton: {
-    width: 44,
-    height: 44,
+    width: 40,
+    height: 40,
     alignItems: "center",
     justifyContent: "center"
   },
   header: {
-    minHeight: designTokens.dimensions.controlHeight.lg,
+    minHeight: designTokens.dimensions.controlHeight.md,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between"
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
   },
   trailing: {
     flexDirection: "row",
-    gap: designTokens.spacing.sm
+    gap: designTokens.spacing.xs
   },
   headerTitle: {
     flex: 1,
