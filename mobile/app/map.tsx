@@ -224,7 +224,7 @@ export default function MapScreen() {
 
     setHasLocationPermission(true);
     const position = await Location.getCurrentPositionAsync({
-      accuracy: Location.Accuracy.BestForNavigation
+      accuracy: Location.Accuracy.Balanced
     });
     const currentPosition: RoutePoint = {
       latitude: position.coords.latitude,
@@ -246,14 +246,11 @@ export default function MapScreen() {
     void Location.watchPositionAsync(
       {
         accuracy: Location.Accuracy.Balanced,
-        timeInterval: 1_000,
-        distanceInterval: 3
+        timeInterval: 2_000,
+        distanceInterval: 5
       },
       (nextPosition) => {
         if (!isActive || watchGenerationRef.current !== generation) return;
-        const reportedAccuracy = nextPosition.coords.accuracy;
-        if (reportedAccuracy !== null && reportedAccuracy > 50) return;
-        if (Date.now() - nextPosition.timestamp > 15_000) return;
         const next: RoutePoint = {
           latitude: nextPosition.coords.latitude,
           longitude: nextPosition.coords.longitude
