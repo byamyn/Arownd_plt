@@ -7,6 +7,7 @@ import {
   formatDuration,
   getActiveStepIndex,
   getManeuverInstruction,
+  getRemainingRouteCoordinates,
   getRemainingRouteMetrics,
   type RouteStep
 } from "./map-routing";
@@ -96,6 +97,39 @@ describe("map routing helpers", () => {
       duration: 100
     };
     expect(getRemainingRouteMetrics(route, 1)).toEqual({ distance: 80, duration: 15 });
+  });
+
+  it("returns the route geometry from the nearest point to the destination", () => {
+    const route = [
+      { longitude: 0, latitude: 0 },
+      { longitude: 0.01, latitude: 0 },
+      { longitude: 0.02, latitude: 0 }
+    ];
+    expect(getRemainingRouteCoordinates(route, { longitude: 0.005, latitude: 0 })).toEqual([
+      { longitude: 0.005, latitude: 0 },
+      { longitude: 0.01, latitude: 0 },
+      { longitude: 0.02, latitude: 0 }
+    ]);
+  });
+
+  it("calculates remaining metrics from live position along the route", () => {
+    const route = {
+      coordinates: [
+        { longitude: 0, latitude: 0 },
+        { longitude: 0.01, latitude: 0 },
+        { longitude: 0.02, latitude: 0 }
+      ],
+      steps,
+      distance: 2_000,
+      duration: 200
+    };
+    const remaining = getRemainingRouteMetrics(
+      route,
+      1,
+      { longitude: 0.01, latitude: 0 }
+    );
+    expect(remaining.distance).toBeCloseTo(1_000, -1);
+    expect(remaining.duration).toBeCloseTo(100, -1);
   });
 
   it("localizes maneuver instructions", () => {
