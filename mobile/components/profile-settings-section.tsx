@@ -243,7 +243,7 @@ export function ProfileSettingsSection() {
           <View style={styles.accountAvatarWrap}>
             {profileVisibility.data?.avatar_url ? <NativeImage source={{ uri: profileVisibility.data.avatar_url }} style={styles.accountHeroAvatar} /> : <View style={[styles.accountHeroAvatar, styles.accountHeroPlaceholder]}><Icon name="user" size={34} color={theme.colors.subtle} /></View>}
             <PressableSurface accessibilityRole="button" accessibilityLabel={translate("profileAvatarChange")} onPress={() => setAvatarActionsOpen(true)} style={styles.avatarEditButton}>
-              <Icon name="edit-2" size={14} color={theme.colors.accentForeground} />
+              <Icon name="pencil" size={14} color={theme.colors.accentForeground} />
             </PressableSurface>
           </View>
           <Heading level={3}>{getProfileDisplayName(profileVisibility.data?.full_name, currentUser.data?.email)}</Heading>
