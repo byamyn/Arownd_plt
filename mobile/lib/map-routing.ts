@@ -161,7 +161,6 @@ async function fetchValhallaRoute(
   const coordinates = legs.flatMap((leg) => leg.shape ? decodePolyline6(leg.shape) : []);
   if (coordinates.length < 2) throw new Error("route_geometry_missing");
 
-  let coordinateOffset = 0;
   const steps: RouteStep[] = legs.flatMap((leg) => {
     const legCoordinates = leg.shape ? decodePolyline6(leg.shape) : [];
     const maneuvers = (leg.maneuvers ?? []).flatMap((maneuver) => {
@@ -180,7 +179,6 @@ async function fetchValhallaRoute(
         location
       }];
     });
-    coordinateOffset += legCoordinates.length;
     return maneuvers;
   });
 
