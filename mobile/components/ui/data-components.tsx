@@ -10,13 +10,42 @@ export function List({ children, style }: { children: ReactNode; style?: StylePr
   return <View style={style}>{children}</View>;
 }
 
+export function ListSection({
+  title,
+  description,
+  action,
+  children,
+  style
+}: {
+  title: string;
+  description?: string;
+  action?: ReactNode;
+  children: ReactNode;
+  style?: StyleProp<ViewStyle>;
+}) {
+  const theme = useAppTheme();
+  return (
+    <View style={[{ gap: designTokens.spacing.sm }, style]}>
+      <View style={{ minHeight: 28, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: designTokens.spacing.md }}>
+        <View style={{ flex: 1, gap: designTokens.spacing.xs }}>
+          <UiText style={{ color: theme.colors.foreground, fontSize: theme.typography.subtitle, fontWeight: theme.fontWeights.semibold, textAlign: "auto" }}>{title}</UiText>
+          {description ? <UiText style={{ color: theme.colors.muted, fontSize: theme.typography.caption, textAlign: "auto" }}>{description}</UiText> : null}
+        </View>
+        {action}
+      </View>
+      {children}
+    </View>
+  );
+}
+
 export function ListItem({
   children,
   leading,
   trailing,
   onPress,
   accessibilityLabel,
-  style
+  style,
+  showDivider = true
 }: {
   children: ReactNode;
   leading?: ReactNode;
@@ -24,9 +53,10 @@ export function ListItem({
   onPress?: () => void;
   accessibilityLabel?: string;
   style?: StyleProp<ViewStyle>;
+  showDivider?: boolean;
 }) {
   const theme = useAppTheme();
-  const content = <View style={[{ minHeight: 56, flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md, paddingVertical: designTokens.spacing.sm, borderBottomWidth: 1, borderBottomColor: theme.colors.divider }, style]}>{leading}<View style={{ flex: 1 }}>{children}</View>{trailing}</View>;
+  const content = <View style={[{ minHeight: 56, flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md, paddingVertical: designTokens.spacing.sm, borderBottomWidth: showDivider ? 1 : 0, borderBottomColor: theme.colors.divider }, style]}>{leading}<View style={{ flex: 1 }}>{children}</View>{trailing}</View>;
   if (!onPress) return content;
   return <Pressable accessibilityRole="button" accessibilityLabel={accessibilityLabel ?? (typeof children === "string" ? children : undefined)} onPress={onPress} style={({ pressed }) => ({ opacity: pressed ? 0.72 : 1 })}>{content}</Pressable>;
 }
