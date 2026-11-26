@@ -40,7 +40,8 @@ services:
     depends_on:
       - routing-gateway
     networks:
-      - routing_edge
+      routing_edge:
+        ipv4_address: 172.31.0.2
 
 volumes:
   valhalla_data:
@@ -49,6 +50,9 @@ volumes:
 
 networks:
   routing_internal:
-    internal: true
+    driver: bridge
   routing_edge:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.31.0.0/24
