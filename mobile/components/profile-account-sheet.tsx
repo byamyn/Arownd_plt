@@ -232,7 +232,7 @@ function AddressesContent() {
   return <ScrollView contentContainerStyle={{ gap: designTokens.spacing.md, paddingBottom: designTokens.spacing.lg }}>
     <Caption>{translate("addressesSubtitle")}</Caption>
     <Button label={translate("addressesAdd")} onPress={() => openEditor(null)} startIcon={<Icon name="plus" size={18} />} fullWidth />
-    {addresses.data.length === 0 ? <Card contentStyle={{ padding: designTokens.spacing.lg, alignItems: "center" }}><Icon name="map-pin" size={28} /><Heading level={3}>{translate("addressesEmpty")}</Heading><Caption>{translate("addressesEmptyHint")}</Caption></Card> : addresses.data.map((address) => <Card key={address.id} contentStyle={{ padding: designTokens.spacing.md, gap: designTokens.spacing.sm }}>
+    {addresses.data.length === 0 ? <View style={{ paddingVertical: designTokens.spacing.xl, alignItems: "center", gap: designTokens.spacing.sm }}><Icon name="map-pin" size={28} /><Heading level={3}>{translate("addressesEmpty")}</Heading><Caption>{translate("addressesEmptyHint")}</Caption></View> : addresses.data.map((address) => <View key={address.id} style={{ paddingVertical: designTokens.spacing.md, borderBottomWidth: 1, borderBottomColor: theme.colors.divider, gap: designTokens.spacing.sm }}>
       <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
         <UiText weight="700">{translate(address.label === "home" ? "addressesHome" : address.label === "work" ? "addressesWork" : "addressesOther")}</UiText>
         {address.is_default ? <StatusBadge label={translate("addressesDefault")} tone="accent" /> : null}
@@ -245,7 +245,7 @@ function AddressesContent() {
         <Button label={translate("addressesEdit")} size="sm" variant="outline" onPress={() => openEditor(address)} />
         <Button label={translate("addressesDelete")} size="sm" variant="danger" onPress={() => setDeleteTarget(address)} />
       </View>
-    </Card>)}
+    </View>)}
     {makeDefault.isError || remove.isError ? <UiText tone="danger">{makeDefault.isError ? translate("addressesDefaultError") : translate("addressesDeleteError")}</UiText> : null}
   </ScrollView>;
 }
