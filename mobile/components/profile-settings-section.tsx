@@ -241,7 +241,7 @@ export function ProfileSettingsSection() {
         </View>
       </View>
 
-      <BottomSheet visible={activeSheet === "location-addresses" || activeSheet === "invite"} onRequestClose={closeSheet} title={translate(activeSheet === "location-addresses" ? "settingsLocationAddresses" : "inviteTitle")} height="82%" maxHeight="94%">
+      <BottomSheet visible={activeSheet === "location-addresses" || activeSheet === "invite"} onRequestClose={closeSheet} title={translate(activeSheet === "location-addresses" ? "settingsLocationAddresses" : "inviteTitle")} maxHeight="94%">
         {activeSheet === "location-addresses" || activeSheet === "invite" ? (
           <ProfileAccountSheet section={activeSheet as ProfileAccountSection} />
         ) : null}
@@ -251,7 +251,7 @@ export function ProfileSettingsSection() {
         <View style={styles.accountHero}>
           <View style={styles.accountAvatarWrap}>
             {profileVisibility.data?.avatar_url ? <NativeImage source={{ uri: profileVisibility.data.avatar_url }} style={styles.accountHeroAvatar} /> : <View style={[styles.accountHeroAvatar, styles.accountHeroPlaceholder]}><Icon name="user" size={34} color={theme.colors.subtle} /></View>}
-            <PressableSurface accessibilityRole="button" accessibilityLabel={translate("profileAvatarChange")} onPress={() => setAvatarActionsOpen(true)} style={styles.avatarEditButton}>
+            <PressableSurface accessibilityRole="button" accessibilityLabel={translate("profileAvatarChange")} onPress={() => { closeSheet(); setAvatarActionsOpen(true); }} style={styles.avatarEditButton}>
               <Icon name="pencil" size={14} color={theme.colors.accentForeground} />
             </PressableSurface>
           </View>
