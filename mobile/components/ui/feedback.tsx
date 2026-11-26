@@ -288,22 +288,22 @@ export function PageSkeleton({
           ))}
         </View>
       ) : variant === "list" ? (
-        <View style={{ gap: designTokens.spacing.md }}>
+        <View>
           {rowKeys.map((index) => (
-            <View key={index} style={{ flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md, paddingVertical: designTokens.spacing.xs }}>
-              <Skeleton width={52} height={52} radius={theme.radius.md} />
+            <View key={index} style={{ flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md, paddingVertical: designTokens.spacing.md, borderBottomWidth: index === count - 1 ? 0 : StyleSheet.hairlineWidth, borderBottomColor: theme.colors.divider }}>
+              <Skeleton width={44} height={44} radius={theme.radius.pill} />
               <View style={{ flex: 1, gap: designTokens.spacing.sm }}>
                 <Skeleton width={index % 2 === 0 ? "68%" : "54%"} height={13} />
-                <Skeleton width="88%" height={10} />
-                <Skeleton width="36%" height={10} />
+                <Skeleton width="58%" height={10} />
               </View>
+              <Skeleton width={18} height={18} radius={theme.radius.pill} />
             </View>
           ))}
         </View>
       ) : variant === "profile" ? (
-        <View style={{ gap: designTokens.spacing.md }}>
+        <View>
           {rowKeys.slice(0, 3).map((index) => (
-            <View key={index} style={{ gap: designTokens.spacing.sm, padding: designTokens.spacing.md, borderRadius: theme.radius.lg, backgroundColor: theme.colors.surfaceSecondary }}>
+            <View key={index} style={{ gap: designTokens.spacing.sm, paddingVertical: designTokens.spacing.md, borderBottomWidth: index === Math.min(count, 3) - 1 ? 0 : StyleSheet.hairlineWidth, borderBottomColor: theme.colors.divider }}>
               <Skeleton width="38%" height={12} />
               <Skeleton width="82%" height={13} />
               <Skeleton width="58%" height={11} />
