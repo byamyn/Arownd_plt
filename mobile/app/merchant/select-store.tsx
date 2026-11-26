@@ -4,7 +4,7 @@ import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { Alert, AppHeader, Card, Icon, PressableSurface, RefreshableScrollView, Spinner, StatusBadge, Text as UiText } from "@/components/ui";
+import { Alert, AppHeader, Icon, PressableSurface, RefreshableScrollView, Spinner, StatusBadge, Text as UiText } from "@/components/ui";
 import { fetchMerchantAccess, setActiveMerchantStoreId } from "@/lib/merchant";
 import { translate, useLanguage } from "@/lib/i18n";
 import { designTokens, useAppTheme } from "@/lib/theme";
@@ -59,7 +59,7 @@ export default function MerchantSelectStoreScreen() {
         <AppHeader title={translate("merchantSelectStoreTitle")} onBack={() => router.back()} />
         <UiText style={styles.subtitle}>{translate("merchantSelectStoreSubtitle")}</UiText>
         {selectionError ? <Alert description={translate("merchantSelectStoreError")} tone="danger" /> : null}
-        <Card contentStyle={styles.list}>
+        <View style={styles.list}>
           {merchantAccess.stores.map((store, index) => {
             const selected = store.id === merchantAccess.store?.id;
             const busy = pendingStoreId === store.id;
@@ -70,7 +70,7 @@ export default function MerchantSelectStoreScreen() {
                 accessibilityLabel={store.name}
                 disabled={pendingStoreId !== null}
                 onPress={() => void selectStore(store.id)}
-                style={[styles.storeRow, index > 0 && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: theme.colors.border }]}
+                style={[styles.storeRow, index > 0 && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: theme.colors.divider }]}
               >
                 <View style={[styles.storeIcon, { backgroundColor: theme.colors.surfaceSecondary }]}>
                   <Icon name="store" size={20} color={theme.colors.accentOnSurface} />
@@ -83,7 +83,7 @@ export default function MerchantSelectStoreScreen() {
               </PressableSurface>
             );
           })}
-        </Card>
+        </View>
       </RefreshableScrollView>
     </SafeAreaView>
   );
