@@ -76,7 +76,7 @@ export function CustomerMainHeader({ variant = "cart" }: CustomerMainHeaderProps
 
 const styles = StyleSheet.create({
   header: {
-    minHeight: designTokens.dimensions.controlHeight.lg,
+    minHeight: designTokens.dimensions.controlHeight.md,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between"
@@ -84,11 +84,11 @@ const styles = StyleSheet.create({
   actions: {
     flexDirection: "row",
     alignItems: "center",
-    gap: designTokens.spacing.sm
+    gap: designTokens.spacing.xs
   },
   iconButton: {
-    width: designTokens.dimensions.controlHeight.md,
-    height: designTokens.dimensions.controlHeight.md,
+    width: designTokens.dimensions.controlHeight.sm,
+    height: designTokens.dimensions.controlHeight.sm,
     borderRadius: designTokens.radius.pill,
     borderWidth: 1,
     alignItems: "center",
