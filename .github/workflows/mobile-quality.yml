@@ -1,5 +1,5 @@
 name: Arownd Native quality checks
-# Re-run quality checks after mobile lockfile regeneration.
+# Re-run quality checks after mobile dependency and lockfile alignment.
 
 on:
   push:
