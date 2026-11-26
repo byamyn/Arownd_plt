@@ -63,7 +63,7 @@ export default function StoresScreen() {
                   accessibilityRole="button"
                   accessibilityLabel={getRegionDisplayName(region, language)}
                   onPress={() => setSelectedRegionId(region.id)}
-                  style={[styles.wilayaRow, { backgroundColor: theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface, borderColor: theme.colors.border, borderWidth: theme.mode === "light" ? 0 : 1 }]}
+                  style={[styles.wilayaRow, { backgroundColor: "transparent", borderBottomColor: theme.colors.divider }]}
                 >
                   <View style={styles.wilayaNumber}>
                     <UiText weight="700" style={{ color: theme.colors.accentMuted }}>{region.code}</UiText>
@@ -116,9 +116,9 @@ const styles = StyleSheet.create({
   list: { gap: designTokens.spacing.md },
   wilayaRow: {
     minHeight: designTokens.dimensions.controlHeight.lg,
-    borderWidth: 1,
-    borderRadius: designTokens.radius.lg,
-    paddingHorizontal: designTokens.spacing.md,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderRadius: 0,
+    paddingHorizontal: designTokens.spacing.xs,
     flexDirection: "row",
     alignItems: "center",
     gap: designTokens.spacing.md
