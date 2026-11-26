@@ -51,7 +51,7 @@ This variable is public app configuration, not a secret. Never put server creden
 - Back up the `valhalla_data` volume and test restoration before production.
 - Update the OSM extract on a controlled schedule. Stage the new PBF, rebuild the graph, run route smoke tests, then switch traffic. Avoid rebuilding the live graph in place during peak usage.
 - Pin and test image versions rather than relying on `latest` indefinitely.
-- The default extract covers Algeria only. Before enabling another Arownd country, build and validate a regional extract that covers that market and its cross-border road connections.
+- The default extracts cover the five currently active Arownd markets. Valhalla scripted accepts multiple PBF URLs, but the upstream Docker guide does not recommend multi-URL builds for every workload. Measure build memory/time and validate routing in each market and at country boundaries before production. Add future markets by extending the extract set and repeating those tests.
 
 ## Security and capacity notes
 
