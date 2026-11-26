@@ -69,7 +69,7 @@ function createStyles(theme: ReturnType<typeof useAppTheme>) {
       paddingVertical: designTokens.spacing.md,
       borderTopWidth: StyleSheet.hairlineWidth,
       borderBottomWidth: StyleSheet.hairlineWidth,
-      borderColor: theme.colors.border,
+      borderColor: theme.colors.divider,
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between"
