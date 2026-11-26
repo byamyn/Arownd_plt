@@ -1,16 +1,20 @@
-import type { ReactNode } from "react";
+import { useMemo, useRef, type ReactNode } from "react";
 import {
   ActivityIndicator,
+  Animated,
   KeyboardAvoidingView,
   Modal,
+  PanResponder,
   Pressable,
   Platform,
+  ScrollView,
   StyleSheet,
   View,
   type StyleProp,
   type ViewStyle
 } from "react-native";
 
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { designTokens, useAppTheme } from "@/lib/theme";
 import { translate } from "@/lib/i18n";
 import { Icon, type IconName } from "./icon";
@@ -389,12 +393,28 @@ export function BottomSheet({
   height?: ViewStyle["height"];
 }) {
   const theme = useAppTheme();
+  const insets = useSafeAreaInsets();
+  const dragY = useRef(new Animated.Value(0)).current;
+  const dragResponder = useMemo(() => PanResponder.create({
+    onStartShouldSetPanResponder: () => false,
+    onMoveShouldSetPanResponder: (_, gesture) => gesture.dy > 6 && Math.abs(gesture.dy) > Math.abs(gesture.dx),
+    onPanResponderMove: (_, gesture) => dragY.setValue(Math.max(0, gesture.dy)),
+    onPanResponderRelease: (_, gesture) => {
+      if (gesture.dy > 84 || gesture.vy > 0.9) {
+        dragY.setValue(0);
+        onRequestClose();
+      } else {
+        Animated.spring(dragY, { toValue: 0, useNativeDriver: true, speed: 22, bounciness: 0 }).start();
+      }
+    },
+    onPanResponderTerminate: () => Animated.spring(dragY, { toValue: 0, useNativeDriver: true, speed: 22, bounciness: 0 }).start()
+  }), [dragY, onRequestClose]);
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onRequestClose}>
       <KeyboardAvoidingView style={{ flex: 1, justifyContent: "flex-end" }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
         <Pressable accessible={false} onPress={onRequestClose} style={{ position: "absolute", top: 0, bottom: 0, start: 0, end: 0, backgroundColor: theme.colors.overlay }} />
-        <View accessibilityViewIsModal style={{ height, maxHeight, padding: designTokens.spacing.lg, paddingBottom: designTokens.spacing.xxl, borderTopLeftRadius: theme.radius.xl, borderTopRightRadius: theme.radius.xl, backgroundColor: theme.colors.surface, gap: designTokens.spacing.md }}>
-          <View style={{ width: theme.dimensions.avatarSize.md, height: 4, borderRadius: theme.radius.pill, backgroundColor: theme.colors.border, alignSelf: "center" }} />
+        <View accessibilityViewIsModal style={{ height, maxHeight, flexShrink: 1, padding: designTokens.spacing.lg, paddingBottom: Math.max(insets.bottom, designTokens.spacing.xl), borderTopLeftRadius: theme.radius.xl, borderTopRightRadius: theme.radius.xl, backgroundColor: theme.colors.surface, gap: designTokens.spacing.md }}>
+          <Animated.View {...dragResponder.panHandlers} style={{ width: theme.dimensions.avatarSize.md, height: 4, borderRadius: theme.radius.pill, backgroundColor: theme.colors.border, alignSelf: "center", transform: [{ translateY: dragY }] }} />
           <View style={{ minHeight: 44, flexDirection: "row", alignItems: "center" }}>
             <Pressable
               accessibilityRole="button"
@@ -411,7 +431,15 @@ export function BottomSheet({
             <View style={{ width: 44, height: 44 }} />
           </View>
           <View style={{ height: 1, backgroundColor: theme.colors.divider }} />
-          {children}
+          <ScrollView
+            style={{ flexShrink: 1 }}
+            contentContainerStyle={{ flexGrow: 1, gap: designTokens.spacing.md, paddingBottom: designTokens.spacing.xs }}
+            keyboardShouldPersistTaps="handled"
+            nestedScrollEnabled
+            showsVerticalScrollIndicator={false}
+          >
+            {children}
+          </ScrollView>
         </View>
       </KeyboardAvoidingView>
     </Modal>
