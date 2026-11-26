@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  decodePolyline6,
   distanceBetweenCoordinates,
   distanceToRouteMeters,
   formatDistance,
@@ -38,6 +39,39 @@ const steps: RouteStep[] = [
 ];
 
 describe("map routing helpers", () => {
+  it("decodes Valhalla polyline6 geometry with six-digit precision", () => {
+    const encodeValue = (value: number) => {
+      let encoded = "";
+      let current = value < 0 ? ~(value << 1) : value << 1;
+      while (current >= 0x20) {
+        encoded += String.fromCharCode((0x20 | (current & 0x1f)) + 63);
+        current >>= 5;
+      }
+      return encoded + String.fromCharCode(current + 63);
+    };
+    const points = [
+      { longitude: 3.0588, latitude: 36.7538 },
+      { longitude: 3.0598, latitude: 36.7548 }
+    ];
+    let previousLatitude = 0;
+    let previousLongitude = 0;
+    const shape = points.map((point) => {
+      const latitude = Math.round(point.latitude * 1_000_000);
+      const longitude = Math.round(point.longitude * 1_000_000);
+      const encoded = encodeValue(latitude - previousLatitude) + encodeValue(longitude - previousLongitude);
+      previousLatitude = latitude;
+      previousLongitude = longitude;
+      return encoded;
+    }).join("");
+
+    const decoded = decodePolyline6(shape);
+    expect(decoded).toHaveLength(2);
+    expect(decoded[0]?.latitude).toBeCloseTo(points[0]!.latitude, 6);
+    expect(decoded[0]?.longitude).toBeCloseTo(points[0]!.longitude, 6);
+    expect(decoded[1]?.latitude).toBeCloseTo(points[1]!.latitude, 6);
+    expect(decoded[1]?.longitude).toBeCloseTo(points[1]!.longitude, 6);
+  });
+
   it("calculates the distance between two coordinates", () => {
     expect(distanceBetweenCoordinates(
       { longitude: 0, latitude: 0 },
