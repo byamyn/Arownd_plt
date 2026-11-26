@@ -91,7 +91,7 @@ function ReviewRow({ review, language, onPress }: { review: AppReview; language:
       onPress={onPress}
       style={({ pressed }) => [styles.card, { opacity: pressed ? 0.72 : 1 }]}
     >
-      <View style={styles.cardContent}
+      <View style={styles.cardContent}>
       <View style={styles.rowHeader}>
         <UiText weight="800" style={styles.targetLabel}>{target}</UiText>
         <RatingStars value={review.rating} size={15} showValue />
