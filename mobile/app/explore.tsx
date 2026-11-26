@@ -141,9 +141,9 @@ export default function ExploreScreen() {
                   accessibilityRole="button"
                   accessibilityState={{ selected }}
                   onPress={() => setActiveTab(tab)}
-                  style={[styles.tab, { backgroundColor: selected ? theme.colors.accent : theme.colors.surfaceSecondary }]}
+                  style={[styles.tab, selected && { borderBottomColor: theme.colors.accent, borderBottomWidth: 2 }]}
                 >
-                  <UiText weight={selected ? "700" : "500"} style={{ color: selected ? "#000000" : theme.colors.foreground }}>{label}</UiText>
+                  <UiText weight={selected ? "700" : "500"} style={{ color: selected ? theme.colors.accent : theme.colors.foreground }}>{label}</UiText>
                 </Pressable>
               );
             })}
@@ -232,11 +232,11 @@ export default function ExploreScreen() {
 const styles = StyleSheet.create({
   headerContent: { gap: designTokens.spacing.lg },
   historySection: { gap: designTokens.spacing.sm },
-  historyItem: { minHeight: 42, flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md },
+  historyItem: { minHeight: 46, flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: "#E8E6DC" },
   historyText: { flex: 1 },
   resultsSection: { gap: designTokens.spacing.lg },
-  tabs: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.sm },
-  tab: { minHeight: 36, paddingHorizontal: designTokens.spacing.lg, borderRadius: designTokens.radius.pill, justifyContent: "center", alignItems: "center" },
+  tabs: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.lg, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: "#E8E6DC" },
+  tab: { minHeight: 40, paddingHorizontal: designTokens.spacing.sm, justifyContent: "center", alignItems: "center", borderBottomWidth: 2, borderBottomColor: "transparent" },
   resultGroup: { gap: designTokens.spacing.sm },
   gridRow: { justifyContent: "space-between" },
   productTile: { width: "47%", flexGrow: 0, flexShrink: 0 }
