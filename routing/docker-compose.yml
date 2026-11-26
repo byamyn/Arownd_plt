@@ -1,0 +1,54 @@
+services:
+  valhalla:
+    image: ${VALHALLA_IMAGE:-ghcr.io/valhalla/valhalla-scripted:latest}
+    restart: unless-stopped
+    environment:
+      tile_urls: ${OSM_PBF_URL:-https://download.geofabrik.de/africa/algeria-latest.osm.pbf}
+    volumes:
+      - valhalla_data:/custom_files
+    expose:
+      - "8002"
+    networks:
+      - routing_internal
+
+  routing-gateway:
+    image: nginx:alpine
+    restart: unless-stopped
+    depends_on:
+      - valhalla
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    expose:
+      - "8080"
+    networks:
+      - routing_internal
+      - routing_edge
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      ROUTING_DOMAIN: ${ROUTING_DOMAIN:?Set ROUTING_DOMAIN in routing/.env}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - routing-gateway
+    networks:
+      - routing_edge
+
+volumes:
+  valhalla_data:
+  caddy_data:
+  caddy_config:
+
+networks:
+  routing_internal:
+    internal: true
+  routing_edge:
+    driver: bridge
