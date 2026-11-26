@@ -41,7 +41,7 @@ export function ProfileAccountSheet({ section }: { section: ProfileAccountSectio
               <Icon name={language === "ar" ? "chevron-left" : "chevron-right"} size={18} />
             </PressableSurface>
             <PressableSurface accessibilityRole="button" onPress={() => setLocationSection("addresses")} style={{ flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md, padding: designTokens.spacing.md, borderRadius: designTokens.radius.lg, borderWidth: 1, borderColor: theme.colors.border }}>
-              <Icon name="map" size={22} />
+              <Icon name="map-pin" size={22} />
               <View style={{ flex: 1, gap: 3 }}>
                 <UiText weight="700">{translate("locationAddressesDelivery")}</UiText>
                 <Caption>{translate("locationAddressesDeliveryHint")}</Caption>
