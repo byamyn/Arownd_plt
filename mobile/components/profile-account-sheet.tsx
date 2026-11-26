@@ -127,7 +127,7 @@ function DeliveryContent() {
           else if (picker === "secondary") { setSecondaryRegionId(Number(item.id)); setCommune(""); }
           else setCommune(item.name);
           setPicker(null);
-        }} style={{ paddingVertical: 13, borderBottomWidth: 1, borderBottomColor: theme.colors.border }}>
+        }} style={{ paddingVertical: 13, borderBottomWidth: 1, borderBottomColor: theme.colors.divider }}>
           <UiText>{item.name}</UiText>
         </PressableSurface>)}
       </ScrollView>
@@ -210,7 +210,7 @@ function AddressesContent() {
       <ScrollView>{options.map((item) => <PressableSurface key={item.id} onPress={() => {
         if (picker === "region") { setRegionId(item.id); setSecondaryId(null); setCommune(""); } else setSecondaryId(item.id);
         setPicker(null);
-      }} style={{ paddingVertical: 13, borderBottomWidth: 1, borderBottomColor: theme.colors.border }}><UiText>{getRegionDisplayName(item, language)}</UiText></PressableSurface>)}</ScrollView>
+      }} style={{ paddingVertical: 13, borderBottomWidth: 1, borderBottomColor: theme.colors.divider }}><UiText>{getRegionDisplayName(item, language)}</UiText></PressableSurface>)}</ScrollView>
     </View>;
   }
   if (editor !== undefined) return <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ gap: designTokens.spacing.md, paddingBottom: designTokens.spacing.lg }}>
