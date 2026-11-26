@@ -19,8 +19,9 @@ import { PullToRefresh } from "@/components/ui/pull-to-refresh";
 import { Button, Caption, Heading, Icon, Image as UiImage, PriceDisplay, PressableSurface, RatingStars, RefreshableScrollView, SearchField, Text as UiText } from "@/components/ui";
 export { EmptyState, ErrorState, LoadingState, PageSkeleton } from "@/components/ui";
 
-export function CustomerScreen({ children, header, footer, showNavigation = true, onRefresh, refreshing = false, contentStyle, scrollRef, stickyHeaderIndices, scrollViewProps }: { children: ReactNode; header?: ReactNode; footer?: ReactNode; showNavigation?: boolean; onRefresh?: (() => void) | undefined; refreshing?: boolean; contentStyle?: StyleProp<ViewStyle>; scrollRef?: Ref<ComponentRef<typeof ScrollView>> | undefined; stickyHeaderIndices?: number[]; scrollViewProps?: Pick<ScrollViewProps, "pagingEnabled" | "decelerationRate" | "onLayout"> }) {
+export function CustomerScreen({ children, header, footer, showNavigation = true, onRefresh, refreshing = false, contentStyle, scrollRef, stickyHeaderIndices, scrollViewProps, embedded = false }: { children: ReactNode; header?: ReactNode; footer?: ReactNode; showNavigation?: boolean; onRefresh?: (() => void) | undefined; refreshing?: boolean; contentStyle?: StyleProp<ViewStyle>; scrollRef?: Ref<ComponentRef<typeof ScrollView>> | undefined; stickyHeaderIndices?: number[]; scrollViewProps?: Pick<ScrollViewProps, "pagingEnabled" | "decelerationRate" | "onLayout">; embedded?: boolean }) {
   const theme = useAppTheme();
+  if (embedded) return <View style={contentStyle}>{children}</View>;
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.colors.background }]}>
       {header ? <View style={styles.screenHeader}>{header}</View> : null}

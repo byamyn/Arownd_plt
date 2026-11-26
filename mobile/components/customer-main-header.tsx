@@ -10,7 +10,7 @@ import { translate } from "@/lib/i18n";
 import { designTokens, useAppTheme } from "@/lib/theme";
 
 type CustomerMainHeaderProps = {
-  variant?: "cart" | "settings";
+  variant?: "cart" | "settings" | "profile";
 };
 
 export function CustomerMainHeader({ variant = "cart" }: CustomerMainHeaderProps) {
@@ -61,14 +61,14 @@ export function CustomerMainHeader({ variant = "cart" }: CustomerMainHeaderProps
             icon={<Icon name="search" size={21} color={theme.colors.foreground} accessibilityHidden />}
             style={[styles.iconButton, { backgroundColor: theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface, borderWidth: theme.mode === "light" ? 0 : 1, borderColor: theme.colors.border }]}
           />
-        ) : (
+        ) : variant === "settings" ? (
           <IconButton
             accessibilityLabel={translate("profileSettings")}
             onPress={() => router.push("/settings")}
             icon={<Icon name="settings" size={21} color={theme.colors.foreground} accessibilityHidden />}
             style={[styles.iconButton, { backgroundColor: theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface, borderWidth: theme.mode === "light" ? 0 : 1, borderColor: theme.colors.border }]}
           />
-        )}
+        ) : null}
       </View>
     </View>
   );
