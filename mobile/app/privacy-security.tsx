@@ -2,7 +2,7 @@ import { router } from "expo-router";
 import { StyleSheet, View } from "react-native";
 
 import { CustomerScreen } from "@/components/customer-ui";
-import { AppHeader, Card, Caption, Heading, Icon, PressableSurface, Text as UiText } from "@/components/ui";
+import { AppHeader, Caption, Heading, Icon, PressableSurface, Text as UiText } from "@/components/ui";
 import { translate } from "@/lib/i18n";
 import { designTokens, useAppTheme, type AppTheme } from "@/lib/theme";
 
@@ -21,11 +21,11 @@ export default function PrivacySecurityScreen() {
         }
       />
       <Heading level={3}>{translate("settingsPrivacyTitle")}</Heading>
-      <Card contentStyle={styles.group}>
+      <View style={styles.group}>
         <PrivacyRow icon="lock" label={translate("settingsPrivacyPolicy")} onPress={() => router.push("/privacy")} theme={theme} styles={styles} />
         <PrivacyRow icon="file-text" label={translate("settingsTermsOfUse")} onPress={() => router.push("/terms")} theme={theme} styles={styles} />
         <PrivacyRow icon="trash-2" label={translate("deleteAccountTitle")} onPress={() => router.push("/delete-account")} theme={theme} styles={styles} last destructive />
-      </Card>
+      </View>
       <Caption>{translate("secureNote")}</Caption>
     </CustomerScreen>
   );
@@ -53,7 +53,7 @@ function PrivacyRow({
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={onPress}
-      style={[styles.row, !last && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.border }]}
+      style={[styles.row, !last && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.divider }]}
     >
       <View style={styles.rowLeading}>
         <Icon name={icon} size={19} color={destructive ? theme.colors.danger : theme.colors.foregroundSecondary} />
