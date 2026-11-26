@@ -201,7 +201,7 @@ function createStyles(theme: AppTheme) {
     },
     productItem: { width: "48%" },
     productCard: { width: "100%" },
-    storeList: { gap: designTokens.spacing.md },
+    storeList: { gap: 0 },
     storeCard: {
       backgroundColor: theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface,
       borderColor: theme.mode === "light" ? "transparent" : theme.colors.border,
