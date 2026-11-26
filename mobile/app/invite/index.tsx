@@ -216,7 +216,7 @@ function createStyles(theme: ReturnType<typeof useAppTheme>) {
       alignItems: "center",
       gap: designTokens.spacing.md,
       borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: theme.colors.border
+      borderBottomColor: theme.colors.divider
     },
     avatar: {
       width: 40,
