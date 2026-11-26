@@ -1,6 +1,6 @@
 # Arownd self-hosted routing
 
-Arownd uses OpenStreetMap road data and a self-hosted Valhalla engine. MapLibre remains the mobile map renderer; this service is responsible only for route calculation and turn-by-turn instructions.
+Arownd uses OpenStreetMap road data and a self-hosted Valhalla engine. The default extract set covers Algeria, Morocco and Egypt, plus the Geofabrik GCC States extract for Saudi Arabia and the UAE. MapLibre remains the mobile map renderer; this service is responsible only for route calculation and turn-by-turn instructions.
 
 ## Components
 
