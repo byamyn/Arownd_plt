@@ -56,8 +56,8 @@ export function TextArea({
           {
             minHeight,
             borderWidth: 1,
-            borderColor: focused ? theme.colors.focus : theme.colors.inputBorder,
-            borderRadius: theme.radius.lg,
+            borderColor: focused ? theme.colors.focus : theme.colors.border,
+            borderRadius: theme.radius.md,
             padding: designTokens.spacing.md,
             color: theme.colors.foreground,
             backgroundColor: theme.colors.surface,
@@ -250,7 +250,7 @@ export function Select({
         disabled={disabled}
         onPress={() => setOpen(true)}
         style={({ pressed }) => [
-          { minHeight: theme.dimensions.controlHeight.lg, borderWidth: 1, borderColor: open ? theme.colors.focus : theme.colors.inputBorder, borderRadius: theme.radius.pill, paddingHorizontal: designTokens.spacing.lg, flexDirection: "row", alignItems: "center", justifyContent: "space-between", backgroundColor: theme.colors.surface, opacity: disabled ? 0.5 : pressed ? 0.75 : 1 },
+          { minHeight: theme.dimensions.controlHeight.lg, borderWidth: 1, borderColor: open ? theme.colors.focus : theme.colors.border, borderRadius: theme.radius.md, paddingHorizontal: designTokens.spacing.md, flexDirection: "row", alignItems: "center", justifyContent: "space-between", backgroundColor: theme.colors.surface, opacity: disabled ? 0.5 : pressed ? 0.75 : 1 },
           style
         ]}
       >
@@ -272,11 +272,12 @@ export function Select({
                 onChange(option.value);
                 setOpen(false);
               }}
-              style={{ minHeight: theme.dimensions.controlHeight.lg, justifyContent: "center", borderBottomWidth: 1, borderBottomColor: theme.colors.divider, backgroundColor: option.value === value ? theme.colors.accent : "transparent", opacity: option.disabled ? 0.45 : 1 }}
+              style={{ minHeight: theme.dimensions.controlHeight.lg, paddingHorizontal: designTokens.spacing.md, flexDirection: "row", alignItems: "center", justifyContent: "space-between", borderBottomWidth: 1, borderBottomColor: theme.colors.divider, backgroundColor: option.value === value ? theme.colors.surfaceMuted : "transparent", opacity: option.disabled ? 0.45 : 1 }}
             >
-              <UiText style={{ color: option.value === value ? theme.colors.accentForeground : theme.colors.foreground, textAlign: "auto", fontSize: theme.typography.body, fontWeight: option.value === value ? theme.fontWeights.bold : theme.fontWeights.regular }}>
+              <UiText style={{ flex: 1, color: theme.colors.foreground, textAlign: "auto", fontSize: theme.typography.body, fontWeight: option.value === value ? theme.fontWeights.semibold : theme.fontWeights.regular }}>
                 {option.label}
               </UiText>
+              {option.value === value ? <Icon name="check" size={18} color={theme.colors.accent} accessibilityHidden /> : null}
             </Pressable>
           ))}
         </ScrollView>
@@ -340,7 +341,7 @@ export function InputOTP({
   return (
     <View accessibilityRole="group" accessibilityLabel={accessibilityLabel} style={{ flexDirection: "row", gap: designTokens.spacing.sm }}>
       {Array.from({ length }, (_, index) => (
-        <View key={index} style={{ flex: 1, minWidth: 0, height: theme.dimensions.controlHeight.lg, borderWidth: 1, borderColor: theme.colors.inputBorder, borderRadius: theme.radius.md, alignItems: "center", justifyContent: "center", backgroundColor: theme.colors.surface }}>
+        <View key={index} style={{ flex: 1, minWidth: 0, height: theme.dimensions.controlHeight.lg, borderWidth: 1, borderColor: theme.colors.border, borderRadius: theme.radius.md, alignItems: "center", justifyContent: "center", backgroundColor: theme.colors.surface }}>
           <UiText style={{ color: theme.colors.foreground, fontSize: theme.typography.title, fontWeight: theme.fontWeights.bold }}>
             {value[index] ?? ""}
           </UiText>
