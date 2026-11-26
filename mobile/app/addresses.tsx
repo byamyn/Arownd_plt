@@ -447,7 +447,7 @@ function createStyles(theme: AppTheme) {
       paddingHorizontal: designTokens.spacing.md,
       justifyContent: "center",
       borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: theme.colors.border
+      borderBottomColor: theme.colors.divider
     },
     pickerOptionSelected: {
       backgroundColor: theme.colors.accent
