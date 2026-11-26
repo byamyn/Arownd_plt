@@ -33,7 +33,7 @@ import { uploadMyProfileAvatar, removeMyProfileAvatar } from "@/lib/profile-avat
 import { getProfileDisplayName } from "@/lib/profile-state";
 import { ProfileAccountSheet, type ProfileAccountSection } from "@/components/profile-account-sheet";
 
-type SettingsSheet = "account" | "delivery" | "addresses" | "invite" | "password" | "appearance" | "language" | "country" | "accounts" | null;
+type SettingsSheet = "account" | "location-addresses" | "invite" | "password" | "appearance" | "language" | "country" | "accounts" | null;
 
 export function ProfileSettingsSection() {
   const theme = useAppTheme();
@@ -224,8 +224,7 @@ export function ProfileSettingsSection() {
         <Heading level={3}>{translate("settingsAccountTitle")}</Heading>
         <Card contentStyle={styles.sectionContent}>
           <SettingsRow icon="user" label={translate("settingsAccount")} onPress={() => openSheet("account")} theme={theme} styles={styles} language={language} />
-          <SettingsRow icon="user" label={translate("settingsProfileData")} onPress={() => openSheet("delivery")} theme={theme} styles={styles} language={language} />
-          <SettingsRow icon="map-pin" label={translate("profileAddresses")} description={translate("profileAddressesHint")} onPress={() => openSheet("addresses")} theme={theme} styles={styles} language={language} />
+          <SettingsRow icon="map-pin" label={translate("settingsLocationAddresses")} description={translate("locationAddressesSubtitle")} onPress={() => openSheet("location-addresses")} theme={theme} styles={styles} language={language} />
           <SettingsRow icon="gift" label={translate("profileInvite")} description={translate("profileInviteHint")} onPress={() => openSheet("invite")} theme={theme} styles={styles} language={language} />
           <SettingsRow icon="map-pin" label={translate("settingsBrowsingCountry")} description={browsingCountry.data ?? "—"} onPress={() => openSheet("country")} theme={theme} styles={styles} language={language} />
           <SettingsRow icon={theme.mode === "dark" ? "moon" : "sun"} label={translate("settingsAppearanceTitle")} description={translate(themeMode === "system" ? "settingsThemeSystem" : themeMode === "light" ? "settingsThemeLight" : "settingsThemeDark")} onPress={() => openSheet("appearance")} theme={theme} styles={styles} language={language} />
@@ -242,9 +241,9 @@ export function ProfileSettingsSection() {
         </Card>
       </View>
 
-      <BottomSheet visible={activeSheet === "delivery" || activeSheet === "addresses" || activeSheet === "invite"} onRequestClose={closeSheet} title={translate(activeSheet === "delivery" ? "settingsProfileData" : activeSheet === "addresses" ? "addressesTitle" : "inviteTitle")} height="82%" maxHeight="94%">
-        {activeSheet === "delivery" || activeSheet === "addresses" || activeSheet === "invite" ? (
-          <ProfileAccountSheet section={activeSheet as ProfileAccountSection} onManageAvatar={() => setAvatarActionsOpen(true)} />
+      <BottomSheet visible={activeSheet === "location-addresses" || activeSheet === "invite"} onRequestClose={closeSheet} title={translate(activeSheet === "location-addresses" ? "settingsLocationAddresses" : "inviteTitle")} height="82%" maxHeight="94%">
+        {activeSheet === "location-addresses" || activeSheet === "invite" ? (
+          <ProfileAccountSheet section={activeSheet as ProfileAccountSection} />
         ) : null}
       </BottomSheet>
 
