@@ -38,7 +38,7 @@ import { getSelectableMerchantCategories, groupMerchantCategories } from "@/lib/
 import { translate, useLanguage } from "@/lib/i18n";
 import { getLocalizedMerchantCategoryLabel } from "@/lib/locale-data";
 import { designTokens, useAppTheme, type AppTheme } from "@/lib/theme";
-import { BottomSheet, AppHeader, Button, Card, ConfirmDialog, ErrorState, Icon, Image as UiImage, PageSkeleton, MediaViewer, Spinner, PressableSurface, Text as UiText, TextField, RefreshableScrollView } from "@/components/ui";
+import { BottomSheet, AppHeader, Button, ConfirmDialog, ErrorState, Icon, Image as UiImage, PageSkeleton, MediaViewer, Spinner, PressableSurface, Text as UiText, TextField, RefreshableScrollView } from "@/components/ui";
 
 export default function MerchantEditProductScreen() {
   const { language } = useLanguage();
@@ -339,7 +339,7 @@ export default function MerchantEditProductScreen() {
         >
           <AppHeader title={translate("merchantProductEditTitle")}/>
 
-                    <Card contentStyle={styles.card}>
+                    <View style={styles.formSection}>
             <View style={styles.sectionHeader}>
               <View style={styles.sectionTitles}>
                 <UiText style={[styles.sectionTitle, { color: theme.colors.foreground }]}>
@@ -425,7 +425,7 @@ export default function MerchantEditProductScreen() {
                 </PressableSurface>
               ) : null}
             </View>
-          </Card>
+          </View>
 
           <Card contentStyle={styles.card}>
             <View style={styles.productHeading}>
@@ -587,7 +587,7 @@ export default function MerchantEditProductScreen() {
             ) : null}
 
             <Button label={translate("merchantProductEditSave")} onPress={() => void saveOffer()} loading={saving} disabled={isBusy && !saving} fullWidth />
-          </Card>
+          </View>
 
 
           {notice ? (
@@ -719,7 +719,7 @@ function createStyles(theme: AppTheme) {
     eyebrow: { fontSize: designTokens.typography.caption - 1, fontWeight: designTokens.fontWeights.extrabold },
     title: { width: "100%", fontSize: designTokens.typography.display - 4, lineHeight: 33, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
     subtitle: { width: "100%", fontSize: designTokens.typography.caption + 1, lineHeight: 20, textAlign: "auto" },
-    card: { padding: designTokens.spacing.lg, gap: designTokens.spacing.xl },
+    formSection: { paddingVertical: designTokens.spacing.lg, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.divider, gap: designTokens.spacing.xl },
     productHeading: { alignItems: "flex-start", gap: designTokens.spacing.sm, paddingBottom: designTokens.spacing.xs },
     productName: { width: "100%", fontSize: designTokens.typography.subtitle, lineHeight: 26, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
     productBrand: { width: "100%", fontSize: designTokens.typography.caption, textAlign: "auto" },
