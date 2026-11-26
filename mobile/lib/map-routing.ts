@@ -61,7 +61,7 @@ type ValhallaResponse = {
   error_code?: number;
 };
 
-function decodePolyline6(encoded: string): RoutePoint[] {
+export function decodePolyline6(encoded: string): RoutePoint[] {
   const coordinates: RoutePoint[] = [];
   let index = 0;
   let latitude = 0;
