@@ -9,6 +9,7 @@ on:
       - cleanup/remove-legacy-web
       - feature/account-username
       - fix/store-pickup-address-optional
+      - fix/checkout-pickup-idempotency
     paths:
       - "mobile/**"
       - ".github/workflows/mobile-quality.yml"
