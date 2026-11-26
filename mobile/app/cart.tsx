@@ -7,7 +7,6 @@ import {
   Alert,
   AppHeader,
   Button,
-  Card,
   CartItem,
   CartSummary,
   Caption,
@@ -164,7 +163,7 @@ export default function CartScreen() {
           </View>
         </CartItem>;
       })}
-    </Card>)}
+    </View>)}
   </CustomerScreen>;
 }
 
