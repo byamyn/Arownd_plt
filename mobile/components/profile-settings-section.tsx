@@ -197,7 +197,7 @@ export function ProfileSettingsSection() {
             onPress={() => router.back()}
             style={styles.backButton}
           >
-            <Icon name="chevron-right" size={22} color={theme.colors.foreground} />
+            <Icon name={language === "ar" ? "chevron-right" : "chevron-left"} size={22} color={theme.colors.foreground} />
           </PressableSurface>
           <View style={styles.headerCopy}>
             <Heading level={2}>{translate("settingsTitle")}</Heading>
@@ -212,25 +212,25 @@ export function ProfileSettingsSection() {
       <View style={styles.section}>
         <Heading level={3}>{translate("settingsAccountTitle")}</Heading>
         <Card contentStyle={styles.sectionContent}>
-          <SettingsRow icon="lock" label={translate("settingsPasswordChangeTitle")} description={translate("settingsPasswordHint")} onPress={() => openSheet("password")} theme={theme} styles={styles} />
-          <SettingsRow icon="refresh-cw" label={translate("settingsSwitchAccount")} description={translate("settingsSwitchAccountHint")} onPress={() => { setAccountSwitchError(false); setAddAccountError(false); openSheet("accounts"); }} theme={theme} styles={styles} last />
+          <SettingsRow icon="lock" label={translate("settingsPasswordChangeTitle")} description={translate("settingsPasswordHint")} onPress={() => openSheet("password")} theme={theme} styles={styles} language={language} />
+          <SettingsRow icon="refresh-cw" label={translate("settingsSwitchAccount")} description={translate("settingsSwitchAccountHint")} onPress={() => { setAccountSwitchError(false); setAddAccountError(false); openSheet("accounts"); }} theme={theme} styles={styles} language={language} last />
         </Card>
       </View>
 
       <View style={styles.section}>
         <Heading level={3}>{translate("settingsPreferencesTitle")}</Heading>
         <Card contentStyle={styles.sectionContent}>
-          <SettingsRow icon="map-pin" label={translate("settingsBrowsingCountry")} description={browsingCountry.data ?? "—"} onPress={() => openSheet("country")} theme={theme} styles={styles} />
-          <SettingsRow icon={theme.mode === "dark" ? "moon" : "sun"} label={translate("settingsAppearanceTitle")} description={translate(themeMode === "system" ? "settingsThemeSystem" : themeMode === "light" ? "settingsThemeLight" : "settingsThemeDark")} onPress={() => openSheet("appearance")} theme={theme} styles={styles} />
-          <SettingsRow icon="globe" label={translate("settingsLanguageTitle")} description={translate(language === "ar" ? "settingsLanguageArabic" : "settingsLanguageEnglish")} onPress={() => openSheet("language")} theme={theme} styles={styles} last />
+          <SettingsRow icon="map-pin" label={translate("settingsBrowsingCountry")} description={browsingCountry.data ?? "—"} onPress={() => openSheet("country")} theme={theme} styles={styles} language={language} />
+          <SettingsRow icon={theme.mode === "dark" ? "moon" : "sun"} label={translate("settingsAppearanceTitle")} description={translate(themeMode === "system" ? "settingsThemeSystem" : themeMode === "light" ? "settingsThemeLight" : "settingsThemeDark")} onPress={() => openSheet("appearance")} theme={theme} styles={styles} language={language} />
+          <SettingsRow icon="globe" label={translate("settingsLanguageTitle")} description={translate(language === "ar" ? "settingsLanguageArabic" : "settingsLanguageEnglish")} onPress={() => openSheet("language")} theme={theme} styles={styles} language={language} last />
         </Card>
       </View>
 
       <View style={styles.section}>
         <Heading level={3}>{translate("settingsPrivacyTitle")}</Heading>
         <Card contentStyle={styles.sectionContent}>
-          <SettingsRow icon="eye" label={translate("profilePublicTitle")} description={profileVisibility.isPending ? translate("profileVisibilityLoading") : profileVisibility.data?.is_public ? translate("profilePublicEnabled") : translate("profilePublicDisabled")} onPress={() => { if (profileVisibility.data && !profileVisibilityMutation.isPending) profileVisibilityMutation.mutate(!profileVisibility.data.is_public); }} theme={theme} styles={styles} disabled={profileVisibility.isPending || !profileVisibility.data || profileVisibilityMutation.isPending} />
-          <SettingsRow icon="lock" label={translate("settingsPrivacyPolicy")} description={translate("settingsTermsOfUse")} onPress={() => router.push("/privacy-security")} theme={theme} styles={styles} last />
+          <SettingsRow icon="eye" label={translate("profilePublicTitle")} description={profileVisibility.isPending ? translate("profileVisibilityLoading") : profileVisibility.data?.is_public ? translate("profilePublicEnabled") : translate("profilePublicDisabled")} onPress={() => { if (profileVisibility.data && !profileVisibilityMutation.isPending) profileVisibilityMutation.mutate(!profileVisibility.data.is_public); }} theme={theme} styles={styles} language={language} disabled={profileVisibility.isPending || !profileVisibility.data || profileVisibilityMutation.isPending} />
+          <SettingsRow icon="lock" label={translate("settingsPrivacyPolicy")} description={translate("settingsTermsOfUse")} onPress={() => router.push("/privacy-security")} theme={theme} styles={styles} language={language} last />
           {profileVisibilityMutation.isError || profileVisibility.isError ? <Caption>{translate("profilePublicError")}</Caption> : null}
         </Card>
       </View>
@@ -238,8 +238,8 @@ export function ProfileSettingsSection() {
       <View style={styles.section}>
         <Heading level={3}>{translate("settingsSupportSection")}</Heading>
         <Card contentStyle={styles.sectionContent}>
-          <SettingsRow icon="message-circle" label={translate("settingsSupportTitle")} onPress={() => router.push("/support")} theme={theme} styles={styles} />
-          <SettingsRow icon="info" label={translate("settingsAboutTitle")} onPress={() => router.push("/about")} theme={theme} styles={styles} last />
+          <SettingsRow icon="message-circle" label={translate("settingsSupportTitle")} onPress={() => router.push("/support")} theme={theme} styles={styles} language={language} />
+          <SettingsRow icon="info" label={translate("settingsAboutTitle")} onPress={() => router.push("/about")} theme={theme} styles={styles} language={language} last />
         </Card>
       </View>
 
@@ -497,6 +497,7 @@ function SettingsRow({
   onPress,
   theme,
   styles,
+  language,
   last = false,
   disabled = false
 }: {
@@ -506,6 +507,7 @@ function SettingsRow({
   onPress: () => void;
   theme: AppTheme;
   styles: ReturnType<typeof createStyles>;
+  language: string;
   last?: boolean;
   disabled?: boolean;
 }) {
@@ -528,7 +530,7 @@ function SettingsRow({
         </View>
       </View>
       <View style={styles.rowTrailing}>
-        <Icon name="chevron-right" size={18} color={theme.colors.subtle} />
+        <Icon name={language === "ar" ? "chevron-left" : "chevron-right"} size={18} color={theme.colors.subtle} />
       </View>
     </PressableSurface>
   );
