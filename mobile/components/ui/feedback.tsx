@@ -1,4 +1,4 @@
-import { useMemo, useRef, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, type ReactNode } from "react";
 import {
   ActivityIndicator,
   Animated,
@@ -397,13 +397,15 @@ export function BottomSheet({
   const theme = useAppTheme();
   const insets = useSafeAreaInsets();
   const dragY = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    if (visible) dragY.setValue(0);
+  }, [dragY, visible]);
   const dragResponder = useMemo(() => PanResponder.create({
     onStartShouldSetPanResponder: () => false,
     onMoveShouldSetPanResponder: (_, gesture) => gesture.dy > 6 && Math.abs(gesture.dy) > Math.abs(gesture.dx),
     onPanResponderMove: (_, gesture) => dragY.setValue(Math.max(0, gesture.dy)),
     onPanResponderRelease: (_, gesture) => {
       if (gesture.dy > 84 || gesture.vy > 0.9) {
-        dragY.setValue(0);
         onRequestClose();
       } else {
         Animated.spring(dragY, { toValue: 0, useNativeDriver: true, speed: 22, bounciness: 0 }).start();
@@ -415,8 +417,10 @@ export function BottomSheet({
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onRequestClose}>
       <KeyboardAvoidingView style={{ flex: 1, justifyContent: "flex-end" }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
         <Pressable accessible={false} onPress={onRequestClose} style={{ position: "absolute", top: 0, bottom: 0, start: 0, end: 0, backgroundColor: theme.colors.overlay }} />
-        <View accessibilityViewIsModal style={{ height, maxHeight, flexShrink: 1, padding: designTokens.spacing.lg, paddingBottom: Math.max(insets.bottom, designTokens.spacing.xl), borderTopLeftRadius: theme.radius.xl, borderTopRightRadius: theme.radius.xl, backgroundColor: theme.colors.surface, gap: designTokens.spacing.md }}>
-          <Animated.View {...dragResponder.panHandlers} style={{ width: theme.dimensions.avatarSize.md, height: 4, borderRadius: theme.radius.pill, backgroundColor: theme.colors.border, alignSelf: "center", transform: [{ translateY: dragY }] }} />
+        <Animated.View accessibilityViewIsModal style={{ height, maxHeight, flexShrink: 1, padding: designTokens.spacing.lg, paddingBottom: Math.max(insets.bottom, designTokens.spacing.xl), borderTopLeftRadius: theme.radius.xl, borderTopRightRadius: theme.radius.xl, backgroundColor: theme.colors.surface, gap: designTokens.spacing.md, transform: [{ translateY: dragY }] }}>
+          <Animated.View {...dragResponder.panHandlers} style={{ width: 72, height: 24, alignSelf: "center", alignItems: "center", justifyContent: "center" }}>
+            <View style={{ width: theme.dimensions.avatarSize.md, height: 4, borderRadius: theme.radius.pill, backgroundColor: theme.colors.border }} />
+          </Animated.View>
           <View style={{ minHeight: 44, flexDirection: "row", alignItems: "center" }}>
             <Pressable
               accessibilityRole="button"
@@ -445,7 +449,7 @@ export function BottomSheet({
           ) : (
             <View style={{ flexShrink: 1, gap: designTokens.spacing.md }}>{children}</View>
           )}
-        </View>
+        </Animated.View>
       </KeyboardAvoidingView>
     </Modal>
   );
