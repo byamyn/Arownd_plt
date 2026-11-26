@@ -1,8 +1,9 @@
 import type { ReactNode } from "react";
-import { View, type StyleProp, type ViewStyle } from "react-native";
+import { StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
 
 import { designTokens, useAppTheme } from "@/lib/theme";
 import { Card, type CardProps } from "./cards";
+import { PressableSurface } from "./primitives";
 import { StatusBadge, type StatusBadgeTone } from "./extended";
 import { Icon } from "./icon";
 import { Text as UiText } from "./typography";
@@ -19,8 +20,45 @@ export function MerchantStatusBadge({ label, tone }: { label: string; tone: Stat
   return <StatusBadge label={label} tone={tone} />;
 }
 
-export function MerchantOrderCard(props: CardProps) {
-  return <Card {...props} />;
+export function MerchantOrderCard({
+  children,
+  media,
+  actions,
+  onPress,
+  disabled = false,
+  style,
+  contentStyle,
+  accessibilityLabel
+}: CardProps) {
+  const theme = useAppTheme();
+  const content = (
+    <View style={[{
+      gap: designTokens.spacing.md,
+      paddingVertical: designTokens.spacing.md,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: theme.colors.divider
+    }, style]}>
+      {media}
+      <View style={[{ gap: designTokens.spacing.md }, contentStyle]}>
+        {children}
+        {actions}
+      </View>
+    </View>
+  );
+
+  if (!onPress) return content;
+
+  return (
+    <PressableSurface
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      accessibilityState={{ disabled }}
+      onPress={onPress}
+      disabled={disabled}
+    >
+      {content}
+    </PressableSurface>
+  );
 }
 
 export function MerchantProductRow({ children, leading, trailing, style }: { children: ReactNode; leading?: ReactNode; trailing?: ReactNode; style?: StyleProp<ViewStyle> }) {
