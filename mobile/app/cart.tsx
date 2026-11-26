@@ -188,7 +188,7 @@ const styles = (theme: ReturnType<typeof useAppTheme>) => StyleSheet.create({
   price: { alignSelf: "flex-start", maxWidth: "100%", flexShrink: 1, fontSize: designTokens.typography.body - 1 },
   controls: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: designTokens.spacing.sm },
   blockedHint: { textAlign: "auto" },
-  summaryContent: { padding: designTokens.spacing.lg, gap: designTokens.spacing.md },
+  summaryContent: { padding: 0, paddingTop: designTokens.spacing.md, gap: designTokens.spacing.md },
   summaryRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   summaryLabel: { flex: 1, minWidth: 0, fontSize: designTokens.typography.body - 1, fontWeight: designTokens.fontWeights.bold },
   total: { flexShrink: 1, minWidth: 0, maxWidth: "58%", fontSize: designTokens.typography.title - 3 },
