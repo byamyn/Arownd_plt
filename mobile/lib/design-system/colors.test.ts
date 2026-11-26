@@ -110,4 +110,11 @@ describe("design system text contrast", () => {
       expect(theme.colors.accentForeground).toBe("#141413");
     }
   });
+
+  it("keeps subtle dividers separate from interactive and input borders", () => {
+    expect(getAppTheme("light").colors.divider).toBe("#E8E6DC");
+    expect(getAppTheme("dark").colors.divider).toBe("#30302A");
+    expect(getAppTheme("light").colors.border).toBe("#B0AEA5");
+    expect(getAppTheme("dark").colors.inputBorder).toBe("#77756D");
+  });
 });
