@@ -544,10 +544,6 @@ function createStyles(theme: AppTheme) {
       alignItems: "center",
       gap: designTokens.spacing.md
     },
-    headerTitle: {
-      flex: 1,
-      textAlign: "auto"
-    },
     headerCopy: {
       flex: 1,
       minWidth: 0,
@@ -569,37 +565,6 @@ function createStyles(theme: AppTheme) {
     section: {
       gap: designTokens.spacing.sm,
       marginTop: 0
-    },
-    preferenceGrid: {
-      flexDirection: "row",
-      gap: designTokens.spacing.sm
-    },
-    preferenceCard: {
-      flex: 1,
-      minWidth: 0,
-      minHeight: 112,
-      padding: designTokens.spacing.sm,
-      borderRadius: designTokens.radius.lg,
-      backgroundColor: theme.colors.surfaceSecondary,
-      justifyContent: "space-between",
-      gap: designTokens.spacing.sm
-    },
-    preferenceIconBadge: {
-      width: 34,
-      height: 34,
-      alignItems: "center",
-      justifyContent: "center",
-      borderRadius: designTokens.radius.md,
-      backgroundColor: theme.colors.accent
-    },
-    preferenceCopy: {
-      gap: designTokens.spacing.xs,
-      minWidth: 0
-    },
-    privacyRowCopy: {
-      flex: 1,
-      minWidth: 0,
-      gap: designTokens.spacing.xs
     },
     signOutRow: {
       minHeight: 58,
@@ -715,10 +680,6 @@ function createStyles(theme: AppTheme) {
       borderRadius: designTokens.radius.md,
       backgroundColor: theme.mode === "dark" ? theme.colors.surfaceSecondary : theme.colors.surfaceMuted
     },
-    signOutButton: {
-      marginTop: designTokens.spacing.md,
-      marginBottom: designTokens.spacing.sm
-    }
   });
 }
 
