@@ -150,7 +150,7 @@ function createStyles(theme: AppTheme) {
   return StyleSheet.create({
     safe: { flex: 1 },
     content: { padding: designTokens.spacing.xl, paddingBottom: designTokens.spacing.xxl, gap: designTokens.spacing.lg },
-    overviewHeader: { padding: designTokens.spacing.xl, borderRadius: theme.radius.xl, backgroundColor: theme.colors.surface, borderWidth: StyleSheet.hairlineWidth, borderColor: theme.colors.border, gap: designTokens.spacing.sm },
+    overviewHeader: { paddingVertical: designTokens.spacing.lg, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.divider, gap: designTokens.spacing.sm },
     overviewEyebrow: { fontSize: designTokens.typography.caption, fontWeight: "600", textAlign: "auto" },
     overviewValue: { fontSize: 30, lineHeight: 38, fontWeight: "800", textAlign: "auto", fontVariant: ["tabular-nums"] },
     overviewCaption: { fontSize: designTokens.typography.caption - 1, lineHeight: 18, textAlign: "auto" },
