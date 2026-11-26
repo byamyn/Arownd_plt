@@ -270,7 +270,7 @@ export default function ProductDetailsScreen() {
             )}
           />
           {selectedOffer ? (
-            <View style={[styles.purchaseFooter, { backgroundColor: theme.colors.background, borderTopColor: theme.colors.border }]}>
+            <View style={[styles.purchaseFooter, { backgroundColor: theme.colors.background, borderTopColor: theme.colors.divider }]}>
               <View style={styles.footerTotal}>
                 <UiText tone="muted" style={styles.reviewCount}>{translate("cartSubtotal")}</UiText>
                 <PriceDisplay value={browsingCurrency.data ? formatMarketPrice(selectedOffer.price * quantity, browsingCurrency.data) : "—"} />
