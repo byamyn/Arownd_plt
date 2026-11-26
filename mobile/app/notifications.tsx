@@ -232,7 +232,7 @@ export default function NotificationsScreen() {
                   if (!item.read) markOne.mutate(item.id);
                   if (destination) router.push(destination as never);
                 }}
-                style={({ pressed }) => [styles.notificationRow, pressed && styles.notificationPressed]}
+                style={({ pressed }) => [styles.notificationRow, { borderBottomColor: theme.colors.divider }, pressed && styles.notificationPressed]}
               >
                 <View style={[styles.iconWrap, { backgroundColor: theme.colors.surfaceSecondary }]}>
                   <Icon name={iconByType[item.type]} size={theme.dimensions.iconSize.md} color={theme.colors.foreground} />
@@ -288,7 +288,7 @@ const styles = StyleSheet.create({
     gap: designTokens.spacing.md,
     paddingVertical: designTokens.spacing.sm,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "rgba(127,127,127,0.24)"
+    borderBottomColor: "transparent"
   },
   notificationPressed: {
     opacity: 0.72
