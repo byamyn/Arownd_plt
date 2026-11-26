@@ -128,10 +128,7 @@ const styles = StyleSheet.create({
     fontSize: designTokens.typography.caption + 1,
     lineHeight: 20
   },
-  linksCard: {
-    paddingHorizontal: designTokens.spacing.md,
-    paddingVertical: 0
-  },
+  linksList: { gap: 0 },
   link: {
     minHeight: 82,
     flexDirection: "row",
