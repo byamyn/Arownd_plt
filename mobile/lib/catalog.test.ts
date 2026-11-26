@@ -201,7 +201,7 @@ describe("fetchMapStoresInBounds", () => {
     const stores = await fetchMapStoresInBounds(viewport, "DZ");
 
     expect(stores).toHaveLength(1001);
-    expect(stores.at(-1)?.id).toBe("store-1000");
+    expect(stores[1000]?.id).toBe("store-1000");
     expect(offsets).toEqual([0, 1000]);
   });
 
