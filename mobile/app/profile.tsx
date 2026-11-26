@@ -33,7 +33,7 @@ import { getSupabaseClient } from "@/lib/supabase";
 import { fetchStoreVerificationReviewerAccess } from "@/lib/store-verification";
 import { ProfileAccountSheet, type ProfileAccountSection } from "@/components/profile-account-sheet";
 import { ProfileActivitySheet, type ProfileActivitySection } from "@/components/profile-activity-sheet";
-import SettingsScreen from "./settings";
+import { ProfileSettingsSection } from "@/components/profile-settings-section";
 import { claimMyUsername } from "@/lib/username";
 
 export default function ProfileScreen() {
@@ -363,7 +363,7 @@ export default function ProfileScreen() {
           ) : null}
         </>
       )}
-      <SettingsScreen embedded />
+      <ProfileSettingsSection />
       <BottomSheet
         visible={accountSheet !== null}
         onRequestClose={() => setAccountSheet(null)}
