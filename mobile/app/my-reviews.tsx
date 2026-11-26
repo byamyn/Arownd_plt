@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
-import { StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 
 import { designTokens, useAppTheme, type AppTheme } from "@/lib/theme";
 import { CustomerScreen, EmptyState, ErrorState, PageSkeleton } from "@/components/customer-ui";
@@ -8,7 +8,6 @@ import {
   AppHeader,
   Button,
   Caption,
-  Card,
   Icon,
   IconButton,
   RatingStars,
@@ -86,12 +85,13 @@ function ReviewRow({ review, language, onPress }: { review: AppReview; language:
     : new Intl.DateTimeFormat(language === "ar" ? "ar-DZ" : "en-DZ", { dateStyle: "medium" }).format(date);
 
   return (
-    <Card
-      onPress={onPress}
+    <Pressable
+      accessibilityRole="button"
       accessibilityLabel={target}
-      style={styles.card}
-      contentStyle={styles.cardContent}
+      onPress={onPress}
+      style={({ pressed }) => [styles.card, { opacity: pressed ? 0.72 : 1 }]}
     >
+      <View style={styles.cardContent}
       <View style={styles.rowHeader}>
         <UiText weight="800" style={styles.targetLabel}>{target}</UiText>
         <RatingStars value={review.rating} size={15} showValue />
@@ -104,7 +104,8 @@ function ReviewRow({ review, language, onPress }: { review: AppReview; language:
         />
         <Caption>{dateLabel}</Caption>
       </View>
-    </Card>
+      </View>
+    </Pressable>
   );
 }
 
