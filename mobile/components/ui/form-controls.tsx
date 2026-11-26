@@ -118,13 +118,13 @@ export function TextField({ label, error, style, containerStyle, accessibilityLa
             label ? styles.textInputWithLabel : null,
             {
               backgroundColor: theme.colors.surface,
-              borderColor: error ? theme.colors.danger : focused ? theme.colors.focus : theme.colors.inputBorder,
+              borderColor: error ? theme.colors.danger : focused ? theme.colors.focus : theme.colors.border,
               borderWidth: focusEmphasis && focused ? 2 : 1,
-              shadowColor: focusEmphasis && focused ? theme.colors.focus : "transparent",
-              shadowOpacity: focusEmphasis && focused ? 0.18 : 0,
-              shadowRadius: focusEmphasis && focused ? 4 : 0,
+              shadowColor: "transparent",
+              shadowOpacity: 0,
+              shadowRadius: 0,
               shadowOffset: { width: 0, height: 0 },
-              elevation: focusEmphasis && focused ? 1 : 0,
+              elevation: 0,
               color: theme.colors.foreground,
               fontFamily: language === "ar" ? theme.fontFamilies.arabic : theme.fontFamilies.latin
             },
@@ -179,7 +179,7 @@ export function QuantityStepper({
 }: QuantityStepperProps) {
   const theme = useAppTheme();
   const state = getQuantityStepState(value, min, max);
-  const buttonStyle = { backgroundColor: theme.colors.surfaceMuted, borderColor: theme.colors.inputBorder };
+  const buttonStyle = { backgroundColor: "transparent", borderColor: theme.colors.divider };
 
   return (
     <View style={styles.stepper} testID={testID}>
@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
   inputContainer: { position: "relative", justifyContent: "center" },
   floatingLabel: { position: "absolute", zIndex: 1, start: designTokens.spacing.lg, top: designTokens.spacing.lg, maxWidth: "72%", paddingHorizontal: 3 },
   fieldLabel: { fontSize: designTokens.typography.caption + 2, fontWeight: designTokens.fontWeights.bold, textAlign: "auto" },
-  textInput: { minHeight: designTokens.dimensions.controlHeight.lg, borderWidth: 1, borderRadius: designTokens.radius.lg - 3, paddingHorizontal: designTokens.spacing.lg, fontSize: designTokens.typography.body },
+  textInput: { minHeight: designTokens.dimensions.controlHeight.lg, borderWidth: 1, borderRadius: designTokens.radius.md, paddingHorizontal: designTokens.spacing.lg, fontSize: designTokens.typography.body },
   textInputWithLabel: { paddingTop: designTokens.spacing.lg + 2 },
   textInputWithPasswordToggleRtl: { paddingLeft: designTokens.spacing.xxl + designTokens.spacing.md },
   textInputWithPasswordToggleLtr: { paddingRight: designTokens.spacing.xxl + designTokens.spacing.md },
