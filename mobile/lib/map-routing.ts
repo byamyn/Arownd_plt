@@ -42,11 +42,167 @@ type OsrmResponse = {
   }>;
 };
 
+type ValhallaResponse = {
+  trip?: {
+    summary?: { length?: number; time?: number };
+    legs?: Array<{
+      shape?: string;
+      maneuvers?: Array<{
+        type?: number;
+        instruction?: string;
+        street_names?: string[];
+        length?: number;
+        time?: number;
+        begin_shape_index?: number;
+      }>;
+    }>;
+  };
+  error?: string;
+  error_code?: number;
+};
+
+function decodePolyline6(encoded: string): RoutePoint[] {
+  const coordinates: RoutePoint[] = [];
+  let index = 0;
+  let latitude = 0;
+  let longitude = 0;
+
+  const readValue = () => {
+    let result = 0;
+    let shift = 0;
+    let byte: number;
+    do {
+      if (index >= encoded.length || shift > 30) throw new Error("invalid_route_geometry");
+      byte = encoded.charCodeAt(index++) - 63;
+      if (byte < 0 || byte > 63) throw new Error("invalid_route_geometry");
+      result |= (byte & 0x1f) << shift;
+      shift += 5;
+    } while (byte >= 0x20);
+    return (result & 1) ? ~(result >> 1) : (result >> 1);
+  };
+
+  while (index < encoded.length) {
+    latitude += readValue();
+    longitude += readValue();
+    coordinates.push({
+      latitude: latitude / 1_000_000,
+      longitude: longitude / 1_000_000
+    });
+  }
+  return coordinates;
+}
+
+function mapValhallaManeuverType(type: number | undefined): string {
+  const types: Record<number, string> = {
+    1: "depart",
+    2: "turn_right",
+    3: "turn_left",
+    4: "arrive",
+    5: "arrive",
+    6: "arrive",
+    7: "continue",
+    8: "continue",
+    9: "slight_right",
+    10: "turn_right",
+    11: "sharp_right",
+    12: "uturn",
+    13: "uturn",
+    14: "sharp_left",
+    15: "turn_left",
+    16: "slight_left",
+    17: "continue",
+    18: "turn_right",
+    19: "turn_left",
+    20: "turn_right",
+    21: "turn_left",
+    22: "continue",
+    23: "slight_right",
+    24: "slight_left",
+    25: "merge",
+    26: "roundabout",
+    27: "roundabout",
+    28: "continue",
+    29: "continue"
+  };
+  return type === undefined ? "continue" : types[type] ?? "continue";
+}
+
+async function fetchValhallaRoute(
+  baseUrl: string,
+  origin: RoutePoint,
+  destination: RoutePoint,
+  signal?: AbortSignal
+): Promise<DrivingRoute> {
+  const response = await fetch(`${baseUrl.replace(/\\/$/, "")}/route`, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      locations: [
+        { lat: origin.latitude, lon: origin.longitude },
+        { lat: destination.latitude, lon: destination.longitude }
+      ],
+      costing: "auto",
+      units: "kilometers",
+      shape_format: "polyline6",
+      directions_options: { units: "kilometers", language: "en-US" }
+    }),
+    ...(signal ? { signal } : {})
+  });
+
+  if (!response.ok) throw new Error("route_service_unavailable");
+  const payload = await response.json() as ValhallaResponse;
+  const trip = payload.trip;
+  const legs = trip?.legs ?? [];
+  if (!trip || legs.length === 0) throw new Error("route_not_found");
+
+  const coordinates = legs.flatMap((leg) => leg.shape ? decodePolyline6(leg.shape) : []);
+  if (coordinates.length < 2) throw new Error("route_geometry_missing");
+
+  let coordinateOffset = 0;
+  const steps: RouteStep[] = legs.flatMap((leg) => {
+    const legCoordinates = leg.shape ? decodePolyline6(leg.shape) : [];
+    const maneuvers = (leg.maneuvers ?? []).flatMap((maneuver) => {
+      const shapeIndex = Math.max(0, Math.min(
+        legCoordinates.length - 1,
+        maneuver.begin_shape_index ?? 0
+      ));
+      const location = legCoordinates[shapeIndex];
+      if (!location) return [];
+      const streetName = maneuver.street_names?.join(" / ") ?? "";
+      return [{
+        name: streetName,
+        distance: (maneuver.length ?? 0) * 1_000,
+        duration: maneuver.time ?? 0,
+        maneuverType: mapValhallaManeuverType(maneuver.type),
+        location
+      }];
+    });
+    coordinateOffset += legCoordinates.length;
+    return maneuvers;
+  });
+
+  return {
+    coordinates,
+    steps,
+    distance: (trip.summary?.length ?? 0) * 1_000,
+    duration: trip.summary?.time ?? 0
+  };
+}
+
 export async function fetchDrivingRoute(
   origin: RoutePoint,
   destination: RoutePoint,
   signal?: AbortSignal
 ): Promise<DrivingRoute> {
+  const selfHostedRoutingUrl = process.env.EXPO_PUBLIC_ROUTING_URL?.trim();
+  if (selfHostedRoutingUrl) {
+    return fetchValhallaRoute(selfHostedRoutingUrl, origin, destination, signal);
+  }
+
+  // Temporary development fallback only. Production builds must set EXPO_PUBLIC_ROUTING_URL.
   const coordinates = [
     `${origin.longitude},${origin.latitude}`,
     `${destination.longitude},${destination.latitude}`
