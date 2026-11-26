@@ -211,13 +211,13 @@ export function ProfileSettingsSection() {
       <View style={styles.section}>
         <Heading level={3}>{translate("settingsAccountTitle")}</Heading>
         <Card contentStyle={styles.sectionContent}>
+          <SettingsRow icon="user" label={translate("settingsAccount")} onPress={() => router.push("/profile")} theme={theme} styles={styles} language={language} />
           <SettingsRow icon="lock" label={translate("settingsPasswordChangeTitle")} description={translate("settingsPasswordHint")} onPress={() => openSheet("password")} theme={theme} styles={styles} language={language} />
           <SettingsRow icon="refresh-cw" label={translate("settingsSwitchAccount")} description={translate("settingsSwitchAccountHint")} onPress={() => { setAccountSwitchError(false); setAddAccountError(false); openSheet("accounts"); }} theme={theme} styles={styles} language={language} />
           <SettingsRow icon="map-pin" label={translate("settingsBrowsingCountry")} description={browsingCountry.data ?? "—"} onPress={() => openSheet("country")} theme={theme} styles={styles} language={language} />
           <SettingsRow icon={theme.mode === "dark" ? "moon" : "sun"} label={translate("settingsAppearanceTitle")} description={translate(themeMode === "system" ? "settingsThemeSystem" : themeMode === "light" ? "settingsThemeLight" : "settingsThemeDark")} onPress={() => openSheet("appearance")} theme={theme} styles={styles} language={language} />
           <SettingsRow icon="globe" label={translate("settingsLanguageTitle")} description={translate(language === "ar" ? "settingsLanguageArabic" : "settingsLanguageEnglish")} onPress={() => openSheet("language")} theme={theme} styles={styles} language={language} />
           <SettingsRow icon="eye" label={translate("profilePublicTitle")} description={profileVisibility.isPending ? translate("profileVisibilityLoading") : profileVisibility.data?.is_public ? translate("profilePublicEnabled") : translate("profilePublicDisabled")} onPress={() => { if (profileVisibility.data && !profileVisibilityMutation.isPending) profileVisibilityMutation.mutate(!profileVisibility.data.is_public); }} theme={theme} styles={styles} language={language} disabled={profileVisibility.isPending || !profileVisibility.data || profileVisibilityMutation.isPending} />
-          <SettingsRow icon="lock" label={translate("settingsPrivacyPolicy")} description={translate("settingsTermsOfUse")} onPress={() => router.push("/privacy-security")} theme={theme} styles={styles} language={language} last />
           {profileVisibilityMutation.isError || profileVisibility.isError ? <Caption>{translate("profilePublicError")}</Caption> : null}
         </Card>
       </View>
@@ -225,6 +225,7 @@ export function ProfileSettingsSection() {
       <View style={styles.section}>
         <Heading level={3}>{translate("settingsSupportSection")}</Heading>
         <Card contentStyle={styles.sectionContent}>
+          <SettingsRow icon="shield" label={translate("settingsPrivacyPolicy")} onPress={() => router.push("/privacy-security")} theme={theme} styles={styles} language={language} />
           <SettingsRow icon="message-circle" label={translate("settingsSupportTitle")} onPress={() => router.push("/support")} theme={theme} styles={styles} language={language} />
           <SettingsRow icon="info" label={translate("settingsAboutTitle")} onPress={() => router.push("/about")} theme={theme} styles={styles} language={language} />
           <PressableSurface accessibilityRole="button" accessibilityLabel={translate("settingsSignOutConfirmAction")} onPress={() => { setSignOutError(false); setSignOutConfirmOpen(true); }} disabled={signOutMutation.isPending} style={styles.signOutRow}>
