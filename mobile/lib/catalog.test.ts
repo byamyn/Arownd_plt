@@ -169,6 +169,7 @@ describe("fetchMapStoresInBounds", () => {
   };
 
   it("fetches every country-scoped viewport page beyond the 1,000-row RPC limit", async () => {
+    rpcMock.mockReset();
     const firstPage = Array.from({ length: 1000 }, (_, index) => ({
       id: `store-${index}`,
       name: `Store ${index}`,
@@ -205,6 +206,7 @@ describe("fetchMapStoresInBounds", () => {
   });
 
   it("rejects invalid browsing country codes before querying the map RPC", async () => {
+    rpcMock.mockReset();
     await expect(fetchMapStoresInBounds(viewport, "DZA")).rejects.toThrow("INVALID_BROWSING_COUNTRY");
     expect(rpcMock).not.toHaveBeenCalled();
   });
