@@ -427,7 +427,7 @@ export default function MerchantEditProductScreen() {
             </View>
           </View>
 
-          <Card contentStyle={styles.card}>
+          <View style={styles.formSection}>
             <View style={styles.productHeading}>
               <UiText style={[styles.productName, { color: theme.colors.foreground }]}>{offer.product.name}</UiText>
               {offer.product.brand ? (
