@@ -430,7 +430,7 @@ export default function CheckoutScreen() {
 function createStyles(theme: AppTheme) { return StyleSheet.create({
   back: { color: theme.colors.accentMuted, fontSize: designTokens.typography.body - 1, fontWeight: designTokens.fontWeights.extrabold },
   sectionGroup: { paddingVertical: designTokens.spacing.lg, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.divider, gap: designTokens.spacing.md },
-  summaryCard: { padding: designTokens.spacing.lg, gap: designTokens.spacing.md },
+  summaryCard: { paddingHorizontal: 0, paddingVertical: designTokens.spacing.md, gap: designTokens.spacing.md },
   paymentGroup: { paddingVertical: designTokens.spacing.lg, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.divider, gap: designTokens.spacing.md },
   paymentMethod: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md },
   paymentInfo: { flex: 1, gap: designTokens.spacing.xs, alignItems: "flex-start" },
