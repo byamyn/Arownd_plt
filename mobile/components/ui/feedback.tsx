@@ -235,7 +235,7 @@ export function PageSkeleton({
       {variant === "cart" ? (
         <View style={{ gap: designTokens.spacing.md }}>
           {rowKeys.map((index) => (
-            <View key={index} style={{ flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md, paddingVertical: designTokens.spacing.sm, borderBottomWidth: index === count - 1 ? 0 : StyleSheet.hairlineWidth, borderBottomColor: theme.colors.border }}>
+            <View key={index} style={{ flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md, paddingVertical: designTokens.spacing.sm, borderBottomWidth: index === count - 1 ? 0 : StyleSheet.hairlineWidth, borderBottomColor: theme.colors.divider }}>
               <Skeleton width={82} height={94} radius={theme.radius.lg} />
               <View style={{ flex: 1, gap: designTokens.spacing.sm }}>
                 <Skeleton width="72%" height={14} />
@@ -410,7 +410,7 @@ export function BottomSheet({
             </View>
             <View style={{ width: 44, height: 44 }} />
           </View>
-          <View style={{ height: 1, backgroundColor: theme.colors.border }} />
+          <View style={{ height: 1, backgroundColor: theme.colors.divider }} />
           {children}
         </View>
       </KeyboardAvoidingView>

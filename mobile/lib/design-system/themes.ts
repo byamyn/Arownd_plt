@@ -27,6 +27,7 @@ export type AppTheme = {
     muted: string;
     subtle: string;
     border: string;
+    divider: string;
     input: string;
     inputBorder: string;
     focus: string;
@@ -88,6 +89,7 @@ export function getAppTheme(mode: "light" | "dark"): AppTheme {
       muted: palette.foregroundMuted,
       subtle: semanticPalette.subtle,
       border: palette.border,
+      divider: palette.divider,
       input: palette.input,
       inputBorder: palette.inputBorder,
       focus: palette.focus,

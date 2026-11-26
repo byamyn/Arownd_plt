@@ -272,7 +272,7 @@ export function Select({
                 onChange(option.value);
                 setOpen(false);
               }}
-              style={{ minHeight: theme.dimensions.controlHeight.lg, justifyContent: "center", borderBottomWidth: 1, borderBottomColor: theme.colors.border, backgroundColor: option.value === value ? theme.colors.accent : "transparent", opacity: option.disabled ? 0.45 : 1 }}
+              style={{ minHeight: theme.dimensions.controlHeight.lg, justifyContent: "center", borderBottomWidth: 1, borderBottomColor: theme.colors.divider, backgroundColor: option.value === value ? theme.colors.accent : "transparent", opacity: option.disabled ? 0.45 : 1 }}
             >
               <UiText style={{ color: option.value === value ? theme.colors.accentForeground : theme.colors.foreground, textAlign: "auto", fontSize: theme.typography.body, fontWeight: option.value === value ? theme.fontWeights.bold : theme.fontWeights.regular }}>
                 {option.label}

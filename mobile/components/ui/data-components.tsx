@@ -10,13 +10,42 @@ export function List({ children, style }: { children: ReactNode; style?: StylePr
   return <View style={style}>{children}</View>;
 }
 
+export function ListSection({
+  title,
+  description,
+  action,
+  children,
+  style
+}: {
+  title: string;
+  description?: string;
+  action?: ReactNode;
+  children: ReactNode;
+  style?: StyleProp<ViewStyle>;
+}) {
+  const theme = useAppTheme();
+  return (
+    <View style={[{ gap: designTokens.spacing.sm }, style]}>
+      <View style={{ minHeight: 28, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: designTokens.spacing.md }}>
+        <View style={{ flex: 1, gap: designTokens.spacing.xs }}>
+          <UiText style={{ color: theme.colors.foreground, fontSize: theme.typography.subtitle, fontWeight: theme.fontWeights.semibold, textAlign: "auto" }}>{title}</UiText>
+          {description ? <UiText style={{ color: theme.colors.muted, fontSize: theme.typography.caption, textAlign: "auto" }}>{description}</UiText> : null}
+        </View>
+        {action}
+      </View>
+      {children}
+    </View>
+  );
+}
+
 export function ListItem({
   children,
   leading,
   trailing,
   onPress,
   accessibilityLabel,
-  style
+  style,
+  showDivider = true
 }: {
   children: ReactNode;
   leading?: ReactNode;
@@ -24,11 +53,12 @@ export function ListItem({
   onPress?: () => void;
   accessibilityLabel?: string;
   style?: StyleProp<ViewStyle>;
+  showDivider?: boolean;
 }) {
   const theme = useAppTheme();
-  const content = <View style={[{ minHeight: 56, flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md, paddingVertical: designTokens.spacing.sm }, style]}>{leading}<View style={{ flex: 1 }}>{children}</View>{trailing}</View>;
+  const content = <View style={[{ minHeight: 56, flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md, paddingVertical: designTokens.spacing.sm, borderBottomWidth: showDivider ? 1 : 0, borderBottomColor: theme.colors.divider }, style]}>{leading}<View style={{ flex: 1 }}>{children}</View>{trailing}</View>;
   if (!onPress) return content;
-  return <Pressable accessibilityRole="button" accessibilityLabel={accessibilityLabel ?? (typeof children === "string" ? children : undefined)} onPress={onPress} style={({ pressed }) => ({ borderBottomWidth: 1, borderBottomColor: theme.colors.border, opacity: pressed ? 0.72 : 1 })}>{content}</Pressable>;
+  return <Pressable accessibilityRole="button" accessibilityLabel={accessibilityLabel ?? (typeof children === "string" ? children : undefined)} onPress={onPress} style={({ pressed }) => ({ opacity: pressed ? 0.72 : 1 })}>{content}</Pressable>;
 }
 
 export type DataTableColumn<Row extends object> = {
@@ -53,11 +83,11 @@ export function DataTable<Row extends object>({
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false} style={style}>
       <View>
-        <View style={{ flexDirection: "row", borderBottomWidth: 1, borderBottomColor: theme.colors.border }}>
+        <View style={{ flexDirection: "row", borderBottomWidth: 1, borderBottomColor: theme.colors.divider }}>
           {columns.map((column) => <View key={String(column.key)} style={{ width: column.width ?? 120, padding: designTokens.spacing.sm }}><View>{typeof column.header === "string" ? <UiText style={{ color: theme.colors.muted, fontSize: theme.typography.caption, fontWeight: theme.fontWeights.bold, textAlign: "auto" }}>{column.header}</UiText> : column.header}</View></View>)}
         </View>
         {rows.map((row, index) => (
-          <View key={keyExtractor(row, index)} style={{ flexDirection: "row", borderBottomWidth: 1, borderBottomColor: theme.colors.border }}>
+          <View key={keyExtractor(row, index)} style={{ flexDirection: "row", borderBottomWidth: 1, borderBottomColor: theme.colors.divider }}>
             {columns.map((column) => <View key={String(column.key)} style={{ width: column.width ?? 120, minHeight: theme.dimensions.controlHeight.md, justifyContent: "center", padding: designTokens.spacing.sm }}>{column.render ? column.render(row) : <UiText style={{ color: theme.colors.foreground, fontSize: theme.typography.caption, textAlign: "auto" }}>{String(row[column.key] ?? "")}</UiText>}</View>)}
           </View>
         ))}
