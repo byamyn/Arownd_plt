@@ -3,7 +3,7 @@ services:
     image: ${VALHALLA_IMAGE:-ghcr.io/valhalla/valhalla-scripted:latest}
     restart: unless-stopped
     environment:
-      tile_urls: ${OSM_PBF_URL:-https://download.geofabrik.de/africa/algeria-latest.osm.pbf}
+      tile_urls: "${OSM_PBF_URLS:-https://download.geofabrik.de/africa/algeria-latest.osm.pbf https://download.geofabrik.de/africa/morocco-latest.osm.pbf https://download.geofabrik.de/africa/egypt-latest.osm.pbf https://download.geofabrik.de/asia/gcc-states-latest.osm.pbf}"
     volumes:
       - valhalla_data:/custom_files
     expose:
