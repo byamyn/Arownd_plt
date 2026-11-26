@@ -230,7 +230,7 @@ export function ProfileSettingsSection() {
         <Heading level={3}>{translate("settingsPrivacyTitle")}</Heading>
         <Card contentStyle={styles.sectionContent}>
           <SettingsRow icon="eye" label={translate("profilePublicTitle")} description={profileVisibility.isPending ? translate("profileVisibilityLoading") : profileVisibility.data?.is_public ? translate("profilePublicEnabled") : translate("profilePublicDisabled")} onPress={() => { if (profileVisibility.data && !profileVisibilityMutation.isPending) profileVisibilityMutation.mutate(!profileVisibility.data.is_public); }} theme={theme} styles={styles} language={language} disabled={profileVisibility.isPending || !profileVisibility.data || profileVisibilityMutation.isPending} />
-          <SettingsRow icon="shield-check" label={translate("settingsPrivacyTitle")} description={translate("settingsPrivacyPolicy") + " · " + translate("settingsTermsOfUse")} onPress={() => router.push("/privacy-security")} theme={theme} styles={styles} language={language} last />
+          <SettingsRow icon="lock" label={translate("settingsPrivacyTitle")} description={translate("settingsPrivacyPolicy") + " · " + translate("settingsTermsOfUse")} onPress={() => router.push("/privacy-security")} theme={theme} styles={styles} language={language} last />
           {profileVisibilityMutation.isError || profileVisibility.isError ? <Caption>{translate("profilePublicError")}</Caption> : null}
         </Card>
       </View>
@@ -530,7 +530,7 @@ function SettingsRow({
         </View>
       </View>
       <View style={styles.rowTrailing}>
-        <Icon name={language === "ar" ? "chevron-left" : "chevron-right"} size={18} color={theme.colors.subtle} />
+        <Icon name="chevron-right" size={18} color={theme.colors.subtle} />
       </View>
     </PressableSurface>
   );
