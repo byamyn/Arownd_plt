@@ -31,8 +31,9 @@ import { fetchMyDeliveryProfile } from "@/lib/delivery-profile";
 import { setMyProfileVisibility } from "@/lib/username";
 import { uploadMyProfileAvatar, removeMyProfileAvatar } from "@/lib/profile-avatar";
 import { getProfileDisplayName } from "@/lib/profile-state";
+import { ProfileAccountSheet, type ProfileAccountSection } from "@/components/profile-account-sheet";
 
-type SettingsSheet = "account" | "password" | "appearance" | "language" | "country" | "accounts" | null;
+type SettingsSheet = "account" | "delivery" | "addresses" | "invite" | "password" | "appearance" | "language" | "country" | "accounts" | null;
 
 export function ProfileSettingsSection() {
   const theme = useAppTheme();
@@ -223,6 +224,9 @@ export function ProfileSettingsSection() {
         <Heading level={3}>{translate("settingsAccountTitle")}</Heading>
         <Card contentStyle={styles.sectionContent}>
           <SettingsRow icon="user" label={translate("settingsAccount")} onPress={() => openSheet("account")} theme={theme} styles={styles} language={language} />
+          <SettingsRow icon="id-card" label={translate("settingsProfileData")} onPress={() => openSheet("delivery")} theme={theme} styles={styles} language={language} />
+          <SettingsRow icon="map-pin" label={translate("profileAddresses")} description={translate("profileAddressesHint")} onPress={() => openSheet("addresses")} theme={theme} styles={styles} language={language} />
+          <SettingsRow icon="gift" label={translate("profileInvite")} description={translate("profileInviteHint")} onPress={() => openSheet("invite")} theme={theme} styles={styles} language={language} />
           <SettingsRow icon="map-pin" label={translate("settingsBrowsingCountry")} description={browsingCountry.data ?? "—"} onPress={() => openSheet("country")} theme={theme} styles={styles} language={language} />
           <SettingsRow icon={theme.mode === "dark" ? "moon" : "sun"} label={translate("settingsAppearanceTitle")} description={translate(themeMode === "system" ? "settingsThemeSystem" : themeMode === "light" ? "settingsThemeLight" : "settingsThemeDark")} onPress={() => openSheet("appearance")} theme={theme} styles={styles} language={language} />
           <SettingsRow icon="globe" label={translate("settingsLanguageTitle")} description={translate(language === "ar" ? "settingsLanguageArabic" : "settingsLanguageEnglish")} onPress={() => openSheet("language")} theme={theme} styles={styles} language={language} />
@@ -237,6 +241,12 @@ export function ProfileSettingsSection() {
           <SettingsRow icon="info" label={translate("settingsAboutTitle")} onPress={() => router.push("/about")} theme={theme} styles={styles} language={language} />
         </Card>
       </View>
+
+      <BottomSheet visible={activeSheet === "delivery" || activeSheet === "addresses" || activeSheet === "invite"} onRequestClose={closeSheet} title={translate(activeSheet === "delivery" ? "settingsProfileData" : activeSheet === "addresses" ? "addressesTitle" : "inviteTitle")} height="82%" maxHeight="94%">
+        {activeSheet === "delivery" || activeSheet === "addresses" || activeSheet === "invite" ? (
+          <ProfileAccountSheet section={activeSheet as ProfileAccountSection} onManageAvatar={() => setAvatarActionsOpen(true)} />
+        ) : null}
+      </BottomSheet>
 
       <BottomSheet visible={activeSheet === "account"} onRequestClose={closeSheet} title={translate("settingsAccount")} closeIcon="chevron-right" height="82%" maxHeight="94%">
         <View style={styles.accountHero}>
@@ -262,6 +272,13 @@ export function ProfileSettingsSection() {
           {signOutError ? <UiText tone="danger">{translate("settingsSignOutError")}</UiText> : null}
         </Card>
       </BottomSheet>
+
+      <Card contentStyle={styles.sectionContent}>
+        <PressableSurface accessibilityRole="button" accessibilityLabel={translate("settingsSignOutConfirmAction")} onPress={() => { setSignOutError(false); setSignOutConfirmOpen(true); }} disabled={signOutMutation.isPending} style={styles.signOutRow}>
+          <View style={styles.linkLabel}><Icon name="log-out" size={19} color={theme.colors.danger} /><UiText tone="danger" weight="700">{translate("settingsSignOutConfirmAction")}</UiText></View>
+        </PressableSurface>
+        {signOutError ? <UiText tone="danger">{translate("settingsSignOutError")}</UiText> : null}
+      </Card>
 
       <BottomSheet visible={avatarActionsOpen} onRequestClose={() => setAvatarActionsOpen(false)} title={translate("profileAvatarOptionsTitle")}>
         <PressableSurface onPress={() => { void chooseAvatar(); }} disabled={avatarUpload.isPending || avatarRemove.isPending} style={styles.avatarOption}><Icon name="image" size={21} color={theme.colors.accentOnSurface} /><UiText weight="600">{translate("profileAvatarChooseFromGallery")}</UiText></PressableSurface>
