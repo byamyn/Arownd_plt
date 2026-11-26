@@ -207,7 +207,7 @@ export default function MerchantProductsScreen() {
             <UiText style={[styles.emptyHint, { color: theme.colors.muted }]}>{translate("merchantProductsEmptyHint")}</UiText>
           </View>
         ) : visibleOffers.length === 0 ? (
-          <Card contentStyle={styles.emptyCard}>
+          <View style={styles.emptyState}>
             <UiText style={[styles.emptyTitle, { color: theme.colors.foreground }]}>{translate("merchantProductsNoResults")}</UiText>
           </View>
         ) : (
@@ -379,7 +379,7 @@ const MerchantOfferCard = memo(function MerchantOfferCard({
           ))}
         </ScrollView>
       </MediaViewer>
-    </View>
+    </Card>
   );
 });
 
