@@ -277,12 +277,7 @@ export default function DeliveryProfileScreen() {
 function createStyles(theme: AppTheme) { return StyleSheet.create({
   stickyFooter: { gap: designTokens.spacing.sm },
   snackbar: { minHeight: 42, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: designTokens.spacing.sm, paddingHorizontal: designTokens.spacing.md, borderRadius: theme.radius.md, backgroundColor: theme.colors.surfaceSecondary },
-  panel: {
-    backgroundColor: theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface,
-    borderColor: theme.mode === "light" ? "transparent" : theme.colors.border,
-    borderRadius: theme.radius.xl,
-    padding: 0
-  },
+  formSection: { paddingVertical: designTokens.spacing.lg, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.divider, gap: designTokens.spacing.md },
   label: { fontSize: designTokens.typography.caption + 1, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
   input: {
     minHeight: designTokens.dimensions.controlHeight.lg,
