@@ -21,7 +21,7 @@ export default function SettingsScreen() {
 
   if (user.isPending) {
     return (
-      <CustomerScreen>
+      <CustomerScreen showNavigation={false}>
         <CustomerMainHeader variant="profile" />
         <PageSkeleton variant="profile" rows={3} />
       </CustomerScreen>
@@ -30,7 +30,7 @@ export default function SettingsScreen() {
 
   if (user.isError) {
     return (
-      <CustomerScreen refreshing={user.isFetching} onRefresh={() => { void user.refetch(); }}>
+      <CustomerScreen showNavigation={false} refreshing={user.isFetching} onRefresh={() => { void user.refetch(); }}>
         <CustomerMainHeader variant="profile" />
         <ErrorState
           title={translate("profileLoadError")}
@@ -44,7 +44,7 @@ export default function SettingsScreen() {
 
   if (!user.data) {
     return (
-      <CustomerScreen>
+      <CustomerScreen showNavigation={false}>
         <CustomerMainHeader variant="profile" />
         <Caption>{translate("profileLoginHint")}</Caption>
         <Button label={translate("profileLogin")} onPress={() => router.push("/login")} fullWidth />
