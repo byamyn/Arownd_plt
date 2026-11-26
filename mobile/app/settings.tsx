@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { router } from "expo-router";
+import { Redirect, router } from "expo-router";
 import { StyleSheet, View } from "react-native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -32,7 +32,7 @@ import { setMyProfileVisibility } from "@/lib/username";
 
 type SettingsSheet = "password" | "appearance" | "language" | "country" | "accounts" | null;
 
-export default function SettingsScreen() {
+export default function SettingsScreen({ embedded = false }: { embedded?: boolean }) {
   const theme = useAppTheme();
   const styles = createStyles(theme);
   const queryClient = useQueryClient();
@@ -187,9 +187,11 @@ export default function SettingsScreen() {
     }
   };
 
+  if (!embedded) return <Redirect href="/profile" />;
+
   return (
-    <CustomerScreen showNavigation={false} contentStyle={styles.screenContent} refreshing={browsingCountry.isFetching || profileVisibility.isFetching || (activeSheet === "country" && countries.isFetching)} onRefresh={() => { void browsingCountry.refetch(); void profileVisibility.refetch(); if (activeSheet === "country") void countries.refetch(); }}>
-      <AppHeader title={translate("settingsTitle")} />
+    <CustomerScreen embedded={embedded} showNavigation={false} contentStyle={styles.screenContent} refreshing={browsingCountry.isFetching || profileVisibility.isFetching || (activeSheet === "country" && countries.isFetching)} onRefresh={() => { void browsingCountry.refetch(); void profileVisibility.refetch(); if (activeSheet === "country") void countries.refetch(); }}>
+      {!embedded ? <AppHeader title={translate("settingsTitle")} /> : null}
       <View style={styles.section}>
         <Heading level={3}>{translate("settingsPreferencesTitle")}</Heading>
         <View style={styles.preferenceGrid}>
