@@ -174,7 +174,7 @@ export default function MerchantOrderDetailsScreen() {
           {detail.data.items.length === 0 ? (
             <UiText style={[styles.mutedText, { color: theme.colors.muted }]}>{translate("merchantOrderItemsUnavailable")}</UiText>
           ) : detail.data.items.map((item) => (
-            <View key={item.id} style={[styles.itemRow, { borderBottomColor: theme.colors.border }]}>
+            <View key={item.id} style={[styles.itemRow, { borderBottomColor: theme.colors.divider }]}>
               <View style={styles.itemInfo}>
                 <UiText style={[styles.itemName, { color: theme.colors.foreground }]}>{item.product_name || translate("merchantOrderItems")}</UiText>
                 <UiText style={[styles.mutedText, { color: theme.colors.muted }]}>{translate("merchantOrderQuantity")}: {formatNumber(item.quantity)}</UiText>
