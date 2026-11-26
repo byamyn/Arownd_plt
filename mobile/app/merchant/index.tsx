@@ -54,7 +54,7 @@ export default function MerchantEntryScreen() {
       <SafeAreaView edges={["top", "left", "right"]} style={[styles.safe, { backgroundColor: theme.colors.background }]}>
         <RefreshableScrollView contentContainerStyle={styles.entryContent} refreshing={access.isFetching} onRefresh={() => { void access.refetch(); }}>
           <Button label={translate("merchantBackToProfile")} onPress={() => router.replace("/profile")} variant="ghost" size="sm" />
-          <View style={styles.entrySection}>
+          <View style={[styles.entrySection, { borderTopColor: theme.colors.divider }]}>
             <UiText style={[styles.eyebrow, { color: theme.colors.accentMuted }]}>{translate("businessTitle")}</UiText>
             <UiText style={[styles.title, { color: theme.colors.foreground }]}>
               {translate("merchantEntryTitle")}
@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
   loading: { flex: 1, padding: designTokens.spacing.xl, justifyContent: "center", gap: designTokens.spacing.md },
   message: { flex: 1, padding: designTokens.spacing.xxl, alignItems: "center", justifyContent: "center" },
   entryContent: { flexGrow: 1, padding: designTokens.spacing.xl, gap: designTokens.spacing.xl },
-  entrySection: { paddingVertical: designTokens.spacing.xl, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: theme.colors.divider, gap: designTokens.spacing.lg },
+  entrySection: { paddingVertical: designTokens.spacing.xl, borderTopWidth: StyleSheet.hairlineWidth, gap: designTokens.spacing.lg },
   eyebrow: { fontSize: designTokens.typography.caption, fontWeight: designTokens.fontWeights.extrabold },
   title: { fontSize: designTokens.typography.display - 4, lineHeight: 33, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
   body: { fontSize: designTokens.typography.caption + 1, lineHeight: 20, textAlign: "auto" }
