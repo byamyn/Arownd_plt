@@ -12,7 +12,7 @@ import {
   RasterSource
 } from "@maplibre/maplibre-react-native";
 
-import { BottomSheet, AppHeader, Button, Card, ErrorState, Heading, Icon, IconButton, Image as UiImage, LoadingState, PageSkeleton, PressableSurface, Text as UiText, TextField, RefreshableScrollView } from "@/components/ui";
+import { BottomSheet, AppHeader, Button, ErrorState, Heading, Icon, IconButton, Image as UiImage, LoadingState, PageSkeleton, PressableSurface, Text as UiText, TextField, RefreshableScrollView } from "@/components/ui";
 import { fetchMerchantAccess } from "@/lib/merchant";
 import { fetchCheckoutRegions } from "@/lib/checkout";
 import { STORE_IMAGE_MAX_BYTES, uploadMerchantStoreImage, validateStoreImageAsset } from "@/lib/merchant-store-images";
