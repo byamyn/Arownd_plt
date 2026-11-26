@@ -1,4 +1,0 @@
-{$ROUTING_DOMAIN} {
-    encode zstd gzip
-    reverse_proxy routing-gateway:8080
-}
