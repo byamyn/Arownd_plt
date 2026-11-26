@@ -360,11 +360,11 @@ export default function MerchantStoreSettingsScreen() {
           {imageCleanupPending ? <UiText style={[styles.error, { color: theme.mode === "light" ? theme.colors.dangerText : theme.colors.danger }]}>{translate("merchantStoreImageCleanupPending")}</UiText> : null}
         </View>
 
-        <Card contentStyle={styles.sectionCard}>
+        <View style={styles.sectionGroup}>
           <Heading level={3}>{translate("merchantStoreDetailsTitle")}</Heading>
           <Field label={translate("merchantStoreSettingsPhone")} value={form.phone} onChangeText={(value) => update("phone", value)} theme={theme} hint={translate("merchantStoreSettingsPhoneHint")} disabled={mutation.isPending} error={fieldErrors.phone} />
           <Field label={translate("merchantStoreSettingsWhatsapp")} value={form.whatsapp} onChangeText={(value) => update("whatsapp", value)} theme={theme} hint={translate("merchantStoreSettingsWhatsappHint")} disabled={mutation.isPending} error={fieldErrors.whatsapp} />
-        </Card>
+        </View>
 
         <Card contentStyle={styles.sectionCard}>
           <Heading level={3}>{translate("merchantStoreLocationTitle")}</Heading>
@@ -456,7 +456,7 @@ export default function MerchantStoreSettingsScreen() {
         {mutation.isSuccess ? <UiText style={[styles.success, { color: theme.mode === "light" ? theme.colors.successText : theme.colors.success }]}>{translate("merchantStoreSettingsSaved")}</UiText> : null}
       </RefreshableScrollView>
 
-      <View style={[styles.footer, { backgroundColor: theme.colors.background, borderTopColor: theme.colors.border }]}>
+      <View style={[styles.footer, { backgroundColor: theme.colors.background, borderTopColor: theme.colors.divider }]}>
         <Button label={translate("merchantStoreSettingsSave")} onPress={submit} loading={mutation.isPending} disabled={imageBusy !== null || locationBusy || mutation.isPending} fullWidth />
       </View>
 
@@ -540,7 +540,7 @@ export default function MerchantStoreSettingsScreen() {
       <BottomSheet visible={regionPickerOpen} onRequestClose={() => setRegionPickerOpen(false)} title={regionPickerLevel === "primary" ? (regionOptions.data ? getRegionLevelDisplayName(regionOptions.data.selectedLevel, language) : "") : (secondaryOptions.data ? getRegionLevelDisplayName(secondaryOptions.data.selectedLevel, language) : "")} maxHeight="85%">
         <ScrollView style={styles.wilayaList} keyboardShouldPersistTaps="handled">
           {(regionPickerLevel === "primary" ? (regionOptions.data?.regions ?? []) : (secondaryOptions.data?.regions ?? [])).map((region) => (
-            <PressableSurface key={region.id} accessibilityRole="button" accessibilityLabel={getRegionDisplayName(region, language)} accessibilityState={{ selected: regionPickerLevel === "primary" ? region.id === form.region_id : region.id === form.secondary_region_id }} onPress={() => regionPickerLevel === "primary" ? selectRegion(region.id) : selectSecondaryRegion(region.id)} style={[styles.wilayaOption, { borderBottomColor: theme.colors.border, backgroundColor: (regionPickerLevel === "primary" ? region.id === form.region_id : region.id === form.secondary_region_id) ? theme.colors.accent : "transparent" }]}>
+            <PressableSurface key={region.id} accessibilityRole="button" accessibilityLabel={getRegionDisplayName(region, language)} accessibilityState={{ selected: regionPickerLevel === "primary" ? region.id === form.region_id : region.id === form.secondary_region_id }} onPress={() => regionPickerLevel === "primary" ? selectRegion(region.id) : selectSecondaryRegion(region.id)} style={[styles.wilayaOption, { borderBottomColor: theme.colors.divider, backgroundColor: (regionPickerLevel === "primary" ? region.id === form.region_id : region.id === form.secondary_region_id) ? theme.colors.accent : "transparent" }]}>
               <UiText style={[styles.wilayaText, { color: (regionPickerLevel === "primary" ? region.id === form.region_id : region.id === form.secondary_region_id) ? theme.colors.accentForeground : theme.colors.foreground }]}>{getRegionDisplayName(region, language)}</UiText>
             </PressableSurface>
           ))}
@@ -606,7 +606,7 @@ function createStyles(theme: AppTheme) {
     editorLogoAction: { position: "absolute", bottom: -2, end: -2, width: 28, height: 28, borderRadius: 14, borderWidth: StyleSheet.hairlineWidth, alignItems: "center", justifyContent: "center" },
     editorIdentityFields: { flex: 1, justifyContent: "center" },
     editorDescription: { paddingHorizontal: designTokens.spacing.lg },
-    sectionCard: { padding: designTokens.spacing.lg, gap: designTokens.spacing.lg },
+    sectionGroup: { paddingVertical: designTokens.spacing.lg, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.divider, gap: designTokens.spacing.lg },
     footer: { paddingHorizontal: designTokens.spacing.lg, paddingVertical: designTokens.spacing.md, borderTopWidth: StyleSheet.hairlineWidth },
     backText: { fontSize: designTokens.typography.caption + 1, fontWeight: designTokens.fontWeights.extrabold },
     subtitle: { fontSize: designTokens.typography.caption + 1, lineHeight: 20, textAlign: "auto" },
