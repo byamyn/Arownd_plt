@@ -37,6 +37,7 @@ import {
   formatDuration,
   getActiveStepIndex,
   getManeuverInstruction,
+  getRemainingRouteCoordinates,
   getRemainingRouteMetrics,
   type DrivingRoute,
   type RoutePoint
@@ -193,17 +194,23 @@ export default function MapScreen() {
   const visibleStores = stores.data ?? [];
 
   const navigationRoute = navigation?.route ?? null;
-  const routeFeatureCollection = useMemo(() => ({
-    type: "FeatureCollection" as const,
-    features: navigationRoute ? [{
-      type: "Feature" as const,
-      properties: {},
-      geometry: {
-        type: "LineString" as const,
-        coordinates: navigationRoute.coordinates.map((point) => [point.longitude, point.latitude])
-      }
-    }] : []
-  }), [navigationRoute]);
+  const routeFeatureCollection = useMemo(() => {
+    if (!navigationRoute) return { type: "FeatureCollection" as const, features: [] };
+    const remainingCoordinates = userPosition
+      ? getRemainingRouteCoordinates(navigationRoute.coordinates, userPosition)
+      : navigationRoute.coordinates;
+    return {
+      type: "FeatureCollection" as const,
+      features: remainingCoordinates.length >= 2 ? [{
+        type: "Feature" as const,
+        properties: {},
+        geometry: {
+          type: "LineString" as const,
+          coordinates: remainingCoordinates.map((point) => [point.longitude, point.latitude])
+        }
+      }] : []
+    };
+  }, [navigationRoute, userPosition]);
 
   const getCurrentLocation = async () => {
     const permission = await Location.requestForegroundPermissionsAsync();
@@ -450,7 +457,7 @@ export default function MapScreen() {
 
   const currentStep = navigation?.route.steps[navigation.currentStepIndex] ?? null;
   const remainingRoute = navigation
-    ? getRemainingRouteMetrics(navigation.route, navigation.currentStepIndex)
+    ? getRemainingRouteMetrics(navigation.route, navigation.currentStepIndex, userPosition)
     : null;
   const distanceTargetStep = currentStep?.maneuverType === "depart"
     ? navigation?.route.steps[navigation.currentStepIndex + 1] ?? currentStep
@@ -533,14 +540,23 @@ export default function MapScreen() {
           {navigation ? (
             <GeoJSONSource id="arownd-navigation-route" data={routeFeatureCollection}>
               <Layer
+                id="arownd-navigation-route-casing"
+                type="line"
+                layout={{ "line-cap": "round", "line-join": "round" }}
+                paint={{
+                  "line-color": isDark ? "#101820" : "#FFFFFF",
+                  "line-width": 11,
+                  "line-opacity": 0.92
+                }}
+              />
+              <Layer
                 id="arownd-navigation-route-line"
                 type="line"
                 layout={{ "line-cap": "round", "line-join": "round" }}
                 paint={{
                   "line-color": designTokens.brand.blue,
-                  "line-width": 7,
-                  "line-opacity": 0.95,
-                  "line-blur": 0.2
+                  "line-width": 6,
+                  "line-opacity": 1
                 }}
               />
             </GeoJSONSource>
@@ -865,21 +881,21 @@ const styles = StyleSheet.create({
     shadowRadius: 4
   },
   markerWrap: {
-    width: 60,
-    height: 60,
+    width: 52,
+    height: 52,
     alignItems: "center",
     justifyContent: "center",
     overflow: "visible"
   },
   markerCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: designTokens.brand.accent,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "rgba(0,0,0,0.12)",
+    borderWidth: 2,
+    borderColor: "#FFFFFF",
     elevation: 3,
     shadowColor: "#000000",
     shadowOffset: { width: 0, height: 2 },
