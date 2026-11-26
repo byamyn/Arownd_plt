@@ -78,7 +78,7 @@ export function SegmentedControl({
       accessibilityLabel={accessibilityLabel}
       style={[
         styles.segmented,
-        { backgroundColor: theme.colors.surfaceMuted, borderRadius: theme.radius.pill },
+        { backgroundColor: "transparent", borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.divider },
         style
       ]}
     >
@@ -97,8 +97,10 @@ export function SegmentedControl({
             style={({ pressed }) => [
               styles.segment,
               {
-                borderRadius: theme.radius.pill,
-                backgroundColor: selected ? theme.colors.accent : "transparent",
+                borderRadius: 0,
+                backgroundColor: "transparent",
+                borderBottomWidth: selected ? 2 : 0,
+                borderBottomColor: theme.colors.accent,
                 opacity: pressed ? 0.75 : 1
               }
             ]}
@@ -106,7 +108,7 @@ export function SegmentedControl({
             <UiText
               numberOfLines={1}
               style={{
-                color: selected ? theme.colors.accentForeground : theme.colors.muted,
+                color: selected ? theme.colors.accent : theme.colors.muted,
                 fontSize: theme.typography.body,
                 fontWeight: selected ? theme.fontWeights.bold : theme.fontWeights.medium
               }}
@@ -150,8 +152,8 @@ const styles = StyleSheet.create({
   segmented: {
     flexDirection: "row",
     alignItems: "center",
-    padding: designTokens.spacing.xs,
-    gap: designTokens.spacing.xs
+    padding: 0,
+    gap: 0
   },
   segment: {
     flex: 1,
