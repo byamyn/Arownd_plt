@@ -3,6 +3,7 @@ import {
   AccessibilityInfo,
   Animated,
   Pressable,
+  StyleSheet,
   View,
   type StyleProp,
   type ViewStyle
