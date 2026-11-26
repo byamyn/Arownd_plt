@@ -1,5 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 
+const { rpcMock } = vi.hoisted(() => ({ rpcMock: vi.fn() }));
+
+vi.mock("@/lib/supabase", () => ({
+  getSupabaseClient: () => ({ rpc: rpcMock })
+}));
+
 vi.mock("@/lib/i18n", () => ({
   getCurrentLanguage: () => "ar"
 }));
@@ -11,6 +17,8 @@ import {
   getPrimaryImage,
   getOfferVariantOptions,
   getCategoryFilterIds,
+  fetchMapStoresInBounds,
+  type MapStoreViewport,
   type HomeProduct,
   type ProductOffer
 } from "@/lib/catalog";
@@ -146,5 +154,60 @@ describe("getCategoryFilterIds", () => {
 
   it("keeps unknown category identifiers intact", () => {
     expect(getCategoryFilterIds("custom-category")).toEqual(["custom-category"]);
+  });
+});
+
+
+describe("fetchMapStoresInBounds", () => {
+  const viewport: MapStoreViewport = {
+    west: -8,
+    south: 18,
+    east: 12,
+    north: 38,
+    centerLatitude: 28,
+    centerLongitude: 2
+  };
+
+  it("fetches every country-scoped viewport page beyond the 1,000-row RPC limit", async () => {
+    rpcMock.mockReset();
+    const firstPage = Array.from({ length: 1000 }, (_, index) => ({
+      id: `store-${index}`,
+      name: `Store ${index}`,
+      latitude: 28,
+      longitude: 2,
+      is_verified: index === 0
+    }));
+    const secondPage = [{
+      id: "store-1000",
+      name: "Store 1000",
+      latitude: 28,
+      longitude: 2,
+      is_verified: false
+    }];
+    const offsets: number[] = [];
+
+    rpcMock.mockImplementation((_functionName: string, args: { p_offset: number }) => {
+      offsets.push(args.p_offset);
+      const result = Promise.resolve({
+        data: args.p_offset === 0 ? firstPage : secondPage,
+        error: null
+      });
+      return {
+        abortSignal: () => result,
+        then: result.then.bind(result)
+      };
+    });
+
+    const stores = await fetchMapStoresInBounds(viewport, "DZ");
+
+    expect(stores).toHaveLength(1001);
+    expect(stores[1000]?.id).toBe("store-1000");
+    expect(offsets).toEqual([0, 1000]);
+  });
+
+  it("rejects invalid browsing country codes before querying the map RPC", async () => {
+    rpcMock.mockReset();
+    await expect(fetchMapStoresInBounds(viewport, "DZA")).rejects.toThrow("INVALID_BROWSING_COUNTRY");
+    expect(rpcMock).not.toHaveBeenCalled();
   });
 });

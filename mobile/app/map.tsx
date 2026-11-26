@@ -51,13 +51,20 @@ const OFF_ROUTE_DISTANCE_METERS = 70;
 const REROUTE_COOLDOWN_MS = 15_000;
 
 // Approximate country centers used for the initial browsing-market map view.
-const BROWSING_COUNTRY_CENTERS: Record<string, RoutePoint> = {
-  DZ: { longitude: 3.05, latitude: 36.75 },
-  AE: { longitude: 54.0, latitude: 24.0 },
-  SA: { longitude: 45.0, latitude: 24.0 },
-  MA: { longitude: -7.0, latitude: 31.8 },
-  EG: { longitude: 30.8, latitude: 26.8 }
+const BROWSING_COUNTRY_MAP_VIEWS: Record<string, { center: RoutePoint; zoom: number }> = {
+  DZ: { center: { longitude: 1.66, latitude: 28.0 }, zoom: 4.1 },
+  AE: { center: { longitude: 54.2, latitude: 24.2 }, zoom: 6.2 },
+  SA: { center: { longitude: 45.0, latitude: 23.8 }, zoom: 4.0 },
+  MA: { center: { longitude: -7.0, latitude: 31.8 }, zoom: 5.2 },
+  EG: { center: { longitude: 30.8, latitude: 26.8 }, zoom: 4.6 }
 };
+
+function getBrowsingCountryMapView(countryCode: string | undefined) {
+  return BROWSING_COUNTRY_MAP_VIEWS[countryCode ?? ""] ?? {
+    center: { longitude: 2.6, latitude: 28.0 },
+    zoom: 4.2
+  };
+}
 
 type NavigationSession = {
   route: DrivingRoute;
@@ -114,9 +121,9 @@ export default function MapScreen() {
   }, []);
 
   const stores = useQuery({
-    queryKey: ["map-stores", mapViewport, requestedStoreId],
-    queryFn: ({ signal }) => fetchMapStoresInBounds(mapViewport!, requestedStoreId ?? null, signal),
-    enabled: mapViewport !== null,
+    queryKey: ["map-stores", browsingCountry.data, mapViewport, requestedStoreId],
+    queryFn: ({ signal }) => fetchMapStoresInBounds(mapViewport!, browsingCountry.data!, requestedStoreId ?? null, signal),
+    enabled: mapViewport !== null && browsingCountry.data !== undefined,
     staleTime: 30_000,
     placeholderData: (previousData) => previousData
   });
@@ -132,12 +139,12 @@ export default function MapScreen() {
 
   useEffect(() => {
     if (!isMapLoaded || !browsingCountry.data || appliedBrowsingCountryRef.current === browsingCountry.data) return;
-    const center = BROWSING_COUNTRY_CENTERS[browsingCountry.data] ?? { longitude: 2.6, latitude: 28.0 };
+    const view = getBrowsingCountryMapView(browsingCountry.data);
     appliedBrowsingCountryRef.current = browsingCountry.data;
     cameraRef.current?.easeTo({
-      center: [center.longitude, center.latitude],
-      zoom: browsingCountry.data === "DZ" ? 8.5 : 4.5,
-      duration: 500
+      center: [view.center.longitude, view.center.latitude],
+      zoom: view.zoom,
+      duration: 700
     });
   }, [isMapLoaded, browsingCountry.data]);
 
@@ -498,8 +505,8 @@ export default function MapScreen() {
                 }
               : {
                   initialViewState: {
-                    center: [BROWSING_COUNTRY_CENTERS[browsingCountry.data ?? "DZ"]?.longitude ?? 3.05, BROWSING_COUNTRY_CENTERS[browsingCountry.data ?? "DZ"]?.latitude ?? 36.75] as [number, number],
-                    zoom: browsingCountry.data === "DZ" || !browsingCountry.data ? 8.5 : 4.5,
+                    center: [getBrowsingCountryMapView(browsingCountry.data).center.longitude, getBrowsingCountryMapView(browsingCountry.data).center.latitude] as [number, number],
+                    zoom: getBrowsingCountryMapView(browsingCountry.data).zoom,
                     pitch: 0,
                     bearing: 0
                   }
