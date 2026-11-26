@@ -366,7 +366,7 @@ export default function MerchantStoreSettingsScreen() {
           <Field label={translate("merchantStoreSettingsWhatsapp")} value={form.whatsapp} onChangeText={(value) => update("whatsapp", value)} theme={theme} hint={translate("merchantStoreSettingsWhatsappHint")} disabled={mutation.isPending} error={fieldErrors.whatsapp} />
         </View>
 
-        <Card contentStyle={styles.sectionCard}>
+        <View style={styles.sectionGroup}>
           <Heading level={3}>{translate("merchantStoreLocationTitle")}</Heading>
           <View style={styles.field}>
             <UiText style={[styles.label, { color: theme.colors.foreground }]}>{regionOptions.data ? getRegionLevelDisplayName(regionOptions.data.selectedLevel, language) : translate("merchantStoreWilayaLabel")}</UiText>
@@ -415,9 +415,9 @@ export default function MerchantStoreSettingsScreen() {
             {locationError ? <UiText style={[styles.error, { color: theme.mode === "light" ? theme.colors.dangerText : theme.colors.danger }]}>{translate("merchantStoreMapLocationError")}</UiText> : null}
             {locationCaptured ? <UiText style={[styles.success, { color: theme.colors.success }]}>{translate("merchantStoreMapLocationCaptured")}</UiText> : null}
           </View>
-        </Card>
+        </View>
 
-        <Card contentStyle={styles.sectionCard}>
+        <View style={styles.sectionGroup}>
           <Heading level={3}>{translate("merchantStoreHoursTitle")}</Heading>
           <View style={styles.row}>
             <View style={styles.half}>
@@ -441,16 +441,16 @@ export default function MerchantStoreSettingsScreen() {
               })}
             </View>
           </View>
-        </Card>
+        </View>
 
-        <Card contentStyle={styles.sectionCard}>
+        <View style={styles.sectionGroup}>
           <Heading level={3}>{translate("merchantStoreSocialTitle")}</Heading>
           <UiText style={[styles.hint, { color: theme.colors.muted }]}>{translate("merchantStoreSettingsSocialHint")}</UiText>
           <Field label={translate("merchantStoreSettingsInstagram")} value={form.instagram_url} onChangeText={(value) => update("instagram_url", value)} theme={theme} keyboardType="url" disabled={mutation.isPending} error={fieldErrors.instagram_url} />
           <Field label={translate("merchantStoreSettingsFacebook")} value={form.facebook_url} onChangeText={(value) => update("facebook_url", value)} theme={theme} keyboardType="url" disabled={mutation.isPending} error={fieldErrors.facebook_url} />
           <Field label={translate("merchantStoreSettingsTikTok")} value={form.tiktok_url} onChangeText={(value) => update("tiktok_url", value)} theme={theme} keyboardType="url" disabled={mutation.isPending} error={fieldErrors.tiktok_url} />
           <Field label={translate("merchantStoreSettingsWebsite")} value={form.website_url} onChangeText={(value) => update("website_url", value)} theme={theme} keyboardType="url" disabled={mutation.isPending} error={fieldErrors.website_url} />
-        </Card>
+        </View>
 
         {formError && mutation.isError ? <UiText accessibilityRole="alert" style={[styles.error, { color: theme.mode === "light" ? theme.colors.dangerText : theme.colors.danger }]}>{translate("merchantStoreSettingsSaveError")}</UiText> : null}
         {mutation.isSuccess ? <UiText style={[styles.success, { color: theme.mode === "light" ? theme.colors.successText : theme.colors.success }]}>{translate("merchantStoreSettingsSaved")}</UiText> : null}
