@@ -168,7 +168,7 @@ export default function CartScreen() {
 }
 
 const styles = (theme: ReturnType<typeof useAppTheme>) => StyleSheet.create({
-  group: { backgroundColor: theme.colors.surface },
+  group: { paddingVertical: designTokens.spacing.md, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.divider, gap: designTokens.spacing.md },
   groupContent: { padding: designTokens.spacing.md, gap: designTokens.spacing.md },
   emptyContent: { minHeight: 220, alignItems: "center", justifyContent: "center", padding: designTokens.spacing.xl, gap: designTokens.spacing.md },
   emptyIcon: { width: 64, height: 64, borderRadius: designTokens.radius.pill, backgroundColor: theme.mode === "dark" ? theme.colors.surfaceSecondary : theme.colors.surfaceMuted, alignItems: "center", justifyContent: "center" },
