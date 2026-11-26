@@ -197,7 +197,7 @@ export function ProfileSettingsSection() {
             onPress={() => router.back()}
             style={styles.backButton}
           >
-            <Icon name={language === "ar" ? "chevron-right" : "chevron-left"} size={22} color={theme.colors.foreground} />
+            <Icon name="chevron-right" size={22} color={theme.colors.foreground} />
           </PressableSurface>
           <View style={styles.headerCopy}>
             <Heading level={2}>{translate("settingsTitle")}</Heading>
@@ -250,7 +250,7 @@ export function ProfileSettingsSection() {
             <Icon name="log-out" size={19} color={theme.colors.danger} />
             <UiText tone="danger" weight="700">{translate("settingsSignOutConfirmAction")}</UiText>
           </View>
-          <Icon name={language === "ar" ? "chevron-left" : "chevron-right"} size={18} color={theme.colors.subtle} />
+          <Icon name="chevron-right" size={18} color={theme.colors.subtle} />
         </PressableSurface>
         {signOutError ? <UiText tone="danger">{translate("settingsSignOutError")}</UiText> : null}
       </View>
