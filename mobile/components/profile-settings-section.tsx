@@ -234,13 +234,6 @@ export function ProfileSettingsSection() {
         <Heading level={3}>{translate("settingsAppSection")}</Heading>
         <Card contentStyle={styles.sectionContent}>
           <SettingsRow
-            icon="bell"
-            label={translate("notificationsTitle")}
-            onPress={() => router.push("/notifications")}
-            theme={theme}
-            styles={styles}
-          />
-          <SettingsRow
             icon="lock"
             label={translate("settingsPasswordChangeTitle")}
             onPress={() => openSheet("password")}
