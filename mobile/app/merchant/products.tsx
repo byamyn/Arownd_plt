@@ -202,14 +202,14 @@ export default function MerchantProductsScreen() {
         ) : null}
 
         {allOffers.length === 0 ? (
-          <Card contentStyle={styles.emptyCard}>
+          <View style={styles.emptyState}>
             <UiText style={[styles.emptyTitle, { color: theme.colors.foreground }]}>{translate("merchantProductsEmpty")}</UiText>
             <UiText style={[styles.emptyHint, { color: theme.colors.muted }]}>{translate("merchantProductsEmptyHint")}</UiText>
-          </Card>
+          </View>
         ) : visibleOffers.length === 0 ? (
           <Card contentStyle={styles.emptyCard}>
             <UiText style={[styles.emptyTitle, { color: theme.colors.foreground }]}>{translate("merchantProductsNoResults")}</UiText>
-          </Card>
+          </View>
         ) : (
           <View style={styles.offerGrid}>
             {visibleOffers.map((offer) => (
@@ -379,7 +379,7 @@ const MerchantOfferCard = memo(function MerchantOfferCard({
           ))}
         </ScrollView>
       </MediaViewer>
-    </Card>
+    </View>
   );
 });
 
@@ -433,7 +433,7 @@ function createStyles(theme: AppTheme) {
     filterLabel: { fontSize: designTokens.typography.caption, fontWeight: designTokens.fontWeights.extrabold },
     feedback: { borderWidth: 1, borderRadius: designTokens.radius.sm, padding: designTokens.spacing.md },
     feedbackText: { fontSize: designTokens.typography.caption, lineHeight: 18, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
-    emptyCard: { gap: designTokens.spacing.sm, alignItems: "flex-start" },
+    emptyState: { paddingVertical: designTokens.spacing.lg, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.divider, gap: designTokens.spacing.sm, alignItems: "flex-start" },
     emptyTitle: { fontSize: designTokens.typography.body, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
     emptyHint: { fontSize: designTokens.typography.caption, lineHeight: 18, textAlign: "auto" },
     offerGrid: { width: "100%", flexDirection: "column", gap: designTokens.spacing.lg },
