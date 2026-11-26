@@ -94,13 +94,13 @@ export default function StoreVerificationModerationScreen() {
           </UiText>
         ) : null}
         {queue.data.length === 0 ? (
-          <Card contentStyle={styles.emptyCard}>
+          <View style={styles.emptyState}>
             <UiText style={[styles.emptyTitle, { color: theme.colors.foreground }]}>
               {translate("verificationQueueEmpty")}
             </UiText>
-          </Card>
+          </View>
         ) : queue.data.map((item) => (
-          <Card key={item.id} contentStyle={styles.requestCard}>
+          <View key={item.id} style={styles.requestRow}>
             <View style={styles.storeHeader}>
               {item.store.logo_url ? (
                 <UiImage uri={item.store.logo_url} accessibilityLabel={item.store.name} aspectRatio={1} style={styles.logo} />
@@ -214,7 +214,7 @@ function createStyles(theme: AppTheme) {
     content: { padding: designTokens.spacing.lg, paddingBottom: designTokens.spacing.xl, gap: designTokens.spacing.md },
     subtitle: { fontSize: designTokens.typography.caption + 1, lineHeight: 20, textAlign: "auto" },
     count: { fontSize: designTokens.typography.body, fontWeight: designTokens.fontWeights.bold },
-    requestCard: { gap: designTokens.spacing.md, borderColor: theme.colors.border, borderWidth: StyleSheet.hairlineWidth },
+    requestRow: { paddingVertical: designTokens.spacing.lg, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.divider, gap: designTokens.spacing.md },\n    emptyState: { paddingVertical: designTokens.spacing.lg },
     storeHeader: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md },
     logo: { width: 64, height: 64, borderRadius: designTokens.radius.md },
     storeInfo: { flex: 1, gap: 4 },
