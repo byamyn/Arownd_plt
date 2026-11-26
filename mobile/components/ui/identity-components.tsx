@@ -106,7 +106,7 @@ export function RatingSelector({
 
 export function ReviewCard({ children, style }: { children: ReactNode; style?: StyleProp<ViewStyle> }) {
   const theme = useAppTheme();
-  return <View style={[{ padding: designTokens.spacing.md, borderBottomWidth: 1, borderBottomColor: theme.colors.border, gap: designTokens.spacing.sm }, style]}>{children}</View>;
+  return <View style={[{ padding: designTokens.spacing.md, borderBottomWidth: 1, borderBottomColor: theme.colors.divider, gap: designTokens.spacing.sm }, style]}>{children}</View>;
 }
 
 export function ReviewList({ children, style }: { children: ReactNode; style?: StyleProp<ViewStyle> }) {
