@@ -29,7 +29,7 @@ import {
 import { translate, type TranslationKey, useLanguage } from "@/lib/i18n";
 import { getRegionDisplayName, getRegionLevelDisplayName } from "@/lib/country-regions";
 import { designTokens, useAppTheme, type AppTheme } from "@/lib/theme";
-import { BottomSheet, AppHeader, Button, Card, ErrorState, PageSkeleton, PressableSurface, RefreshableScrollView, Text as UiText, TextField } from "@/components/ui";
+import { BottomSheet, AppHeader, Button, ErrorState, PageSkeleton, PressableSurface, RefreshableScrollView, Text as UiText, TextField } from "@/components/ui";
 
 export default function MerchantOnboardingScreen() {
   const { language } = useLanguage();
@@ -166,7 +166,7 @@ export default function MerchantOnboardingScreen() {
         >
           <AppHeader title={translate("merchantOnboardingTitle")}/>
 
-          <Card contentStyle={styles.section}>
+          <View style={styles.sectionGroup}>
             <UiText style={[styles.sectionTitle, { color: theme.colors.foreground }]}>
               {translate("merchantStoreDetailsTitle")}
             </UiText>
@@ -227,9 +227,9 @@ export default function MerchantOnboardingScreen() {
               )}
             />
 
-          </Card>
+          </View>
 
-          <Card contentStyle={styles.section}>
+          <View style={styles.sectionGroup}>
             <UiText style={[styles.sectionTitle, { color: theme.colors.foreground }]}>
               {translate("merchantStoreLocationTitle")}
             </UiText>
@@ -322,9 +322,9 @@ export default function MerchantOnboardingScreen() {
             <UiText style={[styles.hint, { color: theme.colors.muted }]}>
               {translate("merchantStoreLocationHint")}
             </UiText>
-          </Card>
+          </View>
 
-          <Card contentStyle={styles.section}>
+          <View style={styles.sectionGroup}>
             <UiText style={[styles.sectionTitle, { color: theme.colors.foreground }]}>
               {translate("merchantStoreHoursTitle")}
             </UiText>
@@ -379,7 +379,7 @@ export default function MerchantOnboardingScreen() {
             <UiText style={[styles.hint, { color: theme.colors.muted }]}>
               {translate("merchantStoreHoursHint")}
             </UiText>
-          </Card>
+          </View>
 
           {submitError ? (
             <View style={[styles.submitError, { backgroundColor: theme.colors.dangerSurface, borderColor: theme.colors.dangerBorder }]}>
@@ -494,7 +494,7 @@ function createStyles(theme: AppTheme) {
     content: { padding: designTokens.spacing.xl, paddingBottom: 38, gap: designTokens.spacing.lg },
     backText: { fontSize: designTokens.typography.body - 1, fontWeight: designTokens.fontWeights.extrabold },
     subtitle: { fontSize: designTokens.typography.body - 1, lineHeight: 21, textAlign: "auto" },
-    section: { padding: designTokens.spacing.lg, gap: designTokens.spacing.lg },
+    sectionGroup: { paddingVertical: designTokens.spacing.lg, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.divider, gap: designTokens.spacing.lg },
     sectionTitle: { fontSize: designTokens.typography.subtitle - 1, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
     input: {
       minHeight: designTokens.dimensions.controlHeight.lg,
