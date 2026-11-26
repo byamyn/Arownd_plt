@@ -705,6 +705,7 @@ export default function MapScreen() {
         }}
         title={selectedStore?.name ?? ""}
         maxHeight="60%"
+        scrollable={!navigation}
       >
         {selectedStore ? (
           navigation ? (
