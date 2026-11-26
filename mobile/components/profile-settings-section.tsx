@@ -222,23 +222,23 @@ export function ProfileSettingsSection() {
     >
       <View style={styles.section}>
         <Heading level={3}>{translate("settingsAccountTitle")}</Heading>
-        <Card contentStyle={styles.sectionContent}>
+        <View style={styles.sectionContent}>
           <SettingsRow icon="user" label={translate("settingsAccount")} onPress={() => openSheet("account")} theme={theme} styles={styles} language={language} />
           <SettingsRow icon="map-pin" label={translate("settingsLocationAddresses")} description={translate("locationAddressesSubtitle")} onPress={() => openSheet("location-addresses")} theme={theme} styles={styles} language={language} />
           <SettingsRow icon="gift" label={translate("profileInvite")} description={translate("profileInviteHint")} onPress={() => openSheet("invite")} theme={theme} styles={styles} language={language} />
           <SettingsRow icon="globe" label={translate("settingsBrowsingCountry")} description={browsingCountry.data ?? "—"} onPress={() => openSheet("country")} theme={theme} styles={styles} language={language} />
           <SettingsRow icon="palette" label={translate("settingsAppearanceTitle")} description={translate(themeMode === "system" ? "settingsThemeSystem" : themeMode === "light" ? "settingsThemeLight" : "settingsThemeDark")} onPress={() => openSheet("appearance")} theme={theme} styles={styles} language={language} />
-          <SettingsRow icon="languages" label={translate("settingsLanguageTitle")} description={translate(language === "ar" ? "settingsLanguageArabic" : "settingsLanguageEnglish")} onPress={() => openSheet("language")} theme={theme} styles={styles} language={language} />
-        </Card>
+          <SettingsRow icon="languages" label={translate("settingsLanguageTitle")} description={translate(language === "ar" ? "settingsLanguageArabic" : "settingsLanguageEnglish")} onPress={() => openSheet("language")} theme={theme} styles={styles} language={language} last />
+        </View>
       </View>
 
       <View style={styles.section}>
         <Heading level={3}>{translate("settingsSupportSection")}</Heading>
-        <Card contentStyle={styles.sectionContent}>
+        <View style={styles.sectionContent}>
           <SettingsRow icon="lock" label={translate("settingsPrivacyPolicy")} onPress={() => router.push("/privacy-security")} theme={theme} styles={styles} language={language} />
           <SettingsRow icon="message-circle" label={translate("settingsSupportTitle")} onPress={() => router.push("/support")} theme={theme} styles={styles} language={language} />
-          <SettingsRow icon="info" label={translate("settingsAboutTitle")} onPress={() => router.push("/about")} theme={theme} styles={styles} language={language} />
-        </Card>
+          <SettingsRow icon="info" label={translate("settingsAboutTitle")} onPress={() => router.push("/about")} theme={theme} styles={styles} language={language} last />
+        </View>
       </View>
 
       <BottomSheet visible={activeSheet === "location-addresses" || activeSheet === "invite"} onRequestClose={closeSheet} title={translate(activeSheet === "location-addresses" ? "settingsLocationAddresses" : "inviteTitle")} height="82%" maxHeight="94%">
@@ -258,7 +258,7 @@ export function ProfileSettingsSection() {
           <Heading level={3}>{getProfileDisplayName(profileVisibility.data?.full_name, currentUser.data?.email)}</Heading>
           {avatarPickerError || avatarUpload.isError || avatarRemove.isError ? <Caption>{translate("profileAvatarError")}</Caption> : null}
         </View>
-        <Card contentStyle={styles.accountDetailsCard}>
+        <View style={styles.accountDetailsCard}>
           <SettingsInfoRow icon="user" label={translate("email")} value={currentUser.data?.email ?? "—"} theme={theme} styles={styles} />
           {profileVisibility.data?.phone ? <SettingsInfoRow icon="phone" label={translate("checkoutPhoneLabel")} value={profileVisibility.data.phone} theme={theme} styles={styles} /> : null}
           <SettingsRow icon="lock" label={translate("settingsPasswordChangeTitle")} onPress={() => openSheet("password")} theme={theme} styles={styles} language={language} />
@@ -269,15 +269,15 @@ export function ProfileSettingsSection() {
           </PressableSurface>
           {profileVisibilityMutation.isError || profileVisibility.isError ? <Caption>{translate("profilePublicError")}</Caption> : null}
           {signOutError ? <UiText tone="danger">{translate("settingsSignOutError")}</UiText> : null}
-        </Card>
+        </View>
       </BottomSheet>
 
-      <Card contentStyle={styles.sectionContent}>
+      <View style={styles.sectionContent}>
         <PressableSurface accessibilityRole="button" accessibilityLabel={translate("settingsSignOutConfirmAction")} onPress={() => { setSignOutError(false); setSignOutConfirmOpen(true); }} disabled={signOutMutation.isPending} style={styles.signOutRow}>
           <View style={styles.linkLabel}><Icon name="log-out" size={19} color={theme.colors.danger} /><UiText tone="danger" weight="700">{translate("settingsSignOutConfirmAction")}</UiText></View>
         </PressableSurface>
         {signOutError ? <UiText tone="danger">{translate("settingsSignOutError")}</UiText> : null}
-      </Card>
+      </View>
 
       <BottomSheet visible={avatarActionsOpen} onRequestClose={() => setAvatarActionsOpen(false)} title={translate("profileAvatarOptionsTitle")}>
         <PressableSurface onPress={() => { void chooseAvatar(); }} disabled={avatarUpload.isPending || avatarRemove.isPending} style={styles.avatarOption}><Icon name="image" size={21} color={theme.colors.accentOnSurface} /><UiText weight="600">{translate("profileAvatarChooseFromGallery")}</UiText></PressableSurface>
@@ -556,26 +556,22 @@ function SettingsRow({
       accessibilityState={{ disabled }}
       disabled={disabled}
       onPress={onPress}
-      style={[styles.linkRow, last ? undefined : { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.border }]}
+      style={[styles.linkRow, last ? undefined : { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.divider }]}
     >
       <View style={styles.linkLabel}>
-        <View style={styles.iconBadge}>
-          <Icon name={icon} size={19} color={theme.colors.accentOnSurface} />
-        </View>
+        <Icon name={icon} size={19} color={theme.colors.muted} />
         <View style={styles.rowCopy}>
-          <UiText weight="700">{label}</UiText>
+          <UiText weight="600">{label}</UiText>
           {description ? <Caption>{description}</Caption> : null}
         </View>
       </View>
-      <View style={styles.rowTrailing}>
-        <Icon name={language === "ar" ? "chevron-left" : "chevron-right"} size={18} color={theme.colors.subtle} />
-      </View>
+      <Icon name={language === "ar" ? "chevron-left" : "chevron-right"} size={18} color={theme.colors.subtle} />
     </PressableSurface>
   );
 }
 
 function SettingsInfoRow({ icon, label, value, theme, styles }: { icon: IconName; label: string; value: string; theme: AppTheme; styles: ReturnType<typeof createStyles> }) {
-  return <View style={[styles.linkRow, { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.border }]}><View style={styles.linkLabel}><View style={styles.iconBadge}><Icon name={icon} size={19} color={theme.colors.accentOnSurface} /></View><View style={styles.rowCopy}><UiText weight="700">{label}</UiText><Caption>{value}</Caption></View></View></View>;
+  return <View style={[styles.linkRow, { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.divider }]}><View style={styles.linkLabel}><Icon name={icon} size={19} color={theme.colors.muted} /><View style={styles.rowCopy}><UiText weight="600">{label}</UiText><Caption>{value}</Caption></View></View></View>;
 }
 
 function createStyles(theme: AppTheme) {
@@ -610,19 +606,15 @@ function createStyles(theme: AppTheme) {
     },
     signOutRow: {
       minHeight: 58,
-      paddingHorizontal: designTokens.spacing.md,
       paddingVertical: designTokens.spacing.sm,
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
-      borderRadius: designTokens.radius.lg,
-      backgroundColor: theme.colors.surfaceSecondary
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: theme.colors.divider
     },
     sectionContent: {
-      gap: 0,
-      paddingHorizontal: designTokens.spacing.md,
-      paddingVertical: designTokens.spacing.xs,
-      borderRadius: designTokens.radius.xl
+      gap: 0
     },
     input: {
       height: designTokens.dimensions.controlHeight.lg,
@@ -642,7 +634,7 @@ function createStyles(theme: AppTheme) {
     accountHeroAvatar: { width: 92, height: 92, borderRadius: 46, backgroundColor: theme.colors.surfaceSecondary },
     accountHeroPlaceholder: { alignItems: "center", justifyContent: "center" },
     avatarEditButton: { position: "absolute", bottom: 0, end: 0, width: 30, height: 30, borderRadius: 15, alignItems: "center", justifyContent: "center", backgroundColor: theme.colors.accent },
-    accountDetailsCard: { gap: 0, paddingHorizontal: designTokens.spacing.md, paddingVertical: designTokens.spacing.xs, borderRadius: designTokens.radius.xl },
+    accountDetailsCard: { gap: 0 },
     avatarOption: { minHeight: 52, borderRadius: designTokens.radius.md, paddingHorizontal: designTokens.spacing.md, flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md, backgroundColor: theme.colors.surfaceSecondary },
     avatarModalOverlay: { flex: 1, justifyContent: "center", padding: designTokens.spacing.lg },
     avatarPreviewCard: { padding: designTokens.spacing.lg, gap: designTokens.spacing.md, alignItems: "center" },
@@ -689,8 +681,8 @@ function createStyles(theme: AppTheme) {
       backgroundColor: theme.colors.surfaceMuted
     },
     linkRow: {
-      minHeight: 76,
-      paddingVertical: designTokens.spacing.md,
+      minHeight: 64,
+      paddingVertical: designTokens.spacing.sm,
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
@@ -712,12 +704,9 @@ function createStyles(theme: AppTheme) {
       backgroundColor: theme.colors.surfaceSecondary
     },
     rowTrailing: {
-      width: 30,
-      height: 30,
+      width: 24,
       alignItems: "center",
-      justifyContent: "center",
-      borderRadius: designTokens.radius.pill,
-      backgroundColor: theme.colors.surfaceMuted
+      justifyContent: "center"
     },
     sheetContent: {
       gap: designTokens.spacing.md
