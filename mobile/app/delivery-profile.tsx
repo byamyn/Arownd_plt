@@ -320,7 +320,7 @@ function createStyles(theme: AppTheme) { return StyleSheet.create({
     paddingHorizontal: designTokens.spacing.sm,
     justifyContent: "center",
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border
+    borderBottomColor: theme.colors.divider
   },
   optionText: { textAlign: "auto", fontSize: designTokens.typography.body - 1 },
   closeButton: {
