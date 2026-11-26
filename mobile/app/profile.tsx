@@ -33,7 +33,6 @@ import { getSupabaseClient } from "@/lib/supabase";
 import { fetchStoreVerificationReviewerAccess } from "@/lib/store-verification";
 import { ProfileAccountSheet, type ProfileAccountSection } from "@/components/profile-account-sheet";
 import { ProfileActivitySheet, type ProfileActivitySection } from "@/components/profile-activity-sheet";
-import { ProfileSettingsSection } from "@/components/profile-settings-section";
 import { claimMyUsername } from "@/lib/username";
 
 export default function ProfileScreen() {
@@ -153,12 +152,12 @@ export default function ProfileScreen() {
   });
 
   if (user.isPending) {
-    return <CustomerScreen><CustomerMainHeader variant="profile" /><PageSkeleton variant="profile" rows={3} /></CustomerScreen>;
+    return <CustomerScreen><CustomerMainHeader variant="settings" /><PageSkeleton variant="profile" rows={3} /></CustomerScreen>;
   }
   if (user.isError) {
     return (
       <CustomerScreen refreshing={user.isFetching} onRefresh={() => { void user.refetch(); }}>
-        <CustomerMainHeader variant="profile" />
+        <CustomerMainHeader variant="settings" />
         <ErrorState
           title={translate("profileLoadError")}
           retryLabel={translate("retry")}
@@ -171,7 +170,7 @@ export default function ProfileScreen() {
   if (!user.data) {
     return (
       <CustomerScreen>
-        <CustomerMainHeader variant="profile" />
+        <CustomerMainHeader variant="settings" />
         <Caption>{translate("profileSubtitle")}</Caption>
         <Caption>{translate("profileLoginHint")}</Caption>
         <Button label={translate("profileLogin")} onPress={() => router.push("/login")} fullWidth />
@@ -181,7 +180,7 @@ export default function ProfileScreen() {
   if (profile.isError) {
     return (
       <CustomerScreen refreshing={profile.isFetching} onRefresh={() => { void profile.refetch(); }}>
-        <CustomerMainHeader variant="profile" />
+        <CustomerMainHeader variant="settings" />
         <ErrorState
           title={translate("profileLoadError")}
           retryLabel={translate("retry")}
@@ -213,7 +212,7 @@ export default function ProfileScreen() {
         });
       }}
     >
-      <CustomerMainHeader variant="profile" />
+      <CustomerMainHeader variant="settings" />
       <Caption>{translate("profileSubtitle")}</Caption>
 
       {profile.isPending ? (
@@ -363,7 +362,6 @@ export default function ProfileScreen() {
           ) : null}
         </>
       )}
-      <ProfileSettingsSection />
       <BottomSheet
         visible={accountSheet !== null}
         onRequestClose={() => setAccountSheet(null)}
