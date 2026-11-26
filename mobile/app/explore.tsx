@@ -120,7 +120,7 @@ export default function ExploreScreen() {
             onAction={clearHistory}
           />
           {recentSearches.length > 0 ? recentSearches.map((item) => (
-            <Pressable key={item} onPress={() => selectRecentSearch(item)} style={styles.historyItem}>
+            <Pressable key={item} onPress={() => selectRecentSearch(item)} style={[styles.historyItem, { borderBottomColor: theme.colors.divider }]} >
               <Icon name="clock" size={17} color={theme.colors.muted} accessibilityHidden />
               <UiText numberOfLines={1} style={styles.historyText}>{item}</UiText>
               <Icon name="arrow-left" size={16} color={theme.colors.subtle} accessibilityHidden />
@@ -131,7 +131,7 @@ export default function ExploreScreen() {
         </View>
       ) : (
         <View style={styles.resultsSection}>
-          <View style={styles.tabs}>
+          <View style={[styles.tabs, { borderBottomColor: theme.colors.divider }]}>
             {(["all", "products", "stores"] as const).map((tab) => {
               const selected = activeTab === tab;
               const label = tab === "all" ? translate("ordersTabAll") : tab === "products" ? translate("favoriteProducts") : translate("favoriteStores");
@@ -232,7 +232,7 @@ export default function ExploreScreen() {
 const styles = StyleSheet.create({
   headerContent: { gap: designTokens.spacing.lg },
   historySection: { gap: designTokens.spacing.sm },
-  historyItem: { minHeight: 46, flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: "#E8E6DC" },
+  historyItem: { minHeight: 46, flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: "transparent" },
   historyText: { flex: 1 },
   resultsSection: { gap: designTokens.spacing.lg },
   tabs: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.lg, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: "#E8E6DC" },
