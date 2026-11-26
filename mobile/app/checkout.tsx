@@ -460,7 +460,7 @@ function createStyles(theme: AppTheme) { return StyleSheet.create({
   deliveryTitle: { color: theme.colors.foreground, fontSize: designTokens.typography.body - 1, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
   deliveryTextSelected: { color: theme.colors.accentForeground },
   deliveryHint: { color: theme.colors.muted, fontSize: designTokens.typography.caption - 1, lineHeight: 15, textAlign: "auto" },
-  summaryRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: designTokens.spacing.md, paddingVertical: designTokens.spacing.sm, borderBottomWidth: 1, borderBottomColor: theme.colors.border },
+  summaryRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: designTokens.spacing.md, paddingVertical: designTokens.spacing.sm, borderBottomWidth: 1, borderBottomColor: theme.colors.divider },
   summaryInfo: { flex: 1, alignItems: "flex-start", gap: designTokens.spacing.xs },
   summaryName: { fontSize: designTokens.typography.caption + 1, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
   summaryPrice: { color: theme.colors.accentMuted, fontSize: designTokens.typography.caption + 1, fontWeight: designTokens.fontWeights.extrabold },
