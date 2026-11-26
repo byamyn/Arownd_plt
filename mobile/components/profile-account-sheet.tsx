@@ -23,6 +23,7 @@ type DeliveryPickerItem = { id: number | string; name: string };
 
 export function ProfileAccountSheet({ section }: { section: ProfileAccountSection; onManageAvatar?: () => void }) {
   const { language } = useLanguage();
+  const theme = useAppTheme();
   const [locationSection, setLocationSection] = useState<"overview" | "delivery" | "addresses">("overview");
 
   return (
@@ -31,7 +32,7 @@ export function ProfileAccountSheet({ section }: { section: ProfileAccountSectio
         locationSection === "overview" ? (
           <View style={{ gap: designTokens.spacing.md }}>
             <Caption>{translate("locationAddressesSubtitle")}</Caption>
-            <PressableSurface accessibilityRole="button" onPress={() => setLocationSection("delivery")} style={{ flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md, padding: designTokens.spacing.md, borderRadius: designTokens.radius.lg, borderWidth: 1, borderColor: designTokens.colors?.border }}>
+            <PressableSurface accessibilityRole="button" onPress={() => setLocationSection("delivery")} style={{ flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md, padding: designTokens.spacing.md, borderRadius: designTokens.radius.lg, borderWidth: 1, borderColor: theme.colors.border }}>
               <Icon name="map-pin" size={22} />
               <View style={{ flex: 1, gap: 3 }}>
                 <UiText weight="700">{translate("locationAddressesGeographic")}</UiText>
@@ -39,7 +40,7 @@ export function ProfileAccountSheet({ section }: { section: ProfileAccountSectio
               </View>
               <Icon name={language === "ar" ? "chevron-left" : "chevron-right"} size={18} />
             </PressableSurface>
-            <PressableSurface accessibilityRole="button" onPress={() => setLocationSection("addresses")} style={{ flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md, padding: designTokens.spacing.md, borderRadius: designTokens.radius.lg, borderWidth: 1, borderColor: designTokens.colors?.border }}>
+            <PressableSurface accessibilityRole="button" onPress={() => setLocationSection("addresses")} style={{ flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md, padding: designTokens.spacing.md, borderRadius: designTokens.radius.lg, borderWidth: 1, borderColor: theme.colors.border }}>
               <Icon name="map" size={22} />
               <View style={{ flex: 1, gap: 3 }}>
                 <UiText weight="700">{translate("locationAddressesDelivery")}</UiText>
