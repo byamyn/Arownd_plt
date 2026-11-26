@@ -184,7 +184,7 @@ function createStyles(theme: ReturnType<typeof useAppTheme>) {
     hero: { alignItems: "flex-start", gap: designTokens.spacing.sm, paddingVertical: designTokens.spacing.lg },
     heroMark: { width: 54, height: 54, borderRadius: designTokens.radius.lg, backgroundColor: theme.colors.accent, alignItems: "center", justifyContent: "center", marginBottom: designTokens.spacing.sm },
     section: { gap: designTokens.spacing.md },
-    contactCard: { gap: designTokens.spacing.md, padding: designTokens.spacing.lg, borderRadius: designTokens.radius.lg, backgroundColor: theme.colors.surface, borderWidth: 1, borderColor: theme.colors.border },
+    contactCard: { gap: designTokens.spacing.md, paddingVertical: designTokens.spacing.md, borderTopWidth: StyleSheet.hairlineWidth, borderColor: theme.colors.divider },
     contactCopy: { gap: designTokens.spacing.xs },
     emptyState: { alignItems: "center", gap: designTokens.spacing.sm, paddingVertical: designTokens.spacing.xl },
     emptyIcon: { width: 56, height: 56, borderRadius: designTokens.radius.lg, backgroundColor: theme.colors.accent, alignItems: "center", justifyContent: "center" },
