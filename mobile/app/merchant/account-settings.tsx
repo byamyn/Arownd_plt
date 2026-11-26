@@ -3,7 +3,7 @@ import { Redirect, router } from "expo-router";
 import { StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { AppHeader, Card, Icon, IconButton, PressableSurface, RefreshableScrollView, Text as UiText } from "@/components/ui";
+import { AppHeader, Icon, IconButton, PressableSurface, RefreshableScrollView, Text as UiText } from "@/components/ui";
 import { fetchMerchantAccess } from "@/lib/merchant";
 import { translate, useLanguage } from "@/lib/i18n";
 import { designTokens, useAppTheme } from "@/lib/theme";
@@ -87,7 +87,7 @@ export default function MerchantAccountSettingsScreen() {
       <RefreshableScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} refreshing={access.isFetching} onRefresh={() => { void access.refetch(); }}>
         <AppHeader
           title={translate("merchantAccountSettingsTitle")}        />
-        <Card contentStyle={styles.linksCard}>
+        <View style={styles.linksList}>
           {links.map((item, index) => (
             <PressableSurface
               key={item.key}
@@ -96,7 +96,7 @@ export default function MerchantAccountSettingsScreen() {
               onPress={item.onPress}
               style={[
                 styles.link,
-                index < links.length - 1 && { borderBottomColor: theme.colors.border, borderBottomWidth: StyleSheet.hairlineWidth }
+                index < links.length - 1 && { borderBottomColor: theme.colors.divider, borderBottomWidth: StyleSheet.hairlineWidth }
               ]}
             >
               <View style={[styles.icon, { backgroundColor: theme.colors.surfaceSecondary }]}>
@@ -111,7 +111,7 @@ export default function MerchantAccountSettingsScreen() {
               <Icon name="chevron-left" size={18} color={theme.colors.subtle} accessibilityHidden />
             </PressableSurface>
           ))}
-        </Card>
+        </View>
       </RefreshableScrollView>
     </SafeAreaView>
   );
