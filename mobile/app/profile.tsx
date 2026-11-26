@@ -16,6 +16,7 @@ import {
   Icon,
   IdentityRow,
   PressableSurface,
+  ListItem,
   TextField,
 } from "@/components/ui";
 import { fetchMyDeliveryProfile } from "@/lib/delivery-profile";
@@ -251,80 +252,86 @@ export default function ProfileScreen() {
           </Card>
 
           {!profile.data?.username ? (
-            <Card contentStyle={styles.identityCard}>
+            <View style={styles.usernameSection}>
               <UiText weight="700">{translate("usernameClaimTitle")}</UiText>
               <Caption>{translate("usernameClaimHint")}</Caption>
               <TextField value={usernameDraft} onChangeText={(value) => setUsernameDraft(value.toLowerCase())} autoCapitalize="none" autoCorrect={false} maxLength={30} placeholder={translate("usernamePlaceholder")} label={translate("username")} error={claimUsername.isError ? translate(claimUsername.error instanceof Error && claimUsername.error.message === "USERNAME_TAKEN" ? "usernameTaken" : claimUsername.error instanceof Error && claimUsername.error.message === "USERNAME_INVALID" ? "usernameInvalid" : claimUsername.error.message === "USERNAME_RESERVED" ? "usernameReserved" : "usernameClaimError") : undefined} />
               <Button label={claimUsername.isPending ? translate("usernameClaimBusy") : translate("usernameClaimAction")} onPress={() => claimUsername.mutate(usernameDraft)} disabled={claimUsername.isPending || usernameDraft.length < 3} fullWidth />
-            </Card>
+            </View>
           ) : null}
 
-          <View style={styles.statsGrid}>
-            <PressableSurface accessibilityRole="button" accessibilityLabel={translate("profileOrders")} onPress={() => setActivitySheet("orders")} style={[styles.statTile, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
-              <View style={[styles.statIcon, { backgroundColor: theme.colors.surfaceSecondary }]}><Icon name="package" size={designTokens.dimensions.iconSize.sm} /></View>
-              <UiText weight="700" style={styles.statValue}>{orders.isPending ? "…" : orders.isError ? "—" : String(orders.data?.length ?? 0)}</UiText>
-              <Caption>{translate("profileOrders")}</Caption>
-            </PressableSurface>
-            <PressableSurface accessibilityRole="button" accessibilityLabel={translate("profileFavorites")} onPress={() => setActivitySheet("favorites")} style={[styles.statTile, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
-              <View style={[styles.statIcon, { backgroundColor: theme.colors.surfaceSecondary }]}><Icon name="heart" size={designTokens.dimensions.iconSize.sm} /></View>
-              <UiText weight="700" style={styles.statValue}>{favorites.isPending ? "…" : favorites.isError ? "—" : String(favoriteCount)}</UiText>
-              <Caption>{translate("profileFavorites")}</Caption>
-            </PressableSurface>
-            <PressableSurface accessibilityRole="button" accessibilityLabel={translate("myReviewsTitle")} onPress={() => setActivitySheet("reviews")} style={[styles.statTile, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
-              <View style={[styles.statIcon, { backgroundColor: theme.colors.surfaceSecondary }]}><Icon name="star" size={designTokens.dimensions.iconSize.sm} /></View>
-              <UiText weight="700" style={styles.statValue}>{reviews.isPending ? "…" : reviews.isError ? "—" : String(reviews.data?.length ?? 0)}</UiText>
-              <Caption>{translate("myReviewsTitle")}</Caption>
-            </PressableSurface>
+          <View style={styles.activityList}>
+            <ListItem
+              leading={<Icon name="package" size={20} color={theme.colors.muted} />}
+              trailing={<View style={styles.listTrailing}><UiText weight="700">{orders.isPending ? "…" : orders.isError ? "—" : String(orders.data?.length ?? 0)}</UiText><Icon name="chevron-left" size={18} color={theme.colors.subtle} /></View>}
+              onPress={() => setActivitySheet("orders")}
+              accessibilityLabel={translate("profileOrders")}
+            >
+              <UiText weight="600">{translate("profileOrders")}</UiText>
+            </ListItem>
+            <ListItem
+              leading={<Icon name="heart" size={20} color={theme.colors.muted} />}
+              trailing={<View style={styles.listTrailing}><UiText weight="700">{favorites.isPending ? "…" : favorites.isError ? "—" : String(favoriteCount)}</UiText><Icon name="chevron-left" size={18} color={theme.colors.subtle} /></View>}
+              onPress={() => setActivitySheet("favorites")}
+              accessibilityLabel={translate("profileFavorites")}
+            >
+              <UiText weight="600">{translate("profileFavorites")}</UiText>
+            </ListItem>
+            <ListItem
+              leading={<Icon name="star" size={20} color={theme.colors.muted} />}
+              trailing={<View style={styles.listTrailing}><UiText weight="700">{reviews.isPending ? "…" : reviews.isError ? "—" : String(reviews.data?.length ?? 0)}</UiText><Icon name="chevron-left" size={18} color={theme.colors.subtle} /></View>}
+              onPress={() => setActivitySheet("reviews")}
+              accessibilityLabel={translate("myReviewsTitle")}
+              showDivider={false}
+            >
+              <UiText weight="600">{translate("myReviewsTitle")}</UiText>
+            </ListItem>
           </View>
 
           {merchantAccess.data?.status === "merchant_ready" && merchantAccess.data.store?.id ? (
-            <PressableSurface
-              accessibilityRole="button"
-              accessibilityLabel={translate("profileSwitchToStore")}
+            <ListItem
+              leading={<Icon name="store" size={20} color={theme.colors.accent} />}
+              trailing={<Icon name="chevron-left" size={18} color={theme.colors.subtle} />}
               onPress={() => router.push("/merchant")}
-              style={[styles.merchantCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.accent }]}
+              accessibilityLabel={translate("profileSwitchToStore")}
+              showDivider={false}
             >
-              <View style={[styles.merchantIcon, { backgroundColor: theme.colors.accent }]}>
-                <Icon name="store" size={24} color={theme.colors.accentForeground} />
-              </View>
-              <View style={styles.merchantText}>
-                <UiText weight="700">{translate("merchantMyStore")}</UiText>
+              <View style={styles.accountLinkText}>
+                <UiText weight="600">{translate("merchantMyStore")}</UiText>
                 <Caption>{translate("profileSwitchToStoreHint")}</Caption>
-                <UiText weight="600" style={{ color: theme.colors.accentOnSurface }}>{translate("profileSwitchToStore")}</UiText>
               </View>
-              <Icon name="chevron-left" size={20} color={theme.colors.subtle} />
-            </PressableSurface>
+            </ListItem>
           ) : null}
 
-          <Card contentStyle={styles.accountLinksCard}>
-            {teamInvitations.data && teamInvitations.data.length > 0 ? (
-              <>
-                <PressableSurface accessibilityRole="button" accessibilityLabel={translate("profileTeamInvitations")} onPress={() => router.push("/team-invitations")} style={styles.accountLinkRow}>
-                  <View style={[styles.accountLinkIcon, { backgroundColor: theme.colors.surfaceSecondary }]}><Icon name="users" size={20} color={theme.colors.accentOnSurface} /></View>
-                  <View style={styles.accountLinkText}>
-                    <UiText weight="700">{translate("profileTeamInvitations")}</UiText>
-                    <Caption>{translate("profileTeamInvitationsHint")}</Caption>
-                  </View>
-                  <Icon name="chevron-left" size={18} color={theme.colors.subtle} />
-                </PressableSurface>
-                <View style={[styles.accountLinkDivider, { backgroundColor: theme.colors.border }]} />
-              </>
-            ) : null}
-          </Card>
+          {teamInvitations.data && teamInvitations.data.length > 0 ? (
+            <ListItem
+              leading={<Icon name="users" size={20} color={theme.colors.muted} />}
+              trailing={<Icon name="chevron-left" size={18} color={theme.colors.subtle} />}
+              onPress={() => router.push("/team-invitations")}
+              accessibilityLabel={translate("profileTeamInvitations")}
+            >
+              <View style={styles.accountLinkText}>
+                <UiText weight="600">{translate("profileTeamInvitations")}</UiText>
+                <Caption>{translate("profileTeamInvitationsHint")}</Caption>
+              </View>
+            </ListItem>
+          ) : null}
 
 
 
           {verificationReviewer.data === true ? (
-            <Card contentStyle={styles.accountLinksCard}>
-              <PressableSurface accessibilityRole="button" accessibilityLabel={translate("verificationModerationTitle")} onPress={() => router.push("/moderation/store-verifications")} style={styles.accountLinkRow}>
-                <View style={[styles.accountLinkIcon, { backgroundColor: theme.colors.surfaceSecondary }]}><Icon name="circle-check" size={20} color={theme.colors.accentOnSurface} /></View>
-                <View style={styles.accountLinkText}>
-                  <UiText weight="700">{translate("verificationModerationTitle")}</UiText>
-                  <Caption>{translate("verificationModerationSubtitle")}</Caption>
-                </View>
-                <Icon name="chevron-left" size={18} color={theme.colors.subtle} />
-              </PressableSurface>
-            </Card>
+            <ListItem
+              leading={<Icon name="circle-check" size={20} color={theme.colors.muted} />}
+              trailing={<Icon name="chevron-left" size={18} color={theme.colors.subtle} />}
+              onPress={() => router.push("/moderation/store-verifications")}
+              accessibilityLabel={translate("verificationModerationTitle")}
+              showDivider={false}
+            >
+              <View style={styles.accountLinkText}>
+                <UiText weight="600">{translate("verificationModerationTitle")}</UiText>
+                <Caption>{translate("verificationModerationSubtitle")}</Caption>
+              </View>
+            </ListItem>
           ) : null}
 
           {orders.isError || favorites.isError || reviews.isError ? (
@@ -460,6 +467,9 @@ const styles = StyleSheet.create({
   avatarPreviewCard: { padding: designTokens.spacing.lg, gap: designTokens.spacing.md, alignItems: "center" },
   avatarPreviewImage: { width: 220, height: 220, borderRadius: 110, backgroundColor: "transparent" },
   identityRow: { flex: 1, minWidth: 0, flexDirection: "row" },
+  usernameSection: { gap: designTokens.spacing.sm },
+  activityList: { gap: 0 },
+  listTrailing: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.sm },
   accountLinksCard: { padding: 0 },
   accountLinkRow: { minHeight: 64, flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md, paddingHorizontal: designTokens.spacing.md, paddingVertical: designTokens.spacing.sm },
   accountLinkDivider: { height: StyleSheet.hairlineWidth, marginStart: 42 + designTokens.spacing.md, marginEnd: designTokens.spacing.md },
