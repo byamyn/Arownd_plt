@@ -234,7 +234,7 @@ export default function ProfileScreen() {
               <Caption>{translate("profileAvatarError")}</Caption>
             ) : null}
             {profile.data?.phone || profileArea ? (
-              <View style={[styles.phoneRow, { borderTopColor: theme.colors.border, flexWrap: "wrap", rowGap: designTokens.spacing.xs }]}>
+              <View style={[styles.phoneRow, { borderTopColor: theme.colors.divider, flexWrap: "wrap", rowGap: designTokens.spacing.xs }]}>
                 {profile.data?.phone ? (
                   <View style={{ flexDirection: "row", alignItems: "center", gap: designTokens.spacing.xs }}>
                     <Icon name="phone" size={16} />
