@@ -348,16 +348,14 @@ export default function ProfileScreen() {
         visible={accountSheet !== null}
         onRequestClose={() => setAccountSheet(null)}
         title={accountSheet === "delivery" ? translate("profileEditAction") : accountSheet === "addresses" ? translate("addressesTitle") : translate("inviteTitle")}
-        height="68%"
         maxHeight="94%"
       >
-        {accountSheet ? <ProfileAccountSheet section={accountSheet} onManageAvatar={() => setAvatarActionsOpen(true)} /> : null}
+        {accountSheet ? <ProfileAccountSheet section={accountSheet} onManageAvatar={() => { setAccountSheet(null); setAvatarActionsOpen(true); }} /> : null}
       </BottomSheet>
       <BottomSheet
         visible={activitySheet !== null}
         onRequestClose={() => setActivitySheet(null)}
         title={activitySheet === "orders" ? translate("profileOrders") : activitySheet === "favorites" ? translate("profileFavorites") : translate("myReviewsTitle")}
-        height="82%"
         maxHeight="94%"
       >
         {activitySheet ? <ProfileActivitySheet section={activitySheet} onNavigate={() => setActivitySheet(null)} /> : null}
