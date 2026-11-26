@@ -183,7 +183,7 @@ export default function MerchantOrderDetailsScreen() {
               <PriceDisplay value={formatMarketPrice(item.unit_price * item.quantity, customerOrder.currency_code)} style={styles.itemPriceDisplay} />
             </View>
           ))}
-          <View style={[styles.totalRow, { borderTopColor: theme.colors.divider }]>
+          <View style={[styles.totalRow, { borderTopColor: theme.colors.divider }]}>
             <UiText style={[styles.mutedText, { color: theme.colors.muted }]}>{translate("merchantOrderSubtotal")}</UiText>
             <UiText style={[styles.valueText, { color: theme.colors.foreground }]}>{formatMarketPrice(order.subtotal, customerOrder.currency_code)}</UiText>
           </View>
