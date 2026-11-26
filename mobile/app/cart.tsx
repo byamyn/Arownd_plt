@@ -53,13 +53,13 @@ export default function CartScreen() {
   if (cart.isError) return <CustomerScreen refreshing={cart.isFetching} onRefresh={() => { void cart.refetch(); }}><ErrorState title={translate("catalogLoadError")} retryLabel={translate("retry")} busy={cart.isFetching} onRetry={() => void cart.refetch()} /></CustomerScreen>;
   if (cart.data.length === 0) return <CustomerScreen refreshing={cart.isFetching} onRefresh={() => { void cart.refetch(); }}>
     <AppHeader title={translate("cartTitle")} />
-    <Card contentStyle={style.emptyContent}>
+    <View style={style.emptyContent}>
       <View style={style.emptyIcon}>
         <Icon name="shopping-bag" size={30} color={theme.colors.foreground} accessibilityHidden />
       </View>
       <UiText weight="800" style={style.emptyTitle}>{translate("cartEmpty")}</UiText>
       <Caption style={style.emptyHint}>{translate("cartEmptyHint")}</Caption>
-    </Card>
+    </View>
     <Button label={translate("cartBrowse")} onPress={() => router.push("/explore")} fullWidth />
   </CustomerScreen>;
 
@@ -109,7 +109,7 @@ export default function CartScreen() {
     {offers.isPending ? <LoadingState label={translate("cartVerifying")} /> : null}
     {mutation.isError ? <Alert tone="danger" description={translate("cartUpdateError")} /> : null}
     {evaluation.blockingCount > 0 ? <Alert tone="danger" description={translate("cartBlocked") + evaluation.blockingCount} /> : null}
-    {[...groups.entries()].map(([storeId, group]) => <Card key={storeId} style={style.group} contentStyle={style.groupContent}>
+    {[...groups.entries()].map(([storeId, group]) => <View key={storeId} style={style.group}>
       <UiText tone="accentMuted" weight="900" style={style.store}>{group.storeName}</UiText>
       {group.items.map((item, itemIndex) => {
         const key = cartLineKey(item);
