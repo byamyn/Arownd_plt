@@ -224,7 +224,7 @@ export function ProfileSettingsSection() {
         <Heading level={3}>{translate("settingsAccountTitle")}</Heading>
         <Card contentStyle={styles.sectionContent}>
           <SettingsRow icon="user" label={translate("settingsAccount")} onPress={() => openSheet("account")} theme={theme} styles={styles} language={language} />
-          <SettingsRow icon="id-card" label={translate("settingsProfileData")} onPress={() => openSheet("delivery")} theme={theme} styles={styles} language={language} />
+          <SettingsRow icon="user" label={translate("settingsProfileData")} onPress={() => openSheet("delivery")} theme={theme} styles={styles} language={language} />
           <SettingsRow icon="map-pin" label={translate("profileAddresses")} description={translate("profileAddressesHint")} onPress={() => openSheet("addresses")} theme={theme} styles={styles} language={language} />
           <SettingsRow icon="gift" label={translate("profileInvite")} description={translate("profileInviteHint")} onPress={() => openSheet("invite")} theme={theme} styles={styles} language={language} />
           <SettingsRow icon="map-pin" label={translate("settingsBrowsingCountry")} description={browsingCountry.data ?? "—"} onPress={() => openSheet("country")} theme={theme} styles={styles} language={language} />
