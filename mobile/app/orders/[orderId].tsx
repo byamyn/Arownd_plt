@@ -193,13 +193,13 @@ export default function OrderDetailsScreen() {
     <AppHeader title={translate("orderDetailsTitle")} leading={<IconButton accessibilityLabel={translate("back")} onPress={() => router.back()} icon={<Icon name="arrow-right" size={22} color={theme.colors.foreground} />} variant="ghost" />} />
     <UiText style={{ color: theme.colors.muted, fontSize: designTokens.typography.caption + 1, textAlign: "auto" }}>{translate("ordersCode") + ": " + orderCode}</UiText>
 
-    <View style={[styles.panel, { backgroundColor: theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface }]}>
+    <View style={styles.panel}>
       <UiText style={styles.sectionTitle}>{translate("orderSummary")}</UiText>
       <View style={styles.totalRow}><UiText style={styles.label}>{translate("orderTotal")}</UiText><PriceDisplay value={formatOrderMoney(order.total)} style={styles.priceDisplay} /></View>
       <UiText style={styles.meta}>{dateLabel(order.created_at, language)}</UiText>
     </View>
 
-    {showParentTimeline ? <View style={[styles.panel, { backgroundColor: theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface }]}>
+    {showParentTimeline ? <View style={styles.panel}>
       <UiText style={styles.sectionTitle}>{translate("orderProgress")}</UiText>
       {parentCancelled ? <OrderStatusBadge status={order.status} /> : <TrackingTimeline steps={STEPS.map((step, index) => ({
         key: step.status,
@@ -207,12 +207,12 @@ export default function OrderDetailsScreen() {
         description: translate(step.hint),
         status: index < activeStep ? "complete" as const : index === activeStep ? "current" as const : "upcoming" as const
       }))} />}
-    </View> : <View style={[styles.panel, { backgroundColor: theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface }]}>
+    </View> : <View style={styles.panel}>
       <UiText style={styles.sectionTitle}>{translate("orderPerStoreProgress")}</UiText>
       <UiText style={styles.meta}>{translate("orderPerStoreHint")}</UiText>
     </View>}
 
-    {merchantOrders.length === 0 ? <View style={[styles.panel, { backgroundColor: theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface }]}>
+    {merchantOrders.length === 0 ? <View style={styles.panel}>
       <UiText style={styles.sectionTitle}>{translate("orderItemsTitle")}</UiText>
       {order.items.map((item) => <View key={item.id} style={styles.itemRow}>
         <View style={styles.itemInfo}>
@@ -234,7 +234,7 @@ export default function OrderDetailsScreen() {
       const disputeActive = Boolean(disputeTicket && disputeTicket.status !== "resolved") || merchantOrder.completion_status === "disputed";
       const canConfirmCompletion = !cancelled && !disputeActive && merchantOrder.completion_status === "pending" && merchantOrder.status === "delivered" && merchantOrder.payment_status === "paid" && Boolean(merchantOrder.seller_confirmed_at);
       const canOpenDispute = !cancelled && !disputeTicket && (merchantOrder.completion_status === "pending" || merchantOrder.completion_status === "disputed");
-      return <View key={merchantOrder.id} style={[styles.panel, { backgroundColor: theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface }]}>
+      return <View key={merchantOrder.id} style={styles.panel}>
         <View style={styles.merchantHeader}>
           <UiText style={styles.sectionTitle}>{merchantOrder.store?.name ?? translate("ordersStore")}</UiText>
           <OrderStatusBadge status={merchantOrder.status} />
@@ -371,7 +371,7 @@ export default function OrderDetailsScreen() {
       </View>;
     })}
 
-    <View style={[styles.panel, { backgroundColor: theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface }]}>
+    <View style={styles.panel}>
       <UiText style={styles.sectionTitle}>{translate("orderRecipientTitle")}</UiText>
       <UiText style={[styles.recipient, { color: theme.colors.foreground }]}>{order.full_name ?? ""}</UiText>
       <UiText style={styles.meta}>{order.region ? getRegionDisplayName(order.region, language) : getLocalizedWilayaLabel(order.wilaya_id ?? 0, order.wilaya?.name_ar ?? "", language, order.wilaya?.name_fr)}{order.secondary_region ? " · " + getRegionDisplayName(order.secondary_region, language) : order.daira?.name_ar ? " · " + (language === "ar" ? order.daira.name_ar : order.daira.name_fr ?? order.daira.name_ar) : ""} · {order.commune ?? ""}</UiText>
@@ -381,7 +381,7 @@ export default function OrderDetailsScreen() {
       <UiText style={styles.meta}>{translate("orderPayment")}: {order.payment_method === "cod" ? translate("checkoutCodNote") : order.payment_method ?? ""}</UiText>
     </View>
 
-    {(query.data.shipments).length > 0 ? <View style={[styles.panel, { backgroundColor: theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface }]}>
+    {(query.data.shipments).length > 0 ? <View style={styles.panel}>
       <UiText style={styles.sectionTitle}>{translate("orderShipmentsTitle")}</UiText>
       {(query.data.shipments).map((shipment) => <View key={shipment.id} style={styles.shipment}>
         <OrderStatusBadge status={shipment.status} />
@@ -441,9 +441,9 @@ export default function OrderDetailsScreen() {
 }
 
 function createStyles(theme: AppTheme) { return StyleSheet.create({
-  panel: { borderRadius: designTokens.radius.md, padding: designTokens.spacing.lg, gap: designTokens.spacing.md },
+  panel: { paddingVertical: designTokens.spacing.lg, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.divider, gap: designTokens.spacing.md },
   sectionTitle: { color: theme.colors.accentMuted, fontSize: designTokens.typography.body, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
-  totalRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", borderTopWidth: 1, borderTopColor: theme.colors.border, paddingTop: designTokens.spacing.sm },
+  totalRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", borderTopWidth: 1, borderTopColor: theme.colors.divider, paddingTop: designTokens.spacing.sm },
   label: { color: theme.colors.muted, fontSize: designTokens.typography.caption + 1, fontWeight: designTokens.fontWeights.bold },
   total: { color: theme.colors.accentMuted, fontSize: designTokens.typography.subtitle + 2, fontWeight: designTokens.fontWeights.extrabold },
   priceDisplay: { justifyContent: "flex-start" },
