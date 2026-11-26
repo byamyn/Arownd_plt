@@ -43,7 +43,7 @@ export function BackButton({
       disabled={disabled}
       onPress={onPress}
       hitSlop={8}
-      style={({ pressed }) => [{ width: theme.dimensions.controlHeight.md, height: theme.dimensions.controlHeight.md, borderRadius: theme.radius.pill, alignItems: "center", justifyContent: "center", backgroundColor: theme.colors.surface, opacity: disabled ? 0.45 : pressed ? 0.72 : 1 }, style]}
+      style={({ pressed }) => [{ width: theme.dimensions.controlHeight.md, height: theme.dimensions.controlHeight.md, borderRadius: theme.radius.pill, alignItems: "center", justifyContent: "center", backgroundColor: "transparent", opacity: disabled ? 0.45 : pressed ? 0.72 : 1 }, style]}
     >
       {children}
     </Pressable>
@@ -161,7 +161,7 @@ function NavigationTab({
           borderRadius: theme.radius.pill,
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: selected ? theme.colors.accent : "transparent"
+          backgroundColor: "transparent"
         }}
       >
         <Animated.View style={{ transform: [{ scale }] }}>
@@ -171,7 +171,7 @@ function NavigationTab({
       <UiText
         numberOfLines={1}
         style={{
-          color: selected ? theme.colors.foreground : theme.colors.muted,
+          color: selected ? theme.colors.accent : theme.colors.muted,
           fontSize: theme.typography.caption,
           fontWeight: theme.fontWeights.medium,
           flexShrink: 1
@@ -206,7 +206,9 @@ export function BottomNavigation({
           flexDirection: "row",
           justifyContent: "space-around",
           paddingVertical: designTokens.spacing.sm,
-          backgroundColor: theme.colors.background
+          backgroundColor: theme.colors.background,
+          borderTopWidth: StyleSheet.hairlineWidth,
+          borderTopColor: theme.colors.divider
         },
         style
       ]}
