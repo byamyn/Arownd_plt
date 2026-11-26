@@ -243,7 +243,7 @@ export default function MerchantTeamScreen() {
         {invitations.isPending ? (
           <View style={styles.center}><Spinner /></View>
         ) : invitations.data?.length ? (
-          <Card contentStyle={styles.listCard}>
+          <View style={styles.listCard}>
             {invitations.data.map((invitation, index) => {
               const expired = new Date(invitation.expires_at).getTime() <= Date.now();
               return (
@@ -263,7 +263,7 @@ export default function MerchantTeamScreen() {
                 </View>
               );
             })}
-          </Card>
+          </View>
         ) : (
           <UiText style={styles.secondaryText}>{translate("merchantTeamInvitationsEmpty")}</UiText>
         )}
