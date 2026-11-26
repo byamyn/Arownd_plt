@@ -221,7 +221,7 @@ export default function AddressesScreen() {
         </SwipeToDelete>
       ))}
 
-      <BottomSheet visible={editor !== null} onRequestClose={() => setEditor(null)} title={translate(editor?.address ? "addressesEditTitle" : "addressesAddTitle")} maxHeight="92%">
+      <BottomSheet visible={editor !== null && !regionPickerOpen && !secondaryPickerOpen} onRequestClose={() => setEditor(null)} title={translate(editor?.address ? "addressesEditTitle" : "addressesAddTitle")} maxHeight="92%">
             <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.formContent}>
 
               <FormLabel>{translate("addressesType")}</FormLabel>
