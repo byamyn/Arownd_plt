@@ -133,7 +133,7 @@ async function fetchValhallaRoute(
   destination: RoutePoint,
   signal?: AbortSignal
 ): Promise<DrivingRoute> {
-  const response = await fetch(`${baseUrl.replace(/\\/$/, "")}/route`, {
+  const response = await fetch(`${baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl}/route`, {
     method: "POST",
     headers: {
       Accept: "application/json",
