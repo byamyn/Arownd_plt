@@ -1,6 +1,7 @@
 import { useState } from "react";
+import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
-import { StyleSheet, View } from "react-native";
+import { Image as NativeImage, Modal, StyleSheet, View } from "react-native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { designTokens, useAppTheme, type AppTheme } from "@/lib/theme";
@@ -28,8 +29,10 @@ import { unregisterCurrentPushDevice } from "@/lib/push-notifications";
 import { BROWSING_CURRENCY_QUERY_KEY, fetchCountries, fetchMyBrowsingCountryCode, updateBrowsingCountryCode, type Country } from "@/lib/country-service";
 import { fetchMyDeliveryProfile } from "@/lib/delivery-profile";
 import { setMyProfileVisibility } from "@/lib/username";
+import { uploadMyProfileAvatar, removeMyProfileAvatar } from "@/lib/profile-avatar";
+import { getProfileDisplayName } from "@/lib/profile-state";
 
-type SettingsSheet = "password" | "appearance" | "language" | "country" | "accounts" | null;
+type SettingsSheet = "account" | "password" | "appearance" | "language" | "country" | "accounts" | null;
 
 export function ProfileSettingsSection() {
   const theme = useAppTheme();
@@ -53,7 +56,13 @@ export function ProfileSettingsSection() {
   const [addAccountError, setAddAccountError] = useState(false);
   const [addingAccount, setAddingAccount] = useState(false);
   const [switchingAccount, setSwitchingAccount] = useState(false);
+  const [selectedAvatar, setSelectedAvatar] = useState<ImagePicker.ImagePickerAsset | null>(null);
+  const [avatarActionsOpen, setAvatarActionsOpen] = useState(false);
+  const [avatarPickerError, setAvatarPickerError] = useState(false);
 
+  const currentUser = useQuery({ queryKey: ["current-user"], queryFn: async () => { const { data, error } = await getSupabaseClient().auth.getUser(); if (error) throw error; return data.user; }, retry: false });
+  const avatarUpload = useMutation({ mutationFn: uploadMyProfileAvatar, onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: ["my-delivery-profile"] }); } });
+  const avatarRemove = useMutation({ mutationFn: removeMyProfileAvatar, onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: ["my-delivery-profile"] }); } });
   const countries = useQuery({ queryKey: ["available-countries"], queryFn: ({ signal }) => fetchCountries(signal), enabled: activeSheet === "country" });
   const browsingCountry = useQuery({ queryKey: ["browsing-country"], queryFn: ({ signal }) => fetchMyBrowsingCountryCode(signal) });
   const profileVisibility = useQuery({ queryKey: ["my-delivery-profile"], queryFn: ({ signal }) => fetchMyDeliveryProfile(signal), retry: false });
@@ -156,6 +165,8 @@ export function ProfileSettingsSection() {
     if (sheet === "country") setCountrySearch("");
   };
   const closeSheet = () => setActiveSheet(null);
+  const chooseAvatar = async () => { setAvatarActionsOpen(false); setAvatarPickerError(false); try { const permission = await ImagePicker.requestMediaLibraryPermissionsAsync(); if (!permission.granted) { setAvatarPickerError(true); return; } const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ["images"], allowsEditing: true, aspect: [1, 1], quality: 0.85 }); if (!result.canceled && result.assets[0]) setSelectedAvatar(result.assets[0]); } catch { setAvatarPickerError(true); } };
+  const captureAvatar = async () => { setAvatarActionsOpen(false); setAvatarPickerError(false); try { const permission = await ImagePicker.requestCameraPermissionsAsync(); if (!permission.granted) { setAvatarPickerError(true); return; } const result = await ImagePicker.launchCameraAsync({ mediaTypes: ["images"], allowsEditing: true, aspect: [1, 1], quality: 0.85 }); if (!result.canceled && result.assets[0]) setSelectedAvatar(result.assets[0]); } catch { setAvatarPickerError(true); } };
   const switchAccount = async (userId: string) => {
     setSwitchingAccount(true);
     setAccountSwitchError(false);
@@ -211,9 +222,7 @@ export function ProfileSettingsSection() {
       <View style={styles.section}>
         <Heading level={3}>{translate("settingsAccountTitle")}</Heading>
         <Card contentStyle={styles.sectionContent}>
-          <SettingsRow icon="user" label={translate("settingsAccount")} onPress={() => router.push("/profile")} theme={theme} styles={styles} language={language} />
-          <SettingsRow icon="lock" label={translate("settingsPasswordChangeTitle")} description={translate("settingsPasswordHint")} onPress={() => openSheet("password")} theme={theme} styles={styles} language={language} />
-          <SettingsRow icon="refresh-cw" label={translate("settingsSwitchAccount")} description={translate("settingsSwitchAccountHint")} onPress={() => { setAccountSwitchError(false); setAddAccountError(false); openSheet("accounts"); }} theme={theme} styles={styles} language={language} />
+          <SettingsRow icon="user" label={translate("settingsAccount")} onPress={() => openSheet("account")} theme={theme} styles={styles} language={language} />
           <SettingsRow icon="map-pin" label={translate("settingsBrowsingCountry")} description={browsingCountry.data ?? "—"} onPress={() => openSheet("country")} theme={theme} styles={styles} language={language} />
           <SettingsRow icon={theme.mode === "dark" ? "moon" : "sun"} label={translate("settingsAppearanceTitle")} description={translate(themeMode === "system" ? "settingsThemeSystem" : themeMode === "light" ? "settingsThemeLight" : "settingsThemeDark")} onPress={() => openSheet("appearance")} theme={theme} styles={styles} language={language} />
           <SettingsRow icon="globe" label={translate("settingsLanguageTitle")} description={translate(language === "ar" ? "settingsLanguageArabic" : "settingsLanguageEnglish")} onPress={() => openSheet("language")} theme={theme} styles={styles} language={language} />
@@ -228,15 +237,48 @@ export function ProfileSettingsSection() {
           <SettingsRow icon="lock" label={translate("settingsPrivacyPolicy")} onPress={() => router.push("/privacy-security")} theme={theme} styles={styles} language={language} />
           <SettingsRow icon="message-circle" label={translate("settingsSupportTitle")} onPress={() => router.push("/support")} theme={theme} styles={styles} language={language} />
           <SettingsRow icon="info" label={translate("settingsAboutTitle")} onPress={() => router.push("/about")} theme={theme} styles={styles} language={language} />
-          <PressableSurface accessibilityRole="button" accessibilityLabel={translate("settingsSignOutConfirmAction")} onPress={() => { setSignOutError(false); setSignOutConfirmOpen(true); }} disabled={signOutMutation.isPending} style={styles.signOutRow}>
-            <View style={styles.linkLabel}>
-              <Icon name="log-out" size={19} color={theme.colors.danger} />
-              <UiText tone="danger" weight="700">{translate("settingsSignOutConfirmAction")}</UiText>
-            </View>
-          </PressableSurface>
-          {signOutError ? <UiText tone="danger">{translate("settingsSignOutError")}</UiText> : null}
         </Card>
       </View>
+
+      <BottomSheet visible={activeSheet === "account"} onRequestClose={closeSheet} title={translate("settingsAccount")} height="82%" maxHeight="94%">
+        <View style={styles.accountHero}>
+          <View style={styles.accountAvatarWrap}>
+            {profileVisibility.data?.avatar_url ? <NativeImage source={{ uri: profileVisibility.data.avatar_url }} style={styles.accountHeroAvatar} /> : <View style={[styles.accountHeroAvatar, styles.accountHeroPlaceholder]}><Icon name="user" size={34} color={theme.colors.subtle} /></View>}
+            <PressableSurface accessibilityRole="button" accessibilityLabel={translate("profileAvatarChange")} onPress={() => setAvatarActionsOpen(true)} style={styles.avatarEditButton}>
+              <Icon name="edit-2" size={14} color={theme.colors.accentForeground} />
+            </PressableSurface>
+          </View>
+          <Heading level={3}>{getProfileDisplayName(profileVisibility.data?.full_name, currentUser.data?.email)}</Heading>
+          {avatarPickerError || avatarUpload.isError || avatarRemove.isError ? <Caption>{translate("profileAvatarError")}</Caption> : null}
+        </View>
+        <Card contentStyle={styles.accountDetailsCard}>
+          <SettingsInfoRow icon="user" label={translate("email")} value={currentUser.data?.email ?? "—"} theme={theme} styles={styles} />
+          {profileVisibility.data?.phone ? <SettingsInfoRow icon="phone" label={translate("checkoutPhoneLabel")} value={profileVisibility.data.phone} theme={theme} styles={styles} /> : null}
+          <SettingsRow icon="lock" label={translate("settingsPasswordChangeTitle")} onPress={() => openSheet("password")} theme={theme} styles={styles} language={language} />
+          <SettingsRow icon="eye" label={translate("profilePublicTitle")} description={profileVisibility.isPending ? translate("profileVisibilityLoading") : profileVisibility.data?.is_public ? translate("profilePublicEnabled") : translate("profilePublicDisabled")} onPress={() => { if (profileVisibility.data && !profileVisibilityMutation.isPending) profileVisibilityMutation.mutate(!profileVisibility.data.is_public); }} theme={theme} styles={styles} language={language} disabled={profileVisibility.isPending || !profileVisibility.data || profileVisibilityMutation.isPending} />
+          <SettingsRow icon="refresh-cw" label={translate("settingsSwitchAccount")} onPress={() => { setAccountSwitchError(false); setAddAccountError(false); openSheet("accounts"); }} theme={theme} styles={styles} language={language} />
+          <PressableSurface accessibilityRole="button" accessibilityLabel={translate("settingsSignOutConfirmAction")} onPress={() => { setSignOutError(false); setSignOutConfirmOpen(true); }} disabled={signOutMutation.isPending} style={styles.signOutRow}>
+            <View style={styles.linkLabel}><Icon name="log-out" size={19} color={theme.colors.danger} /><UiText tone="danger" weight="700">{translate("settingsSignOutConfirmAction")}</UiText></View>
+          </PressableSurface>
+          {profileVisibilityMutation.isError || profileVisibility.isError ? <Caption>{translate("profilePublicError")}</Caption> : null}
+          {signOutError ? <UiText tone="danger">{translate("settingsSignOutError")}</UiText> : null}
+        </Card>
+      </BottomSheet>
+
+      <BottomSheet visible={avatarActionsOpen} onRequestClose={() => setAvatarActionsOpen(false)} title={translate("profileAvatarOptionsTitle")}>
+        <PressableSurface onPress={() => { void chooseAvatar(); }} disabled={avatarUpload.isPending || avatarRemove.isPending} style={styles.avatarOption}><Icon name="image" size={21} color={theme.colors.accentOnSurface} /><UiText weight="600">{translate("profileAvatarChooseFromGallery")}</UiText></PressableSurface>
+        <PressableSurface onPress={() => { void captureAvatar(); }} disabled={avatarUpload.isPending || avatarRemove.isPending} style={styles.avatarOption}><Icon name="camera" size={21} color={theme.colors.accentOnSurface} /><UiText weight="600">{translate("profileAvatarTakePhoto")}</UiText></PressableSurface>
+        {profileVisibility.data?.avatar_url ? <PressableSurface onPress={() => { setAvatarActionsOpen(false); avatarRemove.mutate(); }} disabled={avatarUpload.isPending || avatarRemove.isPending} style={styles.avatarOption}><Icon name="trash-2" size={21} color={theme.colors.danger} /><UiText weight="600" style={{ color: theme.colors.danger }}>{translate("profileAvatarRemove")}</UiText></PressableSurface> : null}
+        <Button label={translate("profileAvatarCancel")} variant="outline" onPress={() => setAvatarActionsOpen(false)} fullWidth />
+      </BottomSheet>
+      <Modal visible={Boolean(selectedAvatar)} transparent animationType="fade" onRequestClose={() => setSelectedAvatar(null)}>
+        <View style={[styles.avatarModalOverlay, { backgroundColor: theme.colors.overlay }]}><Card contentStyle={styles.avatarPreviewCard}>
+          <UiText weight="700">{translate("profileAvatarPreviewTitle")}</UiText><Caption>{translate("profileAvatarPreviewHint")}</Caption>
+          {selectedAvatar ? <NativeImage source={{ uri: selectedAvatar.uri }} resizeMode="cover" style={styles.avatarPreviewImage} /> : null}
+          <Button label={translate("profileAvatarConfirm")} onPress={() => { if (selectedAvatar) avatarUpload.mutate(selectedAvatar, { onSuccess: () => setSelectedAvatar(null) }); }} loading={avatarUpload.isPending} disabled={!selectedAvatar || avatarRemove.isPending} fullWidth />
+          <Button label={translate("profileAvatarCancel")} variant="outline" onPress={() => setSelectedAvatar(null)} disabled={avatarUpload.isPending} fullWidth />
+        </Card></View>
+      </Modal>
 
       <BottomSheet visible={activeSheet === "accounts"} onRequestClose={closeSheet} title={translate("settingsSwitchAccount")}>
         <Caption>{translate("settingsSwitchAccountHint")}</Caption>
@@ -518,6 +560,10 @@ function SettingsRow({
   );
 }
 
+function SettingsInfoRow({ icon, label, value, theme, styles }: { icon: IconName; label: string; value: string; theme: AppTheme; styles: ReturnType<typeof createStyles> }) {
+  return <View style={[styles.linkRow, { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.border }]}><View style={styles.linkLabel}><View style={styles.iconBadge}><Icon name={icon} size={19} color={theme.colors.accentOnSurface} /></View><View style={styles.rowCopy}><UiText weight="700">{label}</UiText><Caption>{value}</Caption></View></View></View>;
+}
+
 function createStyles(theme: AppTheme) {
   return StyleSheet.create({
     screenContent: { gap: designTokens.spacing.xl },
@@ -577,6 +623,16 @@ function createStyles(theme: AppTheme) {
     accountList: {
       gap: designTokens.spacing.sm
     },
+    accountHero: { alignItems: "center", gap: designTokens.spacing.sm, paddingVertical: designTokens.spacing.md },
+    accountAvatarWrap: { width: 92, height: 92, position: "relative" },
+    accountHeroAvatar: { width: 92, height: 92, borderRadius: 46, backgroundColor: theme.colors.surfaceSecondary },
+    accountHeroPlaceholder: { alignItems: "center", justifyContent: "center" },
+    avatarEditButton: { position: "absolute", bottom: 0, end: 0, width: 30, height: 30, borderRadius: 15, alignItems: "center", justifyContent: "center", backgroundColor: theme.colors.accent },
+    accountDetailsCard: { gap: 0, paddingHorizontal: designTokens.spacing.md, paddingVertical: designTokens.spacing.xs, borderRadius: designTokens.radius.xl },
+    avatarOption: { minHeight: 52, borderRadius: designTokens.radius.md, paddingHorizontal: designTokens.spacing.md, flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md, backgroundColor: theme.colors.surfaceSecondary },
+    avatarModalOverlay: { flex: 1, justifyContent: "center", padding: designTokens.spacing.lg },
+    avatarPreviewCard: { padding: designTokens.spacing.lg, gap: designTokens.spacing.md, alignItems: "center" },
+    avatarPreviewImage: { width: 220, height: 220, borderRadius: 110 },
     accountOption: {
       minHeight: 68,
       flexDirection: "row",      alignItems: "center",
