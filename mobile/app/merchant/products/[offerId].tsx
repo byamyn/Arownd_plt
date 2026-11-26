@@ -624,7 +624,7 @@ export default function MerchantEditProductScreen() {
         ) : null}
       </MediaViewer>
 
-      <BottomSheet visible={categoryPickerOpen} onRequestClose={() => setCategoryPickerOpen(false)} title={translate("merchantProductCategoryPickerTitle")} maxHeight="85%">
+      <BottomSheet visible={categoryPickerOpen} onRequestClose={() => setCategoryPickerOpen(false)} title={translate("merchantProductCategoryPickerTitle")} maxHeight="85%" scrollable={false}>
             <ScrollView style={styles.categoryList} showsVerticalScrollIndicator={false}>
               {selectableCategories.map((category) => (
                 <PressableSurface
