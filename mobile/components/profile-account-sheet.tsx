@@ -3,7 +3,7 @@ import { Share, ScrollView, View } from "react-native";
 import * as Linking from "expo-linking";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { Button, Card, Caption, FormLabel, Heading, Icon, PressableSurface, SegmentedControl, StatusBadge, Text as UiText, TextField } from "@/components/ui";
+import { Button, Caption, FormLabel, Heading, Icon, PressableSurface, SegmentedControl, StatusBadge, Text as UiText, TextField } from "@/components/ui";
 import { ErrorState, PageSkeleton } from "@/components/customer-ui";
 import { fetchCheckoutRegions } from "@/lib/checkout";
 import { fetchDeliveryProfileCommunes, fetchMyDeliveryProfile, saveMyDeliveryProfile } from "@/lib/delivery-profile";
@@ -263,20 +263,20 @@ function InviteContent() {
   if (invite.isPending) return <PageSkeleton variant="form" rows={3} />;
   if (invite.isError || !invite.data) return <ErrorState title={translate("inviteLoadError")} retryLabel={translate("retry")} busy={invite.isFetching} onRetry={() => { void invite.refetch(); }} />;
   return <ScrollView contentContainerStyle={{ gap: designTokens.spacing.md, paddingBottom: designTokens.spacing.lg }}>
-    <Card contentStyle={{ padding: designTokens.spacing.lg, gap: designTokens.spacing.xs }}>
+    <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: designTokens.spacing.sm, borderBottomWidth: 1, borderBottomColor: theme.colors.divider }}>
       <Caption>{translate("inviteSuccessfulCount")}</Caption>
-      <Heading level={1}>{String(invite.data.total)}</Heading>
-    </Card>
-    <Card contentStyle={{ padding: designTokens.spacing.lg, gap: designTokens.spacing.md }}>
+      <Heading level={2}>{String(invite.data.total)}</Heading>
+    </View>
+    <View style={{ gap: designTokens.spacing.sm, paddingVertical: designTokens.spacing.sm, borderBottomWidth: 1, borderBottomColor: theme.colors.divider }}>
       <Caption>{translate("inviteCodeLabel")}</Caption>
-      <UiText weight="800" style={{ fontSize: 24, letterSpacing: 1.2, textAlign: "left", writingDirection: "ltr" }}>{formatInviteCode(invite.data.code)}</UiText>
+      <UiText weight="800" style={{ fontSize: 22, letterSpacing: 1.1, textAlign: "left", writingDirection: "ltr" }}>{formatInviteCode(invite.data.code)}</UiText>
       <Button label={translate("inviteShareCode")} variant="outline" fullWidth onPress={() => { void share(`${translate("inviteShareCodeMessage")}\n${formatInviteCode(invite.data.code)}\n${link}`); }} />
-    </Card>
-    <Card contentStyle={{ padding: designTokens.spacing.md, gap: designTokens.spacing.sm }}>
+    </View>
+    <View style={{ gap: designTokens.spacing.sm, paddingVertical: designTokens.spacing.sm }}>
       <Caption>{translate("inviteLinkLabel")}</Caption>
       <UiText style={{ writingDirection: "ltr", textAlign: "left" }}>{link}</UiText>
       <Button label={translate("inviteShare")} fullWidth onPress={() => { void share(`${translate("inviteShareMessage")}\n${link}`); }} />
-    </Card>
+    </View>
     <Heading level={3}>{translate("inviteHistoryTitle")} · {invite.data.total}</Heading>
     {invite.data.referrals.length === 0 ? <Caption>{translate("inviteEmptyHint")}</Caption> : invite.data.referrals.map((item) => {
       const name = item.displayName ?? translate("invitePrivateMember");
