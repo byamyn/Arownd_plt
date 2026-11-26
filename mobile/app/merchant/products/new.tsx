@@ -352,7 +352,7 @@ export default function MerchantNewProductScreen() {
             ) : null}
           </View>
 
-          <Card contentStyle={styles.card}>
+          <View style={styles.formSection}>
             <FormField label={translate("merchantProductNameLabel")} hint={translate("merchantProductNameHint")} error={fieldErrors.name} theme={theme}>
               <TextField
                 value={form.name}
