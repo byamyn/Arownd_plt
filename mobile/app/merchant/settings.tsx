@@ -461,7 +461,7 @@ export default function MerchantStoreSettingsScreen() {
       </View>
 
       </KeyboardAvoidingView>
-      <BottomSheet visible={mapPickerOpen} onRequestClose={() => setMapPickerOpen(false)} title={translate("merchantStoreMapPickerTitle")} maxHeight="92%">
+      <BottomSheet visible={mapPickerOpen} onRequestClose={() => setMapPickerOpen(false)} title={translate("merchantStoreMapPickerTitle")} maxHeight="92%" scrollable={false}>
         <View style={styles.mapPickerContent}>
           <UiText style={[styles.hint, { color: theme.colors.muted }]}>{translate("merchantStoreMapPickerHint")}</UiText>
           <View style={[styles.mapPickerContainer, { borderColor: theme.colors.border }]}>
@@ -537,7 +537,7 @@ export default function MerchantStoreSettingsScreen() {
         </View>
       </BottomSheet>
 
-      <BottomSheet visible={regionPickerOpen} onRequestClose={() => setRegionPickerOpen(false)} title={regionPickerLevel === "primary" ? (regionOptions.data ? getRegionLevelDisplayName(regionOptions.data.selectedLevel, language) : "") : (secondaryOptions.data ? getRegionLevelDisplayName(secondaryOptions.data.selectedLevel, language) : "")} maxHeight="85%">
+      <BottomSheet visible={regionPickerOpen} onRequestClose={() = scrollable={false}> setRegionPickerOpen(false)} title={regionPickerLevel === "primary" ? (regionOptions.data ? getRegionLevelDisplayName(regionOptions.data.selectedLevel, language) : "") : (secondaryOptions.data ? getRegionLevelDisplayName(secondaryOptions.data.selectedLevel, language) : "")} maxHeight="85%">
         <ScrollView style={styles.wilayaList} keyboardShouldPersistTaps="handled">
           {(regionPickerLevel === "primary" ? (regionOptions.data?.regions ?? []) : (secondaryOptions.data?.regions ?? [])).map((region) => (
             <PressableSurface key={region.id} accessibilityRole="button" accessibilityLabel={getRegionDisplayName(region, language)} accessibilityState={{ selected: regionPickerLevel === "primary" ? region.id === form.region_id : region.id === form.secondary_region_id }} onPress={() => regionPickerLevel === "primary" ? selectRegion(region.id) : selectSecondaryRegion(region.id)} style={[styles.wilayaOption, { borderBottomColor: theme.colors.divider, backgroundColor: (regionPickerLevel === "primary" ? region.id === form.region_id : region.id === form.secondary_region_id) ? theme.colors.accent : "transparent" }]}>
