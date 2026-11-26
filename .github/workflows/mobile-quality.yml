@@ -10,7 +10,6 @@ on:
       - feature/account-username
       - fix/store-pickup-address-optional
       - fix/checkout-pickup-idempotency
-      - fix/map-countrywide-store-discovery
     paths:
       - "mobile/**"
       - ".github/workflows/mobile-quality.yml"
