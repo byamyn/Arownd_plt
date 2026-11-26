@@ -111,13 +111,16 @@ function ReviewRow({ review, language, onPress }: { review: AppReview; language:
 function createReviewStyles(theme: AppTheme) {
   return StyleSheet.create({
     card: {
-      backgroundColor: theme.mode === "light" ? theme.colors.surfaceSecondary : theme.colors.surface,
-      borderColor: theme.mode === "light" ? "transparent" : theme.colors.border,
-      borderRadius: designTokens.radius.lg
+      backgroundColor: "transparent",
+      borderColor: "transparent",
+      borderRadius: 0,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: theme.colors.divider
     },
     cardContent: {
       gap: designTokens.spacing.md,
-      padding: designTokens.spacing.lg
+      paddingVertical: designTokens.spacing.md,
+      paddingHorizontal: designTokens.spacing.xs
     },
     rowHeader: {
       flexDirection: "row",
@@ -134,7 +137,7 @@ function createReviewStyles(theme: AppTheme) {
       gap: designTokens.spacing.md,
       paddingTop: designTokens.spacing.sm,
       borderTopWidth: StyleSheet.hairlineWidth,
-      borderTopColor: theme.colors.border
+      borderTopColor: theme.colors.divider
     }
   });
 }
