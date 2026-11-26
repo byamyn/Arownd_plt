@@ -143,11 +143,11 @@ function NavigationTab({
         {
           flex: 1,
           minWidth: 0,
-          minHeight: theme.dimensions.controlHeight.lg,
+          minHeight: theme.dimensions.controlHeight.md,
           paddingHorizontal: designTokens.spacing.xs,
           alignItems: "center",
           justifyContent: "center",
-          gap: designTokens.spacing.xs,
+          gap: designTokens.spacing.xs / 2,
           opacity: item.disabled ? 0.45 : pressed ? 0.72 : 1
         }
       ]}
@@ -156,9 +156,9 @@ function NavigationTab({
         ref={cartTargetRef}
         collapsable={false}
         style={{
-          minWidth: 44,
-          minHeight: 32,
-          paddingHorizontal: designTokens.spacing.md,
+          minWidth: 40,
+          minHeight: 26,
+          paddingHorizontal: designTokens.spacing.sm,
           borderRadius: theme.radius.pill,
           alignItems: "center",
           justifyContent: "center",
@@ -206,7 +206,7 @@ export function BottomNavigation({
         {
           flexDirection: "row",
           justifyContent: "space-around",
-          paddingVertical: designTokens.spacing.sm,
+          paddingVertical: designTokens.spacing.xs,
           backgroundColor: theme.colors.background,
           borderTopWidth: StyleSheet.hairlineWidth,
           borderTopColor: theme.colors.divider
