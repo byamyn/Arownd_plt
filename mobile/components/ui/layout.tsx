@@ -98,7 +98,7 @@ export function Divider({
     <View
       accessibilityElementsHidden
       style={[
-        { height: 1, alignSelf: "stretch", marginHorizontal: inset, backgroundColor: theme.colors.border },
+        { height: 1, alignSelf: "stretch", marginHorizontal: inset, backgroundColor: theme.colors.divider },
         style
       ]}
     />
