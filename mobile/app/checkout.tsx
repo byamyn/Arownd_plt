@@ -270,9 +270,9 @@ export default function CheckoutScreen() {
       <TextField accessibilityLabel={translate("fullNamePlaceholder")} value={fullName} onChangeText={(value) => { setFormEdited(true); setSelectedAddressId(null); setFullName(value); }} placeholder={translate("fullNamePlaceholder")} style={fieldStyle} textAlign="auto" maxLength={120} />
       <UiText style={styles.fieldLabel}>{translate("checkoutPhoneLabel")}</UiText>
       <TextField accessibilityLabel={translate("checkoutPhonePlaceholder")} value={phone} onChangeText={(value) => { setFormEdited(true); setSelectedAddressId(null); setPhone(value); }} placeholder={translate("checkoutPhonePlaceholder")} style={fieldStyle} textAlign="auto" keyboardType="phone-pad" maxLength={20} />
-    </Card>
+    </View>
 
-    <Card style={styles.sectionCard} contentStyle={styles.section}>
+    <View style={styles.sectionGroup}>
       <UiText style={styles.sectionTitle}>{translate("checkoutDeliveryTitle")}</UiText>
       {savedAddresses.isPending ? (
         <PageSkeleton variant="list" rows={1} />
@@ -429,8 +429,6 @@ export default function CheckoutScreen() {
 
 function createStyles(theme: AppTheme) { return StyleSheet.create({
   back: { color: theme.colors.accentMuted, fontSize: designTokens.typography.body - 1, fontWeight: designTokens.fontWeights.extrabold },
-  sectionCard: { borderRadius: designTokens.radius.xl },
-  section: { padding: designTokens.spacing.lg, gap: designTokens.spacing.md },
   summaryCard: { padding: designTokens.spacing.lg, gap: designTokens.spacing.md },
   paymentGroup: { paddingVertical: designTokens.spacing.lg, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.divider, gap: designTokens.spacing.md },
   paymentMethod: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.md },
