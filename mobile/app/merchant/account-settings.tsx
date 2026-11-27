@@ -3,7 +3,7 @@ import { Redirect, router } from "expo-router";
 import { StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { AppHeader, Icon, IconButton, PressableSurface, RefreshableScrollView, Text as UiText } from "@/components/ui";
+import { AppHeader, Icon, PressableSurface, RefreshableScrollView, Text as UiText } from "@/components/ui";
 import { fetchMerchantAccess } from "@/lib/merchant";
 import { translate, useLanguage } from "@/lib/i18n";
 import { designTokens, useAppTheme } from "@/lib/theme";
@@ -91,7 +91,8 @@ export default function MerchantAccountSettingsScreen() {
     <SafeAreaView edges={["top", "left", "right"]} style={[styles.safe, { backgroundColor: theme.colors.background }]}>
       <RefreshableScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} refreshing={access.isFetching} onRefresh={() => { void access.refetch(); }}>
         <AppHeader
-          title={translate("merchantAccountSettingsTitle")}        />
+          title={translate("merchantAccountSettingsTitle")}
+        />
         {sections.map((section) => (
           <View key={section.key} style={styles.section}>
             <UiText weight="700" style={[styles.sectionTitle, { color: theme.colors.muted }]}>
