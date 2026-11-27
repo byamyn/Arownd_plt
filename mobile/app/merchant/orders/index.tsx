@@ -3,6 +3,7 @@ import { Redirect, router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import {
+  Pressable,
   StyleSheet,
   View
 } from "react-native";
@@ -18,7 +19,7 @@ import { translate, type Language, type TranslationKey, useLanguage } from "@/li
 import { getLocalizedWilayaLabel } from "@/lib/locale-data";
 import type { MerchantDashboardOrder } from "@/lib/merchant-dashboard-state";
 import { designTokens, useAppTheme, type AppTheme } from "@/lib/theme";
-import { RefreshableScrollView, Button, ErrorState, FilterBar, FilterChip, Icon, OrderCardSkeleton, MerchantOrderCard, MerchantStatusBadge, MerchantMetricCard, PriceDisplay, Text as UiText } from "@/components/ui";
+import { RefreshableScrollView, ErrorState, FilterBar, FilterChip, Icon, OrderCardSkeleton, MerchantStatusBadge, MerchantMetricCard, PriceDisplay, Text as UiText } from "@/components/ui";
 import { MerchantStudioHeader } from "@/components/merchant-studio-header";
 
 type OrderFilter = "all" | "pending" | "quoted" | "confirmed" | "shipped" | "delivered" | "cancelled" | "rejected";
@@ -136,9 +137,17 @@ export default function MerchantOrdersScreen() {
       <RefreshableScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} refreshing={access.isFetching || dashboard.isFetching} onRefresh={() => { void Promise.all([access.refetch(), dashboard.refetch()]); }}>
         <MerchantStudioHeader sectionTitle={translate("merchantOrdersPageTitle")} onSettingsPress={() => router.push("/merchant/account-settings")} />
         <View style={styles.summaryGrid}>
-          {orderSummary.map((item) => (
-            <MerchantMetricCard key={item.label} label={item.label} value={formatNumber(item.value)} valueTone={item.tone} style={styles.summaryCard} />
-          ))}
+          <MerchantMetricCard
+            label={translate("merchantAnalyticsOrders")}
+            value={formatNumber(dashboard.data.orders.length)}
+            style={styles.summaryCard}
+          />
+          <MerchantMetricCard
+            label={translate("merchantOrdersFilterPending")}
+            value={formatNumber(dashboard.data.orders.filter((order) => order.status === "pending").length)}
+            valueTone="warning"
+            style={styles.summaryCard}
+          />
         </View>
 
         <FilterBar style={styles.filters}>
@@ -152,8 +161,9 @@ export default function MerchantOrdersScreen() {
           ))}
         </FilterBar>
 
-        <Button
-          label={translate(hideClosedOrders ? "merchantShowClosedOrders" : "merchantHideClosedOrders")}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityState={{ expanded: !hideClosedOrders }}
           onPress={() => {
             const nextValue = !hideClosedOrders;
             setHideClosedOrders(nextValue);
@@ -161,9 +171,13 @@ export default function MerchantOrdersScreen() {
               void AsyncStorage.setItem(`arownd:merchant:${storeId}:hide-closed-orders`, nextValue ? "hide" : "show").catch(() => undefined);
             }
           }}
-          variant="outline"
-          size="sm"
-        />
+          style={styles.closedOrdersToggle}
+        >
+          <Icon name={hideClosedOrders ? "eye" : "eye-off"} size={16} color={theme.colors.muted} />
+          <UiText style={[styles.closedOrdersText, { color: theme.colors.muted }]}>
+            {translate(hideClosedOrders ? "merchantShowClosedOrders" : "merchantHideClosedOrders")}
+          </UiText>
+        </Pressable>
 
         <View style={styles.listHeading}>
           <View style={[styles.countPill, { backgroundColor: theme.colors.surfaceSecondary }]}>
@@ -215,54 +229,53 @@ export default function MerchantOrdersScreen() {
 function OrderCard({ order, language, theme, onPress }: { order: MerchantDashboardOrder; language: Language; theme: AppTheme; onPress: () => void }) {
   const style = createStyles(theme);
   const itemNames = order.productNames.length > 0
-    ? order.productNames.slice(0, 3).join("، ")
+    ? order.productNames.slice(0, 2).join("، ")
     : translate("merchantOrderItems");
   const wilayaName = order.wilayaId === null
     ? (language === "ar" ? order.wilayaName : order.wilayaNameFr || order.wilayaName)
     : getLocalizedWilayaLabel(order.wilayaId, order.wilayaName, language, order.wilayaNameFr);
   const location = [order.commune, wilayaName].filter(Boolean).join("، ");
+  const locale = language === "ar"
+    ? "ar-DZ-u-nu-latn"
+    : language === "fr"
+      ? "fr-DZ-u-nu-latn"
+      : "en-DZ-u-nu-latn";
+  const createdDate = new Date(order.createdAt).toLocaleDateString(locale, {
+    day: "numeric",
+    month: "short"
+  });
 
   return (
-    <MerchantOrderCard onPress={onPress} accessibilityLabel={translate("merchantOrderNumber") + " " + order.parentOrderId.slice(0, 8)}>
-      <View style={style.orderHeader}>
-        <UiText style={[style.orderCode, { color: theme.colors.foreground }]}>
-          {translate("merchantOrderNumber")} {order.parentOrderId.slice(0, 8)}
-        </UiText>
-        <OrderStatus order={order} />
-      </View>
-      <UiText style={[style.customerName, { color: theme.colors.foreground }]}>
-        {order.customerName || translate("merchantCustomerUnknown")}
-      </UiText>
-      <UiText style={[style.orderMeta, { color: theme.colors.muted }]} numberOfLines={2}>
-        {itemNames}
-      </UiText>
-      <UiText style={[style.quantityText, { color: theme.colors.subtle }]}>
-        {formatNumber(order.totalQuantity)} {translate("merchantOrderQuantity")}
-      </UiText>
-      {location ? (
-        <UiText style={[style.orderMeta, { color: theme.colors.muted }]}>{location}</UiText>
-      ) : null}
-      <View style={style.orderFooter}>
-        <View style={style.priceBlock}>
-          <UiText style={[style.metaLabel, { color: theme.colors.subtle }]}>{translate("merchantOrderTotal")}</UiText>
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={translate("merchantOrderNumber") + " " + order.parentOrderId.slice(0, 8)}
+      style={({ pressed }) => [style.orderRow, pressed ? style.orderRowPressed : null]}
+    >
+      <View style={style.orderMain}>
+        <View style={style.orderTopLine}>
+          <UiText style={[style.orderCode, { color: theme.colors.muted }]}>
+            {translate("merchantOrderNumber")} {order.parentOrderId.slice(0, 8)}
+          </UiText>
+          <OrderStatus order={order} />
+        </View>
+        <View style={style.orderPrimaryLine}>
+          <UiText numberOfLines={1} style={[style.customerName, { color: theme.colors.foreground }]}>
+            {order.customerName || translate("merchantCustomerUnknown")}
+          </UiText>
           <PriceDisplay value={formatMarketPrice(order.subtotal + order.shippingFee, order.currencyCode)} style={style.orderPrice} />
         </View>
-        <View style={style.deliveryBlock}>
-          <UiText style={[style.metaLabel, { color: theme.colors.subtle }]}>{translate("merchantOrderDeliveryType")}</UiText>
-          <UiText style={[style.deliveryType, { color: theme.colors.foreground }]}>
-            {order.deliveryType === "desk"
-              ? translate("checkoutStorePickup")
-              : translate("checkoutHomeDelivery")}
+        <UiText numberOfLines={1} style={[style.orderMeta, { color: theme.colors.muted }]}>
+          {itemNames}
+        </UiText>
+        <View style={style.orderBottomLine}>
+          <UiText numberOfLines={1} style={[style.orderMeta, { color: theme.colors.subtle }]}>
+            {[createdDate, location, formatNumber(order.totalQuantity) + " " + translate("merchantOrderQuantity")].filter(Boolean).join(" · ")}
           </UiText>
+          <Icon name="chevron-left" size={16} color={theme.colors.subtle} />
         </View>
       </View>
-      <View style={style.orderAction}>
-        <UiText style={{ color: theme.colors.accentMuted, fontSize: designTokens.typography.caption, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" }}>
-          {translate("merchantOrderDetailTitle")}
-        </UiText>
-        <Icon name="chevron-left" size={16} color={theme.colors.accentMuted} />
-      </View>
-    </MerchantOrderCard>
+    </Pressable>
   );
 }
 
@@ -273,7 +286,8 @@ function OrderStatus({ order }: { order: MerchantDashboardOrder }) {
     confirmed: "merchantOrderStatusConfirmed",
     shipped: "merchantOrderStatusShipped",
     delivered: "merchantOrderStatusDelivered",
-    cancelled: "merchantOrderStatusCancelled"
+    cancelled: "merchantOrderStatusCancelled",
+    rejected: "merchantOrdersFilterRejected"
   };
   const tone = order.status === "delivered"
     ? "success"
@@ -336,26 +350,26 @@ function createStyles(theme: AppTheme) {
     content: { padding: designTokens.spacing.xl, paddingBottom: designTokens.spacing.xxl, gap: designTokens.spacing.lg },
     eyebrow: { fontSize: designTokens.typography.caption, fontWeight: designTokens.fontWeights.extrabold },
     subtitle: { fontSize: designTokens.typography.caption + 1, lineHeight: 19, textAlign: "auto" },
-    summaryGrid: { flexDirection: "row", flexWrap: "wrap", gap: designTokens.spacing.sm },
-    summaryCard: { width: "48%", flexGrow: 1, minHeight: 82, justifyContent: "center" },
+    summaryGrid: { flexDirection: "row", gap: designTokens.spacing.sm },
+    summaryCard: { minHeight: 76, justifyContent: "center", paddingVertical: designTokens.spacing.md },
     filters: { paddingVertical: designTokens.spacing.xs },
+    closedOrdersToggle: { minHeight: 36, flexDirection: "row", alignItems: "center", alignSelf: "flex-start", gap: designTokens.spacing.xs, paddingHorizontal: designTokens.spacing.xs },
+    closedOrdersText: { fontSize: designTokens.typography.caption, fontWeight: designTokens.fontWeights.semibold },
     listHeading: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
     sectionTitle: { fontSize: designTokens.typography.body, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
     countPill: { minHeight: 30, paddingHorizontal: designTokens.spacing.md, borderRadius: designTokens.radius.pill, alignItems: "center", justifyContent: "center" },
     countText: { fontSize: designTokens.typography.caption, fontWeight: designTokens.fontWeights.extrabold, fontVariant: ["tabular-nums"] },
-    orderList: { gap: designTokens.spacing.md },
-    orderHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: designTokens.spacing.sm },
-    orderCode: { fontSize: designTokens.typography.caption + 1, fontWeight: designTokens.fontWeights.extrabold },
-    customerName: { fontSize: designTokens.typography.body - 1, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
-    orderMeta: { fontSize: designTokens.typography.caption, textAlign: "auto", lineHeight: 18 },
-    quantityText: { fontSize: designTokens.typography.caption - 1, fontWeight: designTokens.fontWeights.semibold, textAlign: "auto" },
-    orderFooter: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingTop: designTokens.spacing.md, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: theme.colors.divider },
-    priceBlock: { gap: designTokens.spacing.xs, alignItems: "flex-start" },
-    deliveryBlock: { gap: designTokens.spacing.xs, alignItems: "flex-end" },
-    metaLabel: { fontSize: designTokens.typography.caption - 1, fontWeight: designTokens.fontWeights.medium },
-    orderPrice: { alignSelf: "flex-start" },
-    deliveryType: { fontSize: designTokens.typography.caption, fontWeight: designTokens.fontWeights.bold },
-    orderAction: { flexDirection: "row", alignItems: "center", gap: designTokens.spacing.xs, alignSelf: "flex-start", paddingTop: designTokens.spacing.xs },
+    orderList: { gap: 0 },
+    orderRow: { minHeight: 112, paddingVertical: designTokens.spacing.md, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.divider },
+    orderRowPressed: { opacity: 0.68 },
+    orderMain: { flex: 1, gap: designTokens.spacing.xs },
+    orderTopLine: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: designTokens.spacing.sm },
+    orderPrimaryLine: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: designTokens.spacing.md },
+    orderCode: { fontSize: designTokens.typography.caption, fontWeight: designTokens.fontWeights.semibold },
+    customerName: { flex: 1, fontSize: designTokens.typography.body - 1, fontWeight: designTokens.fontWeights.bold, textAlign: "auto" },
+    orderMeta: { fontSize: designTokens.typography.caption, textAlign: "auto", lineHeight: 18, flexShrink: 1 },
+    orderBottomLine: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: designTokens.spacing.sm },
+    orderPrice: { alignSelf: "center" },
     emptyState: { paddingVertical: designTokens.spacing.lg, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.divider, gap: designTokens.spacing.sm, alignItems: "flex-start" },
     emptyTitle: { fontSize: designTokens.typography.body - 1, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
     limitHint: { fontSize: designTokens.typography.caption - 1, lineHeight: 16, textAlign: "auto", paddingHorizontal: designTokens.spacing.xs }
