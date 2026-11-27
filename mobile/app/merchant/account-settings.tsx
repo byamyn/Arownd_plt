@@ -249,7 +249,7 @@ export default function MerchantAccountSettingsScreen() {
             ]}
           >
             <SafeAreaView edges={["top", "bottom"]} style={styles.drawerSafe}>
-              <View style={styles.drawerHeader}>
+              <View style={[styles.drawerHeader, { borderBottomColor: theme.colors.divider }]}>
                 <UiText weight="800" style={styles.drawerTitle}>{translate("merchantAccountSettingsTitle")}</UiText>
                 <IconButton
                   accessibilityLabel={translate("back")}
@@ -352,7 +352,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: theme.colors.divider
   },
   drawerTitle: { flex: 1, fontSize: designTokens.typography.subtitle },
   drawerSection: { gap: designTokens.spacing.xs },
