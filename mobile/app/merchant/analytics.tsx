@@ -137,6 +137,7 @@ export default function MerchantAnalyticsScreen() {
             <View style={styles.grid}>
               {orderCards.map((card) => <MerchantMetricCard key={card.label} label={card.label} value={card.value} valueTone={card.tone} style={styles.metricCard} />)}
             </View>
+            <UiText style={[styles.overviewCaption, { color: theme.colors.muted }]}>{translate("merchantBusinessOrderPeriodNote")}</UiText>
 
             <Heading level={3}>{translate("merchantBusinessSalesTrend")}</Heading>
             <ChartCard style={styles.chartCard}>
