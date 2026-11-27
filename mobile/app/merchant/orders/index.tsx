@@ -228,11 +228,7 @@ function OrderCard({ order, language, theme, onPress }: { order: MerchantDashboa
     ? (language === "ar" ? order.wilayaName : order.wilayaNameFr || order.wilayaName)
     : getLocalizedWilayaLabel(order.wilayaId, order.wilayaName, language, order.wilayaNameFr);
   const location = [order.commune, wilayaName].filter(Boolean).join("، ");
-  const locale = language === "ar"
-    ? "ar-DZ-u-nu-latn"
-    : language === "fr"
-      ? "fr-DZ-u-nu-latn"
-      : "en-DZ-u-nu-latn";
+  const locale = language === "ar" ? "ar-DZ-u-nu-latn" : "en-DZ-u-nu-latn";
   const createdDate = new Date(order.createdAt).toLocaleDateString(locale, {
     day: "numeric",
     month: "short"
