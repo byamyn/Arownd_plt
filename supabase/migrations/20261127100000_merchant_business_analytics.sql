@@ -46,8 +46,12 @@ security invoker
 set search_path = ''
 as $function$
 begin
-  if new.status = 'delivered'
-     and (tg_op = 'INSERT' or old.status is distinct from 'delivered') then
+  if tg_op = 'INSERT' then
+    if new.status = 'delivered' then
+      new.delivered_at := now();
+      new.delivered_at_is_estimated := false;
+    end if;
+  elsif new.status = 'delivered' and old.status is distinct from 'delivered' then
     new.delivered_at := now();
     new.delivered_at_is_estimated := false;
   end if;
@@ -185,15 +189,20 @@ begin
   ),
   slow_products as (
     select coalesce(jsonb_agg(jsonb_build_object(
-      'name', p.name,
-      'stock_quantity', so.stock_quantity
-    ) order by so.stock_quantity asc, p.name), '[]'::jsonb) as items
-    from public.store_offers so
-    join public.products p on p.id = so.product_id
-    where so.store_id = _store_id
-      and not exists (
-        select 1 from product_sales ps where ps.offer_id = so.id
-      )
+      'name', candidates.name,
+      'stock_quantity', candidates.stock_quantity
+    ) order by candidates.stock_quantity asc, candidates.name), '[]'::jsonb) as items
+    from (
+      select p.name, so.stock_quantity
+      from public.store_offers so
+      join public.products p on p.id = so.product_id
+      where so.store_id = _store_id
+        and not exists (
+          select 1 from product_sales ps where ps.offer_id = so.id
+        )
+      order by so.stock_quantity asc, p.name
+      limit 5
+    ) candidates
   ),
   inventory as (
     select
@@ -222,7 +231,7 @@ begin
     'rejected_orders', os.rejected_orders,
     'average_order', ss.average_order,
     'delivery_rate_percent', case when os.orders_total = 0 then 0
-      else round((ss.delivered_orders::numeric / os.orders_total) * 100, 1) end,
+      else round((os.delivered_orders::numeric / os.orders_total) * 100, 1) end,
     'cancellation_rate_percent', case when os.orders_total = 0 then 0
       else round((os.cancelled_orders::numeric / os.orders_total) * 100, 1) end,
     'estimated_delivery_dates', ss.estimated_delivery_dates,
