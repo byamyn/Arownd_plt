@@ -171,7 +171,7 @@ export default function MerchantAnalyticsScreen() {
               {data.slow_products.length === 0 ? <UiText style={[styles.empty, { color: theme.colors.muted }]}>{translate("merchantBusinessNoSlowProducts")}</UiText> : data.slow_products.map((product, index) => (
                 <View key={`${product.name}-${index}`} style={[styles.productRow, { borderBottomColor: theme.colors.divider }]}>
                   <UiText numberOfLines={2} style={[styles.productName, styles.productInfo, { color: theme.colors.foreground }]}>{product.name}</UiText>
-                  <UiText style={[styles.productHint, { color: theme.colors.muted }]}>{translate("merchantAnalyticsProducts")}: {formatNumber(product.stock_quantity)}</UiText>
+                  <UiText style={[styles.productHint, { color: theme.colors.muted }]}>{translate("merchantBusinessStockUnits")}: {formatNumber(product.stock_quantity)}</UiText>
                 </View>
               ))}
             </View>
