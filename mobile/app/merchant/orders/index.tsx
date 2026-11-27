@@ -125,13 +125,6 @@ export default function MerchantOrdersScreen() {
   const getFilterCount = (value: OrderFilter) => value === "all"
     ? availableOrders.length
     : availableOrders.filter((order) => order.status === value).length;
-  const orderSummary = [
-    { label: translate("merchantAnalyticsOrders"), value: dashboard.data.orders.length, tone: "default" as const },
-    { label: translate("merchantOrdersFilterPending"), value: dashboard.data.orders.filter((order) => order.status === "pending").length, tone: "warning" as const },
-    { label: translate("merchantAnalyticsActive"), value: dashboard.data.orders.filter((order) => order.status === "quoted" || order.status === "confirmed" || order.status === "shipped").length, tone: "warning" as const },
-    { label: translate("merchantAnalyticsDelivered"), value: dashboard.data.orders.filter((order) => order.status === "delivered").length, tone: "success" as const }
-  ];
-
   return (
     <SafeAreaView edges={["top", "left", "right"]} style={[styles.safe, { backgroundColor: theme.colors.background }]}>
       <RefreshableScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} refreshing={access.isFetching || dashboard.isFetching} onRefresh={() => { void Promise.all([access.refetch(), dashboard.refetch()]); }}>
