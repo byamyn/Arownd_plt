@@ -186,7 +186,7 @@ export default function MerchantAccountSettingsScreen() {
             title={translate("merchantAccountSettingsTitle")}
             trailing={
               <IconButton
-                accessibilityLabel={translate("menu")}
+                accessibilityLabel={translate("merchantAccountSettingsTitle")}
                 onPress={openDrawer}
                 variant="ghost"
                 icon={<Icon name="menu" size={22} color={theme.colors.foreground} />}
@@ -240,8 +240,8 @@ export default function MerchantAccountSettingsScreen() {
               {
                 width: drawerWidth,
                 backgroundColor: theme.colors.surface,
-                borderLeftColor: theme.colors.divider,
-                transform: [{ translateX: drawerX }]
+                borderStartColor: theme.colors.divider,
+                transform: [{ translateX: I18nManager.isRTL ? drawerX : drawerX.interpolate({ inputRange: [0, drawerWidth], outputRange: [0, -drawerWidth] }) }]
               },
               I18nManager.isRTL ? { right: 0 } : { left: 0 }
             ]}
@@ -329,13 +329,13 @@ const styles = StyleSheet.create({
     padding: designTokens.spacing.md
   },
   drawerLayer: { ...StyleSheet.absoluteFillObject, zIndex: 20 },
-  backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: "#000000" },
+  backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: "transparent" },
   backdropTint: { ...StyleSheet.absoluteFillObject, backgroundColor: "#000000" },
   drawer: {
     position: "absolute",
     top: 0,
     bottom: 0,
-    borderLeftWidth: StyleSheet.hairlineWidth,
+    borderStartWidth: StyleSheet.hairlineWidth,
     paddingHorizontal: designTokens.spacing.lg,
     elevation: 18,
     shadowColor: "#000000",
@@ -350,7 +350,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "#00000018"
+    borderBottomColor: theme.colors.divider
   },
   drawerTitle: { flex: 1, fontSize: designTokens.typography.subtitle },
   drawerSection: { gap: designTokens.spacing.xs },
