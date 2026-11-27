@@ -18,7 +18,8 @@ import { fetchMerchantAccess } from "@/lib/merchant";
 import { translate, useLanguage } from "@/lib/i18n";
 import { designTokens, useAppTheme } from "@/lib/theme";
 
-const EDGE_WIDTH = 26;
+const EDGE_START = 28;
+const EDGE_DEPTH = 76;
 
 export default function MerchantAccountSettingsScreen() {
   useLanguage();
@@ -71,8 +72,9 @@ export default function MerchantAccountSettingsScreen() {
     onStartShouldSetPanResponder: () => false,
     onMoveShouldSetPanResponderCapture: (_event, gesture) => {
       if (Math.abs(gesture.dx) < 8 || Math.abs(gesture.dx) < Math.abs(gesture.dy) * 1.2) return false;
-      const fromRightEdge = gesture.x0 >= Dimensions.get("window").width - EDGE_WIDTH;
-      const fromLeftEdge = gesture.x0 <= EDGE_WIDTH;
+      const screenWidth = Dimensions.get("window").width;
+      const fromRightEdge = gesture.x0 >= screenWidth - EDGE_DEPTH && gesture.x0 <= screenWidth - EDGE_START;
+      const fromLeftEdge = gesture.x0 >= EDGE_START && gesture.x0 <= EDGE_DEPTH;
       if (drawerOpenRef.current) {
         const insideDrawer = I18nManager.isRTL
           ? gesture.x0 >= Dimensions.get("window").width - drawerWidth
@@ -189,7 +191,7 @@ export default function MerchantAccountSettingsScreen() {
                 accessibilityLabel={translate("merchantAccountSettingsTitle")}
                 onPress={openDrawer}
                 variant="ghost"
-                icon={<Icon name="list" size={22} color={theme.colors.foreground} />}
+                icon={<Icon name="menu" size={22} color={theme.colors.foreground} />}
               />
             }
           />
