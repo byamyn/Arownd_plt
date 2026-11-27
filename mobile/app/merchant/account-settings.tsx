@@ -330,9 +330,9 @@ const styles = StyleSheet.create({
   retry: {
     padding: designTokens.spacing.md
   },
-  drawerLayer: { ...StyleSheet.absoluteFillObject, zIndex: 20 },
-  backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: "transparent" },
-  backdropTint: { ...StyleSheet.absoluteFillObject, backgroundColor: "#000000" },
+  drawerLayer: { ...StyleSheet.absoluteFill, zIndex: 20 },
+  backdrop: { ...StyleSheet.absoluteFill, backgroundColor: "transparent" },
+  backdropTint: { ...StyleSheet.absoluteFill, backgroundColor: "#000000" },
   drawer: {
     position: "absolute",
     top: 0,
