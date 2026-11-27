@@ -102,7 +102,7 @@ export default function MerchantAnalyticsScreen() {
         {period === "custom" ? (
           <View style={[styles.datePanel, { borderColor: theme.colors.divider }]}>
             <UiText style={[styles.sectionLabel, { color: theme.colors.foreground }]}>{translate("merchantBusinessFrom")}</UiText>
-            <DatePicker value={customFrom} onChange={(value) => { setCustomFrom(value); setAppliedRange(null); }} accessibilityLabel={translate("merchantBusinessFrom")} monthLabel={formatMonth} weekdayLabels={weekdayLabels} previousMonthLabel={translate("merchantBusinessPreviousMonth")} nextMonthLabel={translate("merchantBusinessMonth")} maxDate={customTo} />
+            <DatePicker value={customFrom} onChange={(value) => { setCustomFrom(value); setAppliedRange(null); }} accessibilityLabel={translate("merchantBusinessFrom")} monthLabel={formatMonth} weekdayLabels={weekdayLabels} previousMonthLabel={translate("merchantBusinessPreviousMonth")} nextMonthLabel={translate("merchantBusinessNextMonth")} maxDate={customTo} />
             <UiText style={[styles.sectionLabel, { color: theme.colors.foreground }]}>{translate("merchantBusinessTo")}</UiText>
             <DatePicker value={customTo} onChange={(value) => { setCustomTo(value); setAppliedRange(null); }} accessibilityLabel={translate("merchantBusinessTo")} monthLabel={formatMonth} weekdayLabels={weekdayLabels} previousMonthLabel={translate("merchantBusinessPreviousMonth")} nextMonthLabel={translate("merchantBusinessMonth")} minDate={customFrom} maxDate={dateKey(new Date())} />
             {!dateRangeValid ? <UiText style={[styles.validation, { color: theme.colors.danger }]}>{translate("merchantBusinessDateRangeError")}</UiText> : null}
