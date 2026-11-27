@@ -293,11 +293,7 @@ function LoadingScreen({ theme, label }: { theme: AppTheme; label: string }) {
   return (
     <SafeAreaView edges={["top", "left", "right"]} style={[stylesForScreen.safe, { backgroundColor: theme.colors.background }]}>
       <View accessible accessibilityLabel={label} style={stylesForScreen.center}>
-        <View style={stylesForScreen.heading}>
-          <UiText accessibilityRole="header" style={[stylesForScreen.headingTitle, { color: theme.colors.foreground }]}>
-            {translate("merchantOrdersPageTitle")}
-          </UiText>
-        </View>
+        <MerchantStudioHeader sectionTitle={translate("merchantOrdersPageTitle")} onSettingsPress={() => router.push("/merchant/account-settings")} />
         <View style={{ width: "100%", gap: designTokens.spacing.md }}>
           {[0, 1, 2, 3].map((item) => <OrderCardSkeleton key={item} />)}
         </View>
@@ -322,11 +318,7 @@ function MessageScreen({
   return (
     <SafeAreaView edges={["top", "left", "right"]} style={[stylesForScreen.safe, { backgroundColor: theme.colors.background }]}>
       <View style={stylesForScreen.center}>
-        <View style={stylesForScreen.heading}>
-          <UiText accessibilityRole="header" style={[stylesForScreen.headingTitle, { color: theme.colors.foreground }]}>
-            {translate("merchantOrdersPageTitle")}
-          </UiText>
-        </View>
+        <MerchantStudioHeader sectionTitle={translate("merchantOrdersPageTitle")} onSettingsPress={() => router.push("/merchant/account-settings")} />
         <ErrorState title={title} retryLabel={actionLabel} busy={busy} onRetry={onAction} />
       </View>
     </SafeAreaView>
@@ -336,8 +328,6 @@ function MessageScreen({
 const stylesForScreen = StyleSheet.create({
   safe: { flex: 1 },
   center: { flex: 1, padding: designTokens.spacing.xxl, alignItems: "center", justifyContent: "center", gap: designTokens.spacing.lg },
-  heading: { width: "100%", alignItems: "flex-start", gap: designTokens.spacing.xs },
-  headingTitle: { fontSize: designTokens.typography.title, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
 });
 
 function createStyles(theme: AppTheme) {

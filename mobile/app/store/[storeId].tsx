@@ -130,7 +130,7 @@ export default function StoreDetailsScreen() {
       onRefresh={() => { void Promise.all([store.refetch(), browsingCurrency.refetch(), merchantAccess.refetch(), ...(tab === "products" ? [offers.refetch()] : [])]); }}
     >
       <AppHeader
-        title=""
+        title={isStoreOwner ? "Arownd Studio" : ""}
         leading={<IconButton accessibilityLabel={translate("back")} onPress={() => router.back()} icon={<Icon name="arrow-right" color={theme.colors.foreground} size={20} />} variant="ghost" />}
         trailing={<>
           {isStoreOwner ? <IconButton accessibilityLabel={translate("merchantAccountSettingsTitle")} onPress={() => router.push("/merchant/account-settings")} icon={<Icon name="settings" color={theme.colors.foreground} size={19} />} variant="ghost" /> : null}

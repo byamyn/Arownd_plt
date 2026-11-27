@@ -167,6 +167,14 @@ export default function MerchantProductsScreen() {
       <RefreshableScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} refreshing={access.isFetching || products.isFetching} onRefresh={() => { void Promise.all([access.refetch(), products.refetch()]); }}>
         <MerchantStudioHeader sectionTitle={translate("merchantProductsTitle")} onSettingsPress={() => router.push("/merchant/account-settings")} />
 
+        <View style={styles.summaryGrid}>
+          <MerchantMetricCard label={translate("merchantProductsSummaryTotal")} value={String(summary.total)} style={styles.summaryCard} />
+          <MerchantMetricCard label={translate("merchantProductsSummaryLow")} value={String(summary.low)} valueTone="warning" style={styles.summaryCard} />
+          <MerchantMetricCard label={translate("merchantProductsSummaryOut")} value={String(summary.out)} valueTone="danger" style={styles.summaryCard} />
+        </View>
+
+        {canManageCatalog ? <Button label={translate("merchantProductCreateOpen")} onPress={() => router.push("/merchant/products/new")} fullWidth /> : null}
+
         <SearchField
           value={search}
           onChangeText={setSearch}
@@ -182,14 +190,6 @@ export default function MerchantProductsScreen() {
           <FilterChip label={translate("merchantProductsFilterOut")} selected={filter === "out"} onPress={() => setFilter("out")} leading={<Icon name="package" size={14} color={filter === "out" ? theme.colors.accentForeground : theme.colors.muted} accessibilityHidden />} />
           <FilterChip label={translate("merchantProductsHidden")} selected={filter === "hidden"} onPress={() => setFilter("hidden")} leading={<Icon name="eye-off" size={14} color={filter === "hidden" ? theme.colors.accentForeground : theme.colors.muted} accessibilityHidden />} />
         </FilterBar>
-
-        {canManageCatalog ? <Button label={translate("merchantProductCreateOpen")} onPress={() => router.push("/merchant/products/new")} fullWidth /> : null}
-
-        <View style={styles.summaryGrid}>
-          <MerchantMetricCard label={translate("merchantProductsSummaryTotal")} value={String(summary.total)} style={styles.summaryCard} />
-          <MerchantMetricCard label={translate("merchantProductsSummaryLow")} value={String(summary.low)} valueTone="warning" style={styles.summaryCard} />
-          <MerchantMetricCard label={translate("merchantProductsSummaryOut")} value={String(summary.out)} valueTone="danger" style={styles.summaryCard} />
-        </View>
 
         {notice ? (
           <View style={[styles.feedback, { backgroundColor: theme.colors.successSurface, borderColor: theme.colors.successBorder }]}>
