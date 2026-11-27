@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { RefreshableScrollView, AppHeader, Button, Card, ErrorState, FilterBar, FilterChip, Icon, Image as UiImage, ProductCardSkeleton, MediaViewer, MerchantMetricCard, MerchantStatusBadge, PressableSurface, SearchField, Text as UiText, TextField } from "@/components/ui";
+import { RefreshableScrollView, Button, Card, ErrorState, FilterBar, FilterChip, Icon, Image as UiImage, ProductCardSkeleton, MediaViewer, MerchantMetricCard, MerchantStatusBadge, PressableSurface, SearchField, Text as UiText, TextField } from "@/components/ui";
 import {
   fetchMerchantAccess
 } from "@/lib/merchant";
@@ -28,6 +28,7 @@ import {
 } from "@/lib/merchant-products-state";
 import { translate, useLanguage } from "@/lib/i18n";
 import { designTokens, useAppTheme, type AppTheme } from "@/lib/theme";
+import { MerchantStudioHeader } from "@/components/merchant-studio-header";
 
 const EMPTY_MERCHANT_PRODUCTS: MerchantProductOffer[] = [];
 
@@ -164,7 +165,7 @@ export default function MerchantProductsScreen() {
   return (
     <SafeAreaView edges={["top", "left", "right"]} style={[styles.safe, { backgroundColor: theme.colors.background }]}>
       <RefreshableScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} refreshing={access.isFetching || products.isFetching} onRefresh={() => { void Promise.all([access.refetch(), products.refetch()]); }}>
-        <AppHeader title={translate("merchantProductsTitle")} />
+        <MerchantStudioHeader sectionTitle={translate("merchantProductsTitle")} onSettingsPress={() => router.push("/merchant/account-settings")} />
 
         <SearchField
           value={search}
@@ -405,8 +406,7 @@ function MessageScreen({
   return (
     <SafeAreaView edges={["top", "left", "right"]} style={[styles.safe, { backgroundColor: theme.colors.background }]}>
       <View style={styles.messageContainer}>
-        <AppHeader
-          title={translate("merchantProductsTitle")}        />
+        <MerchantStudioHeader sectionTitle={translate("merchantProductsTitle")} onSettingsPress={() => router.push("/merchant/account-settings")} />
         {loading ? (
           <View style={{ width: "100%", gap: designTokens.spacing.lg }}>
             {[0, 1, 2].map((item) => <ProductCardSkeleton key={item} style={{ width: "100%", flex: 0 }} />)}

@@ -9,7 +9,8 @@ import { fetchMerchantAccess } from "@/lib/merchant";
 import { fetchMerchantAnalytics } from "@/lib/merchant-analytics";
 import { translate, useLanguage } from "@/lib/i18n";
 import { designTokens, useAppTheme, type AppTheme } from "@/lib/theme";
-import { RefreshableScrollView, AppHeader, ChartCard, ErrorState, Heading, MetricCardSkeleton, Skeleton, MerchantMetricCard, Text as UiText } from "@/components/ui";
+import { MerchantStudioHeader } from "@/components/merchant-studio-header";
+import { RefreshableScrollView, ChartCard, ErrorState, Heading, MetricCardSkeleton, Skeleton, MerchantMetricCard, Text as UiText } from "@/components/ui";
 
 export default function MerchantAnalyticsScreen() {
   const { language } = useLanguage();
@@ -56,7 +57,7 @@ export default function MerchantAnalyticsScreen() {
   return (
     <SafeAreaView edges={["top", "left", "right"]} style={[styles.safe, { backgroundColor: theme.colors.background }]}>
       <RefreshableScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} refreshing={access.isFetching || analytics.isFetching} onRefresh={() => { void Promise.all([access.refetch(), analytics.refetch()]); }}>
-        <AppHeader title={translate("merchantAnalyticsTitle")} />
+        <MerchantStudioHeader sectionTitle={translate("merchantAnalyticsTitle")} onSettingsPress={() => router.push("/merchant/account-settings")} />
 
         <View style={styles.overviewHeader}>
           <UiText style={[styles.overviewEyebrow, { color: theme.colors.muted }]}>{translate("merchantAnalyticsRevenue")}</UiText>
@@ -125,8 +126,7 @@ function Message({ theme, label, loading = false, actionLabel, onAction, busy = 
   return (
     <SafeAreaView edges={["top", "left", "right"]} style={[styles.safe, { backgroundColor: theme.colors.background }]}>
       <View style={styles.message}>
-        <AppHeader
-          title={translate("merchantAnalyticsTitle")}        />
+        <MerchantStudioHeader sectionTitle={translate("merchantAnalyticsTitle")} onSettingsPress={() => router.push("/merchant/account-settings")} />
         {loading ? (
           <View style={{ width: "100%", gap: designTokens.spacing.md }}>
           <View style={{ flexDirection: "row", flexWrap: "wrap", gap: designTokens.spacing.sm }}>

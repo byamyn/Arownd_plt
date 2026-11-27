@@ -133,6 +133,7 @@ export default function StoreDetailsScreen() {
         title=""
         leading={<IconButton accessibilityLabel={translate("back")} onPress={() => router.back()} icon={<Icon name="arrow-right" color={theme.colors.foreground} size={20} />} variant="ghost" />}
         trailing={<>
+          {isStoreOwner ? <IconButton accessibilityLabel={translate("merchantAccountSettingsTitle")} onPress={() => router.push("/merchant/account-settings")} icon={<Icon name="settings" color={theme.colors.foreground} size={19} />} variant="ghost" /> : null}
           <IconButton accessibilityLabel={translate("storeShare")} disabled={!details.slug} onPress={() => { if (details.slug) void Share.share({ title: details.name, message: translate("storeSharePrefix") + " " + details.name + "\nhttps://arownd.vercel.app/store/" + encodeURIComponent(details.slug) }); }} icon={<Icon name="send" color={theme.colors.foreground} size={19} />} />
           <FavoriteButton kind="stores" id={storeId} iconOnly />
         </>}
@@ -202,7 +203,6 @@ export default function StoreDetailsScreen() {
           <View style={styles.storeActionsRow}>
             {details.phone ? <View style={styles.storeActionItem}><Button label={translate("storeCall")} onPress={() => { void Linking.openURL(`tel:${details.phone!.replace(/[^\\d+]/g, "")}`); }} variant="outline" size="md" fullWidth startIcon={<Icon name="phone" size={16} color={theme.colors.foreground} accessibilityHidden />} /></View> : null}
             {details.latitude != null && details.longitude != null ? <View style={styles.storeActionItem}><Button label={translate("mapDirections")} onPress={() => router.push({ pathname: "/map", params: { storeId, directions: "1" } })} variant="outline" size="md" fullWidth startIcon={<Icon name="navigation" size={16} color={theme.colors.foreground} accessibilityHidden />} /></View> : null}
-            {isStoreOwner ? <IconButton accessibilityLabel={translate("merchantStoreSettingsTitle")} onPress={() => router.push("/merchant/settings")} icon={<Icon name="settings" size={19} color={theme.colors.foreground} accessibilityHidden />} variant="surface" style={styles.ownerSettingsButton} /> : null}
           </View>
         ) : null}
       </View>
@@ -291,7 +291,6 @@ const styles = StyleSheet.create({
   storeHero: { paddingHorizontal: designTokens.spacing.lg, paddingBottom: designTokens.spacing.lg, gap: designTokens.spacing.md },
   storeActionsRow: { flexDirection: "row", gap: designTokens.spacing.sm },
   storeActionItem: { flex: 1 },
-  ownerSettingsButton: { width: 44, height: designTokens.dimensions.controlHeight.md, borderWidth: 1, borderColor: "#D1D5DB" },
   storeMetaRow: { flexDirection: "row", alignItems: "center", flexWrap: "wrap", columnGap: designTokens.spacing.md, rowGap: designTokens.spacing.xs },
   storeScheduleRow: { gap: designTokens.spacing.xs },
   ownerEditor: { gap: designTokens.spacing.md, paddingTop: designTokens.spacing.sm, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: "#D1D5DB" },

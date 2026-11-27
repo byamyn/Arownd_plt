@@ -18,7 +18,8 @@ import { translate, type Language, type TranslationKey, useLanguage } from "@/li
 import { getLocalizedWilayaLabel } from "@/lib/locale-data";
 import type { MerchantDashboardOrder } from "@/lib/merchant-dashboard-state";
 import { designTokens, useAppTheme, type AppTheme } from "@/lib/theme";
-import { RefreshableScrollView, AppHeader, Button, ErrorState, FilterBar, FilterChip, Icon, IconButton, OrderCardSkeleton, MerchantOrderCard, MerchantStatusBadge, PriceDisplay, Text as UiText } from "@/components/ui";
+import { RefreshableScrollView, Button, ErrorState, FilterBar, FilterChip, Icon, OrderCardSkeleton, MerchantOrderCard, MerchantStatusBadge, MerchantMetricCard, PriceDisplay, Text as UiText } from "@/components/ui";
+import { MerchantStudioHeader } from "@/components/merchant-studio-header";
 
 type OrderFilter = "all" | "pending" | "quoted" | "confirmed" | "shipped" | "delivered" | "cancelled" | "rejected";
 
@@ -123,21 +124,22 @@ export default function MerchantOrdersScreen() {
   const getFilterCount = (value: OrderFilter) => value === "all"
     ? availableOrders.length
     : availableOrders.filter((order) => order.status === value).length;
+  const orderSummary = [
+    { label: translate("merchantAnalyticsOrders"), value: dashboard.data.orders.length, tone: "default" as const },
+    { label: translate("merchantOrdersFilterPending"), value: dashboard.data.orders.filter((order) => order.status === "pending").length, tone: "warning" as const },
+    { label: translate("merchantAnalyticsActive"), value: dashboard.data.orders.filter((order) => order.status === "quoted" || order.status === "confirmed" || order.status === "shipped").length, tone: "warning" as const },
+    { label: translate("merchantAnalyticsDelivered"), value: dashboard.data.orders.filter((order) => order.status === "delivered").length, tone: "success" as const }
+  ];
 
   return (
     <SafeAreaView edges={["top", "left", "right"]} style={[styles.safe, { backgroundColor: theme.colors.background }]}>
       <RefreshableScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} refreshing={access.isFetching || dashboard.isFetching} onRefresh={() => { void Promise.all([access.refetch(), dashboard.refetch()]); }}>
-        <AppHeader
-          title={translate("merchantOrdersPageTitle")}
-          trailing={
-            <IconButton
-              accessibilityLabel={translate("merchantAccountSettingsTitle")}
-              onPress={() => router.push("/merchant/account-settings")}
-              icon={<Icon name="settings" size={19} color={theme.colors.foreground} />}
-              variant="ghost"
-            />
-          }
-        />
+        <MerchantStudioHeader sectionTitle={translate("merchantOrdersPageTitle")} onSettingsPress={() => router.push("/merchant/account-settings")} />
+        <View style={styles.summaryGrid}>
+          {orderSummary.map((item) => (
+            <MerchantMetricCard key={item.label} label={item.label} value={formatNumber(item.value)} valueTone={item.tone} style={styles.summaryCard} />
+          ))}
+        </View>
 
         <FilterBar style={styles.filters}>
           {FILTERS.map((item) => (
@@ -344,6 +346,8 @@ function createStyles(theme: AppTheme) {
     content: { padding: designTokens.spacing.xl, paddingBottom: designTokens.spacing.xxl, gap: designTokens.spacing.lg },
     eyebrow: { fontSize: designTokens.typography.caption, fontWeight: designTokens.fontWeights.extrabold },
     subtitle: { fontSize: designTokens.typography.caption + 1, lineHeight: 19, textAlign: "auto" },
+    summaryGrid: { flexDirection: "row", flexWrap: "wrap", gap: designTokens.spacing.sm },
+    summaryCard: { width: "48%", flexGrow: 1, minHeight: 82, justifyContent: "center" },
     filters: { paddingVertical: designTokens.spacing.xs },
     listHeading: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
     sectionTitle: { fontSize: designTokens.typography.body, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
