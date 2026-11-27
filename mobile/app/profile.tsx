@@ -290,11 +290,15 @@ export default function ProfileScreen() {
 
           {merchantAccess.data?.status === "merchant_ready" && merchantAccess.data.store?.id ? (
             <ListItem
-              leading={<Icon name="store" size={20} color={theme.colors.accent} />}
+              leading={
+                <View style={{ width: 52, height: 52, borderRadius: designTokens.radius.lg, alignItems: "center", justifyContent: "center", backgroundColor: theme.colors.accent }}>
+                  <Icon name="clapperboard" size={24} color="#FFFFFF" />
+                </View>
+              }
               trailing={<Icon name="chevron-left" size={18} color={theme.colors.subtle} />}
               onPress={() => router.push("/merchant")}
               accessibilityLabel={translate("profileSwitchToStore")}
-              showDivider={false}
+              style={{ minHeight: 76 }}
             >
               <View style={styles.accountLinkText}>
                 <UiText weight="600">{translate("merchantMyStore")}</UiText>
