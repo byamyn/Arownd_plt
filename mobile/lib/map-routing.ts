@@ -185,7 +185,6 @@ export function getRemainingRouteCoordinates(
 ): RoutePoint[] {
   if (route.length < 2) return route;
 
-  let travelled = 0;
   let bestDistance = Number.POSITIVE_INFINITY;
   let bestIndex = 0;
   let bestFraction = 0;
