@@ -1,34 +1,41 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Redirect, router } from "expo-router";
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
-import {
-  ScrollView,
-  StyleSheet,
-  View
-} from "react-native";
+import { memo, useCallback, useMemo, useState } from "react";
+import { StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { RefreshableScrollView, Button, Card, ErrorState, FilterBar, FilterChip, Icon, Image as UiImage, ProductCardSkeleton, MediaViewer, MerchantMetricCard, MerchantStatusBadge, PressableSurface, SearchField, Text as UiText, TextField } from "@/components/ui";
 import {
-  fetchMerchantAccess
-} from "@/lib/merchant";
+  RefreshableScrollView,
+  Button,
+  ErrorState,
+  FilterBar,
+  FilterChip,
+  Icon,
+  Image as UiImage,
+  ProductCardSkeleton,
+  MediaViewer,
+  MerchantMetricCard,
+  MerchantStatusBadge,
+  PressableSurface,
+  SearchField,
+  Text as UiText
+} from "@/components/ui";
+import { MerchantStudioHeader } from "@/components/merchant-studio-header";
+import { fetchMerchantAccess } from "@/lib/merchant";
 import {
   fetchMerchantProductOffer,
   fetchMerchantProducts,
-  setMerchantProductVisibility,
-  updateMerchantProductOffer
+  setMerchantProductVisibility
 } from "@/lib/merchant-products";
 import {
   filterMerchantProducts,
   getMerchantInventoryLevel,
   getMerchantInventorySummary,
-  validateMerchantOfferValues,
   type MerchantInventoryFilter,
   type MerchantProductOffer
 } from "@/lib/merchant-products-state";
 import { translate, useLanguage } from "@/lib/i18n";
 import { designTokens, useAppTheme, type AppTheme } from "@/lib/theme";
-import { MerchantStudioHeader } from "@/components/merchant-studio-header";
 
 const EMPTY_MERCHANT_PRODUCTS: MerchantProductOffer[] = [];
 
@@ -66,36 +73,6 @@ export default function MerchantProductsScreen() {
     () => filterMerchantProducts(allOffers, search, filter),
     [allOffers, search, filter]
   );
-
-  const saveOffer = useCallback(async (
-    offerId: string,
-    priceInput: string,
-    stockInput: string
-  ): Promise<void> => {
-    if (!storeId || busyOfferId) return;
-
-    const values = validateMerchantOfferValues(priceInput, stockInput);
-    if (!values) {
-      setNotice(null);
-      setActionError(translate("merchantProductsValidation"));
-      return;
-    }
-
-    setBusyOfferId(offerId);
-    setNotice(null);
-    setActionError(null);
-
-    try {
-      await updateMerchantProductOffer(offerId, storeId, values);
-      await queryClient.invalidateQueries({ queryKey: ["merchant-products", storeId] });
-      await queryClient.invalidateQueries({ queryKey: ["merchant-dashboard", storeId] });
-      setNotice(translate("merchantProductsSaved"));
-    } catch {
-      setActionError(translate("merchantProductsSaveError"));
-    } finally {
-      setBusyOfferId(null);
-    }
-  }, [busyOfferId, queryClient, storeId]);
 
   const toggleVisibility = useCallback(async (offerId: string, isMerchantHidden: boolean): Promise<void> => {
     if (!storeId || busyOfferId) return;
@@ -164,8 +141,16 @@ export default function MerchantProductsScreen() {
 
   return (
     <SafeAreaView edges={["top", "left", "right"]} style={[styles.safe, { backgroundColor: theme.colors.background }]}>
-      <RefreshableScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} refreshing={access.isFetching || products.isFetching} onRefresh={() => { void Promise.all([access.refetch(), products.refetch()]); }}>
-        <MerchantStudioHeader sectionTitle={translate("merchantProductsTitle")} onSettingsPress={() => router.push("/merchant/account-settings")} />
+      <RefreshableScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        refreshing={access.isFetching || products.isFetching}
+        onRefresh={() => { void Promise.all([access.refetch(), products.refetch()]); }}
+      >
+        <MerchantStudioHeader
+          sectionTitle={translate("merchantProductsTitle")}
+          onSettingsPress={() => router.push("/merchant/account-settings")}
+        />
 
         <View style={styles.summaryGrid}>
           <MerchantMetricCard label={translate("merchantProductsSummaryTotal")} value={String(summary.total)} style={styles.summaryCard} />
@@ -173,7 +158,13 @@ export default function MerchantProductsScreen() {
           <MerchantMetricCard label={translate("merchantProductsSummaryOut")} value={String(summary.out)} valueTone="danger" style={styles.summaryCard} />
         </View>
 
-        {canManageCatalog ? <Button label={translate("merchantProductCreateOpen")} onPress={() => router.push("/merchant/products/new")} fullWidth /> : null}
+        {canManageCatalog ? (
+          <Button
+            label={translate("merchantProductCreateOpen")}
+            onPress={() => router.push("/merchant/products/new")}
+            fullWidth
+          />
+        ) : null}
 
         <SearchField
           value={search}
@@ -212,20 +203,18 @@ export default function MerchantProductsScreen() {
             <UiText style={[styles.emptyTitle, { color: theme.colors.foreground }]}>{translate("merchantProductsNoResults")}</UiText>
           </View>
         ) : (
-          <View style={styles.offerGrid}>
+          <View style={styles.productList}>
             {visibleOffers.map((offer) => (
-              <View key={offer.id} style={styles.offerGridItem}>
-                <MerchantOfferCard
-                  offer={offer}
-                  theme={theme}
-                  busy={busyOfferId === offer.id}
-                  anyBusy={busyOfferId !== null}
-                  canManageCatalog={canManageCatalog}
-                  onSave={saveOffer}
-                  onToggleVisibility={toggleVisibility}
-                  onEdit={editOffer}
-                />
-              </View>
+              <MerchantProductRow
+                key={offer.id}
+                offer={offer}
+                theme={theme}
+                busy={busyOfferId === offer.id}
+                anyBusy={busyOfferId !== null}
+                canManageCatalog={canManageCatalog}
+                onToggleVisibility={toggleVisibility}
+                onEdit={editOffer}
+              />
             ))}
           </View>
         )}
@@ -234,13 +223,12 @@ export default function MerchantProductsScreen() {
   );
 }
 
-const MerchantOfferCard = memo(function MerchantOfferCard({
+const MerchantProductRow = memo(function MerchantProductRow({
   offer,
   theme,
   busy,
   anyBusy,
   canManageCatalog,
-  onSave,
   onToggleVisibility,
   onEdit
 }: {
@@ -249,23 +237,11 @@ const MerchantOfferCard = memo(function MerchantOfferCard({
   busy: boolean;
   anyBusy: boolean;
   canManageCatalog: boolean;
-  onSave: (offerId: string, price: string, stock: string) => void;
   onToggleVisibility: (offerId: string, isMerchantHidden: boolean) => void;
   onEdit: (offerId: string) => void;
 }) {
   const styles = createStyles(theme);
-  const [price, setPrice] = useState(String(offer.price));
-  const [stock, setStock] = useState(String(offer.stock_quantity));
   const [galleryOpen, setGalleryOpen] = useState(false);
-
-  useEffect(() => {
-    setPrice(String(offer.price));
-    setStock(String(offer.stock_quantity));
-  }, [offer.price, offer.stock_quantity]);
-
-  const handleSave = useCallback(() => onSave(offer.id, price, stock), [onSave, offer.id, price, stock]);
-  const handleToggleVisibility = useCallback(() => onToggleVisibility(offer.id, offer.is_merchant_hidden), [onToggleVisibility, offer.id, offer.is_merchant_hidden]);
-  const handleEdit = useCallback(() => onEdit(offer.id), [onEdit, offer.id]);
   const image = offer.images.find((item) => item.is_primary) ?? offer.images[0] ?? null;
   const inventoryLevel = getMerchantInventoryLevel(offer.stock_quantity);
   const inventoryLabel = inventoryLevel === "out"
@@ -274,100 +250,104 @@ const MerchantOfferCard = memo(function MerchantOfferCard({
       ? translate("merchantProductsLow")
       : translate("merchantProductsAvailable");
 
-  return (
-    <Card style={{ backgroundColor: theme.colors.surface, width: "100%" }} contentStyle={styles.offerCard}>
-      <View style={styles.postHeader}>
-        <View style={styles.productInfo}>
-          <UiText style={[styles.productName, { color: theme.colors.foreground }]} numberOfLines={2}>
-            {offer.product.name}
-          </UiText>
-          {offer.product.brand ? (
-            <UiText style={[styles.productBrand, { color: theme.colors.muted }]} numberOfLines={1}>
-              {offer.product.brand}
-            </UiText>
-          ) : null}
-        </View>
-        <View style={styles.badgeColumn}>
-          <MerchantStatusBadge
-            label={inventoryLabel}
-            tone={inventoryLevel === "out" ? "danger" : inventoryLevel === "low" ? "warning" : "success"}
-          />
-          <MerchantStatusBadge
-            label={offer.is_merchant_hidden ? translate("merchantProductsHidden") : translate("merchantProductsVisible")}
-            tone={offer.is_merchant_hidden ? "neutral" : "accent"}
-          />
-        </View>
-      </View>
+  const openEditor = useCallback(() => onEdit(offer.id), [onEdit, offer.id]);
+  const toggleVisibility = useCallback(
+    () => onToggleVisibility(offer.id, offer.is_merchant_hidden),
+    [onToggleVisibility, offer.id, offer.is_merchant_hidden]
+  );
 
+  return (
+    <View style={styles.productRow}>
       <PressableSurface
         accessibilityRole={image ? "button" : undefined}
         accessibilityLabel={translate("merchantProductImagesLabel")}
         disabled={!image}
         onPress={() => setGalleryOpen(true)}
-        style={[styles.productImage, { backgroundColor: theme.mode === "dark" ? theme.colors.surfaceSecondary : theme.colors.surfaceMuted }]}
+        style={[styles.productThumbnail, { backgroundColor: theme.mode === "dark" ? theme.colors.surfaceSecondary : theme.colors.surfaceMuted }]}
       >
         {image ? (
           <UiImage
             uri={image.image_url}
             accessibilityLabel={translate("merchantProductImagesLabel")}
             aspectRatio={1}
-            style={styles.image}
+            style={styles.thumbnailImage}
           />
         ) : (
-          <Icon name="image" color={theme.colors.muted} size={28} accessibilityHidden />
+          <Icon name="image" color={theme.colors.muted} size={24} accessibilityHidden />
         )}
       </PressableSurface>
 
-      <View style={styles.postBody}>
-        <View style={styles.inputsRow}>
-        <View style={styles.inputGroup}>
-          <UiText style={[styles.inputLabel, { color: theme.colors.muted }]}>{translate("merchantProductsPriceLabel")}</UiText>
-          <TextField
-            value={price}
-            onChangeText={setPrice}
-            keyboardType="number-pad"
-            editable={canManageCatalog && !anyBusy}
-            accessibilityLabel={translate("merchantProductsPriceLabel")}
-            style={[styles.valueInput, { color: theme.colors.foreground, borderColor: (theme.colors.inputBorder), backgroundColor: theme.colors.background }]}
-          />
-        </View>
-        <View style={styles.inputGroup}>
-          <UiText style={[styles.inputLabel, { color: theme.colors.muted }]}>{translate("merchantProductsStockLabel")}</UiText>
-          <TextField
-            value={stock}
-            onChangeText={setStock}
-            keyboardType="number-pad"
-            editable={!anyBusy}
-            accessibilityLabel={translate("merchantProductsStockLabel")}
-            style={[styles.valueInput, { color: theme.colors.foreground, borderColor: (theme.colors.inputBorder), backgroundColor: theme.colors.background }]}
-          />
-          <UiText style={[styles.stockHint, { color: theme.colors.subtle }]}>
-            {translate("merchantProductsStockHint")}
+      <PressableSurface
+        accessibilityRole="button"
+        accessibilityLabel={offer.product.name}
+        onPress={openEditor}
+        style={styles.productDetails}
+      >
+        <UiText style={[styles.productName, { color: theme.colors.foreground }]} numberOfLines={2}>
+          {offer.product.name}
+        </UiText>
+        {offer.product.brand ? (
+          <UiText style={[styles.productBrand, { color: theme.colors.muted }]} numberOfLines={1}>
+            {offer.product.brand}
           </UiText>
-        </View>
-        </View>
-
-{canManageCatalog ? (
-          <>
-            <Button label={translate("merchantProductsSave")} onPress={handleSave} loading={busy} disabled={anyBusy} fullWidth />
-            <View style={styles.actionsRow}>
-              <Button label={offer.is_merchant_hidden ? translate("merchantProductsShow") : translate("merchantProductsHide")} onPress={handleToggleVisibility} disabled={anyBusy} variant="outline" size="sm" fullWidth style={{ flex: 1 }} />
-              <Button label={translate("merchantProductEditOpen")} onPress={handleEdit} disabled={anyBusy} variant="ghost" size="sm" fullWidth style={{ flex: 1 }} />
-            </View>
-          </>
         ) : null}
-      </View>
+        <UiText style={[styles.productPrice, { color: theme.colors.foreground }]}>
+          {offer.price.toLocaleString()} دج
+        </UiText>
+        <View style={styles.metadataRow}>
+          <MerchantStatusBadge
+            label={inventoryLabel}
+            tone={inventoryLevel === "out" ? "danger" : inventoryLevel === "low" ? "warning" : "success"}
+          />
+          <UiText style={[styles.stockText, { color: theme.colors.muted }]}>
+            {translate("merchantProductsStockLabel")}: {offer.stock_quantity}
+          </UiText>
+          {offer.is_merchant_hidden ? (
+            <MerchantStatusBadge label={translate("merchantProductsHidden")} tone="neutral" />
+          ) : null}
+        </View>
+      </PressableSurface>
+
+      {canManageCatalog ? (
+        <View style={styles.rowActions}>
+          <PressableSurface
+            accessibilityRole="button"
+            accessibilityLabel={offer.is_merchant_hidden ? translate("merchantProductsShow") : translate("merchantProductsHide")}
+            accessibilityState={{ disabled: anyBusy, busy }}
+            disabled={anyBusy}
+            onPress={toggleVisibility}
+            style={[styles.iconAction, { opacity: anyBusy ? 0.5 : 1 }]}
+          >
+            {busy ? (
+              <Icon name="loader-circle" color={theme.colors.muted} size={19} accessibilityHidden />
+            ) : (
+              <Icon
+                name={offer.is_merchant_hidden ? "eye" : "eye-off"}
+                color={theme.colors.muted}
+                size={19}
+                accessibilityHidden
+              />
+            )}
+          </PressableSurface>
+          <PressableSurface
+            accessibilityRole="button"
+            accessibilityLabel={translate("merchantProductEditOpen")}
+            onPress={openEditor}
+            style={styles.iconAction}
+          >
+            <Icon name="pencil" color={theme.colors.muted} size={18} accessibilityHidden />
+          </PressableSurface>
+        </View>
+      ) : (
+        <Icon name="chevron-left" color={theme.colors.subtle} size={18} accessibilityHidden />
+      )}
 
       <MediaViewer
         visible={galleryOpen}
         onRequestClose={() => setGalleryOpen(false)}
         closeLabel={translate("merchantProductCategoryClose")}
       >
-        <ScrollView
-          horizontal
-          contentContainerStyle={styles.galleryImages}
-          showsHorizontalScrollIndicator={false}
-        >
+        <View style={styles.galleryImages}>
           {offer.images.map((item) => (
             <UiImage
               key={item.id}
@@ -378,9 +358,9 @@ const MerchantOfferCard = memo(function MerchantOfferCard({
               resizeMode="contain"
             />
           ))}
-        </ScrollView>
+        </View>
       </MediaViewer>
-    </Card>
+    </View>
   );
 });
 
@@ -429,39 +409,41 @@ function createStyles(theme: AppTheme) {
     summaryCard: { flex: 1, minHeight: 84, alignItems: "flex-start", justifyContent: "center", paddingHorizontal: designTokens.spacing.md },
     searchField: { width: "100%" },
     filters: { paddingVertical: designTokens.spacing.xs, paddingEnd: designTokens.spacing.xs },
-    filterButton: { minHeight: 42, borderWidth: 1, borderRadius: designTokens.radius.pill, paddingHorizontal: 15, justifyContent: "center", alignItems: "center" },
-    filterLabel: { fontSize: designTokens.typography.caption, fontWeight: designTokens.fontWeights.extrabold },
     feedback: { borderWidth: 1, borderRadius: designTokens.radius.sm, padding: designTokens.spacing.md },
     feedbackText: { fontSize: designTokens.typography.caption, lineHeight: 18, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
     emptyState: { paddingVertical: designTokens.spacing.lg, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.divider, gap: designTokens.spacing.sm, alignItems: "flex-start" },
     emptyTitle: { fontSize: designTokens.typography.body, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
     emptyHint: { fontSize: designTokens.typography.caption, lineHeight: 18, textAlign: "auto" },
-    offerGrid: { width: "100%", flexDirection: "column", gap: designTokens.spacing.lg },
-    offerGridItem: { width: "100%", minWidth: 0 },
-    offerCard: { padding: 0, gap: 0, overflow: "hidden" },
-    postHeader: { width: "100%", flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: designTokens.spacing.sm, padding: designTokens.spacing.md },
-    badgeColumn: { flexDirection: "row", flexWrap: "wrap", justifyContent: "flex-end", gap: designTokens.spacing.xs },
-    productImage: { width: "100%", aspectRatio: 1, borderRadius: 0, overflow: "hidden", alignItems: "center", justifyContent: "center" },
-    postBody: { width: "100%", padding: designTokens.spacing.md, gap: designTokens.spacing.md },
-    image: { width: "100%", height: "100%" },
-    galleryOverlay: { flex: 1, justifyContent: "center", padding: designTokens.spacing.lg },
-    galleryCard: { borderWidth: 1, borderRadius: designTokens.radius.md, padding: designTokens.spacing.lg, gap: designTokens.spacing.md },
-    galleryHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-    galleryTitle: { fontSize: designTokens.typography.body - 1, fontWeight: designTokens.fontWeights.extrabold },
-    galleryClose: { fontSize: designTokens.typography.caption, fontWeight: designTokens.fontWeights.extrabold },
-    galleryImages: { flexDirection: "row", gap: designTokens.spacing.md, paddingVertical: 4 },
-    galleryImage: { width: 260, height: 300, borderRadius: designTokens.radius.sm, backgroundColor: theme.colors.surfaceMuted },
-    imageFallback: { fontSize: designTokens.typography.title + 2, fontWeight: designTokens.fontWeights.extrabold },
-    productInfo: { flex: 1, minWidth: 0, alignItems: "flex-start", gap: designTokens.spacing.xs },
+    productList: { width: "100%" },
+    productRow: {
+      width: "100%",
+      minHeight: 104,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: designTokens.spacing.md,
+      paddingVertical: designTokens.spacing.md,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: theme.colors.divider
+    },
+    productThumbnail: {
+      width: 76,
+      height: 76,
+      borderRadius: designTokens.radius.md,
+      overflow: "hidden",
+      alignItems: "center",
+      justifyContent: "center"
+    },
+    thumbnailImage: { width: "100%", height: "100%" },
+    productDetails: { flex: 1, minWidth: 0, alignItems: "flex-start", gap: 4 },
     productName: { width: "100%", fontSize: designTokens.typography.body - 1, lineHeight: 19, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
     productBrand: { width: "100%", fontSize: designTokens.typography.caption - 1, textAlign: "auto" },
-    currentPrice: { fontSize: designTokens.typography.caption + 1, fontWeight: designTokens.fontWeights.extrabold, marginTop: 1 },
-    inputsRow: { flexDirection: "row", gap: designTokens.spacing.sm },
-    inputGroup: { flex: 1, minWidth: 0, gap: designTokens.spacing.xs },
-    inputLabel: { fontSize: designTokens.typography.caption, fontWeight: designTokens.fontWeights.extrabold, textAlign: "auto" },
-    stockHint: { fontSize: designTokens.typography.caption - 2, lineHeight: 14, textAlign: "auto" },
-    valueInput: { width: "100%", minHeight: 42, borderWidth: 1, borderRadius: designTokens.radius.sm, paddingHorizontal: designTokens.spacing.sm, textAlign: "auto", fontSize: designTokens.typography.caption + 1, fontWeight: designTokens.fontWeights.extrabold },
-    actionsRow: { flexDirection: "row", gap: designTokens.spacing.sm },
+    productPrice: { fontSize: designTokens.typography.caption + 1, fontWeight: designTokens.fontWeights.extrabold },
+    metadataRow: { flexDirection: "row", alignItems: "center", flexWrap: "wrap", gap: designTokens.spacing.xs, marginTop: 2 },
+    stockText: { fontSize: designTokens.typography.caption - 2 },
+    rowActions: { alignItems: "center", justifyContent: "center", gap: designTokens.spacing.xs },
+    iconAction: { width: 36, height: 36, borderRadius: designTokens.radius.pill, alignItems: "center", justifyContent: "center" },
+    galleryImages: { flexDirection: "row", gap: designTokens.spacing.md, paddingVertical: 4 },
+    galleryImage: { width: 260, height: 300, borderRadius: designTokens.radius.sm, backgroundColor: theme.colors.surfaceMuted },
     messageContainer: { flex: 1, padding: designTokens.spacing.lg, justifyContent: "center", gap: designTokens.spacing.lg },
     messageText: { fontSize: designTokens.typography.body - 1, lineHeight: 21, fontWeight: designTokens.fontWeights.extrabold, textAlign: "center" }
   });
