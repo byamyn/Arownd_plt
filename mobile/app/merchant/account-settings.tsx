@@ -44,42 +44,47 @@ export default function MerchantAccountSettingsScreen() {
   if (access.data.status !== "merchant_ready" || !access.data.store?.id) return <Redirect href="/merchant" />;
 
   const isOwner = access.data.teamRole === "owner";
-  const links = [
+  const sections = [
     {
-      key: "switch-store",
-      icon: "store" as const,
-      title: translate("merchantSelectStoreTitle"),
-      description: translate("merchantSelectStoreSubtitle"),
-      onPress: () => router.push("/merchant/select-store")
+      key: "store",
+      title: translate("merchantStudioSettingsStoreSection"),
+      links: [
+        {
+          key: "switch-store",
+          icon: "store" as const,
+          title: translate("merchantSelectStoreTitle"),
+          description: translate("merchantSelectStoreSubtitle"),
+          onPress: () => router.push("/merchant/select-store")
+        },
+        ...(isOwner ? [
+          {
+            key: "store-details",
+            icon: "store" as const,
+            title: translate("merchantAccountSettingsStore"),
+            description: translate("merchantAccountSettingsStoreHint"),
+            onPress: () => router.push("/merchant/settings")
+          },
+          {
+            key: "verification",
+            icon: "circle-check" as const,
+            title: translate("merchantAccountSettingsVerification"),
+            description: translate("merchantAccountSettingsVerificationHint"),
+            onPress: () => router.push("/merchant/verification")
+          }
+        ] : [])
+      ]
     },
     ...(isOwner ? [{
       key: "team",
-      icon: "users" as const,
-      title: translate("merchantTeamManage"),
-      description: translate("merchantTeamSubtitle"),
-      onPress: () => router.push("/merchant/team")
-    },
-    {
-      key: "store",
-      icon: "store" as const,
-      title: translate("merchantAccountSettingsStore"),
-      description: translate("merchantAccountSettingsStoreHint"),
-      onPress: () => router.push("/merchant/settings")
-    },
-    {
-      key: "verification",
-      icon: "circle-check" as const,
-      title: translate("merchantAccountSettingsVerification"),
-      description: translate("merchantAccountSettingsVerificationHint"),
-      onPress: () => router.push("/merchant/verification")
-    }] : []),
-    {
-      key: "account",
-      icon: "settings" as const,
-      title: translate("merchantAccountSettingsAccount"),
-      description: translate("merchantAccountSettingsAccountHint"),
-      onPress: () => router.push("/settings")
-    }
+      title: translate("merchantStudioSettingsTeamSection"),
+      links: [{
+        key: "team",
+        icon: "users" as const,
+        title: translate("merchantTeamManage"),
+        description: translate("merchantTeamSubtitle"),
+        onPress: () => router.push("/merchant/team")
+      }]
+    }] : [])
   ];
 
   return (
@@ -87,31 +92,38 @@ export default function MerchantAccountSettingsScreen() {
       <RefreshableScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} refreshing={access.isFetching} onRefresh={() => { void access.refetch(); }}>
         <AppHeader
           title={translate("merchantAccountSettingsTitle")}        />
-        <View style={styles.linksList}>
-          {links.map((item, index) => (
-            <PressableSurface
-              key={item.key}
-              accessibilityRole="button"
-              accessibilityLabel={item.title}
-              onPress={item.onPress}
-              style={[
-                styles.link,
-                index < links.length - 1 && { borderBottomColor: theme.colors.divider, borderBottomWidth: StyleSheet.hairlineWidth }
-              ]}
-            >
-              <View style={[styles.icon, { backgroundColor: theme.colors.surfaceSecondary }]}>
-                <Icon name={item.icon} size={20} color={theme.colors.accentOnSurface} accessibilityHidden />
-              </View>
-              <View style={styles.copy}>
-                <UiText weight="700">{item.title}</UiText>
-                <UiText style={{ color: theme.colors.muted, fontSize: designTokens.typography.caption }}>
-                  {item.description}
-                </UiText>
-              </View>
-              <Icon name="chevron-left" size={18} color={theme.colors.subtle} accessibilityHidden />
-            </PressableSurface>
-          ))}
-        </View>
+        {sections.map((section) => (
+          <View key={section.key} style={styles.section}>
+            <UiText weight="700" style={[styles.sectionTitle, { color: theme.colors.muted }]}>
+              {section.title}
+            </UiText>
+            <View style={styles.linksList}>
+              {section.links.map((item, index) => (
+                <PressableSurface
+                  key={item.key}
+                  accessibilityRole="button"
+                  accessibilityLabel={item.title}
+                  onPress={item.onPress}
+                  style={[
+                    styles.link,
+                    index < section.links.length - 1 && { borderBottomColor: theme.colors.divider, borderBottomWidth: StyleSheet.hairlineWidth }
+                  ]}
+                >
+                  <View style={[styles.icon, { backgroundColor: theme.colors.surfaceSecondary }]}>
+                    <Icon name={item.icon} size={20} color={theme.colors.accentOnSurface} accessibilityHidden />
+                  </View>
+                  <View style={styles.copy}>
+                    <UiText weight="700">{item.title}</UiText>
+                    <UiText style={{ color: theme.colors.muted, fontSize: designTokens.typography.caption }}>
+                      {item.description}
+                    </UiText>
+                  </View>
+                  <Icon name="chevron-left" size={18} color={theme.colors.subtle} accessibilityHidden />
+                </PressableSurface>
+              ))}
+            </View>
+          </View>
+        ))}
       </RefreshableScrollView>
     </SafeAreaView>
   );
@@ -124,9 +136,10 @@ const styles = StyleSheet.create({
     paddingBottom: designTokens.spacing.xxl,
     gap: designTokens.spacing.lg
   },
-  subtitle: {
-    fontSize: designTokens.typography.caption + 1,
-    lineHeight: 20
+  section: { gap: designTokens.spacing.xs },
+  sectionTitle: {
+    fontSize: designTokens.typography.caption,
+    paddingTop: designTokens.spacing.sm
   },
   linksList: { gap: 0 },
   link: {
