@@ -22,7 +22,7 @@ import { readCartOptions } from "@/lib/cart-state";
 import { translate, type TranslationKey, useLanguage } from "@/lib/i18n";
 import { designTokens, useAppTheme, type AppTheme } from "@/lib/theme";
 import { getRegionDisplayName } from "@/lib/country-regions";
-import { Alert, AppHeader, Button, ConfirmDialog, ErrorState, Icon, MerchantOrderCard, MerchantStatusBadge, PriceDisplay, OrderCardSkeleton, RefreshableScrollView, Text as UiText, TextField, TrackingTimeline } from "@/components/ui";
+import { Alert, AppHeader, Button, ConfirmDialog, ErrorState, Icon, MerchantStatusBadge, PriceDisplay, OrderCardSkeleton, RefreshableScrollView, Text as UiText, TextField, TrackingTimeline } from "@/components/ui";
 
 type ConfirmAction = "reject" | "collect" | null;
 
@@ -154,15 +154,15 @@ export default function MerchantOrderDetailsScreen() {
         <AppHeader title={translate("merchantOrderDetailTitle")}/>
 
         {order.status === "delivered" ? (
-          <MerchantOrderCard>
+          <View style={styles.section}>
             <View style={styles.sectionHeading}>
               <Icon name="handshake" size={24} color={theme.colors.success} />
               <UiText style={[styles.sectionTitle, { color: theme.colors.foreground }]}>{translate("merchantTrackingDelivered")}</UiText>
             </View>
-          </MerchantOrderCard>
+          </View>
         ) : null}
 
-        <MerchantOrderCard>
+        <View style={styles.section}>
           <View style={styles.summaryRow}>
             <UiText style={[styles.amount, { color: theme.colors.accentMuted }]}>{formatMarketPrice(total, customerOrder.currency_code)}</UiText>
             <StatusPill status={order.status} deliveryType={deliveryType ?? "home"} />
@@ -195,9 +195,9 @@ export default function MerchantOrderDetailsScreen() {
             <UiText style={[styles.sectionTitle, { color: theme.colors.foreground }]}>{translate("merchantOrderTotal")}</UiText>
             <UiText style={[styles.amount, { color: theme.colors.accentMuted }]}>{formatMarketPrice(total, customerOrder.currency_code)}</UiText>
           </View>
-        </MerchantOrderCard>
+        </View>
 
-        <MerchantOrderCard>
+        <View style={styles.section}>
           <UiText style={[styles.sectionTitle, { color: theme.colors.foreground }]}>{translate("merchantOrderCustomerTitle")}</UiText>
           <InfoRow label={translate("merchantCustomerUnknown")} value={customerOrder.full_name || "—"} theme={theme} />
           <InfoRow label={translate("merchantOrderPhone")} value={customerOrder.phone || "—"} theme={theme} />
@@ -210,10 +210,10 @@ export default function MerchantOrderDetailsScreen() {
           {detail.data.shipment ? (
             <InfoRow label={translate("merchantOrderShipmentStatus")} value={merchantShipmentStatusLabel(detail.data.shipment.status)} theme={theme} />
           ) : null}
-        </MerchantOrderCard>
+        </View>
 
         {canQuote ? (
-          <MerchantOrderCard>
+          <View style={styles.section}>
             <UiText style={[styles.sectionTitle, { color: theme.colors.foreground }]}>{translate("merchantQuoteTitle")}</UiText>
             {deliveryType === "desk" ? (
               <UiText style={[styles.mutedText, { color: theme.colors.muted }]}>{translate("merchantQuotePickupHint")}</UiText>
@@ -235,22 +235,22 @@ export default function MerchantOrderDetailsScreen() {
             {canReject ? (
               <Button label={translate("merchantOrderReject")} onPress={() => setConfirmAction("reject")} variant="danger" fullWidth />
             ) : null}
-          </MerchantOrderCard>
+          </View>
         ) : null}
 
         {order.status === "quoted" ? (
           <Alert description={translate("merchantQuoteAwaitingCustomer")} tone="warning" />
         ) : null}
 
-        <MerchantOrderCard>
+        <View style={styles.section}>
           <UiText style={[styles.sectionTitle, { color: theme.colors.foreground }]}>{translate("merchantTrackingTitle")}</UiText>
           {trackingEvents.length === 0 ? (
             <UiText style={[styles.mutedText, { color: theme.colors.muted }]}>{translate("merchantTrackingEmpty")}</UiText>
           ) : <TrackingTimeline steps={trackingSteps} />}
-        </MerchantOrderCard>
+        </View>
 
         {nextStatus && nextStatusLabel ? (
-          <MerchantOrderCard>
+          <View style={styles.section}>
             <UiText style={[styles.sectionTitle, { color: theme.colors.foreground }]}>{translate("merchantFulfillmentTitle")}</UiText>
             <UiText style={[styles.mutedText, { color: theme.colors.muted }]}>
               {nextStatus === "delivered" && deliveryType === "desk"
@@ -258,23 +258,23 @@ export default function MerchantOrderDetailsScreen() {
                 : translate("merchantMarkShippedHint")}
             </UiText>
             <Button label={translate("merchantTrackingAdvance") + ": " + translate(nextStatusLabel)} onPress={() => statusMutation.mutate(nextStatus)} loading={statusMutation.isPending} fullWidth />
-          </MerchantOrderCard>
+          </View>
         ) : null}
 
         {canCollectCod ? (
-          <MerchantOrderCard>
+          <View style={styles.section}>
             <UiText style={[styles.sectionTitle, { color: theme.colors.foreground }]}>{translate("merchantCodTitle")}</UiText>
             <UiText style={[styles.amount, { color: theme.colors.accentMuted }]}>{formatMarketPrice(total, customerOrder.currency_code)}</UiText>
             <UiText style={[styles.mutedText, { color: theme.colors.muted }]}>{translate(deliveryType === "home" ? "merchantCodDeliveryHint" : "merchantCodPickupHint")}</UiText>
             <Button label={translate("merchantCodCollect")} onPress={() => setConfirmAction("collect")} fullWidth />
-          </MerchantOrderCard>
+          </View>
         ) : null}
 
         {order.payment_status === "paid" ? (
           <Alert description={`${translate("merchantCodPaid")}: ${formatMarketPrice(order.paid_amount ?? 0, customerOrder.currency_code)}`} tone="success" />
         ) : null}
 
-        <MerchantOrderCard>
+        <View style={styles.section}>
           <UiText style={[styles.sectionTitle, { color: theme.colors.foreground }]}>{translate("orderCompletionTitle")}</UiText>
           {order.completion_status === "completed" ? <Alert description={translate("orderCompletionCompleted")} tone="success" /> : null}
           {disputeActive ? <Alert title={translate("orderCompletionDisputed")} description={disputeTicket?.reason ?? order.dispute_reason ?? translate("orderDisputeTicket")} tone="danger" /> : null}
@@ -297,7 +297,7 @@ export default function MerchantOrderDetailsScreen() {
             <UiText style={[styles.mutedText, { color: theme.colors.muted }]}>{new Date(event.created_at).toLocaleString(language === "ar" ? "ar-DZ-u-nu-latn" : "en-DZ-u-nu-latn")}</UiText>
             {event.reason ? <UiText style={[styles.mutedText, { color: theme.colors.muted }]}>{event.reason}</UiText> : null}
           </View>)}
-        </MerchantOrderCard>
+        </View>
 
         {actionError ? (
           <Alert description={translateError(actionError)} tone="danger" />
@@ -423,6 +423,7 @@ function createStyles(theme: AppTheme) {
   return StyleSheet.create({
     safe: { flex: 1 },
     content: { padding: designTokens.spacing.xl, paddingBottom: designTokens.spacing.xxl, gap: designTokens.spacing.lg },
+    section: { paddingVertical: designTokens.spacing.md, gap: designTokens.spacing.md, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.divider },
     eyebrow: { fontSize: designTokens.typography.caption, fontWeight: designTokens.fontWeights.extrabold },
     subtitle: { fontSize: designTokens.typography.caption + 1, lineHeight: 19, textAlign: "auto" },
     summaryRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: designTokens.spacing.md, paddingBottom: designTokens.spacing.sm },
