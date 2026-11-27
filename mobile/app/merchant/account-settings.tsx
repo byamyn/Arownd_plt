@@ -189,7 +189,7 @@ export default function MerchantAccountSettingsScreen() {
                 accessibilityLabel={translate("merchantAccountSettingsTitle")}
                 onPress={openDrawer}
                 variant="ghost"
-                icon={<Icon name="menu" size={22} color={theme.colors.foreground} />}
+                icon={<Icon name="list" size={22} color={theme.colors.foreground} />}
               />
             }
           />
@@ -272,7 +272,7 @@ export default function MerchantAccountSettingsScreen() {
                     >
                       <Icon name={item.icon} size={19} color={theme.colors.accentOnSurface} />
                       <UiText weight="600" style={styles.drawerLinkText}>{item.title}</UiText>
-                      <Icon name={I18nManager.isRTL ? "chevron-left" : "chevron-right"} size={17} color={theme.colors.subtle} />
+                      <Icon name="chevron-left" size={17} color={theme.colors.subtle} />
                     </Pressable>
                   ))}
                 </View>
