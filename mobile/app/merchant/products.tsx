@@ -319,7 +319,7 @@ const MerchantProductRow = memo(function MerchantProductRow({
             style={[styles.iconAction, { opacity: anyBusy ? 0.5 : 1 }]}
           >
             {busy ? (
-              <Icon name="loader-circle" color={theme.colors.muted} size={19} accessibilityHidden />
+              <Icon name="refresh-cw" color={theme.colors.muted} size={19} accessibilityHidden />
             ) : (
               <Icon
                 name={offer.is_merchant_hidden ? "eye" : "eye-off"}
