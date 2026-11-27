@@ -54,7 +54,7 @@ export default function MerchantAnalyticsScreen() {
   if (access.isError) {
     return <Message theme={theme} label={translate("merchantDashboardError")} actionLabel={translate("merchantRetry")} busy={access.isFetching} onAction={() => void access.refetch()} />;
   }
-  if (analyticsEnabled && (analytics.isError || (ready && accountCurrency.isError))) {
+  if (accountCurrency.isError || (analyticsEnabled && analytics.isError)) {
     return <Message theme={theme} label={translate("merchantDashboardError")} actionLabel={translate("merchantRetry")} busy={analytics.isFetching || accountCurrency.isFetching} onAction={() => { void analytics.refetch(); void accountCurrency.refetch(); }} />;
   }
   if (!access.data) return <Redirect href="/login" />;
