@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Redirect, router } from "expo-router";
 import { memo, useCallback, useMemo, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import {
@@ -347,7 +347,11 @@ const MerchantProductRow = memo(function MerchantProductRow({
         onRequestClose={() => setGalleryOpen(false)}
         closeLabel={translate("merchantProductCategoryClose")}
       >
-        <View style={styles.galleryImages}>
+        <ScrollView
+          horizontal
+          contentContainerStyle={styles.galleryImages}
+          showsHorizontalScrollIndicator={false}
+        >
           {offer.images.map((item) => (
             <UiImage
               key={item.id}
@@ -358,7 +362,7 @@ const MerchantProductRow = memo(function MerchantProductRow({
               resizeMode="contain"
             />
           ))}
-        </View>
+        </ScrollView>
       </MediaViewer>
     </View>
   );
